@@ -38,10 +38,10 @@ public class PlayerBehaviour : MonoBehaviour
 	void HandleInputs()
 	{
 		// Movement
-		float xInput = Input.GetAxisRaw("Horizontal");
-		float yInput = Input.GetAxisRaw("Vertical");
+		float x_input = Input.GetAxisRaw("Horizontal");
+		float y_input = Input.GetAxisRaw("Vertical");
 
-		inputDirection = new Vector2(xInput, yInput);
+		inputDirection = new Vector2(x_input, y_input);
 
 		if (inputDirection != Vector2.zero)
 		{

@@ -9,7 +9,7 @@
     <ProductVersion>10.0.20506</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <RootNamespace></RootNamespace>
-    <ProjectGuid>{32C3BDE6-E125-3128-82C1-25D0441455A3}</ProjectGuid>
+    <ProjectGuid>{02A1D8AB-7066-746D-0152-080D65C02CC8}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <AssemblyName>Assembly-CSharp</AssemblyName>
@@ -54,6 +54,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Assets\Scripts\PlayerBehaviour.cs" />
+    <Compile Include="Assets\Scripts\CamBehaviour.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="UnityEngine">
