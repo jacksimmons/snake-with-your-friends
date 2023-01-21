@@ -6,7 +6,7 @@ public class CamBehaviour : MonoBehaviour
 {
 	[SerializeField]
 	private PlayerBehaviour playerBehaviour;
-	private GameObject player;
+	private Transform playerHead;
 	private Camera cam;
 
 	private float followSharpness = 0.1f;
@@ -15,15 +15,9 @@ public class CamBehaviour : MonoBehaviour
 	void Awake()
 	{
 		cam = gameObject.GetComponent<Camera>();
-		player = playerBehaviour.gameObject;
-		offset = transform.position - player.transform.position;
+		playerHead = playerBehaviour.gameObject.transform.GetChild(0);
+		offset = transform.position - playerHead.position;
 	}
-
-	// Start is called before the first frame update
-
-	void Start()
-    {
-    }
 
 	void LateUpdate()
 	{
@@ -31,7 +25,7 @@ public class CamBehaviour : MonoBehaviour
 
 		transform.position = Vector3.Lerp(
 			transform.position,
-			player.transform.position + offset,
+			playerHead.position + offset,
 			blend);
 	}
 }
