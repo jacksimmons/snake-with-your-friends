@@ -32,4 +32,20 @@ namespace Extensions
 			}
 			return v1.x > v2.x;
 		}
+
+		// https://answers.unity.com/questions/661383/whats-the-most-efficient-way-to-rotate-a-vector2-o.html
+		public static Vector2 Rotate(Vector2 v, float degrees)
+		{
+			float sin = Mathf.Sin(degrees * Mathf.Deg2Rad);
+			float cos = Mathf.Cos(degrees * Mathf.Deg2Rad);
+
+			float temp_x = v.x;
+			float temp_y = v.y;
+
+			v.x = (cos * temp_x) - (sin * temp_y);
+			v.y = (sin * temp_x) + (cos * temp_y);
+
+			return v;
+		}
 	}
+}

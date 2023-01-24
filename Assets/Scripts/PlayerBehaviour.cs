@@ -2,6 +2,8 @@ using Extensions;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
+using Unity.Mathematics;
 using UnityEditor;
 using UnityEditor.Callbacks;
 using UnityEngine;
@@ -17,36 +19,35 @@ public class PlayerBehaviour : MonoBehaviour
 {
 	[SerializeField]
 	private GameObject groundTilemapObject;
-	private Tilemap groundTilemap;
+	public Tilemap groundTilemap;
 
-	private List<Transform> body;
-	private Dictionary<Transform, Vector2> bodyDirections;
-	private bool rotating;
-	private Dictionary<Vector2, int> rotationsToTileCounters;
-	private Vector2 targetTileCentre;
-	private bool reachedTargetTileCentre;
+	public List<BodyPartBehaviour> body;
 
 	private Rigidbody2D rb;
 
-	private Vector2 lastTravellingDirection;
-	private Vector2 travellingDirection;
+	// Simple boolean which gets set to false after the starting direction is set
+	private bool firstDirection = true;
 	private Vector2 inputDirection;
+	private Vector2 lastTravellingDirection;
+	private Vector2 lastDifferentTravellingDirection;
+	public Vector2 travellingDirection;
+
+	// These points are used with the current direction to determine whether the
+	// body part should turn or not.
+	public List<Vector2> cutoffPoints;
 
 	private float movementSpeed = 0.1f;
+	private bool moving = false;
 
 	// Start is called before the first frame update
 	void Awake()
 	{
-		body = new List<Transform>();
-		Transform head = transform.GetChild(0);
-		Transform tail = transform.GetChild(transform.childCount - 1);
+		body = new List<BodyPartBehaviour>();
+		BodyPartBehaviour head = transform.GetChild(0).GetComponent<BodyPartBehaviour>();
+		BodyPartBehaviour tail = transform.GetChild(transform.childCount - 1).GetComponent<BodyPartBehaviour>();
 
 		body.Add(head);
 		body.Add(tail);
-
-		rotating = false;
-		rotationsToTileCounters = new Dictionary<Vector2, int>();
-		reachedTargetTileCentre = true;
 
 		groundTilemap = groundTilemapObject.GetComponent<Tilemap>();
 		rb = gameObject.GetComponent<Rigidbody2D>();
@@ -60,21 +61,34 @@ public class PlayerBehaviour : MonoBehaviour
 
 	void FixedUpdate()
 	{
-		MovePlayer();
+		if (travellingDirection != lastTravellingDirection)
+		{
+			lastDifferentTravellingDirection = lastTravellingDirection;
+			// We have rotated. Get position of head; this is the turn cutoff point
+			// THEN, rotate the head.
+			Vector2 cutoffPoint = body[0].transform.position;
+			cutoffPoints.Add(cutoffPoint);
 
-		if (reachedTargetTileCentre)
-		{
-			targetTileCentre = groundTilemap.CellToWorld(groundTilemap.WorldToCell(body[0].position)) + groundTilemap.cellSize / 2;
-		}
-		else if (Vectors.componentGreaterThanOrEqualTo(travellingDirection, targetTileCentre))
-		{
-			foreach (Vector2 rotation in rotationsToTileCounters.Keys)
+			print("HI");
+			body[0].Rotate();
+
+			foreach (BodyPartBehaviour bph in body)
 			{
-				int tileCounter = rotationsToTileCounters[rotation];
-				rotationsToTileCounters[rotation] = tileCounter + 1;
-				bodyDirections[body[tileCounter + 1]] = rotation;
+				bph.SetCutoffPointIfNone(cutoffPoint);
 			}
-			reachedTargetTileCentre = true;
+		}
+
+		if (moving)
+		{
+			foreach (BodyPartBehaviour bph in body)
+			{
+				if (firstDirection)
+				{
+					bph.direction = travellingDirection;
+				}
+				bph.Move(movementSpeed);
+			}
+			firstDirection = false;
 		}
 	}
 
@@ -93,7 +107,7 @@ public class PlayerBehaviour : MonoBehaviour
 			if (inputDirection.x != 0 && inputDirection.y != 0)
 			{
 				// If multiple axis inputs are present, prefers an axis if it is equal to that of the travellingDirection
-				if (inputDirection.y == travellingDirection.y)
+				if (inputDirection.y == lastTravellingDirection.y)
 				{
 					inputDirection = Vector2.up * inputDirection.y;
 				}
@@ -104,28 +118,16 @@ public class PlayerBehaviour : MonoBehaviour
 				}
 			}
 
-			if (inputDirection.x == 0 && Math.Sign(inputDirection.y) != -Math.Sign(travellingDirection.y)
-				|| inputDirection.y == 0 && Math.Sign(inputDirection.x) != -Math.Sign(travellingDirection.x))
+			if (inputDirection.x == 0 && Math.Sign(inputDirection.y) != -Math.Sign(lastTravellingDirection.y)
+				|| inputDirection.y == 0 && Math.Sign(inputDirection.x) != -Math.Sign(lastTravellingDirection.x))
 			{
 				// If inputDirection doesn't go back on itself
 				travellingDirection = inputDirection;
-
-				if (travellingDirection != lastTravellingDirection)
-				{
-					//MovePlayer(-body[0].position + groundTilemap.CellToWorld(groundTilemap.WorldToCell(body[0].position)) + (groundTilemap.cellSize / 2));
-					rotating = true;
-					rotationsToTileCounters[travellingDirection] = 0;
-					reachedTargetTileCentre = true;
-				}
 			}
-		}
-	}
 
-	void MovePlayer()
-	{
-		foreach (Transform bodyPart in body)
-		{
-			bodyPart.transform.Translate(bodyDirections[bodyPart] * movementSpeed);
+			moving = true;
 		}
+		else
+			moving = false;
 	}
 }

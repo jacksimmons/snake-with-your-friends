@@ -15,7 +15,7 @@ public class CamBehaviour : MonoBehaviour
 	void Awake()
 	{
 		cam = gameObject.GetComponent<Camera>();
-		playerHead = playerBehaviour.gameObject.transform.GetChild(0);
+		playerHead = playerBehaviour.transform.GetChild(0);
 		offset = transform.position - playerHead.position;
 	}
 
