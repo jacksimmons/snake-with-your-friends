@@ -6,17 +6,19 @@ using UnityEngine.Tilemaps;
 
 public class GameBehaviour : MonoBehaviour
 {
-	[SerializeField]
+	private GameObject groundGridObject;
 	private GameObject groundTilemapObject;
 	private Tilemap groundTilemap;
+	
 	[SerializeField]
 	private Tile lightTile;
 	[SerializeField]
 	private Tile darkTile;
 
-	[SerializeField]
+	private GameObject wallGridObject;
 	private GameObject wallTilemapObject;
 	private Tilemap wallTilemap;
+	
 	[SerializeField]
 	private Tile wallTile;
 
@@ -33,7 +35,26 @@ public class GameBehaviour : MonoBehaviour
 
 	void Awake()
 	{
+		// Create the ground tilemap
+		groundGridObject = new GameObject();
+		groundGridObject.AddComponent<Grid>();
+		
+		groundTilemapObject = new GameObject();
+		groundTilemapObject.AddComponent<Tilemap>();
+		
+		groundTilemapObject.transform.parent = groundGridObject;
+		
 		groundTilemap = groundTilemapObject.GetComponent<Tilemap>();
+
+		// Create the wall tilemap
+		wallGridObject = new GameObject();
+		wallGridObject.AddComponent<Grid>();
+		
+		wallTilemapObject = new GameObject();
+		wallTilemapObject.AddComponent<Tilemap>();
+		
+		wallTilemapObject.transform.parent = wallGridObject;
+		
 		wallTilemap = wallTilemapObject.GetComponent<Tilemap>();
 	}
 
