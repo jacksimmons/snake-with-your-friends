@@ -1,5 +1,5 @@
 public abstract class Item {
-	private int lifetime;
+	private int _lifetime;
 	
 	public abstract void Use();
 }
