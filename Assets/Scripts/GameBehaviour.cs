@@ -6,18 +6,14 @@ using UnityEngine.Tilemaps;
 
 public class GameBehaviour : MonoBehaviour
 {
-	private GameObject groundGridObject;
-	private GameObject groundTilemapObject;
-	private Tilemap groundTilemap;
+	public Tilemap groundTilemap;
 	
 	[SerializeField]
 	private Tile lightTile;
 	[SerializeField]
 	private Tile darkTile;
 
-	private GameObject wallGridObject;
-	private GameObject wallTilemapObject;
-	private Tilemap wallTilemap;
+	public Tilemap wallTilemap;
 	
 	[SerializeField]
 	private Tile wallTile;
@@ -26,7 +22,7 @@ public class GameBehaviour : MonoBehaviour
 	private GameObject[] players;
 	private Dictionary<int, GameObject[]> squareDepthToPlayers;
 
-	private const int WORLD_SIZE = 50; // The world size is a square, WORLD_SIZE * WORLD_SIZE
+	private const int WORLD_SIZE = 25; // The world size is a square, WORLD_SIZE * WORLD_SIZE
 
 	// Soft limit is preferred, but if it is too small, the hard limit is used (1 tile).
 	// The minimum ratio between the distance between two snakes, and the WORLD_SIZE, before an inner square must be established.
@@ -35,27 +31,9 @@ public class GameBehaviour : MonoBehaviour
 
 	void Awake()
 	{
-		// Create the ground tilemap
-		groundGridObject = new GameObject();
-		groundGridObject.AddComponent<Grid>();
-		
-		groundTilemapObject = new GameObject();
-		groundTilemapObject.AddComponent<Tilemap>();
-		
-		groundTilemapObject.transform.parent = groundGridObject;
-		
-		groundTilemap = groundTilemapObject.GetComponent<Tilemap>();
-
-		// Create the wall tilemap
-		wallGridObject = new GameObject();
-		wallGridObject.AddComponent<Grid>();
-		
-		wallTilemapObject = new GameObject();
-		wallTilemapObject.AddComponent<Tilemap>();
-		
-		wallTilemapObject.transform.parent = wallGridObject;
-		
-		wallTilemap = wallTilemapObject.GetComponent<Tilemap>();
+		// Create the tilemaps
+		groundTilemap = CreateAndReturnTilemap(gridName: "Ground", hasCollider: false);
+		wallTilemap = CreateAndReturnTilemap(gridName: "Wall", hasCollider: true);
 	}
 
 	void Start()
@@ -63,6 +41,25 @@ public class GameBehaviour : MonoBehaviour
 		CreateGroundTilemap();
 		CreateWallTilemap();
 		PlaceSnakes(1, players);
+	}
+
+	Tilemap CreateAndReturnTilemap(string gridName, bool hasCollider)
+	{
+		GameObject gridObject = new GameObject(gridName);
+		gridObject.AddComponent<Grid>();
+
+		GameObject tilemapObject = new GameObject("Tilemap");
+		tilemapObject.AddComponent<Tilemap>();
+		tilemapObject.AddComponent<TilemapRenderer>();
+
+		if (hasCollider)
+			tilemapObject.AddComponent<TilemapCollider2D>();
+
+		tilemapObject.transform.parent = gridObject.transform;
+
+		Tilemap tilemap = tilemapObject.GetComponent<Tilemap>();
+
+		return tilemap;
 	}
 
 	void CreateGroundTilemap()
@@ -140,7 +137,7 @@ public class GameBehaviour : MonoBehaviour
 
 		for (int i = 0; i < remainingPlayers.Length; i++)
 		{
-			players[i].transform.position = corners[i % 4];
+			players[i].transform.position = corners[i % 4] + (Vector3)(Vector2.one * groundTilemap.cellSize / 2);
 			if (i % 4 == 0 && i < remainingPlayers.Length - 1)
 			{
 				int newDepth = depth + (int)Mathf.Floor(minDist);

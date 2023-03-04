@@ -9,28 +9,26 @@ namespace Extensions
 			return new Vector2(vec.x % mod, vec.y % mod);
 		}
 
-		///<summary>
-		///<para>Only use this when the first vector has only ONE component. Performs v1.c > v2.c, where c is the component.</para>
-		///</summary>
-		public static bool componentGreaterThan(Vector2 v1, Vector2 v2)
+		// The next two methods are used to compare the only component of the first vector to the same component of the second
+		// Only the first vector must have only one component
+		public static bool OnlyComponentOfFirstGT(Vector2 v1, Vector2 v2)
 		{
 			if (v1.x == 0)
 			{
-				return v1.y > v2.y;
+				return Mathf.Abs(v1.y) > Mathf.Abs(v2.y);
 			}
-			return v1.x > v2.x;
+
+			return Mathf.Abs(v1.x) > Mathf.Abs(v2.x);
 		}
 
-		///<summary>
-		///<para>Only use this when the first vector has only ONE component. Performs v1.c >= v2.c, where c is the component.</para>
-		///</summary>
-		public static bool componentGreaterThanOrEqualTo(Vector2 v1, Vector2 v2)
+		public static bool OnlyComponentOfFirstGTE(Vector2 v1, Vector2 v2)
 		{
 			if (v1.x == 0)
 			{
-				return v1.y > v2.y;
+				return Mathf.Abs(v1.y) >= Mathf.Abs(v2.y);
 			}
-			return v1.x > v2.x;
+
+			return Mathf.Abs(v1.x) >= Mathf.Abs(v2.x);
 		}
 
 		// https://answers.unity.com/questions/661383/whats-the-most-efficient-way-to-rotate-a-vector2-o.html
@@ -46,6 +44,11 @@ namespace Extensions
 			v.y = (sin * temp_x) + (cos * temp_y);
 
 			return v;
+		}
+
+		public static Vector3 v2to3(Vector2 v)
+		{
+			return new Vector3(v.x, v.y, 0);
 		}
 	}
 }
