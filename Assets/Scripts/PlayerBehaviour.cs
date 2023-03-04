@@ -138,8 +138,8 @@ public class PlayerBehaviour : MonoBehaviour
 				// Rotate all non-corner children
 				for (int i = 0; i < transform.childCount; i++)
 				{
-					if (!bodyPartIsCorner[i])
-						transform.GetChild(i).Rotate(Vector3.forward * bodyPartRotations[i]);
+					//if (!bodyPartIsCorner[i])
+					transform.GetChild(i).Rotate(Vector3.forward * bodyPartRotations[i]);
 				}
 
 				// Move children
@@ -158,20 +158,21 @@ public class PlayerBehaviour : MonoBehaviour
 					bodyPartRotations[i] = bodyPartRotations[i - 1];
 				}
 
-				// Handle assignment of corners for the next movement frame
-				MakeAllNotCorners();
-				HandleCorners();
+				// Corners
 
 				string output_B = "";
 				string output_R = "";
+				string output_C = "";
 				for (int i = 0; i < transform.childCount; i++)
 				{
 					output_B += bodyPartDirections[i].ToString() + ",";
 					output_R += bodyPartRotations[i].ToString() + ",";
+					output_C += bodyPartIsCorner[i].ToString() + ",";
 				}
 
-				print("B: " + output_B);
-				print("R: " + output_R);
+				//print("B: " + output_B);
+				//print("R: " + output_R);
+				print("C: " + output_C);
 			}
 		}
 	}
@@ -206,85 +207,6 @@ public class PlayerBehaviour : MonoBehaviour
 		// This will make the movement not update next Update
 		if (direction == -movement)
 			direction = Vector2.zero;
-	}
-
-	void MakeAllNotCorners()
-	{
-		for (int i = 0; i < transform.childCount; i++)
-		{
-			MakePartNotCorner(i);
-			bodyPartIsCorner[i] = false;
-		}
-	}
-
-	void HandleCorners()
-	{
-		for (int i = 0; i < transform.childCount - 2; i++)
-		{
-			// If the part before and after it have different directions...
-			if (bodyPartDirections[i] != bodyPartDirections[i + 2])
-			{
-				if (!bodyPartIsCorner[i + 1])
-				{
-					MakePartCorner(i + 1);
-					bodyPartIsCorner[i + 1] = true;
-				}
-			}
-		}
-	}
-
-	void MakePartCorner(int i)
-	{
-		Vector2 before = bodyPartDirections[i - 1];
-		Vector2 after = bodyPartDirections[i + 1];
-
-		Transform child = transform.GetChild(i);
-		SpriteRenderer sr = child.GetComponent<SpriteRenderer>();
-		sr.sprite = cornerPiece;
-
-		Quaternion prevRotation = child.rotation;
-
-		// L corner (|_)
-		if (before == Vector2.left && after == Vector2.up
-		|| before == Vector2.down && after == Vector2.right)
-		{
-			child.rotation = Quaternion.Euler(Vector3.forward * 180);
-		}
-
-		// r corner
-		else if (before == Vector2.left && after == Vector2.down
-		|| before == Vector2.up && after == Vector2.right)
-		{
-			child.rotation = Quaternion.Euler(Vector3.forward * 90);
-		}
-
-		// Flipped r (¬) corner
-		else if (before == Vector2.right && after == Vector2.down
-		|| before == Vector2.up && after == Vector2.left)
-		{
-			child.rotation = Quaternion.Euler(Vector3.forward * 0);
-		}
-
-		// Flipped L (_|) corner
-		else if (before == Vector2.right && after == Vector2.up
-		|| before == Vector2.down && after == Vector2.left)
-		{
-			child.rotation = Quaternion.Euler(Vector3.forward * -90);
-		}
-
-		if (child.rotation == transform.GetChild(i - 1).rotation && bodyPartIsCorner[i - 1])
-		{
-			child.rotation = prevRotation;
-			MakePartNotCorner(i);
-		}
-	}
-
-	void MakePartNotCorner(int i)
-	{
-		Transform child = transform.GetChild(i);
-		SpriteRenderer sr = child.GetComponent<SpriteRenderer>();
-		if (sr.sprite == cornerPiece)
-			sr.sprite = straightPiece;
 	}
 
 	void AddBodyPart()
