@@ -17,6 +17,9 @@ using UnityEngine.UIElements;
 
 public class PlayerBehaviour : MonoBehaviour
 {
+	private Vector2 startingDirection = Vector2.up;
+	private float startingRotation = 0f;
+
 	[SerializeField]
 	private GameBehaviour game;
 
@@ -27,22 +30,24 @@ public class PlayerBehaviour : MonoBehaviour
 
 	// Simple boolean which gets set to false after the starting direction is set
 	private bool firstDirectionNotSet = true;
-	private bool firstDirectionNotApplied = true;
 	public Vector2 direction = Vector2.zero;
-	public Vector2 lastTravellingDirection = Vector2.zero;
+	// The last valid, non-zero direction vector
+	public Vector2 movement = Vector2.zero;
 
 	// These points are used with the current direction to determine whether the
 	// body part should turn or not.
 	[SerializeField]
 	private GameObject bodyPartTemplate;
-	private List<Vector2> bodyPartDirections;
 	private List<bool> bodyPartIsCorner;
 
+	private List<Vector2> bodyPartDirections;
+	private Queue<Vector2> directionQueue;
+
 	// On next tile events
-	private List<float> nextRotations;
+	private List<float> bodyPartRotations;
 	// For when the player inputs a turn, but we don't want to change the nextRotation until the move cycle is complete
 	// We want every body part to experience the same rotation in each cycle
-	private List<float> delayedNextRotations;
+	private Queue<float> rotationQueue;
 
 	public Transform head;
 	public Transform tail;
@@ -62,15 +67,16 @@ public class PlayerBehaviour : MonoBehaviour
 
 		bodyPartDirections = new List<Vector2>();
 
-		delayedNextRotations = new List<float>();
-		nextRotations = new List<float>();
-		bodyPartIsCorner = new List<bool>(); 
+		directionQueue = new Queue<Vector2>();
+		rotationQueue = new Queue<float>();
+		bodyPartRotations = new List<float>();
+		bodyPartIsCorner = new List<bool>();
 
 		for (int i = 0; i < transform.childCount; i++)
 		{
-			bodyPartDirections.Add(Vector2.zero);
+			bodyPartDirections.Add(startingDirection);
 			bodyPartIsCorner.Add(false);
-			nextRotations.Add(0f);
+			bodyPartRotations.Add(startingRotation);
 		}
 	}
 
@@ -86,24 +92,26 @@ public class PlayerBehaviour : MonoBehaviour
 		timer++;
 		moveTimer++;
 
-		if (lastTravellingDirection != Vector2.zero)
+		// .Handle first direction
+		// .Increment move time, reset counter if it's passed the number of body parts
+		// - Handle new body parts in the middle of a movetime
+		// .Set direction = movement
+		// Set sprite rotation = angle between prev. dir and lastTravDir.
+		// Calculate what WILL be a corner piece after movement
+		// Apply corner sprites
+		// Move the entire snake, excluding corner pieces which act as pipes
+
+		// Ensure the first movement has been made
+		if (movement != Vector2.zero)
 		{
-			// Above ensures that the first direction has been selected
-			if (firstDirectionNotSet)
-			{
-				bodyPartDirections[0] = lastTravellingDirection;
-				nextRotations[0] = Vector2.SignedAngle(Vector2.up, lastTravellingDirection);
+			//if (firstDirectionNotSet)
+			//	SetFirstDirection();
 
-				firstDirectionNotSet = false;
-				// firstDirectionNotApplied set to false in the moveTimer >= moveTime if statement
-				// This is to prevent starting gap between the body parts (more precision on when each part starts moving)
-			}
-
-			if (lastTravellingDirection != bodyPartDirections[0])
+			// If a rotation is required, add it to the end of the queue.
+			if (directionQueue.Count == 0 && movement != bodyPartDirections[0])
 			{
-				// Sets the timer back to the first moveTime seamlessly (if it's part way through a moveTime it retains this progression)
-				delayedNextRotations.Add(Vector2.SignedAngle(bodyPartDirections[0], lastTravellingDirection));
-				bodyPartDirections[0] = lastTravellingDirection;
+				rotationQueue.Enqueue(Vector2.SignedAngle(bodyPartDirections[0], movement));
+				directionQueue.Enqueue(movement);
 			}
 
 			if (moveTimer >= moveTime)
@@ -115,40 +123,23 @@ public class PlayerBehaviour : MonoBehaviour
 				}
 				moveTimer = 0;
 
-				// Apply first direction if not done yet
-				if (firstDirectionNotApplied)
-				{
-					for (int i = 1; i < transform.childCount; i++)
-					{
-						// Set the direction AFTER the previous part (i) has moved, so that the next move includes this part
-						// The direction is Vector2.up, ASSUMING every snake always starts facing up
-						// This is so the body parts behind the head go towards the head, then turn when the head first turns
-						bodyPartDirections[i] = Vector2.up;
-					}
-					firstDirectionNotApplied = false;
-				}
-
 				// Update rotations
 				// We need to allow rotations to occur every tile jump, so a nextRotation property for every child is needed
 				// The first direction needs to be able to bypass this to set the rotation value
-				if (!firstDirectionNotApplied)
-				{
-					if (delayedNextRotations.Count > 0)
-					{
-						nextRotations[0] = delayedNextRotations[0];
-						delayedNextRotations.RemoveAt(0);
-					}
-					else
-					{
-						nextRotations[0] = 0f;
-					}
-				}
+				if (rotationQueue.Count > 0)
+					bodyPartRotations[0] = rotationQueue.Dequeue();
+				else
+					bodyPartRotations[0] = 0f;
+
+				// Update direction (only if there is one)
+				if (directionQueue.Count > 0)
+					bodyPartDirections[0] = directionQueue.Dequeue();
 
 				// Rotate all non-corner children
 				for (int i = 0; i < transform.childCount; i++)
 				{
 					if (!bodyPartIsCorner[i])
-						transform.GetChild(i).Rotate(Vector3.forward * nextRotations[i]);
+						transform.GetChild(i).Rotate(Vector3.forward * bodyPartRotations[i]);
 				}
 
 				// Move children
@@ -158,26 +149,25 @@ public class PlayerBehaviour : MonoBehaviour
 					child.Translate(Quaternion.Inverse(child.rotation) * bodyPartDirections[i] * movementSpeed);
 				}
 
-				// Handle assignment of corners after movement, as it just became visibly necessary
-				// Doing this before would make this a straight when it should be a corner
-				HandleCorners();
-				HandleNotCorners();
-
 				// Assign the next direction for every child
 				// Negative iteration is used so dn -> dn-1, ..., d3 -> d2, d2 -> d1, so dn != d1
 				// Positive iteration would mean d2 -> d1, d3 -> d2, ..., dn -> dn-1 so dn = dn-1 = ... = d3 = d2 = d1
 				for (int i = transform.childCount - 1; i > 0; i--)
 				{
 					bodyPartDirections[i] = bodyPartDirections[i - 1];
-					nextRotations[i] = nextRotations[i - 1];
+					bodyPartRotations[i] = bodyPartRotations[i - 1];
 				}
+
+				// Handle assignment of corners for the next movement frame
+				MakeAllNotCorners();
+				HandleCorners();
 
 				string output_B = "";
 				string output_R = "";
 				for (int i = 0; i < transform.childCount; i++)
 				{
 					output_B += bodyPartDirections[i].ToString() + ",";
-					output_R += nextRotations[i].ToString() + ",";
+					output_R += bodyPartRotations[i].ToString() + ",";
 				}
 
 				print("B: " + output_B);
@@ -193,7 +183,7 @@ public class PlayerBehaviour : MonoBehaviour
 		float y_input = Input.GetAxisRaw("Vertical");
 
 		if (direction != Vector2.zero)
-			lastTravellingDirection = direction;
+			movement = direction;
 
 		if (x_input > 0)
 			direction = Vector2.right;
@@ -213,36 +203,31 @@ public class PlayerBehaviour : MonoBehaviour
 		}
 
 		// We can't have the snake going back on itself.
-		// This will make the lastTravellingDirection not update next Update
-		if (direction == -lastTravellingDirection)
+		// This will make the movement not update next Update
+		if (direction == -movement)
 			direction = Vector2.zero;
+	}
+
+	void MakeAllNotCorners()
+	{
+		for (int i = 0; i < transform.childCount; i++)
+		{
+			MakePartNotCorner(i);
+			bodyPartIsCorner[i] = false;
+		}
 	}
 
 	void HandleCorners()
 	{
 		for (int i = 0; i < transform.childCount - 2; i++)
 		{
+			// If the part before and after it have different directions...
 			if (bodyPartDirections[i] != bodyPartDirections[i + 2])
 			{
 				if (!bodyPartIsCorner[i + 1])
 				{
 					MakePartCorner(i + 1);
 					bodyPartIsCorner[i + 1] = true;
-				}
-			}
-		}
-	}
-
-	void HandleNotCorners()
-	{
-		for (int i = 0; i < transform.childCount - 2; i++)
-		{
-			if (bodyPartDirections[i] == bodyPartDirections[i + 2])
-			{
-				if (bodyPartIsCorner[i + 1])
-				{
-					MakePartNotCorner(i + 1);
-					bodyPartIsCorner[i + 1] = false;
 				}
 			}
 		}
@@ -256,6 +241,8 @@ public class PlayerBehaviour : MonoBehaviour
 		Transform child = transform.GetChild(i);
 		SpriteRenderer sr = child.GetComponent<SpriteRenderer>();
 		sr.sprite = cornerPiece;
+
+		Quaternion prevRotation = child.rotation;
 
 		// L corner (|_)
 		if (before == Vector2.left && after == Vector2.up
@@ -282,7 +269,13 @@ public class PlayerBehaviour : MonoBehaviour
 		else if (before == Vector2.right && after == Vector2.up
 		|| before == Vector2.down && after == Vector2.left)
 		{
-			child.rotation = Quaternion.Euler(Vector3.forward * 270);
+			child.rotation = Quaternion.Euler(Vector3.forward * -90);
+		}
+
+		if (child.rotation == transform.GetChild(i - 1).rotation && bodyPartIsCorner[i - 1])
+		{
+			child.rotation = prevRotation;
+			MakePartNotCorner(i);
 		}
 	}
 
@@ -290,8 +283,8 @@ public class PlayerBehaviour : MonoBehaviour
 	{
 		Transform child = transform.GetChild(i);
 		SpriteRenderer sr = child.GetComponent<SpriteRenderer>();
-		sr.sprite = straightPiece;
-		child.rotation = transform.GetChild(i - 1).rotation;
+		if (sr.sprite == cornerPiece)
+			sr.sprite = straightPiece;
 	}
 
 	void AddBodyPart()
