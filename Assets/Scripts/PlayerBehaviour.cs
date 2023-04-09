@@ -34,23 +34,11 @@ public class PlayerBehaviour : MonoBehaviour
 	// The last valid, non-zero direction vector
 	public Vector2 movement = Vector2.zero;
 
-	// These points are used with the current direction to determine whether the
-	// body part should turn or not.
-	[SerializeField]
-	private GameObject bodyPartTemplate;
-	private List<bool> bodyPartIsCorner;
-
-	private List<Vector2> bodyPartDirections;
 	private Queue<Vector2> directionQueue;
 
-	// On next tile events
-	private List<float> bodyPartRotations;
-	// For when the player inputs a turn, but we don't want to change the nextRotation until the move cycle is complete
-	// We want every body part to experience the same rotation in each cycle
-	private Queue<float> rotationQueue;
-
-	public Transform head;
-	public Transform tail;
+	public BodyPart head;
+	public BodyPart tail;
+	private List<BodyPart> bodyParts;
 
 	private float movementSpeed = 1f;
 	// Increments to moveTime * childCount, then resets
@@ -62,22 +50,13 @@ public class PlayerBehaviour : MonoBehaviour
 	// Start is called before the first frame update
 	void Awake()
 	{
-		head = transform.GetChild(0);
-		tail = transform.GetChild(transform.childCount - 1);
-
-		bodyPartDirections = new List<Vector2>();
-
-		directionQueue = new Queue<Vector2>();
-		rotationQueue = new Queue<float>();
-		bodyPartRotations = new List<float>();
-		bodyPartIsCorner = new List<bool>();
-
-		for (int i = 0; i < transform.childCount; i++)
-		{
-			bodyPartDirections.Add(startingDirection);
-			bodyPartIsCorner.Add(false);
-			bodyPartRotations.Add(startingRotation);
-		}
+		bodyParts = new List<BodyPart>();
+		head = new BodyPart();
+		tail = new BodyPart();
+		head.transform = transform.GetChild(0);
+		tail.transform = transform.GetChild(transform.childCount - 1);
+		head.direction = startingDirection;
+		tail.direction = startingDirection;
 	}
 
 	// Update is called once per frame
@@ -212,17 +191,53 @@ public class PlayerBehaviour : MonoBehaviour
 	void AddBodyPart()
 	{
 		// Adds a new body part as a child, then moves the tail after it
-		GameObject bodyPart = Instantiate(bodyPartTemplate, gameObject.transform);
+		BodyPart bodyPart = new BodyPart(straightPiece);
+		bodyPart.transform.SetParent(transform);
 		// Makes the new body part have the same direction, indexed rotation and raw rotation as the tail
+		bodyPart.direction = tail.direction;
 		bodyPart.transform.rotation = tail.rotation;
 		tail.SetAsLastSibling();
 	}
 
-	void TrimAtIndex(int index)
+	public class BodyPart
 	{
+		private Vector2 direction;
+		private Transform transform;
 
-		/*childDirections.RemoveAt(childDirections.Count - 1);
-		childIndexedRotations.RemoveAt(childDirections.Count - 1);
-		Destroy(bodyPart);*/
+		// For a body part with pre-existing transform
+		public BodyPart();
+
+		// For a body part without pre-existing transform
+		public BodyPart(Sprite sprite)
+		{
+			GameObject bodyPartGameObject = new GameObject("Body", typeof(SpriteRenderer));
+			bodyPartGameObject.GetComponent<SpriteRenderer>().sprite = sprite;
+			this.transform = bodyPartGameObject.transform;
+		}
+
+		public void Move(Vector2 direction)
+		{
+			Vector2 prevDirection = this.direction;
+
+			// Move the body part
+			this.transform.position += (Vector3)direction;
+
+			float angle;
+			angle = Vector2.SignedAngle(prevDirection, direction);
+
+			// If the body part is a corner piece
+			if (angle != 0)
+			{
+				if (Mathf.Approximately(angle, 90))
+				{
+					// r
+				}
+
+				else if (Mathf.Approximately(angle, -90))
+				{
+					// ¬
+				}
+			}
+		}
 	}
 }
