@@ -7,20 +7,17 @@ using UnityEngine.Tilemaps;
 public class GameBehaviour : MonoBehaviour
 {
 	public Tilemap groundTilemap;
-	
-	[SerializeField]
-	private Tile lightTile;
-	[SerializeField]
-	private Tile darkTile;
-
 	public Tilemap wallTilemap;
-	
-	[SerializeField]
-	private Tile wallTile;
 
 	[SerializeField]
-	private GameObject[] players;
-	private Dictionary<int, GameObject[]> squareDepthToPlayers;
+	private Tile _lightTile;
+	[SerializeField]
+	private Tile _darkTile;	
+	[SerializeField]
+	private Tile _wallTile;
+
+	[SerializeField]
+	private GameObject[] _players;
 
 	private const int WORLD_SIZE = 25; // The world size is a square, WORLD_SIZE * WORLD_SIZE
 
@@ -40,7 +37,7 @@ public class GameBehaviour : MonoBehaviour
 	{
 		CreateGroundTilemap();
 		CreateWallTilemap();
-		PlaceSnakes(1, players);
+		PlaceSnakes(1, _players);
 	}
 
 	Tilemap CreateAndReturnTilemap(string gridName, bool hasCollider)
@@ -75,17 +72,17 @@ public class GameBehaviour : MonoBehaviour
 				{
 					// Even row -> starts with light (i.e. Even cols are light)
 					if (j % 2 == 0)
-						tiles[WORLD_SIZE * i + j] = lightTile;
+						tiles[WORLD_SIZE * i + j] = _lightTile;
 					else
-						tiles[WORLD_SIZE * i + j] = darkTile;
+						tiles[WORLD_SIZE * i + j] = _darkTile;
 				}
 				else
 				{
 					// Odd row -> starts with dark (i.e. Odd cols are light)
 					if (j % 2 == 0)
-						tiles[WORLD_SIZE * i + j] = darkTile;
+						tiles[WORLD_SIZE * i + j] = _darkTile;
 					else
-						tiles[WORLD_SIZE * i + j] = lightTile;
+						tiles[WORLD_SIZE * i + j] = _lightTile;
 				}
 			}
 		}
@@ -105,12 +102,12 @@ public class GameBehaviour : MonoBehaviour
 				if (i == 0 || i == WORLD_SIZE + 1)
 				{
 					// We are on the top or bottom row, so guaranteed placement of wall
-					tiles[(WORLD_SIZE + 2) * i + j] = wallTile;
+					tiles[(WORLD_SIZE + 2) * i + j] = _wallTile;
 				}
 				else if (j == 0 || j == WORLD_SIZE + 1)
 				{
 					// We are on the leftmost or rightmost column, so place wall
-					tiles[(WORLD_SIZE + 2) * i + j] = wallTile;
+					tiles[(WORLD_SIZE + 2) * i + j] = _wallTile;
 				}
 			}
 		}
@@ -137,7 +134,7 @@ public class GameBehaviour : MonoBehaviour
 
 		for (int i = 0; i < remainingPlayers.Length; i++)
 		{
-			players[i].transform.position = corners[i % 4] + (Vector3)(Vector2.one * groundTilemap.cellSize / 2);
+			_players[i].transform.position = corners[i % 4] + (Vector3)(Vector2.one * groundTilemap.cellSize / 2);
 			if (i % 4 == 0 && i < remainingPlayers.Length - 1)
 			{
 				int newDepth = depth + (int)Mathf.Floor(minDist);

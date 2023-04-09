@@ -17,46 +17,42 @@ using UnityEngine.UIElements;
 
 public class PlayerBehaviour : MonoBehaviour
 {
-	private Vector2 startingDirection = Vector2.up;
-	private float startingRotation = 0f;
+	private Vector2 _startingDirection = Vector2.up;
 
 	[SerializeField]
-	private GameBehaviour game;
-
+	private Sprite _straightPiece;
 	[SerializeField]
-	private Sprite straightPiece;
-	[SerializeField]
-	private Sprite cornerPiece;
+	private Sprite _cornerPiece;
 
 	// Simple boolean which gets set to false after the starting direction is set
-	private bool firstDirectionNotSet = true;
+	private bool _firstDirectionNotSet = true;
 	public Vector2 direction = Vector2.zero;
 	// The last valid, non-zero direction vector
 	public Vector2 movement = Vector2.zero;
 
-	private Queue<Vector2> directionQueue;
+	private Queue<Vector2> _directionQueue;
 
 	public BodyPart head;
 	public BodyPart tail;
-	private List<BodyPart> bodyParts;
+	private List<BodyPart> _bodyParts;
 
-	private float movementSpeed = 1f;
-	// Increments to moveTime * childCount, then resets
+	private float _movementSpeed = 1f;
+	// Increments to _moveTime * childCount, then resets
 	public int timer = 0;
-	// Increments to moveTime, then resets
+	// Increments to _moveTime, then resets
 	public int moveTimer = 0;
-	private int moveTime = 20;
+	private int _moveTime = 20;
 
 	// Start is called before the first frame update
 	void Awake()
 	{
-		bodyParts = new List<BodyPart>();
+		_bodyParts = new List<BodyPart>();
 		head = new BodyPart();
 		tail = new BodyPart();
 		head.transform = transform.GetChild(0);
 		tail.transform = transform.GetChild(transform.childCount - 1);
-		head.direction = startingDirection;
-		tail.direction = startingDirection;
+		head.direction = _startingDirection;
+		tail.direction = _startingDirection;
 	}
 
 	// Update is called once per frame
@@ -73,7 +69,7 @@ public class PlayerBehaviour : MonoBehaviour
 
 		// .Handle first direction
 		// .Increment move time, reset counter if it's passed the number of body parts
-		// - Handle new body parts in the middle of a movetime
+		// - Handle new body parts in the middle of a _moveTime
 		// .Set direction = movement
 		// Set sprite rotation = angle between prev. dir and lastTravDir.
 		// Calculate what WILL be a corner piece after movement
@@ -83,20 +79,20 @@ public class PlayerBehaviour : MonoBehaviour
 		// Ensure the first movement has been made
 		if (movement != Vector2.zero)
 		{
-			//if (firstDirectionNotSet)
+			//if (_firstDirectionNotSet)
 			//	SetFirstDirection();
 
 			// If a rotation is required, add it to the end of the queue.
-			if (directionQueue.Count == 0 && movement != bodyPartDirections[0])
+			if (_directionQueue.Count == 0 && movement != bodyPartDirections[0])
 			{
 				rotationQueue.Enqueue(Vector2.SignedAngle(bodyPartDirections[0], movement));
-				directionQueue.Enqueue(movement);
+				_directionQueue.Enqueue(movement);
 			}
 
-			if (moveTimer >= moveTime)
+			if (moveTimer >= _moveTime)
 			{
 				// Reset the timer(s)
-				if (timer >= transform.childCount * moveTime)
+				if (timer >= transform.childCount * _moveTime)
 				{
 					timer = 0;
 				}
@@ -111,8 +107,8 @@ public class PlayerBehaviour : MonoBehaviour
 					bodyPartRotations[0] = 0f;
 
 				// Update direction (only if there is one)
-				if (directionQueue.Count > 0)
-					bodyPartDirections[0] = directionQueue.Dequeue();
+				if (_directionQueue.Count > 0)
+					bodyPartDirections[0] = _directionQueue.Dequeue();
 
 				// Rotate all non-corner children
 				for (int i = 0; i < transform.childCount; i++)
@@ -125,7 +121,7 @@ public class PlayerBehaviour : MonoBehaviour
 				for (int i = 0; i < transform.childCount; i++)
 				{
 					Transform child = transform.GetChild(i);
-					child.Translate(Quaternion.Inverse(child.rotation) * bodyPartDirections[i] * movementSpeed);
+					child.Translate(Quaternion.Inverse(child.rotation) * bodyPartDirections[i] * _movementSpeed);
 				}
 
 				// Assign the next direction for every child
@@ -191,7 +187,7 @@ public class PlayerBehaviour : MonoBehaviour
 	void AddBodyPart()
 	{
 		// Adds a new body part as a child, then moves the tail after it
-		BodyPart bodyPart = new BodyPart(straightPiece);
+		BodyPart bodyPart = new BodyPart(_straightPiece);
 		bodyPart.transform.SetParent(transform);
 		// Makes the new body part have the same direction, indexed rotation and raw rotation as the tail
 		bodyPart.direction = tail.direction;

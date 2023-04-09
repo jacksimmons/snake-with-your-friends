@@ -5,27 +5,27 @@ using UnityEngine;
 public class CamBehaviour : MonoBehaviour
 {
 	[SerializeField]
-	private PlayerBehaviour playerBehaviour;
-	private Transform playerHead;
-	private Camera cam;
+	private PlayerBehaviour _playerBehaviour;
+	private Transform _playerHead;
+	private Camera _cam;
 
-	private float followSharpness = 0.1f;
-	private Vector3 offset;
+	private float _followSharpness = 0.1f;
+	private Vector3 _offset;
 
 	void Awake()
 	{
-		cam = gameObject.GetComponent<Camera>();
-		playerHead = playerBehaviour.transform.GetChild(0);
-		offset = transform.position - playerHead.position;
+		_cam = gameObject.GetComponent<Camera>();
+		_playerHead = _playerBehaviour.transform.GetChild(0);
+		_offset = transform.position - _playerHead.position;
 	}
 
 	void LateUpdate()
 	{
-		float blend = 1 - Mathf.Pow(1 - followSharpness, Time.deltaTime * 30);
+		float blend = 1 - Mathf.Pow(1 - _followSharpness, Time.deltaTime * 30);
 
 		transform.position = Vector3.Lerp(
 			transform.position,
-			playerHead.position + offset,
+			_playerHead.position + _offset,
 			blend);
 	}
 }
