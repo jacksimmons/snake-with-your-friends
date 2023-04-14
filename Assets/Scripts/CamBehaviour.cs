@@ -23,7 +23,8 @@ public class CamBehaviour : MonoBehaviour
 	{
 		float blend = 1 - Mathf.Pow(1 - _followSharpness, Time.deltaTime * 30);
 
-		transform.position = Vector3.Lerp(
+		if (_playerHead != null)
+			transform.position = Vector3.Lerp(
 			transform.position,
 			_playerHead.position + _offset,
 			blend);

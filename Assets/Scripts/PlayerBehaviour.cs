@@ -1,6 +1,7 @@
 using Extensions;
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Linq;
 using System.Net.Http.Headers;
 using System.Reflection;
@@ -20,9 +21,15 @@ public class PlayerBehaviour : MonoBehaviour
 	private Vector2 _startingDirection = Vector2.up;
 
 	[SerializeField]
-	private Sprite _straightPiece;
+	private Sprite _headPiece;
 	[SerializeField]
-	private Sprite _cornerPiece;
+	private Sprite _tailPiece;
+	[SerializeField]
+	private Sprite _straightPiece;
+
+	// Corner pieces
+	[SerializeField]
+	private Sprite[] _cornerPieces = new Sprite[4];
 
 	// Simple boolean which gets set to false after the starting direction is set
 	private bool _firstDirectionNotSet = true;
@@ -46,13 +53,44 @@ public class PlayerBehaviour : MonoBehaviour
 	// Start is called before the first frame update
 	void Awake()
 	{
+		// Add the BodyParts
 		_bodyParts = new List<BodyPart>();
-		head = new BodyPart();
-		tail = new BodyPart();
-		head.transform = transform.GetChild(0);
-		tail.transform = transform.GetChild(transform.childCount - 1);
-		head.direction = _startingDirection;
-		tail.direction = _startingDirection;
+		for (int i = 0; i < transform.childCount; i++)
+		{
+			Sprite _sprite;
+			Sprite[] _cornerSprites = null;
+
+			if (i == 0)
+				_sprite = _headPiece;
+			else if (i == transform.childCount - 1)
+				_sprite = _tailPiece;
+			else
+			{
+				_sprite = _straightPiece;
+				_cornerSprites = _cornerPieces;
+			}
+
+			Transform _transform = transform.GetChild(i);
+			Vector2 _direction = _startingDirection;
+
+			BodyPart bp;
+
+			// Head and body
+			if (i < transform.childCount - 1)
+			{
+				bp = new BodyPart(_transform, _direction, _sprite, _cornerSprites);
+				if (i == 0)
+					head = bp;
+			}
+			
+			// Tail
+			else
+			{
+				bp = new TailBodyPart(_transform, _direction, _sprite);
+				tail = bp;
+			}
+			_bodyParts.Add(bp);
+		}
 	}
 
 	// Update is called once per frame
@@ -79,16 +117,6 @@ public class PlayerBehaviour : MonoBehaviour
 		// Ensure the first movement has been made
 		if (movement != Vector2.zero)
 		{
-			//if (_firstDirectionNotSet)
-			//	SetFirstDirection();
-
-			// If a rotation is required, add it to the end of the queue.
-			if (_directionQueue.Count == 0 && movement != bodyPartDirections[0])
-			{
-				rotationQueue.Enqueue(Vector2.SignedAngle(bodyPartDirections[0], movement));
-				_directionQueue.Enqueue(movement);
-			}
-
 			if (moveTimer >= _moveTime)
 			{
 				// Reset the timer(s)
@@ -98,56 +126,32 @@ public class PlayerBehaviour : MonoBehaviour
 				}
 				moveTimer = 0;
 
-				// Update rotations
-				// We need to allow rotations to occur every tile jump, so a nextRotation property for every child is needed
-				// The first direction needs to be able to bypass this to set the rotation value
-				if (rotationQueue.Count > 0)
-					bodyPartRotations[0] = rotationQueue.Dequeue();
-				else
-					bodyPartRotations[0] = 0f;
+				// Iterate backwards through the body parts, from tail to head
+				// The reason for doing this is so every part inherits its next
+				// direction from the part before it.
 
-				// Update direction (only if there is one)
-				if (_directionQueue.Count > 0)
-					bodyPartDirections[0] = _directionQueue.Dequeue();
-
-				// Rotate all non-corner children
-				for (int i = 0; i < transform.childCount; i++)
+				if (_bodyParts.Count > 1)
 				{
-					//if (!bodyPartIsCorner[i])
-					transform.GetChild(i).Rotate(Vector3.forward * bodyPartRotations[i]);
+					// Tail first
+					BodyPart prev = _bodyParts[_bodyParts.Count - 2];
+					_bodyParts[_bodyParts.Count - 1].Move(prev.direction);
+
+					// Then the rest of the body, tail - 1 to head
+					for (int i = _bodyParts.Count - 2; i >= 0; i--)
+					{
+						BodyPart next = null;
+						Vector2 dir = movement;
+						if (i + 1 < _bodyParts.Count)
+							next = _bodyParts[i + 1];
+						if (i > 0)
+							dir = _bodyParts[i - 1].direction;
+						_bodyParts[i].HandleMovement(dir, next);
+					}
+
+					// Update tail rotation
+					if (!prev.isCorner)
+						_bodyParts[_bodyParts.Count - 1].transform.rotation = prev.transform.rotation;
 				}
-
-				// Move children
-				for (int i = 0; i < transform.childCount; i++)
-				{
-					Transform child = transform.GetChild(i);
-					child.Translate(Quaternion.Inverse(child.rotation) * bodyPartDirections[i] * _movementSpeed);
-				}
-
-				// Assign the next direction for every child
-				// Negative iteration is used so dn -> dn-1, ..., d3 -> d2, d2 -> d1, so dn != d1
-				// Positive iteration would mean d2 -> d1, d3 -> d2, ..., dn -> dn-1 so dn = dn-1 = ... = d3 = d2 = d1
-				for (int i = transform.childCount - 1; i > 0; i--)
-				{
-					bodyPartDirections[i] = bodyPartDirections[i - 1];
-					bodyPartRotations[i] = bodyPartRotations[i - 1];
-				}
-
-				// Corners
-
-				string output_B = "";
-				string output_R = "";
-				string output_C = "";
-				for (int i = 0; i < transform.childCount; i++)
-				{
-					output_B += bodyPartDirections[i].ToString() + ",";
-					output_R += bodyPartRotations[i].ToString() + ",";
-					output_C += bodyPartIsCorner[i].ToString() + ",";
-				}
-
-				//print("B: " + output_B);
-				//print("R: " + output_R);
-				print("C: " + output_C);
 			}
 		}
 	}
@@ -187,53 +191,145 @@ public class PlayerBehaviour : MonoBehaviour
 	void AddBodyPart()
 	{
 		// Adds a new body part as a child, then moves the tail after it
-		BodyPart bodyPart = new BodyPart(_straightPiece);
-		bodyPart.transform.SetParent(transform);
-		// Makes the new body part have the same direction, indexed rotation and raw rotation as the tail
-		bodyPart.direction = tail.direction;
-		bodyPart.transform.rotation = tail.rotation;
-		tail.SetAsLastSibling();
+		GameObject part = new GameObject();
+		part.transform.SetParent(transform);
+
+		// Makes the new body part have the same direction and rotation as the tail
+		BodyPart bodyPart = new BodyPart(part.transform, tail.direction, _straightPiece, _cornerPieces);
+		bodyPart.transform.rotation = tail.transform.rotation;
+
+		tail.transform.SetAsLastSibling();
+	}
+
+	void HandleDeath()
+	{
+		Destroy(gameObject);
+	}
+
+	void OnCollisionEnter2D(Collision2D collision)
+	{
+		Transform t = collision.otherCollider.transform;
+		if (t != null)
+		{
+			if (t == head.transform)
+			{
+				HandleDeath();
+			}
+		}
 	}
 
 	public class BodyPart
 	{
-		private Vector2 direction;
-		private Transform transform;
+		public Vector2 direction;
+		public Transform transform;
+		public Sprite defaultSprite;
+		public bool isCorner;
+		private Sprite[] _cornerSprites = null;
 
-		// For a body part with pre-existing transform
-		public BodyPart();
-
-		// For a body part without pre-existing transform
-		public BodyPart(Sprite sprite)
+		// For a body part that isn't the head or the tail
+		public BodyPart(Transform transform, Vector2 direction, Sprite defaultSprite, Sprite[] cornerSprites)
 		{
-			GameObject bodyPartGameObject = new GameObject("Body", typeof(SpriteRenderer));
-			bodyPartGameObject.GetComponent<SpriteRenderer>().sprite = sprite;
-			this.transform = bodyPartGameObject.transform;
+			this.transform = transform;
+			this.direction = direction;
+			this.defaultSprite = defaultSprite;
+			isCorner = false;
+			_cornerSprites = cornerSprites;
+			SetSprite(defaultSprite);
+		}
+
+		public void SetSprite(Sprite sprite)
+		{
+			this.transform.gameObject.GetComponent<SpriteRenderer>().sprite = sprite;
 		}
 
 		public void Move(Vector2 direction)
 		{
-			Vector2 prevDirection = this.direction;
-
-			// Move the body part
+			this.direction = direction;
 			this.transform.position += (Vector3)direction;
+		}
 
-			float angle;
-			angle = Vector2.SignedAngle(prevDirection, direction);
+		/// <summary>
+		/// Complex movement handling with corner piece handling.
+		/// </summary>
+		/// <param name="dir">The new direction to move along.</param>
+		/// <param name="next">The "next" body part, the body part
+		/// which appears next in the child hierarchy (towards tail).</param>
+		public virtual void HandleMovement(Vector2 dir, BodyPart next)
+		{
+			Vector2 prevDirection = this.direction;
+			Move(dir);
+			float angle = Vector2.SignedAngle(prevDirection, direction);
+			this.transform.Rotate(Vector3.forward, angle);
 
 			// If the body part is a corner piece
-			if (angle != 0)
+			if (next != null)
 			{
-				if (Mathf.Approximately(angle, 90))
+				if (angle != 0)
 				{
-					// r
-				}
+					// If the next part isn't a tail, make it a corner
+					if (next._cornerSprites != null)
+					{
+						next.transform.rotation = Quaternion.identity;
+						next.isCorner = true;
 
-				else if (Mathf.Approximately(angle, -90))
+						if (next.direction == Vector2.up)
+						{
+							if (dir == Vector2.left)
+								next.SetSprite(next._cornerSprites[3]); // -R
+							else if (dir == Vector2.right)
+								next.SetSprite(next._cornerSprites[2]); // R
+						}
+
+						else if (next.direction == Vector2.left)
+						{
+							if (dir == Vector2.up)
+								next.SetSprite(next._cornerSprites[0]); // L
+							else if (dir == Vector2.down)
+								next.SetSprite(next._cornerSprites[2]); // R
+						}
+
+						else if (next.direction == Vector2.down)
+						{
+							if (dir == Vector2.left)
+								next.SetSprite(next._cornerSprites[1]); // -L
+							else if (dir == Vector2.right)
+								next.SetSprite(next._cornerSprites[0]); // L
+						}
+
+						else if (next.direction == Vector2.right)
+						{
+							if (dir == Vector2.up)
+								next.SetSprite(next._cornerSprites[1]); // -L
+							else if (dir == Vector2.down)
+								next.SetSprite(next._cornerSprites[3]); // -R
+						}
+					}
+				}
+				else
 				{
-					// ¬
+					// In case it is currently a corner, set the sprite to default
+					// Also set the rotation to the body part in front
+					next.isCorner = false;
+					next.SetSprite(next.defaultSprite);
+					next.transform.rotation = this.transform.rotation;
 				}
 			}
+		}
+	}
+
+	public class TailBodyPart : BodyPart
+	{
+		public TailBodyPart(Transform transform, Vector2 direction, Sprite defaultSprite, Sprite[] cornerSprites = null)
+			: base(transform, direction, defaultSprite, cornerSprites) { }
+
+		/// <summary>
+		/// Movement handling without handling corner pieces.
+		/// Moves in direction `dir`.
+		/// </summary>
+		/// <param name="dir">New direction.</param>
+		public void HandleMovement(Vector2 dir)
+		{
+			Move(dir);
 		}
 	}
 }
