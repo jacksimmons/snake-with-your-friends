@@ -1,14 +1,5 @@
-using Extensions;
-using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.Linq;
-using System.Net.Http.Headers;
-using System.Reflection;
-using TreeEditor;
 using UnityEngine;
-using UnityEngine.Tilemaps;
-using UnityEngine.UIElements;
 
 /* Movement:
  * Moves smoothly, can't go back on itself (sign(d0) == sign(d1))
@@ -38,6 +29,8 @@ public class PlayerBehaviour : MonoBehaviour
 	public Vector2 direction = Vector2.zero;
 	// The last valid, non-zero direction vector
 	public Vector2 movement = Vector2.zero;
+	// The last `movement` which was used
+	private Vector2 _prevMovement = Vector2.zero;
 
 	public BodyPart head;
 	public BodyPart tail;
@@ -50,7 +43,11 @@ public class PlayerBehaviour : MonoBehaviour
 	public int moveTimer = 0;
 	private int _moveTime = 20;
 
-	// Start is called before the first frame update
+	public bool frozen = false;
+
+	// Components
+	private Rigidbody2D _rb;
+
 	void Awake()
 	{
 		// Add the BodyParts
@@ -95,31 +92,17 @@ public class PlayerBehaviour : MonoBehaviour
 
 	void Start()
 	{
+		_rb = GetComponent<Rigidbody2D>();
 	}
 
 	// Update is called once per frame
 	void Update()
 	{
 		HandleInputs();
-
-		if (GameBehaviour.loaded)
-		{
-			GameBehaviour.loaded = false;
-			transform.position += (Vector3)Vector2.up * 2;
-
-			AddBodyPart();
-			AddBodyPart();
-			AddBodyPart();
-			AddBodyPart();
-		}
 	}
 
 	void FixedUpdate()
 	{
-		// Increment the timers every FixedUpdate
-		timer++;
-		moveTimer++;
-
 		// .Handle first direction
 		// .Increment move time, reset counter if it's passed the number of body parts
 		// - Handle new body parts in the middle of a _moveTime
@@ -128,45 +111,8 @@ public class PlayerBehaviour : MonoBehaviour
 		// Calculate what WILL be a corner piece after movement
 		// Apply corner sprites
 		// Move the entire snake, excluding corner pieces which act as pipes
-
-		// Ensure the first movement has been made
-		if (movement != Vector2.zero)
-		{
-			if (moveTimer >= _moveTime)
-			{
-				// Reset the timer(s)
-				if (timer >= transform.childCount * _moveTime)
-				{
-					timer = 0;
-				}
-				moveTimer = 0;
-
-				// Iterate backwards through the body parts, from tail to head
-				// The reason for doing this is so every part inherits its next
-				// direction from the part before it.
-
-				if (_bodyParts.Count > 1)
-				{
-					// Tail first
-					BodyPart tailPrev = _bodyParts[_bodyParts.Count - 2];
-					_bodyParts[_bodyParts.Count - 1].Move(tailPrev.direction);
-
-					// Then the rest of the body, tail - 1 to head
-					for (int i = _bodyParts.Count - 2; i >= 0; i--)
-					{
-						BodyPart next = null;
-						Vector2 dir = movement;
-						if (i > 0)
-						{
-							dir = _bodyParts[i-1].direction;
-						}
-						if (i + 1 < _bodyParts.Count)
-							next = _bodyParts[i+1];
-						_bodyParts[i].HandleMovement(dir, next);
-					}
-				}
-			}
-		}
+		HandleMovementLoop();
+		HandleInternalCollisions();
 	}
 
 	void HandleInputs()
@@ -196,9 +142,97 @@ public class PlayerBehaviour : MonoBehaviour
 		}
 
 		// We can't have the snake going back on itself.
-		// This will make the movement not update next Update
-		if (direction == -movement)
+		// So cancel the new input.
+		if (direction == -_prevMovement)
 			direction = Vector2.zero;
+	}
+
+	void HandleMovementLoop()
+	{
+		// Increment the timers
+		timer++;
+		moveTimer++;
+
+		// Ensures the first movement has been made
+		if (movement != Vector2.zero && !frozen)
+		{
+			if (moveTimer >= _moveTime)
+			{
+				// Reset the timer(s)
+				if (timer >= transform.childCount * _moveTime)
+				{
+					timer = 0;
+				}
+				moveTimer = 0;
+
+				// Update prevMovement
+				_prevMovement = movement;
+
+				// Iterate backwards through the body parts, from tail to head
+				// The reason for doing this is so every part inherits its next
+				// direction from the part before it.
+				if (_bodyParts.Count > 1)
+				{
+					// Tail first
+					BodyPart tailPrev = _bodyParts[_bodyParts.Count - 2];
+					_bodyParts[_bodyParts.Count - 1].Move(tailPrev.direction);
+
+					// Then the rest of the body, tail - 1 to head
+					for (int i = _bodyParts.Count - 2; i >= 0; i--)
+					{
+						BodyPart next = null;
+						Vector2 dir = movement;
+						if (i > 0)
+						{
+							dir = _bodyParts[i - 1].direction;
+						}
+						if (i + 1 < _bodyParts.Count)
+							next = _bodyParts[i + 1];
+						_bodyParts[i].HandleMovement(dir, next);
+					}
+				}
+			}
+		}
+	}
+
+	/// <summary>
+	/// Handles all collisions involving the head and another body part.
+	/// </summary>
+	void HandleInternalCollisions()
+	{
+		Vector2 headPos = head.transform.position;
+		foreach (BodyPart bp in _bodyParts)
+		{
+			if (bp != head)
+			{
+				Collider2D c = bp.transform.GetComponent<Collider2D>();
+				if (c != null)
+				{
+					if (c.OverlapPoint(headPos))
+					{
+						HandleDeath();
+					}
+				}
+				else
+				{
+					Debug.LogWarning("No collider for " + _bodyParts.IndexOf(bp) + "th body part.");
+				}
+			}
+		}
+	}
+
+	void HandleDeath()
+	{
+		foreach (BodyPart bp in _bodyParts)
+		{
+			SpriteRenderer sr = bp.transform.GetComponent<SpriteRenderer>();
+			if (sr != null)
+			{
+				sr.color = Color.grey;
+			}
+		}
+		frozen = true;
+		_rb.simulated = false;
 	}
 
 	void AddBodyPart()
@@ -220,17 +254,16 @@ public class PlayerBehaviour : MonoBehaviour
 		_bodyParts.Add(tail);
 	}
 
-	void HandleDeath()
-	{
-		Destroy(gameObject);
-	}
-
 	void OnCollisionEnter2D(Collision2D collision)
 	{
-		Transform t = collision.otherCollider.transform;
-		if (t != null)
+		// Handles all snake collision OTHER than internal collisions
+		// (collisions of body parts with each other)
+		Transform col = collision.collider.transform;
+		Transform other = collision.otherCollider.transform;
+		if (other != null)
 		{
-			if (t == head.transform)
+			// The head has crashed into something (not itself)
+			if (other == head.transform)
 			{
 				HandleDeath();
 			}

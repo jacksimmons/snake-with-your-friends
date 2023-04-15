@@ -14,12 +14,14 @@ public class GameBehaviour : MonoBehaviour
 	[SerializeField]
 	private Tile _lightTile;
 	[SerializeField]
-	private Tile _darkTile;	
+	private Tile _darkTile;
 	[SerializeField]
 	private Tile _wallTile;
 
 	[SerializeField]
 	private GameObject[] _players;
+
+	private Food food;
 
 	private const int WORLD_SIZE = 25; // The world size is a square, WORLD_SIZE * WORLD_SIZE
 

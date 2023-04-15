@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public interface IItem {
@@ -8,14 +10,14 @@ public interface IItem {
 public interface IProjectile {
 	Vector2 Start { get; set; }
 	Vector2 Direction { get; set; }
-	void Collision();
+	void OnCollision();
 }
 
 public abstract class Item : IItem
 {
 	private float _lifetime;
 
-	float IItem.Lifetime
+	public float Lifetime
 	{
 		get
 		{
@@ -30,33 +32,55 @@ public abstract class Item : IItem
 		}
 	}
 
+	public Item(float lifetime)
+	{
+		Lifetime = lifetime;
+	}
+
 	public abstract void Use();
 }
 
-public class Viagra : Item
+public class PowerupItem : Item
 {
+	public PowerupItem(float lifetime)
+		: base(lifetime)
+	{ }
+
 	public override void Use()
 	{
 	}
 }
 
-public class SnakeOfSteel : Item
+public class InstantItem : Item
 {
+	public InstantItem()
+		: base(0)
+	{
+		Use();
+	}
+
 	public override void Use()
 	{
 	}
 }
 
-public class Fireball : Item, IProjectile
+public class ProjectileItem : Item, IProjectile
 {
-	Vector2 IProjectile.Start { get; set; }
-	Vector2 IProjectile.Direction { get; set; }
+	public Vector2 Start { get; set; }
+	public Vector2 Direction { get; set; }
+
+	public ProjectileItem(float lifetime, Vector2 start, Vector2 dir)
+		: base(lifetime)
+	{
+		Start = start;
+		Direction = dir;
+	}
 
 	public override void Use()
 	{
 	}
 
-	public void Collision()
+	public void OnCollision()
 	{
 	}
 }
