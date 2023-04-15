@@ -11,21 +11,18 @@ public class NetworkBehaviour : MonoBehaviour
 
 	private CallResult<NumberOfCurrentPlayers_t> m_NumberOfCurrentPlayers;
 
+	private void Awake()
+	{
+		m_GameOverlayActivated = Callback<GameOverlayActivated_t>.Create(OnGameOverlayActivated);
+		m_NumberOfCurrentPlayers = CallResult<NumberOfCurrentPlayers_t>.Create(OnNumberOfCurrentPlayers);
+	}
+
 	private void Start()
 	{
 		if (SteamManager.Initialized)
 		{
 			string name = SteamFriends.GetPersonaName();
 			Debug.Log(name);
-		}
-	}
-
-	private void OnEnable()
-	{
-		if (SteamManager.Initialized)
-		{
-			m_GameOverlayActivated = Callback<GameOverlayActivated_t>.Create(OnGameOverlayActivated);
-			m_NumberOfCurrentPlayers = CallResult<NumberOfCurrentPlayers_t>.Create(OnNumberOfCurrentPlayers);
 		}
 	}
 
