@@ -6,6 +6,8 @@ using UnityEngine.Tilemaps;
 
 public class GameBehaviour : MonoBehaviour
 {
+	public static bool loaded = false;
+
 	public Tilemap groundTilemap;
 	public Tilemap wallTilemap;
 
@@ -38,6 +40,8 @@ public class GameBehaviour : MonoBehaviour
 		CreateGroundTilemap();
 		CreateWallTilemap();
 		PlaceSnakes(1, _players);
+
+		loaded = true;
 	}
 
 	Tilemap CreateAndReturnTilemap(string gridName, bool hasCollider)
