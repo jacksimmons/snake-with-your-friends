@@ -70,51 +70,51 @@ public class Status
 		_positiveTimer = duration;
 	}
 
-	public void Eat(Food food)
-	{
-		switch (food)
-		{
-			case Food.Coffee:
-				DrinkCoffee();
-				break;
-			case Food.Booze:
-				DrinkBooze();
-				break;
-			case Food.Apple:
-				EatApple();
-				break;
-			case Food.Orange:
-				EatOrange();
-				break;
-			case Food.Banana:
-				EatBanana();
-				break;
-			case Food.FireFruit:
-				EatFireFruit();
-				break;
-			case Food.Drumstick:
-				EatDrumstick();
-				break;
-			case Food.Bone:
-				EatBone();
-				break;
-			case Food.Cheese:
-				EatCheese();
-				break;
-			case Food.Pizza:
-				EatPizza();
-				break;
-			case Food.Pineapple:
-				EatPineapple();
-				break;
-			case Food.PineapplePizza:
-				EatPineapplePizza();
-				break;
-			case Food.IceCream:
-				EatIceCream();
-				break;
-		}	
-	}
+	//public void Eat(Food food)
+	//{
+	//	switch (food)
+	//	{
+	//		case Food.Coffee:
+	//			DrinkCoffee();
+	//			break;
+	//		case Food.Booze:
+	//			DrinkBooze();
+	//			break;
+	//		case Food.Apple:
+	//			EatApple();
+	//			break;
+	//		case Food.Orange:
+	//			EatOrange();
+	//			break;
+	//		case Food.Banana:
+	//			EatBanana();
+	//			break;
+	//		case Food.FireFruit:
+	//			EatFireFruit();
+	//			break;
+	//		case Food.Drumstick:
+	//			EatDrumstick();
+	//			break;
+	//		case Food.Bone:
+	//			EatBone();
+	//			break;
+	//		case Food.Cheese:
+	//			EatCheese();
+	//			break;
+	//		case Food.Pizza:
+	//			EatPizza();
+	//			break;
+	//		case Food.Pineapple:
+	//			EatPineapple();
+	//			break;
+	//		case Food.PineapplePizza:
+	//			EatPineapplePizza();
+	//			break;
+	//		case Food.IceCream:
+	//			EatIceCream();
+	//			break;
+	//	}	
+	//}
 
 	public void DrinkCoffee()
 	{

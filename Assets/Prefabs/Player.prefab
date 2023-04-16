@@ -73,10 +73,10 @@ MonoBehaviour:
   _tailPiece: {fileID: 21300000, guid: 9d2fc6af15053b149b847ad800fe27b6, type: 3}
   _straightPiece: {fileID: 21300000, guid: 5dbd08e1b155aad469cbcf43e9563923, type: 3}
   _cornerPieces:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
+  - {fileID: 21300000, guid: d9aa5ab9caf99a54db513b335fc29ede, type: 3}
+  - {fileID: 21300000, guid: a71108d87f6708842a41f7b08a93f7c1, type: 3}
+  - {fileID: 21300000, guid: 5066610b97d5618488fd083612c976eb, type: 3}
+  - {fileID: 21300000, guid: ea088e9a0d887c14ca57ea19dfdbc818, type: 3}
   direction: {x: 0, y: 0}
   movement: {x: 0, y: 0}
   timer: 0

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Security.Cryptography;
 using UnityEngine;
 
 /* Movement:
@@ -35,6 +36,10 @@ public class PlayerBehaviour : MonoBehaviour
 	public BodyPart head;
 	public BodyPart tail;
 	private List<BodyPart> _bodyParts;
+
+	// How many body part adds are queued
+	// One body part can be created after each movement frame
+	private int bodyPartQueueLength = 0;
 
 	private float _movementSpeed = 1f;
 	// Increments to _moveTime * childCount, then resets
@@ -111,6 +116,7 @@ public class PlayerBehaviour : MonoBehaviour
 		// Apply corner sprites
 		// Move the entire snake, excluding corner pieces which act as pipes
 		HandleMovementLoop();
+		HandleAddBodyPart();
 		HandleInternalCollisions();
 	}
 
@@ -200,6 +206,53 @@ public class PlayerBehaviour : MonoBehaviour
 	}
 
 	/// <summary>
+	/// Adds a new body part onto the end of the snake, then makes it the new tail.
+	/// Then turns the tail into a regular straight piece.
+	/// </summary>
+	void HandleAddBodyPart()
+	{
+		if (bodyPartQueueLength > 0)
+		{
+			print(tail.direction);
+
+			Vector2 position = tail.transform.position - (Vector3)tail.direction;
+
+			// Update the (previously) tail into a normal body part
+			tail.defaultSprite = _straightPiece;
+			tail.SetSprite(_straightPiece);
+			tail.cornerSprites = _cornerPieces;
+
+			// Instantiate the new body part
+			GameObject newBodyPartObj = Instantiate(_bp_template, position, tail.transform.rotation, transform);
+
+			// Create the new BodyPart object
+			BodyPart newBodyPart = new BodyPart(tail, _tailPiece, null, newBodyPartObj.transform);
+
+			// The snake will end with ~- (~ is the new tail), as expected
+			float angle = Vector2.SignedAngle(tail.direction, _bodyParts[_bodyParts.Count - 2].direction);
+			if (angle != 0)
+			{
+				newBodyPartObj.transform.rotation = tail.prevRot;
+				tail.MakeCorner(_bodyParts[_bodyParts.Count - 2].direction);
+			}
+
+			// Append the new BodyPart object
+			_bodyParts.Add(newBodyPart);
+
+			// Set the tail to the new tail
+			tail = newBodyPart;
+
+			// Decrement the queue counter
+			bodyPartQueueLength--;
+		}
+	}
+
+	public void AddToBodyPartQueue()
+	{
+		bodyPartQueueLength++;
+	}
+
+	/// <summary>
 	/// Handles all collisions involving the head and another body part.
 	/// </summary>
 	void HandleInternalCollisions()
@@ -239,25 +292,6 @@ public class PlayerBehaviour : MonoBehaviour
 		_rb.simulated = false;
 	}
 
-	void AddBodyPart()
-	{
-		// Adds a new body part as a child, then moves the tail after it
-		GameObject bp = Instantiate(_bp_template);
-		bp.transform.SetParent(transform);
-		bp.transform.position = tail.transform.position;
-		tail.transform.position -= (Vector3)tail.direction;
-
-		// Makes the new body part have the same direction and rotation as the tail
-		BodyPart bodyPart = new BodyPart(bp.transform, tail.direction, _straightPiece,
-			_cornerPieces);
-		bodyPart.transform.rotation = tail.transform.rotation;
-
-		tail.transform.SetAsLastSibling();
-		_bodyParts.RemoveAt(_bodyParts.Count - 1);
-		_bodyParts.Add(bodyPart);
-		_bodyParts.Add(tail);
-	}
-
 	public class BodyPart
 	{
 		public Vector2 direction;
@@ -265,13 +299,31 @@ public class PlayerBehaviour : MonoBehaviour
 		public Sprite defaultSprite;
 		public bool isCorner;
 		public int teleportCounter;
-
 		// Rotation before it became a corner, useful only to parts after this one
-		protected Quaternion prevRot = Quaternion.identity;
+		public Quaternion prevRot = Quaternion.identity;
+		public Sprite[] cornerSprites = null;
 
-		private Sprite[] _cornerSprites = null;
+		// For copying a body part (except for transform)
+		public BodyPart(BodyPart old, Sprite defaultSprite, Sprite[] cornerSprites, Transform transform)
+		{
+			this.transform = transform;
 
-		// For a body part that isn't the head or the tail
+			direction = old.direction;
+
+			this.defaultSprite = defaultSprite;
+			SetSprite(defaultSprite);
+
+			this.cornerSprites = cornerSprites;
+
+			isCorner = old.isCorner;
+
+			// Will not affect teleporting UNLESS necessary
+			teleportCounter = old.teleportCounter + 1;
+
+			prevRot = old.prevRot;
+		}
+
+		// For a body part that isn't the tail
 		public BodyPart(Transform transform, Vector2 direction, Sprite defaultSprite,
 			Sprite[] cornerSprites)
 		{
@@ -280,10 +332,10 @@ public class PlayerBehaviour : MonoBehaviour
 			this.defaultSprite = defaultSprite;
 			isCorner = false;
 			teleportCounter = 0;
-			_cornerSprites = cornerSprites;
+			this.cornerSprites = cornerSprites;
 			SetSprite(defaultSprite);
 		}
-
+		
 		/// <summary>
 		/// 
 		/// </summary>
@@ -296,33 +348,33 @@ public class PlayerBehaviour : MonoBehaviour
 			if (direction == Vector2.up)
 			{
 				if (prevDir == Vector2.left)
-					SetSprite(_cornerSprites[3]); // -R
+					SetSprite(this.cornerSprites[3]); // -R
 				else if (prevDir == Vector2.right)
-					SetSprite(_cornerSprites[2]); // R
+					SetSprite(this.cornerSprites[2]); // R
 			}
 
 			else if (direction == Vector2.left)
 			{
 				if (prevDir == Vector2.up)
-					SetSprite(_cornerSprites[0]); // L
+					SetSprite(this.cornerSprites[0]); // L
 				else if (prevDir == Vector2.down)
-					SetSprite(_cornerSprites[2]); // R
+					SetSprite(this.cornerSprites[2]); // R
 			}
 
 			else if (direction == Vector2.down)
 			{
 				if (prevDir == Vector2.left)
-					SetSprite(_cornerSprites[1]); // -L
+					SetSprite(this.cornerSprites[1]); // -L
 				else if (prevDir == Vector2.right)
-					SetSprite(_cornerSprites[0]); // L
+					SetSprite(this.cornerSprites[0]); // L
 			}
 
 			else if (direction == Vector2.right)
 			{
 				if (prevDir == Vector2.up)
-					SetSprite(_cornerSprites[1]); // -L
+					SetSprite(this.cornerSprites[1]); // -L
 				else if (prevDir == Vector2.down)
-					SetSprite(_cornerSprites[3]); // -R
+					SetSprite(this.cornerSprites[3]); // -R
 			}
 		}
 
@@ -354,7 +406,7 @@ public class PlayerBehaviour : MonoBehaviour
 		public virtual void HandleMovement(Vector2 dir, BodyPart next)
 		{
 			// First handle our own movement and rotation
-			Vector2 prevDirection = this.direction;
+			Vector2 prevDirection = direction;
 			Move(dir);
 			float angle = Vector2.SignedAngle(prevDirection, direction);
 			this.transform.Rotate(Vector3.forward, angle);
@@ -364,7 +416,7 @@ public class PlayerBehaviour : MonoBehaviour
 			{
 				// If the next part isn't a tail, and is an angled body part,
 				// make it a corner.
-				if (next._cornerSprites != null)
+				if (next.cornerSprites != null)
 				{
 					if (angle != 0)
 					{
@@ -386,6 +438,9 @@ public class PlayerBehaviour : MonoBehaviour
 				// If it is a tail, rotate alongside this body part
 				else
 				{
+					// Store the tail's previous rotation in prevRot
+					// This is needed in some situations in HandleAddBodyPart
+					next.prevRot = next.transform.rotation;
 					next.transform.Rotate(Vector3.forward, angle);
 				}
 			}

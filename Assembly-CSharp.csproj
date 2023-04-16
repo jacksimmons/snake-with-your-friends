@@ -57,6 +57,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\Scripts\Item.cs" />
+    <Compile Include="Assets\Scripts\BodyPartBehaviour.cs" />
+    <Compile Include="Assets\Scripts\Teleporter.cs" />
     <Compile Include="Assets\Scripts\GameBehaviour.cs" />
     <Compile Include="Assets\Scripts\Vectors.cs" />
     <Compile Include="Assets\Scripts\Status.cs" />
@@ -64,12 +66,10 @@
     <Compile Include="Assets\Scripts\NetworkBehaviour.cs" />
     <Compile Include="Assets\Scripts\Arrays.cs" />
     <Compile Include="Assets\Scripts\Steamworks.NET\SteamManager.cs" />
-    <Compile Include="Assets\Scripts\Food.cs" />
+    <Compile Include="Assets\Scripts\FoodBehaviour.cs" />
     <Compile Include="Assets\Scripts\CamBehaviour.cs" />
     <Compile Include="Assets\Scripts\MainMenu.cs" />
     <Compile Include="Assets\Scripts\Lobby.cs" />
-    <Compile Include="Assets\Scripts\Teleporter.cs" />
-    <Compile Include="Assets\Scripts\BodyPartBehaviour.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />
