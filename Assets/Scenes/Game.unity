@@ -307,9 +307,7 @@ MonoBehaviour:
   _wallTile: {fileID: 11400000, guid: 2a1c06836de000d4bb5cdb4ca8f49847, type: 2}
   _players:
   - {fileID: 1332599340}
-  - {fileID: 607378847}
-  - {fileID: 483813910}
-  - {fileID: 1897491260}
+  groundSize: 15
 --- !u!4 &312712080
 Transform:
   m_ObjectHideFlags: 0

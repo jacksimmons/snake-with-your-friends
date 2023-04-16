@@ -45,10 +45,5 @@ namespace Extensions
 
 			return v;
 		}
-
-		public static Vector3 v2to3(Vector2 v)
-		{
-			return new Vector3(v.x, v.y, 0);
-		}
 	}
 }

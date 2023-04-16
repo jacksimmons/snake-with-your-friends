@@ -45,7 +45,6 @@ public class PlayerBehaviour : MonoBehaviour
 
 	public bool frozen = false;
 
-	// Components
 	private Rigidbody2D _rb;
 
 	void Awake()
@@ -113,6 +112,11 @@ public class PlayerBehaviour : MonoBehaviour
 		// Move the entire snake, excluding corner pieces which act as pipes
 		HandleMovementLoop();
 		HandleInternalCollisions();
+	}
+
+	public BodyPart GetBodyPart(int i)
+	{
+		return _bodyParts[i];
 	}
 
 	void HandleInputs()
@@ -254,28 +258,13 @@ public class PlayerBehaviour : MonoBehaviour
 		_bodyParts.Add(tail);
 	}
 
-	void OnCollisionEnter2D(Collision2D collision)
-	{
-		// Handles all snake collision OTHER than internal collisions
-		// (collisions of body parts with each other)
-		Transform col = collision.collider.transform;
-		Transform other = collision.otherCollider.transform;
-		if (other != null)
-		{
-			// The head has crashed into something (not itself)
-			if (other == head.transform)
-			{
-				HandleDeath();
-			}
-		}
-	}
-
 	public class BodyPart
 	{
 		public Vector2 direction;
 		public Transform transform;
 		public Sprite defaultSprite;
 		public bool isCorner;
+		public int teleportCounter;
 
 		// Rotation before it became a corner, useful only to parts after this one
 		protected Quaternion prevRot = Quaternion.identity;
@@ -290,6 +279,7 @@ public class PlayerBehaviour : MonoBehaviour
 			this.direction = direction;
 			this.defaultSprite = defaultSprite;
 			isCorner = false;
+			teleportCounter = 0;
 			_cornerSprites = cornerSprites;
 			SetSprite(defaultSprite);
 		}
@@ -352,6 +342,9 @@ public class PlayerBehaviour : MonoBehaviour
 		{
 			this.direction = direction;
 			this.transform.position += (Vector3)direction;
+
+			if (teleportCounter > 0)
+				teleportCounter--;
 		}
 
 		/// <summary>
