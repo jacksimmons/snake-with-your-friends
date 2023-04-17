@@ -12,6 +12,6 @@ public class MainMenu : MonoBehaviour
 
 	public void OnJoinServerButtonPressed()
 	{
-		print("Join");
+		SceneManager.LoadScene("JoinMenu");
 	}
 }

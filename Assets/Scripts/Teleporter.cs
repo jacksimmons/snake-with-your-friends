@@ -5,20 +5,11 @@ using UnityEngine;
 public class Teleporter : MonoBehaviour
 {
 	// The two teleporter objects
-	private GameObject A;
-	private GameObject B;
-
-	void Awake()
-	{
-		A = transform.Find("A").gameObject;
-		B = transform.Find("B").gameObject;
-	}
-
+	public GameObject A;
+	public GameObject B;
 
 	private void OnTriggerEnter2D(Collider2D collision)
 	{
-		print("HI");
-
 		GameObject obj = collision.gameObject;
 		if (obj.transform.parent.CompareTag("Player"))
 		{
@@ -31,11 +22,11 @@ public class Teleporter : MonoBehaviour
 				GameObject teleportTo;
 
 				// Find the shorter distance, and confirm the player is touching that end
-				if (dA < dB && dA < 1)
+				if (dA < dB)
 				{
 					teleportTo = B;
 				}
-				else if (dB < dA && dB < 1)
+				else if (dB < dA)
 				{
 					teleportTo = A;
 				}

@@ -27,7 +27,9 @@ public class FoodBehaviour : MonoBehaviour
 		if (obj.transform.parent.CompareTag("Player"))
 		{
 			PlayerBehaviour player = obj.transform.GetComponentInParent<PlayerBehaviour>();
-			player.AddToBodyPartQueue();
+			if (player != null)
+				player.AddToBodyPartQueue();
+
 			Destroy(gameObject);
 		}
 	}

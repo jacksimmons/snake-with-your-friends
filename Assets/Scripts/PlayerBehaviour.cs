@@ -10,6 +10,8 @@ using UnityEngine;
 
 public class PlayerBehaviour : MonoBehaviour
 {
+	public Status status;
+
 	private Vector2 _startingDirection = Vector2.up;
 
 	[SerializeField]
@@ -96,7 +98,29 @@ public class PlayerBehaviour : MonoBehaviour
 
 	void Start()
 	{
+		// Initialise components
 		_rb = GetComponent<Rigidbody2D>();
+
+		// Create Status
+		List<BodyPartStatus> bpss = new List<BodyPartStatus>();
+		for (int i = 0; i < _bodyParts.Count; i++)
+		{
+			BodyPartStatus bps = new BodyPartStatus(false, false);
+			bpss.Add(bps);
+		}
+		status = new Status(bpss);
+	}
+
+	public void Reset()
+	{
+		while (RemoveBodyPart())
+		{
+		}
+
+		head.transform.position = Vector3.zero;
+		head.transform.rotation = Quaternion.identity;
+		tail.transform.position = Vector3.down;
+		tail.transform.rotation = Quaternion.identity;
 	}
 
 	// Update is called once per frame
@@ -244,12 +268,25 @@ public class PlayerBehaviour : MonoBehaviour
 
 			// Decrement the queue counter
 			bodyPartQueueLength--;
+			// Increase the number of pieces
+			status.numPieces++;
 		}
 	}
 
 	public void AddToBodyPartQueue()
 	{
 		bodyPartQueueLength++;
+	}
+
+	bool RemoveBodyPart()
+	{
+		if (transform.childCount > 2)
+		{
+			Destroy(transform.GetChild(transform.childCount - 2));
+			_bodyParts.RemoveAt(transform.childCount - 2);
+			return true;
+		}
+		return false;
 	}
 
 	/// <summary>
@@ -290,6 +327,16 @@ public class PlayerBehaviour : MonoBehaviour
 		}
 		frozen = true;
 		_rb.simulated = false;
+	}
+
+	private void OnCollisionEnter2D(Collision2D collision)
+	{
+		GameObject col = collision.collider.gameObject;
+		GameObject other = collision.otherCollider.gameObject;
+		if (other != null)
+		{
+			HandleDeath();
+		}
 	}
 
 	public class BodyPart

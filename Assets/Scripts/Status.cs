@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class Status
 {
+	public int numPieces;
+
 	private List<BodyPartStatus> _bodyPartStatuses;
 
 	// Positive active effects (only one at a time)
@@ -26,6 +28,7 @@ public class Status
 	public Status(List<BodyPartStatus> bpsx)
 	{
 		_bodyPartStatuses = bpsx;
+		numPieces = 2;
 	}
 
 	public void Update(float delta)
