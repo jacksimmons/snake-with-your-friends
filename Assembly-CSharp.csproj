@@ -57,10 +57,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\Scripts\Item.cs" />
-    <Compile Include="Assets\Scripts\BodyPartBehaviour.cs" />
     <Compile Include="Assets\Scripts\Teleporter.cs" />
     <Compile Include="Assets\Scripts\GameBehaviour.cs" />
     <Compile Include="Assets\Scripts\Vectors.cs" />
+    <Compile Include="Assets\Scripts\JoinMenu.cs" />
     <Compile Include="Assets\Scripts\Status.cs" />
     <Compile Include="Assets\Scripts\PlayerBehaviour.cs" />
     <Compile Include="Assets\Scripts\NetworkBehaviour.cs" />
@@ -69,8 +69,7 @@
     <Compile Include="Assets\Scripts\FoodBehaviour.cs" />
     <Compile Include="Assets\Scripts\CamBehaviour.cs" />
     <Compile Include="Assets\Scripts\MainMenu.cs" />
-    <Compile Include="Assets\Scripts\Lobby.cs" />
-    <Compile Include="Assets\Scripts\JoinMenu.cs" />
+    <Compile Include="Assets\Scripts\LobbyMenu.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />

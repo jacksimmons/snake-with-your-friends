@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Security.Cryptography;
 using UnityEngine;
 
 /* Movement:
@@ -10,6 +9,9 @@ using UnityEngine;
 
 public class PlayerBehaviour : MonoBehaviour
 {
+	[SerializeField]
+	public bool freeMovement;
+
 	public Status status;
 
 	private Vector2 _startingDirection = Vector2.up;
@@ -155,7 +157,7 @@ public class PlayerBehaviour : MonoBehaviour
 		float x_input = Input.GetAxisRaw("Horizontal");
 		float y_input = Input.GetAxisRaw("Vertical");
 
-		if (direction != Vector2.zero)
+		if (freeMovement || (direction != Vector2.zero))
 			movement = direction;
 
 		if (x_input > 0)

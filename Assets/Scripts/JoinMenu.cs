@@ -1,11 +1,7 @@
 using Steamworks;
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using UnityEngine.UI;
 
 public class JoinMenu : MonoBehaviour
 {
@@ -15,15 +11,38 @@ public class JoinMenu : MonoBehaviour
 	[SerializeField]
 	private GameObject _lobbyButtonTemplate;
 
+	protected Callback<LobbyDataUpdate_t> m_LobbyDataUpdate;
+
 	private CallResult<LobbyMatchList_t> m_LobbyMatchList;
 	private CallResult<LobbyEnter_t> m_LobbyEnter;
+
+	public enum Security
+	{
+		Private,
+		Friends,
+		Public,
+		Invisible
+	}
+
+	public enum Distance
+	{
+		Worldwide,
+		Far,
+		Regional,
+		Close
+	}
+
+	public enum Slots
+	{
+		Available,
+		Any
+	}
 
 	private void Awake()
 	{
 		if (SteamManager.Initialized)
 		{
-			m_LobbyMatchList = CallResult<LobbyMatchList_t>.Create(OnLobbyMatchList);
-			m_LobbyEnter = CallResult<LobbyEnter_t>.Create(OnLobbyEnter);
+			m_LobbyDataUpdate = Callback<LobbyDataUpdate_t>.Create(OnLobbyDataUpdate);
 		}
 	}
 
@@ -34,9 +53,15 @@ public class JoinMenu : MonoBehaviour
 			string name = SteamFriends.GetPersonaName();
 			Debug.Log(name);
 
-			SteamAPICall_t handle = SteamMatchmaking.RequestLobbyList();
-			m_LobbyMatchList.Set(handle);
+			RefreshLobbyList();
 		}
+	}
+
+	public void RefreshLobbyList()
+	{
+		m_LobbyMatchList = CallResult<LobbyMatchList_t>.Create(OnLobbyMatchList);
+		SteamAPICall_t handle = SteamMatchmaking.RequestLobbyList();
+		m_LobbyMatchList.Set(handle);
 	}
 
 	public void OnBackPressed()
@@ -50,15 +75,60 @@ public class JoinMenu : MonoBehaviour
 		uint.TryParse(idField.text, out id);
 		id--;
 
-		print(id);
-
-		SteamAPICall_t handle = SteamMatchmaking.JoinLobby((CSteamID)id);
+		m_LobbyEnter = CallResult<LobbyEnter_t>.Create(OnLobbyEnter);
+		SteamAPICall_t handle = SteamMatchmaking.JoinLobby(new CSteamID(id));
 		m_LobbyEnter.Set(handle);
+	}
+
+	public void OnDistanceDropdownUpdated(int distance)
+	{
+		ELobbyDistanceFilter filter;
+		switch (distance)
+		{
+			case 0:
+				filter = ELobbyDistanceFilter.k_ELobbyDistanceFilterWorldwide;
+				break;
+			case 1:
+				filter = ELobbyDistanceFilter.k_ELobbyDistanceFilterFar;
+				break;
+			case 2:
+				filter = ELobbyDistanceFilter.k_ELobbyDistanceFilterDefault;
+				break;
+			case 3:
+				filter = ELobbyDistanceFilter.k_ELobbyDistanceFilterClose;
+				break;
+			default:
+				filter = ELobbyDistanceFilter.k_ELobbyDistanceFilterDefault;
+				break;
+		}
+		SteamMatchmaking.AddRequestLobbyListDistanceFilter(filter);
+		RefreshLobbyList();
+	}
+
+	public void OnFullnessDropdownUpdated(int fullness)
+	{
+		int slots;
+		switch (fullness)
+		{
+			case 0:
+				slots = 1;
+				break;
+			default:
+				slots = 0;
+				break;
+		}
+		SteamMatchmaking.AddRequestLobbyListFilterSlotsAvailable(slots);
+		RefreshLobbyList();
 	}
 
 	private void OnLobbyMatchList(LobbyMatchList_t result, bool bIOFailure)
 	{
-		print("HI");
+		// Remove pre-existing lobbies
+		foreach (Transform child in _contentOutput.transform)
+		{
+			Destroy(child.gameObject);
+		}
+
 		uint count = result.m_nLobbiesMatching;
 		for (int i = 0; i < count; i++)
 		{
@@ -67,50 +137,46 @@ public class JoinMenu : MonoBehaviour
 			TextMeshProUGUI[] tmps = newElement.GetComponentsInChildren<TextMeshProUGUI>();
 
 			string name = SteamMatchmaking.GetLobbyData(lobby_id, "name");
-			int lobbyType;
-			int.TryParse(SteamMatchmaking.GetLobbyData(lobby_id, "LOBBY_TYPE"), out lobbyType);
-			int numPlayers = SteamMatchmaking.GetNumLobbyMembers(lobby_id);
+			int players = SteamMatchmaking.GetNumLobbyMembers(lobby_id);
+			int player_limit = SteamMatchmaking.GetLobbyMemberLimit(lobby_id);
 
-			if (i == 2)
-			{
-				for (int j = 0; j < SteamMatchmaking.GetLobbyDataCount(lobby_id); j++)
-				{
-					string pchKey;
-					string pchValue;
-					SteamMatchmaking.GetLobbyDataByIndex(lobby_id, i, out pchKey, 500, out pchValue, 500);
-					print(pchKey);
-					print(pchValue);
-				}
-			}
 			// Odd indices are labels
 			tmps[0].text = (i+1).ToString();
 			tmps[2].text = name;
-			tmps[4].text = numPlayers.ToString();
+			tmps[4].text = players.ToString() + "/" + player_limit.ToString();
 
-			string lobbyTypeName;
-			switch (lobbyType)
-			{
-				case 0:
-					lobbyTypeName = "Private";
-					break;
-				case 1:
-					lobbyTypeName = "Friends";
-					break;
-				case 2:
-					lobbyTypeName = "Public";
-					break;
-				case 3:
-					lobbyTypeName = "Invisible";
-					break;
-				default:
-					lobbyTypeName = "Unknown";
-					break;
-			}
-			tmps[6].text = lobbyTypeName;
+			//string lobbyTypeName;
+			//switch (lobbyType)
+			//{
+			//	case 0:
+			//		lobbyTypeName = "Private";
+			//		break;
+			//	case 1:
+			//		lobbyTypeName = "Friends";
+			//		break;
+			//	case 2:
+			//		lobbyTypeName = "Public";
+			//		break;
+			//	case 3:
+			//		lobbyTypeName = "Invisible";
+			//		break;
+			//	default:
+			//		lobbyTypeName = "Unknown";
+			//		break;
+			//}
 		}
 	}
 
 	private void OnLobbyEnter(LobbyEnter_t result, bool bIOFailure)
+	{
+		if (result.m_EChatRoomEnterResponse
+			== (uint)EChatRoomEnterResponse.k_EChatRoomEnterResponseSuccess)
+		{
+			print("Successfully joined lobby.");
+		}
+	}
+
+	private void OnLobbyDataUpdate(LobbyDataUpdate_t result)
 	{
 
 	}
