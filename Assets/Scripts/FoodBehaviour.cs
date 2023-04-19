@@ -26,7 +26,7 @@ public class FoodBehaviour : MonoBehaviour
 		{
 			PlayerBehaviour player = obj.transform.GetComponentInParent<PlayerBehaviour>();
 			if (player != null)
-				player.AddToBodyPartQueue();
+				player.QAddBodyPart();
 
 			Destroy(gameObject);
 		}

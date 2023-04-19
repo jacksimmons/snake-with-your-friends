@@ -7,12 +7,10 @@ public class CamBehaviour : MonoBehaviour
 	private Transform _playerHead;
 
 	private float _followSharpness = 0.1f;
-	private Vector3 _offset;
 
 	void Awake()
 	{
 		_playerHead = _playerBehaviour.transform.GetChild(0);
-		_offset = transform.position - _playerHead.position;
 	}
 
 	void LateUpdate()
@@ -22,7 +20,7 @@ public class CamBehaviour : MonoBehaviour
 		if (_playerHead != null)
 			transform.position = Vector3.Lerp(
 			transform.position,
-			_playerHead.position + _offset,
+			_playerHead.position + Vector3.back,
 			blend);
 	}
 }

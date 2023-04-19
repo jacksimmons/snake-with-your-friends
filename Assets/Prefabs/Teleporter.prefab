@@ -181,6 +181,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   A: {fileID: 9019377352338791615}
   B: {fileID: 1858359333939198850}
+  rotationSpeed: 90
 --- !u!1 &9019377352338791615
 GameObject:
   m_ObjectHideFlags: 0

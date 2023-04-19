@@ -38,50 +38,47 @@ public class GameBehaviour : MonoBehaviour
 
 	void Start()
 	{
-		if (groundSize == e_WorldSize.LOBBY)
-		{
-			Vector2Int custBL = Vector2Int.left * ((int)groundSize + 1);
+		//Vector2Int custBL = Vector2Int.left * ((int)groundSize + 1);
 
-			// Create the customise area tilemaps
-			Tilemap custGT = CreateAndReturnTilemap(gridName: "CustGround", hasCollider: false);
-			Tilemap custWT = CreateAndReturnTilemap(gridName: "CustWall", hasCollider: true);
+		//// Create the customise area tilemaps
+		//Tilemap custGT = CreateAndReturnTilemap(gridName: "CustGround", hasCollider: false);
+		//Tilemap custWT = CreateAndReturnTilemap(gridName: "CustWall", hasCollider: true);
 
-			CreateGroundTilemap(custGT, custBL);
-			CreateWallTilemap(custWT, custBL);
+		//CreateGroundTilemap(custGT, custBL);
+		//CreateWallTilemap(custWT, custBL);
 
-			Vector2Int readyBL = Vector2Int.up * ((int)groundSize + 1);
+		//Vector2Int readyBL = Vector2Int.up * ((int)groundSize + 1);
 
-			// Create the ready area tilemaps
-			Tilemap readyGT = CreateAndReturnTilemap(gridName: "ReadyGround", hasCollider: false);
-			Tilemap readyWT = CreateAndReturnTilemap(gridName: "ReadyWall", hasCollider: true);
+		//// Create the ready area tilemaps
+		//Tilemap readyGT = CreateAndReturnTilemap(gridName: "ReadyGround", hasCollider: false);
+		//Tilemap readyWT = CreateAndReturnTilemap(gridName: "ReadyWall", hasCollider: true);
 
-			CreateGroundTilemap(readyGT, readyBL);
-			CreateWallTilemap(readyWT, readyBL);
+		//CreateGroundTilemap(readyGT, readyBL);
+		//CreateWallTilemap(readyWT, readyBL);
 
-			Vector2Int baseBL = Vector2Int.zero;
+		//Vector2Int baseBL = Vector2Int.zero;
 
-			// Create the base area tilemaps
-			Tilemap baseGT = CreateAndReturnTilemap(gridName: "BaseGround", hasCollider: false);
-			Tilemap baseWT = CreateAndReturnTilemap(gridName: "BaseWall", hasCollider: true);
+		//// Create the base area tilemaps
+		//Tilemap baseGT = CreateAndReturnTilemap(gridName: "BaseGround", hasCollider: false);
+		//Tilemap baseWT = CreateAndReturnTilemap(gridName: "BaseWall", hasCollider: true);
 
-			CreateGroundTilemap(baseGT, baseBL);
-			CreateWallTilemap(baseWT, baseBL);
+		//CreateGroundTilemap(baseGT, baseBL);
+		//CreateWallTilemap(baseWT, baseBL);
 
-			PlaceSnakes(1, _players, baseGT, baseBL);
+		//PlaceSnakes(1, _players, baseGT, baseBL);
 
-			// Create the object array (the size of the map has been defined now)
-			_objects = new bool[(int)groundSize * (int)groundSize];
+		//// Create the object array (the size of the map has been defined now)
+		//_objects = new bool[(int)groundSize * (int)groundSize];
 
-			CreateTeleportingMenuPair(
-				"Customise", "Back",
-				new Vector3(baseBL.x + 1.5f + ((int)groundSize / 2), baseBL.y + 1.5f, 0),
-				new Vector3(custBL.x + 1.5f + ((int)groundSize / 2), custBL.y + (int)groundSize + 0.5f, 0));
+		//CreateTeleportingMenuPair(
+		//	"Customise", "Back",
+		//	new Vector3(baseBL.x + 1.5f + ((int)groundSize / 2), baseBL.y + 1.5f, 0),
+		//	new Vector3(custBL.x + 1.5f + ((int)groundSize / 2), custBL.y + (int)groundSize + 0.5f, 0));
 
-			CreateTeleportingMenuPair(
-				"Ready", "Unready",
-				new Vector3(baseBL.x + 1.5f + ((int)groundSize / 2), baseBL.y + (int)groundSize + 0.5f, 0),
-				new Vector3(readyBL.x + 1.5f + ((int)groundSize / 2), readyBL.y + 1.5f, 0));
-		}
+		//CreateTeleportingMenuPair(
+		//	"Ready", "Unready",
+		//	new Vector3(baseBL.x + 1.5f + ((int)groundSize / 2), baseBL.y + (int)groundSize + 0.5f, 0),
+		//	new Vector3(readyBL.x + 1.5f + ((int)groundSize / 2), readyBL.y + 1.5f, 0));
 	}
 
 	Tilemap CreateAndReturnTilemap(string gridName, bool hasCollider)

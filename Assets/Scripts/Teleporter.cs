@@ -6,14 +6,19 @@ public class Teleporter : MonoBehaviour
 	public GameObject A;
 	public GameObject B;
 
+	[SerializeField]
+	private float rotationSpeed;
+
+	private Rigidbody2D _rb;
+
 	private void OnTriggerEnter2D(Collider2D collision)
 	{
 		GameObject obj = collision.gameObject;
 		if (obj.transform.parent.CompareTag("Player"))
 		{
 			PlayerBehaviour player = obj.transform.GetComponentInParent<PlayerBehaviour>();
-			PlayerBehaviour.BodyPart bp = player.GetBodyPart(obj.transform.GetSiblingIndex());
-			if (bp.teleportCounter == 0)
+			BodyPart bp = player.BodyParts[obj.transform.GetSiblingIndex()];
+			if (bp.p_TeleportCounter == 0)
 			{
 				float dA = (obj.transform.position - A.transform.position).magnitude;
 				float dB = (obj.transform.position - B.transform.position).magnitude;
@@ -38,8 +43,16 @@ public class Teleporter : MonoBehaviour
 				obj.transform.position = teleportTo.transform.position;
 
 				// Add 2 to the counter (very safe)
-				bp.teleportCounter += 2;
+				bp.p_TeleportCounter += 2;
 			}
 		}
+	}
+
+	private void FixedUpdate()
+	{
+		A.transform.Rotate(Vector3.forward * rotationSpeed
+		* Time.fixedDeltaTime);
+		B.transform.Rotate(Vector3.forward * rotationSpeed
+		* Time.fixedDeltaTime);
 	}
 }

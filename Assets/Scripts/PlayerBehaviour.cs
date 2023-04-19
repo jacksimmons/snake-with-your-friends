@@ -1,4 +1,8 @@
+using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
+using System.Threading;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
 /* Movement:
@@ -11,6 +15,7 @@ public class PlayerBehaviour : MonoBehaviour
 {
 	[SerializeField]
 	public bool freeMovement;
+	private bool freeMovementWaitingForMoveFrame = false;
 
 	public Status status;
 
@@ -40,11 +45,20 @@ public class PlayerBehaviour : MonoBehaviour
 	public BodyPart head;
 	public BodyPart tail;
 	private List<BodyPart> _bodyParts;
+	public List<BodyPart> BodyParts
+	{
+		get { return _bodyParts; }
+	}
 
-	// How many body part adds are queued
-	// One body part can be created after each movement frame
-	private int bodyPartQueueLength = 0;
+	// All actions are executed after the next movement frame
+	private List<Action> _queuedActions;
+	// The movement vector to be moved along every frame
+	// When the player is in forced movement state
+	private Vector2 _forcedMovement = Vector2.zero;
+	// Restored after forced movement ends
+	private List<Vector2> _stored_bp_directions = new List<Vector2>();
 
+	[SerializeField]
 	private float _movementSpeed = 1f;
 	// Increments to _moveTime * childCount, then resets
 	public int timer = 0;
@@ -58,7 +72,7 @@ public class PlayerBehaviour : MonoBehaviour
 
 	void Awake()
 	{
-		// Add the BodyParts
+		// Create BodyParts
 		_bodyParts = new List<BodyPart>();
 		for (int i = 0; i < transform.childCount; i++)
 		{
@@ -76,14 +90,13 @@ public class PlayerBehaviour : MonoBehaviour
 			}
 
 			Transform _transform = transform.GetChild(i);
-			Vector2 _direction = _startingDirection;
 
 			BodyPart bp;
 
 			// Head and body
 			if (i < transform.childCount - 1)
 			{
-				bp = new BodyPart(_transform, _direction, _sprite, _cornerSprites);
+				bp = new BodyPart(_transform, _startingDirection, _sprite, _cornerSprites, _movementSpeed);
 				if (i == 0)
 					head = bp;
 			}
@@ -91,11 +104,14 @@ public class PlayerBehaviour : MonoBehaviour
 			// Tail
 			else
 			{
-				bp = new TailBodyPart(_transform, _direction, _sprite, null);
+				bp = new BodyPart(_transform, _startingDirection, _sprite, null, _movementSpeed);
 				tail = bp;
 			}
 			_bodyParts.Add(bp);
 		}
+
+		// Create QueuedActions
+		_queuedActions = new List<Action>();
 	}
 
 	void Start()
@@ -115,40 +131,34 @@ public class PlayerBehaviour : MonoBehaviour
 
 	public void Reset()
 	{
-		while (RemoveBodyPart())
-		{
-		}
+		while (RemoveBodyPart()) { }
 
-		head.transform.position = Vector3.zero;
-		head.transform.rotation = Quaternion.identity;
-		tail.transform.position = Vector3.down;
-		tail.transform.rotation = Quaternion.identity;
-	}
-
-	// Update is called once per frame
-	void Update()
-	{
-		HandleInputs();
+		head.p_Position = Vector3.zero;
+		head.p_Rotation = Quaternion.identity;
+		tail.p_Position = Vector3.down;
+		tail.p_Rotation = Quaternion.identity;
 	}
 
 	void FixedUpdate()
 	{
-		// .Handle first direction
-		// .Increment move time, reset counter if it's passed the number of body parts
-		// - Handle new body parts in the middle of a _moveTime
-		// .Set direction = movement
-		// Set sprite rotation = angle between prev. dir and lastTravDir.
-		// Calculate what WILL be a corner piece after movement
-		// Apply corner sprites
-		// Move the entire snake, excluding corner pieces which act as pipes
-		HandleMovementLoop();
-		HandleAddBodyPart();
-		HandleInternalCollisions();
-	}
+		// Increment the timers
+		timer++;
+		moveTimer++;
 
-	public BodyPart GetBodyPart(int i)
-	{
-		return _bodyParts[i];
+		HandleInputs();
+
+		// Handle queued actions (other than any that
+		// get added by said actions)
+		for (int i = 0; i < _queuedActions.Count; i++)
+		{
+			_queuedActions[0]();
+			_queuedActions.RemoveAt(0);
+		}
+
+		if (freeMovement)
+			moveTimer = _moveTime;
+
+		HandleMovementLoop();
 	}
 
 	void HandleInputs()
@@ -157,8 +167,17 @@ public class PlayerBehaviour : MonoBehaviour
 		float x_input = Input.GetAxisRaw("Horizontal");
 		float y_input = Input.GetAxisRaw("Vertical");
 
-		if (freeMovement || (direction != Vector2.zero))
-			movement = direction;
+		if (!frozen)
+		{
+			if (freeMovement || (direction != Vector2.zero))
+			{
+				movement = direction;
+			}
+		}
+		else
+		{
+			movement = _forcedMovement;
+		}
 
 		if (x_input > 0)
 			direction = Vector2.right;
@@ -185,22 +204,18 @@ public class PlayerBehaviour : MonoBehaviour
 
 	void HandleMovementLoop()
 	{
-		// Increment the timers
-		timer++;
-		moveTimer++;
-
-		// Ensures the first movement has been made
-		if (movement != Vector2.zero && !frozen)
+		if (moveTimer >= _moveTime)
 		{
-			if (moveTimer >= _moveTime)
+			// Reset the timer(s)
+			if (timer >= transform.childCount * _moveTime)
 			{
-				// Reset the timer(s)
-				if (timer >= transform.childCount * _moveTime)
-				{
-					timer = 0;
-				}
-				moveTimer = 0;
+				timer = 0;
+			}
+			moveTimer = 0;
 
+			// Ensures the first movement has been made
+			if (movement != Vector2.zero)
+			{
 				// Update prevMovement
 				_prevMovement = movement;
 
@@ -211,7 +226,7 @@ public class PlayerBehaviour : MonoBehaviour
 				{
 					// Tail first
 					BodyPart tailPrev = _bodyParts[_bodyParts.Count - 2];
-					_bodyParts[_bodyParts.Count - 1].Move(tailPrev.direction);
+					_bodyParts[_bodyParts.Count - 1].Move(tailPrev.p_Direction);
 
 					// Then the rest of the body, tail - 1 to head
 					for (int i = _bodyParts.Count - 2; i >= 0; i--)
@@ -220,7 +235,7 @@ public class PlayerBehaviour : MonoBehaviour
 						Vector2 dir = movement;
 						if (i > 0)
 						{
-							dir = _bodyParts[i - 1].direction;
+							dir = _bodyParts[i - 1].p_Direction;
 						}
 						if (i + 1 < _bodyParts.Count)
 							next = _bodyParts[i + 1];
@@ -235,52 +250,41 @@ public class PlayerBehaviour : MonoBehaviour
 	/// Adds a new body part onto the end of the snake, then makes it the new tail.
 	/// Then turns the tail into a regular straight piece.
 	/// </summary>
-	void HandleAddBodyPart()
+	private void AddBodyPart()
 	{
-		if (bodyPartQueueLength > 0)
+		Vector2 position = tail.p_Position - (Vector3)tail.p_Direction;
+
+		// Update the (previously) tail into a normal body part
+		tail.p_DefaultSprite = _straightPiece;
+		tail.p_Sprite = _straightPiece;
+		tail.p_CornerSprites = _cornerPieces;
+
+		// Instantiate the new body part
+		GameObject newBodyPartObj = Instantiate(_bp_template, position, tail.p_Rotation, transform);
+
+		// Create the new BodyPart object, and turn it into the tail
+		BodyPart newBodyPart = new BodyPart(tail, newBodyPartObj.transform);
+		newBodyPart.p_DefaultSprite = _tailPiece;
+		newBodyPart.p_Sprite = _tailPiece;
+		newBodyPart.p_CornerSprites = null;
+
+		// The snake will end with ~- (~ is the new tail), as expected
+		float angle = Vector2.SignedAngle(tail.p_Direction, _bodyParts[_bodyParts.Count - 2].p_Direction);
+		if (angle != 0)
 		{
-			print(tail.direction);
-
-			Vector2 position = tail.transform.position - (Vector3)tail.direction;
-
-			// Update the (previously) tail into a normal body part
-			tail.defaultSprite = _straightPiece;
-			tail.SetSprite(_straightPiece);
-			tail.cornerSprites = _cornerPieces;
-
-			// Instantiate the new body part
-			GameObject newBodyPartObj = Instantiate(_bp_template, position, tail.transform.rotation, transform);
-
-			// Create the new BodyPart object
-			BodyPart newBodyPart = new BodyPart(tail, _tailPiece, null, newBodyPartObj.transform);
-
-			// The snake will end with ~- (~ is the new tail), as expected
-			float angle = Vector2.SignedAngle(tail.direction, _bodyParts[_bodyParts.Count - 2].direction);
-			if (angle != 0)
-			{
-				newBodyPartObj.transform.rotation = tail.prevRot;
-				tail.MakeCorner(_bodyParts[_bodyParts.Count - 2].direction);
-			}
-
-			// Append the new BodyPart object
-			_bodyParts.Add(newBodyPart);
-
-			// Set the tail to the new tail
-			tail = newBodyPart;
-
-			// Decrement the queue counter
-			bodyPartQueueLength--;
-			// Increase the number of pieces
-			status.numPieces++;
+			newBodyPart.p_Rotation = tail.prevRot;
+			tail.MakeCorner(_bodyParts[_bodyParts.Count - 2].p_Direction);
 		}
+		_bodyParts.Add(newBodyPart);
+
+		// Set the tail to the new tail
+		tail = newBodyPart;
+
+		// Increase the number of pieces
+		status.numPieces++;
 	}
 
-	public void AddToBodyPartQueue()
-	{
-		bodyPartQueueLength++;
-	}
-
-	bool RemoveBodyPart()
+	private bool RemoveBodyPart()
 	{
 		if (transform.childCount > 2)
 		{
@@ -291,37 +295,50 @@ public class PlayerBehaviour : MonoBehaviour
 		return false;
 	}
 
-	/// <summary>
-	/// Handles all collisions involving the head and another body part.
-	/// </summary>
-	void HandleInternalCollisions()
+	public void QAddBodyPart()
 	{
-		Vector2 headPos = head.transform.position;
-		foreach (BodyPart bp in _bodyParts)
+		_queuedActions.Add(new Action(AddBodyPart));
+	}
+
+	public void QBeginForcedMovement(Vector2 direction, float speed)
+	{
+		_queuedActions.Add(new Action(() =>
 		{
-			if (bp != head)
+			frozen = true;
+			_forcedMovement = direction * speed;
+			movement = _forcedMovement;
+			foreach (var part in _bodyParts)
 			{
-				Collider2D c = bp.transform.GetComponent<Collider2D>();
-				if (c != null)
-				{
-					if (c.OverlapPoint(headPos))
-					{
-						HandleDeath();
-					}
-				}
-				else
-				{
-					Debug.LogWarning("No collider for " + _bodyParts.IndexOf(bp) + "th body part.");
-				}
+				_stored_bp_directions.Add(part.p_Direction);
+				part.p_Direction = _forcedMovement;
 			}
-		}
+		}));
+	}
+
+	public void QEndForcedMovement()
+	{
+		_queuedActions.Add(new Action(() =>
+		{
+			frozen = false;
+
+			// ! Limitation - the snake must continue,
+			// this means if the snake starts on a scootile,
+			// they start without input.
+			movement = _forcedMovement.normalized;
+			_forcedMovement = Vector2.zero;
+			for (int i = 0; i < _bodyParts.Count; i++)
+			{
+				_bodyParts[i].p_Direction = _stored_bp_directions[i];
+			}
+			_stored_bp_directions.Clear();
+		}));
 	}
 
 	void HandleDeath()
 	{
 		foreach (BodyPart bp in _bodyParts)
 		{
-			SpriteRenderer sr = bp.transform.GetComponent<SpriteRenderer>();
+			SpriteRenderer sr = bp.p_Transform.gameObject.GetComponent<SpriteRenderer>();
 			if (sr != null)
 			{
 				sr.color = Color.grey;
@@ -337,179 +354,8 @@ public class PlayerBehaviour : MonoBehaviour
 		GameObject other = collision.otherCollider.gameObject;
 		if (other != null)
 		{
-			HandleDeath();
-		}
-	}
-
-	public class BodyPart
-	{
-		public Vector2 direction;
-		public Transform transform;
-		public Sprite defaultSprite;
-		public bool isCorner;
-		public int teleportCounter;
-		// Rotation before it became a corner, useful only to parts after this one
-		public Quaternion prevRot = Quaternion.identity;
-		public Sprite[] cornerSprites = null;
-
-		// For copying a body part (except for transform)
-		public BodyPart(BodyPart old, Sprite defaultSprite, Sprite[] cornerSprites, Transform transform)
-		{
-			this.transform = transform;
-
-			direction = old.direction;
-
-			this.defaultSprite = defaultSprite;
-			SetSprite(defaultSprite);
-
-			this.cornerSprites = cornerSprites;
-
-			isCorner = old.isCorner;
-
-			// Will not affect teleporting UNLESS necessary
-			teleportCounter = old.teleportCounter + 1;
-
-			prevRot = old.prevRot;
-		}
-
-		// For a body part that isn't the tail
-		public BodyPart(Transform transform, Vector2 direction, Sprite defaultSprite,
-			Sprite[] cornerSprites)
-		{
-			this.transform = transform;
-			this.direction = direction;
-			this.defaultSprite = defaultSprite;
-			isCorner = false;
-			teleportCounter = 0;
-			this.cornerSprites = cornerSprites;
-			SetSprite(defaultSprite);
-		}
-		
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="prevDir">The direction of the previous body part.</param>
-		public void MakeCorner(Vector2 prevDir)
-		{
-			isCorner = true;
-			transform.rotation = Quaternion.identity;
-
-			if (direction == Vector2.up)
-			{
-				if (prevDir == Vector2.left)
-					SetSprite(this.cornerSprites[3]); // -R
-				else if (prevDir == Vector2.right)
-					SetSprite(this.cornerSprites[2]); // R
-			}
-
-			else if (direction == Vector2.left)
-			{
-				if (prevDir == Vector2.up)
-					SetSprite(this.cornerSprites[0]); // L
-				else if (prevDir == Vector2.down)
-					SetSprite(this.cornerSprites[2]); // R
-			}
-
-			else if (direction == Vector2.down)
-			{
-				if (prevDir == Vector2.left)
-					SetSprite(this.cornerSprites[1]); // -L
-				else if (prevDir == Vector2.right)
-					SetSprite(this.cornerSprites[0]); // L
-			}
-
-			else if (direction == Vector2.right)
-			{
-				if (prevDir == Vector2.up)
-					SetSprite(this.cornerSprites[1]); // -L
-				else if (prevDir == Vector2.down)
-					SetSprite(this.cornerSprites[3]); // -R
-			}
-		}
-
-		public void MakeNotCorner(Quaternion rot)
-		{
-			isCorner = false;
-			this.transform.rotation = rot;
-			SetSprite(defaultSprite);
-		}
-
-		public void SetSprite(Sprite sprite)
-		{
-			this.transform.gameObject.GetComponent<SpriteRenderer>().sprite = sprite;
-		}
-
-		public void Move(Vector2 direction)
-		{
-			this.direction = direction;
-			this.transform.position += (Vector3)direction;
-
-			if (teleportCounter > 0)
-				teleportCounter--;
-		}
-
-		/// <summary>
-		/// Complex movement handling with corner piece handling.
-		/// </summary>
-		/// <param name="dir">The new direction to move along.</param>
-		public virtual void HandleMovement(Vector2 dir, BodyPart next)
-		{
-			// First handle our own movement and rotation
-			Vector2 prevDirection = direction;
-			Move(dir);
-			float angle = Vector2.SignedAngle(prevDirection, direction);
-			this.transform.Rotate(Vector3.forward, angle);
-
-			// If the body part is a corner piece
-			if (next != null)
-			{
-				// If the next part isn't a tail, and is an angled body part,
-				// make it a corner.
-				if (next.cornerSprites != null)
-				{
-					if (angle != 0)
-					{
-						if (!next.isCorner)
-							next.prevRot = next.transform.rotation;
-						next.MakeCorner(dir);
-					}
-					else
-					{
-						// When making `next` not a corner, set its rotation
-						// to our prevRot (if this is a corner), or our rotation
-						// (if this isn't a corner)
-						Quaternion rot = this.transform.rotation;
-						if (isCorner)
-							rot = prevRot;
-						next.MakeNotCorner(rot);
-					}
-				}
-				// If it is a tail, rotate alongside this body part
-				else
-				{
-					// Store the tail's previous rotation in prevRot
-					// This is needed in some situations in HandleAddBodyPart
-					next.prevRot = next.transform.rotation;
-					next.transform.Rotate(Vector3.forward, angle);
-				}
-			}
-		}
-	}
-
-	public class TailBodyPart : BodyPart
-	{
-		public TailBodyPart(Transform transform, Vector2 direction, Sprite defaultSprite, 
-			Sprite[] cornerSprites)
-			: base(transform, direction, defaultSprite, cornerSprites) { }
-
-		/// <summary>
-		/// Movement handling without handling corner pieces.
-		/// Moves in direction `dir`.
-		/// </summary>
-		/// <param name="dir">New direction.</param>
-		public void HandleMovement(Vector2 dir)
-		{
-			Move(dir);
+			if (!freeMovement)
+				HandleDeath();
 		}
 	}
 }
