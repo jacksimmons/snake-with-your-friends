@@ -2,22 +2,8 @@ using UnityEngine;
 
 public class FoodBehaviour : MonoBehaviour
 {
-	public enum Food
-	{
-		Coffee,
-		Booze,
-		Apple,
-		Orange,
-		Banana,
-		FireFruit,
-		Drumstick,
-		Bone,
-		Cheese,
-		Pizza,
-		Pineapple,
-		PineapplePizza,
-		IceCream
-	}
+	[SerializeField]
+	private Food food;
 
 	private void OnTriggerEnter2D(Collider2D collision)
 	{
@@ -26,7 +12,10 @@ public class FoodBehaviour : MonoBehaviour
 		{
 			PlayerBehaviour player = obj.transform.GetComponentInParent<PlayerBehaviour>();
 			if (player != null)
+			{
 				player.QAddBodyPart();
+				player.status.Eat(food);
+			}
 
 			Destroy(gameObject);
 		}

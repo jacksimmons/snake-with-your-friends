@@ -5,18 +5,18 @@ using Steamworks;
 using System;
 using UnityEngine.SceneManagement;
 
-public class LobbyMenu : MonoBehaviour
+public class Lobby : MonoBehaviour
 {
-	ulong lobbyId = 0;
+	static ulong lobbyId = 0;
 
-	protected Callback<LobbyEnter_t> m_LobbyEnter;
-	protected Callback<LobbyChatUpdate_t> m_LobbyChatUpdate;
+	static protected Callback<LobbyEnter_t> m_LobbyEnter;
+	static protected Callback<LobbyChatUpdate_t> m_LobbyChatUpdate;
 
-	private CallResult<LobbyCreated_t> m_LobbyCreated;
+	static private CallResult<LobbyCreated_t> m_LobbyCreated;
 
 	// Start is called before the first frame update
 	void Start()
-    {
+	{
 		if (SteamManager.Initialized)
 		{
 			m_LobbyEnter = Callback<LobbyEnter_t>.Create(OnLobbyEnter);
@@ -25,9 +25,9 @@ public class LobbyMenu : MonoBehaviour
 
 			CreateLobby();
 		}
-    }
+	}
 
-	public void OnBackPressed()
+	static public void OnBackPressed()
 	{
 		if (lobbyId != 0)
 		{
@@ -37,7 +37,7 @@ public class LobbyMenu : MonoBehaviour
 		SceneManager.LoadScene("MainMenu");
 	}
 
-	void CreateLobby()
+	static void CreateLobby()
 	{
 		SteamAPICall_t handle = SteamMatchmaking.CreateLobby(
 			ELobbyType.k_ELobbyTypePublic, cMaxMembers: 4);
@@ -45,7 +45,7 @@ public class LobbyMenu : MonoBehaviour
 	}
 
 	// Callbacks
-	void OnLobbyCreated(LobbyCreated_t result, bool bIOFailure)
+	static void OnLobbyCreated(LobbyCreated_t result, bool bIOFailure)
 	{
 		switch (result.m_eResult)
 		{
@@ -68,7 +68,7 @@ public class LobbyMenu : MonoBehaviour
 	}
 
 	// A user has joined, left, disconnected, etc.
-	void OnLobbyChatUpdate(LobbyChatUpdate_t pCallback)
+	static void OnLobbyChatUpdate(LobbyChatUpdate_t pCallback)
 	{
 		string affects = SteamFriends.GetFriendPersonaName(
 			(CSteamID)(pCallback.m_ulSteamIDUserChanged));
@@ -99,7 +99,7 @@ public class LobbyMenu : MonoBehaviour
 		}
 	}
 
-	void OnLobbyEnter(LobbyEnter_t pCallback)
+	static void OnLobbyEnter(LobbyEnter_t pCallback)
 	{
 		if (pCallback.m_EChatRoomEnterResponse ==
 			(uint)EChatRoomEnterResponse.k_EChatRoomEnterResponseSuccess)
@@ -107,5 +107,18 @@ public class LobbyMenu : MonoBehaviour
 			lobbyId = pCallback.m_ulSteamIDLobby;
 			print("Joined lobby successfully.");
 		}
+	}
+
+	static public Dictionary<string, string> GetLobbyDebug()
+	{
+		Dictionary<string, string> lobbyValues = new Dictionary<string, string>
+		{
+			{ "Steam Name", SteamFriends.GetPersonaName() },
+			{ "Steam State", SteamFriends.GetPersonaState().ToString().Substring(15) },
+			{ "Lobby ID", lobbyId == 0 ? "False" : lobbyId.ToString() },
+			{ "Lobby Name", lobbyId == 0 ? "False" : SteamMatchmaking.GetLobbyData((CSteamID)lobbyId, "name") }
+		};
+
+		return lobbyValues;
 	}
 }

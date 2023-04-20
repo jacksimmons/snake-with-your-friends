@@ -15,7 +15,8 @@ public class PlayerBehaviour : MonoBehaviour
 {
 	[SerializeField]
 	public bool freeMovement;
-	private bool freeMovementWaitingForMoveFrame = false;
+	[SerializeField]
+	private float _freeMovementSpeedMod = 1.0f;
 
 	public Status status;
 
@@ -127,6 +128,10 @@ public class PlayerBehaviour : MonoBehaviour
 			bpss.Add(bps);
 		}
 		status = new Status(bpss);
+
+		// Handle free movement
+		if (freeMovement)
+			_moveTime = Mathf.CeilToInt(_moveTime / _freeMovementSpeedMod);
 	}
 
 	public void Reset()
@@ -146,18 +151,6 @@ public class PlayerBehaviour : MonoBehaviour
 		moveTimer++;
 
 		HandleInputs();
-
-		// Handle queued actions (other than any that
-		// get added by said actions)
-		for (int i = 0; i < _queuedActions.Count; i++)
-		{
-			_queuedActions[0]();
-			_queuedActions.RemoveAt(0);
-		}
-
-		if (freeMovement)
-			moveTimer = _moveTime;
-
 		HandleMovementLoop();
 	}
 
@@ -212,6 +205,14 @@ public class PlayerBehaviour : MonoBehaviour
 				timer = 0;
 			}
 			moveTimer = 0;
+
+			// Handle queued actions (other than any that
+			// get added by said actions)
+			for (int i = 0; i < _queuedActions.Count; i++)
+			{
+				_queuedActions[0]();
+				_queuedActions.RemoveAt(0);
+			}
 
 			// Ensures the first movement has been made
 			if (movement != Vector2.zero)
@@ -281,7 +282,7 @@ public class PlayerBehaviour : MonoBehaviour
 		tail = newBodyPart;
 
 		// Increase the number of pieces
-		status.numPieces++;
+		status.p_NumPieces++;
 	}
 
 	private bool RemoveBodyPart()
@@ -346,6 +347,22 @@ public class PlayerBehaviour : MonoBehaviour
 		}
 		frozen = true;
 		_rb.simulated = false;
+	}
+
+	public Dictionary<string, string> GetPlayerDebug()
+	{
+		Dictionary<string, string> playerValues = new Dictionary<string, string>
+		{
+			{ "direction", direction.ToString() },
+			{ "movement", movement.ToString() },
+			{ "prevMovement", _prevMovement.ToString() }
+		};
+		for (int i = 0; i < _queuedActions.Count; i++)
+			playerValues.Add("queuedActions [" + i.ToString() + "]" , _queuedActions[i].Target.ToString());
+		playerValues.Add("forcedMovement", _forcedMovement.ToString());
+		for (int i = 0; i < _stored_bp_directions.Count; i++)
+			playerValues.Add("storedBpDirections [" + i.ToString() + "]" , _stored_bp_directions[i].ToString());
+		return playerValues;
 	}
 
 	private void OnCollisionEnter2D(Collision2D collision)

@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Status
 {
-	public int numPieces;
+	public int p_NumPieces { get; set; }
 
 	private List<BodyPartStatus> _bodyPartStatuses;
 
@@ -23,12 +23,12 @@ public class Status
 
 	// Counters
 	private float _speedIncrease;
-	private int _potassium;
+	private int _potassiumLevels;
 
 	public Status(List<BodyPartStatus> bpsx)
 	{
 		_bodyPartStatuses = bpsx;
-		numPieces = 2;
+		p_NumPieces = 2;
 	}
 
 	public void Update(float delta)
@@ -57,7 +57,24 @@ public class Status
 		_isWobbling = false;
 
 		_speedIncrease = 0;
-		_potassium = 0;
+		_potassiumLevels = 0;
+	}
+
+	public Dictionary<string, string> GetStatusDebug()
+	{
+		Dictionary<string, string> statuses = new Dictionary<string, string>();
+		statuses["isBreathingFire"] = _isBreathingFire.ToString();
+		statuses["isPissing"] = _isPissing.ToString();
+		statuses["isFast"] = _isFast.ToString();
+		statuses["isBrainFreezed"] = _isBrainFreezed.ToString();
+		statuses["isHallucinating"] = _isHallucinating.ToString();
+		statuses["isAppleTeethed"] = _isAppleTeethed.ToString();
+		statuses["isWobbling"] = _isWobbling.ToString();
+
+		statuses["speedIncrease"] = _speedIncrease.ToString();
+		statuses["potassiumLevels"] = _potassiumLevels.ToString();
+
+		return statuses;
 	}
 
 	/// <summary>
@@ -73,110 +90,110 @@ public class Status
 		_positiveTimer = duration;
 	}
 
-	//public void Eat(Food food)
-	//{
-	//	switch (food)
-	//	{
-	//		case Food.Coffee:
-	//			DrinkCoffee();
-	//			break;
-	//		case Food.Booze:
-	//			DrinkBooze();
-	//			break;
-	//		case Food.Apple:
-	//			EatApple();
-	//			break;
-	//		case Food.Orange:
-	//			EatOrange();
-	//			break;
-	//		case Food.Banana:
-	//			EatBanana();
-	//			break;
-	//		case Food.FireFruit:
-	//			EatFireFruit();
-	//			break;
-	//		case Food.Drumstick:
-	//			EatDrumstick();
-	//			break;
-	//		case Food.Bone:
-	//			EatBone();
-	//			break;
-	//		case Food.Cheese:
-	//			EatCheese();
-	//			break;
-	//		case Food.Pizza:
-	//			EatPizza();
-	//			break;
-	//		case Food.Pineapple:
-	//			EatPineapple();
-	//			break;
-	//		case Food.PineapplePizza:
-	//			EatPineapplePizza();
-	//			break;
-	//		case Food.IceCream:
-	//			EatIceCream();
-	//			break;
-	//	}	
-	//}
+	public void Eat(Food food)
+	{
+		switch (food)
+		{
+			case Food.Coffee:
+				DrinkCoffee();
+				break;
+			case Food.Booze:
+				DrinkBooze();
+				break;
+			case Food.Apple:
+				EatApple();
+				break;
+			case Food.Orange:
+				EatOrange();
+				break;
+			case Food.Banana:
+				EatBanana();
+				break;
+			case Food.FireFruit:
+				EatFireFruit();
+				break;
+			case Food.Drumstick:
+				EatDrumstick();
+				break;
+			case Food.Bone:
+				EatBone();
+				break;
+			case Food.Cheese:
+				EatCheese();
+				break;
+			case Food.Pizza:
+				EatPizza();
+				break;
+			case Food.Pineapple:
+				EatPineapple();
+				break;
+			case Food.PineapplePizza:
+				EatPineapplePizza();
+				break;
+			case Food.IceCream:
+				EatIceCream();
+				break;
+		}
+	}
 
-	public void DrinkCoffee()
+	private void DrinkCoffee()
 	{
 		NewPositiveActive(10);
 		_isFast = true;
 		_speedIncrease += 0.1f;
 	}
 
-	public void DrinkBooze()
+	private void DrinkBooze()
 	{
 		NewPositiveActive(10);
 		_isPissing = true;
 	}
 
-	public void EatApple()
+	private void EatApple()
 	{
 		ClearPassive();
 		_isAppleTeethed = true;
 	}
 
-	public void EatOrange()
+	private void EatOrange()
 	{
 	}
 
-	public void EatBanana()
+	private void EatBanana()
 	{
 	}
 
-	public void EatFireFruit()
+	private void EatFireFruit()
 	{
 		NewPositiveActive(5);
 		_isBreathingFire = true;
 	}
 
-	public void EatDrumstick()
+	private void EatDrumstick()
 	{
 	}
 
-	public void EatBone()
+	private void EatBone()
 	{
 	}
 
-	public void EatCheese()
+	private void EatCheese()
 	{
 	}
 
-	public void EatPizza()
+	private void EatPizza()
 	{
 	}
 
-	public void EatPineapple()
+	private void EatPineapple()
 	{
 	}
 
-	public void EatPineapplePizza()
+	private void EatPineapplePizza()
 	{
 	}
 
-	public void EatIceCream()
+	private void EatIceCream()
 	{
 	}
 }
