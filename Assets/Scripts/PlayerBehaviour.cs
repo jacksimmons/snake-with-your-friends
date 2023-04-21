@@ -13,17 +13,14 @@ using UnityEngine;
 
 public class PlayerBehaviour : MonoBehaviour
 {
-	[SerializeField]
-	public bool freeMovement;
-	[SerializeField]
-	private float _freeMovementSpeedMod = 1.0f;
-
 	public Status status;
 
-	private Vector2 _startingDirection = Vector2.up;
-
+	// Templates and sprites
 	[SerializeField]
 	private GameObject _bp_template;
+	[SerializeField]
+	private GameObject _ef_too_many_pints_template;
+	private TooManyPints _ef_too_many_pints_script = null;
 
 	[SerializeField]
 	private Sprite _headPiece;
@@ -36,6 +33,9 @@ public class PlayerBehaviour : MonoBehaviour
 	[SerializeField]
 	private Sprite[] _cornerPieces = new Sprite[4];
 
+	// Directions and movement
+
+	private Vector2 _startingDirection = Vector2.up;
 	// Simple boolean which gets set to false after the starting direction is set
 	public Vector2 direction = Vector2.zero;
 	// The last valid, non-zero direction vector
@@ -43,6 +43,32 @@ public class PlayerBehaviour : MonoBehaviour
 	// The last `movement` which was used
 	private Vector2 _prevMovement = Vector2.zero;
 
+	// Free movement
+	[SerializeField]
+	public bool freeMovement;
+	[SerializeField]
+	private float _freeMovementSpeedMod = 1.0f;
+
+	// Forced movement
+
+	// The movement vector to be moved along every frame
+	// When the player is in forced movement state
+	private Vector2 _forcedMovement = Vector2.zero;
+	// Restored after forced movement ends
+	private List<Vector2> _stored_bp_directions = new List<Vector2>();
+
+	// Movement values
+
+	[SerializeField]
+	private float _movementSpeed = 1f;
+	// Increments to _moveTime * childCount, then resets
+	public int timer = 0;
+	// Increments to _moveTime, then resets
+	public int moveTimer = 0;
+	private int _moveTime = 20;
+	public bool frozen = false;
+
+	// Body Parts
 	public BodyPart head;
 	public BodyPart tail;
 	private List<BodyPart> _bodyParts;
@@ -53,22 +79,8 @@ public class PlayerBehaviour : MonoBehaviour
 
 	// All actions are executed after the next movement frame
 	private List<Action> _queuedActions;
-	// The movement vector to be moved along every frame
-	// When the player is in forced movement state
-	private Vector2 _forcedMovement = Vector2.zero;
-	// Restored after forced movement ends
-	private List<Vector2> _stored_bp_directions = new List<Vector2>();
 
-	[SerializeField]
-	private float _movementSpeed = 1f;
-	// Increments to _moveTime * childCount, then resets
-	public int timer = 0;
-	// Increments to _moveTime, then resets
-	public int moveTimer = 0;
-	private int _moveTime = 20;
-
-	public bool frozen = false;
-
+	// Components
 	private Rigidbody2D _rb;
 
 	void Awake()
@@ -144,13 +156,18 @@ public class PlayerBehaviour : MonoBehaviour
 		tail.p_Rotation = Quaternion.identity;
 	}
 
+	private void Update()
+	{
+		HandleInputs();
+		HandleStatus();
+	}
+
 	void FixedUpdate()
 	{
 		// Increment the timers
 		timer++;
 		moveTimer++;
 
-		HandleInputs();
 		HandleMovementLoop();
 	}
 
@@ -193,6 +210,20 @@ public class PlayerBehaviour : MonoBehaviour
 		// So cancel the new input.
 		if (direction == -_prevMovement)
 			direction = Vector2.zero;
+	}
+
+	void HandleStatus()
+	{
+		if (status.p_NumPints > 0 && _ef_too_many_pints_script == null)
+		{
+			GameObject go = new GameObject("Effect:TooManyPints");
+			go.layer = LayerMask.NameToLayer("Effects");
+			go.AddComponent<TooManyPints>();
+			_ef_too_many_pints_script = go.GetComponent<TooManyPints>();
+		}
+
+		if (_ef_too_many_pints_script != null)
+			_ef_too_many_pints_script.UpdatePints(status.p_NumPints);
 	}
 
 	void HandleMovementLoop()

@@ -18,27 +18,57 @@ public class Status
 		{ "buff", false },
 		{ "pissing", false }
 	};
+	public Dictionary<string, bool> p_ActiveEffects
+	{
+		get { return _active_effects; }
+		set { _active_effects = value; }
+	}
 
 	private Dictionary<string, bool> _passive_effects = new Dictionary<string, bool>
 	{
 		{ "caffeinated", false },
 		{ "brain_freeze", false },
 		{ "hallucination", false },
-		{ "too_many_pints", false },
 		{ "unicorn", false },
 		{ "laxative", false },
 		{ "rocket_shitting", false }
 	};
+	public Dictionary<string, bool> p_PassiveEffects
+	{
+		get { return _passive_effects; }
+		set { _passive_effects = value; }
+	}
 
 	// Counters
 	private int _shit_o_counter;
+	public int p_ShitOCounter
+	{
+		get { return _shit_o_counter; }
+	}
+
+	private int _numPints;
+	public int p_NumPints
+	{
+		get { return _numPints; }
+	}
+
 	private float _speedIncrease;
+	public float p_SpeedIncrease
+	{
+		get { return _speedIncrease; }
+	}
+
 	private int _potassiumLevels;
+	public int p_PotassiumLevels
+	{
+		get { return _potassiumLevels; }
+	}
 
 	public Status(List<BodyPartStatus> bpsx)
 	{
 		_bodyPartStatuses = bpsx;
 		_shit_o_counter = 0;
+		_numPints = 0;
 		_speedIncrease = 0;
 		_potassiumLevels = 0;
 		p_NumPieces = 2;
@@ -70,6 +100,7 @@ public class Status
 		}
 
 		_shit_o_counter = 0;
+		_numPints = 0;
 		_speedIncrease = 0;
 		_potassiumLevels = 0;
 	}
@@ -83,6 +114,7 @@ public class Status
 			statuses[key] = _passive_effects[key].ToString();
 
 		statuses["shit_o_counter"] = _shit_o_counter.ToString();
+		statuses["numPints"] = _numPints.ToString();
 		statuses["speedIncrease"] = _speedIncrease.ToString();
 		statuses["potassiumLevels"] = _potassiumLevels.ToString();
 		statuses["NumPieces"] = p_NumPieces.ToString();
@@ -168,6 +200,7 @@ public class Status
 	{
 		NewActive(10);
 		_active_effects["pissing"] = true;
+		_numPints++;
 	}
 
 	private void EatApple()

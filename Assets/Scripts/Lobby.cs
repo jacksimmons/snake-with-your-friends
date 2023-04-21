@@ -111,13 +111,19 @@ public class Lobby : MonoBehaviour
 
 	static public Dictionary<string, string> GetLobbyDebug()
 	{
-		Dictionary<string, string> lobbyValues = new Dictionary<string, string>
+		Dictionary<string, string> lobbyValues;
+		if (SteamManager.Initialized)
 		{
-			{ "Steam Name", SteamFriends.GetPersonaName() },
-			{ "Steam State", SteamFriends.GetPersonaState().ToString().Substring(15) },
-			{ "Lobby ID", lobbyId == 0 ? "False" : lobbyId.ToString() },
-			{ "Lobby Name", lobbyId == 0 ? "False" : SteamMatchmaking.GetLobbyData((CSteamID)lobbyId, "name") }
-		};
+			lobbyValues = new Dictionary<string, string>
+			{
+				{ "Steam Name", SteamFriends.GetPersonaName() },
+				{ "Steam State", SteamFriends.GetPersonaState().ToString().Substring(15) },
+				{ "Lobby ID", lobbyId == 0 ? "False" : lobbyId.ToString() },
+				{ "Lobby Name", lobbyId == 0 ? "False" : SteamMatchmaking.GetLobbyData((CSteamID)lobbyId, "name") }
+			};
+		}
+		else
+			lobbyValues = new Dictionary<string, string>();
 
 		return lobbyValues;
 	}
