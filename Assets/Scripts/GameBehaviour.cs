@@ -101,6 +101,8 @@ public class GameBehaviour : MonoBehaviour
 		if (hasCollider)
 		{
 			tilemapObject.AddComponent<TilemapCollider2D>();
+			tilemapObject.GetComponent<TilemapCollider2D>().isTrigger = true;
+			tilemapObject.AddComponent<WallTilemap>();
 		}
 
 		tilemapObject.transform.parent = gridObject.transform;

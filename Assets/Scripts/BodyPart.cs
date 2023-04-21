@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices;
 using UnityEngine;
 
 public class BodyPart
@@ -146,7 +147,16 @@ public class BodyPart
 	public void Move(Vector2 direction)
 	{
 		p_Direction = direction;
-		p_Position += (Vector3)(p_Direction * p_Speed);
+
+		for (int i = 0; i < 10; i++)
+		{
+			ContactFilter2D contactFilter2D = new ContactFilter2D();
+			Collider2D[] collider2Ds = new Collider2D[10];
+			if (p_Transform.GetComponent<Collider2D>().OverlapCollider(contactFilter2D, collider2Ds) == 0)
+				p_Position += (Vector3)(p_Direction * p_Speed * 0.1f);
+			else
+				Debug.Log(i);
+		}
 
 		if (p_TeleportCounter > 0)
 			p_TeleportCounter--;

@@ -12,7 +12,7 @@ public class TooManyPints : MonoBehaviour
 
 	private PostProcessVolume _volume;
 	private LensDistortion _ld;
-	private ChromaticAberration _chromatic;
+	private ChromaticAberration _chromaticAberration;
 
 	private void Start()
 	{
@@ -22,11 +22,11 @@ public class TooManyPints : MonoBehaviour
 		_ld.enabled.Override(true);
 		_ld.intensity.Override(1);
 
-		_chromatic = ScriptableObject.CreateInstance<ChromaticAberration>();
-		_chromatic.enabled.Override(true);
-		_chromatic.intensity.Override(1);
+		_chromaticAberration = ScriptableObject.CreateInstance<ChromaticAberration>();
+		_chromaticAberration.enabled.Override(true);
+		_chromaticAberration.intensity.Override(1);
 
-		PostProcessEffectSettings[] settings = { _ld, _chromatic };
+		PostProcessEffectSettings[] settings = { _ld, _chromaticAberration };
 
 		_volume = PostProcessManager.instance.QuickVolume(gameObject.layer, 100f, settings);
 		_volume.isGlobal = true;
@@ -36,7 +36,7 @@ public class TooManyPints : MonoBehaviour
 	{
 		print(_ld.intensity.value);
 		_ld.intensity.value = Mathf.PingPong(Time.time * (_wooziness / _wooziness_duration_mod), _wooziness * 2) - _wooziness;
-		_chromatic.intensity.value = _wooziness / 33;
+		_chromaticAberration.intensity.value = _wooziness / 33;
 	}
 
 	public void UpdatePints(int pints)

@@ -41,7 +41,7 @@ public class PlayerBehaviour : MonoBehaviour
 	// The last valid, non-zero direction vector
 	public Vector2 movement = Vector2.zero;
 	// The last `movement` which was used
-	private Vector2 _prevMovement = Vector2.zero;
+	public Vector2 p_PrevMovement { get; private set; }
 
 	// Free movement
 	[SerializeField]
@@ -60,7 +60,8 @@ public class PlayerBehaviour : MonoBehaviour
 	// Movement values
 
 	[SerializeField]
-	private float _movementSpeed = 1f;
+	private float _defaultMovementSpeed;
+	public float p_MovementSpeed { get; private set; }
 	// Increments to _moveTime * childCount, then resets
 	public int timer = 0;
 	// Increments to _moveTime, then resets
@@ -85,6 +86,9 @@ public class PlayerBehaviour : MonoBehaviour
 
 	void Awake()
 	{
+		// Set movement speed
+		p_MovementSpeed = _defaultMovementSpeed;
+
 		// Create BodyParts
 		_bodyParts = new List<BodyPart>();
 		for (int i = 0; i < transform.childCount; i++)
@@ -109,7 +113,7 @@ public class PlayerBehaviour : MonoBehaviour
 			// Head and body
 			if (i < transform.childCount - 1)
 			{
-				bp = new BodyPart(_transform, _startingDirection, _sprite, _cornerSprites, _movementSpeed);
+				bp = new BodyPart(_transform, _startingDirection, _sprite, _cornerSprites, p_MovementSpeed);
 				if (i == 0)
 					head = bp;
 			}
@@ -117,7 +121,7 @@ public class PlayerBehaviour : MonoBehaviour
 			// Tail
 			else
 			{
-				bp = new BodyPart(_transform, _startingDirection, _sprite, null, _movementSpeed);
+				bp = new BodyPart(_transform, _startingDirection, _sprite, null, p_MovementSpeed);
 				tail = bp;
 			}
 			_bodyParts.Add(bp);
@@ -208,7 +212,7 @@ public class PlayerBehaviour : MonoBehaviour
 
 		// We can't have the snake going back on itself.
 		// So cancel the new input.
-		if (direction == -_prevMovement)
+		if (direction == -p_PrevMovement)
 			direction = Vector2.zero;
 	}
 
@@ -258,7 +262,7 @@ public class PlayerBehaviour : MonoBehaviour
 			if (movement != Vector2.zero)
 			{
 				// Update prevMovement
-				_prevMovement = movement;
+				p_PrevMovement = movement;
 
 				// Iterate backwards through the body parts, from tail to head
 				// The reason for doing this is so every part inherits its next
@@ -325,6 +329,11 @@ public class PlayerBehaviour : MonoBehaviour
 		status.p_NumPieces++;
 	}
 
+	public void Q(Action action)
+	{
+		_queuedActions.Add(action);
+	}
+
 	private bool RemoveBodyPart()
 	{
 		if (transform.childCount > 2)
@@ -375,18 +384,20 @@ public class PlayerBehaviour : MonoBehaviour
 		}));
 	}
 
-	void HandleDeath()
+	public void HandleDeath()
 	{
-		foreach (BodyPart bp in _bodyParts)
+		_rb.simulated = false;
+		AddBodyPart();
+
+		// Half move so covered by head, and increase every sorting order other than this new part
+		_bodyParts[1].Move(p_PrevMovement * 0.5f);
+		head.p_Transform.GetComponent<SpriteRenderer>().sortingOrder += 1;
+		for (int i = 2; i < _bodyParts.Count; i++)
 		{
-			SpriteRenderer sr = bp.p_Transform.gameObject.GetComponent<SpriteRenderer>();
-			if (sr != null)
-			{
-				sr.color = Color.grey;
-			}
+			_bodyParts[i].Move(p_PrevMovement);
+			_bodyParts[i].p_Transform.GetComponent<SpriteRenderer>().sortingOrder += 1;
 		}
 		frozen = true;
-		_rb.simulated = false;
 	}
 
 	public Dictionary<string, string> GetPlayerDebug()
@@ -395,7 +406,7 @@ public class PlayerBehaviour : MonoBehaviour
 		{
 			{ "direction", direction.ToString() },
 			{ "movement", movement.ToString() },
-			{ "prevMovement", _prevMovement.ToString() }
+			{ "prevMovement", p_PrevMovement.ToString() }
 		};
 		for (int i = 0; i < _queuedActions.Count; i++)
 			playerValues.Add("queuedActions [" + i.ToString() + "]" , _queuedActions[i].Target.ToString());
@@ -403,16 +414,5 @@ public class PlayerBehaviour : MonoBehaviour
 		for (int i = 0; i < _stored_bp_directions.Count; i++)
 			playerValues.Add("storedBpDirections [" + i.ToString() + "]" , _stored_bp_directions[i].ToString());
 		return playerValues;
-	}
-
-	private void OnCollisionEnter2D(Collision2D collision)
-	{
-		GameObject col = collision.collider.gameObject;
-		GameObject other = collision.otherCollider.gameObject;
-		if (other != null)
-		{
-			if (!freeMovement)
-				HandleDeath();
-		}
 	}
 }
