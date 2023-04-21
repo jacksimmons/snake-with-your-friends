@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class Status
@@ -86,7 +87,7 @@ public class Status
 	/// </summary>
 	public void ClearActive()
 	{
-		foreach (var key in _active_effects.Keys)
+		foreach (var key in _active_effects.Keys.ToList())
 		{
 			_active_effects[key] = false;
 		}
@@ -94,7 +95,7 @@ public class Status
 
 	public void ClearPassive()
 	{
-		foreach (var key in _passive_effects.Keys)
+		foreach (var key in _passive_effects.Keys.ToList())
 		{
 			_passive_effects[key] = false;
 		}

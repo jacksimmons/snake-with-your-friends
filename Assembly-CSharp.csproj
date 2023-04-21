@@ -57,6 +57,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\Scripts\Item.cs" />
+    <Compile Include="Assets\Scripts\Effects\TooManyPints.cs" />
     <Compile Include="Assets\Scripts\Teleporter.cs" />
     <Compile Include="Assets\Scripts\GameBehaviour.cs" />
     <Compile Include="Assets\Scripts\ScootileTilemap.cs" />
@@ -65,6 +66,7 @@
     <Compile Include="Assets\Scripts\Status.cs" />
     <Compile Include="Assets\Scripts\DebugBehaviour.cs" />
     <Compile Include="Assets\Scripts\PlayerBehaviour.cs" />
+    <Compile Include="Assets\Scripts\FollowPlayer.cs" />
     <Compile Include="Assets\Scripts\NetworkBehaviour.cs" />
     <Compile Include="Assets\Scripts\Arrays.cs" />
     <Compile Include="Assets\Scripts\Steamworks.NET\SteamManager.cs" />
@@ -73,8 +75,6 @@
     <Compile Include="Assets\Scripts\CamBehaviour.cs" />
     <Compile Include="Assets\Scripts\MainMenu.cs" />
     <Compile Include="Assets\Scripts\Lobby.cs" />
-    <Compile Include="Assets\Scripts\FollowPlayer.cs" />
-    <Compile Include="Assets\Scripts\Effects\TooManyPints.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />

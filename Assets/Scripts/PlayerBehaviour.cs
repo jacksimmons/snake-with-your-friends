@@ -223,7 +223,16 @@ public class PlayerBehaviour : MonoBehaviour
 		}
 
 		if (_ef_too_many_pints_script != null)
-			_ef_too_many_pints_script.UpdatePints(status.p_NumPints);
+		{
+			if (status.p_NumPints > 0)
+			{
+				_ef_too_many_pints_script.UpdatePints(status.p_NumPints);
+			}
+			else
+			{
+				Destroy(_ef_too_many_pints_script.transform.gameObject);
+			}
+		}
 	}
 
 	void HandleMovementLoop()
