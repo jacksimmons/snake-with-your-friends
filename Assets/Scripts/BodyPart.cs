@@ -41,7 +41,11 @@ public class BodyPart
 	// Rotation before it became a corner, useful only to parts after this one
 	public Quaternion prevRot = Quaternion.identity;
 
-	// For copying a body part (except for transform)
+	/// <summary>
+	/// Copy body part constructor.
+	/// </summary>
+	/// <param name="old"></param>
+	/// <param name="transform"></param>
 	public BodyPart(BodyPart old, Transform transform)
 	{
 		_transform = transform;
@@ -56,7 +60,14 @@ public class BodyPart
 		prevRot = old.prevRot;
 	}
 
-	// For a body part that isn't the tail
+	/// <summary>
+	/// Standard body part constructor.
+	/// </summary>
+	/// <param name="transform"></param>
+	/// <param name="direction"></param>
+	/// <param name="defaultSprite"></param>
+	/// <param name="cornerSprites"></param>
+	/// <param name="movementSpeed"></param>
 	public BodyPart(Transform transform, Vector2 direction, Sprite defaultSprite,
 		Sprite[] cornerSprites, float movementSpeed)
 	{
@@ -72,7 +83,9 @@ public class BodyPart
 	}
 
 	/// <summary>
-	/// 
+	/// Turns a body part into a corner piece.
+	/// Uses its current direction and the previous part's direction to calculate
+	/// what type of corner sprite is required.
 	/// </summary>
 	/// <param name="prevDir">The direction of the previous body part.</param>
 	public void MakeCorner(Vector2 prevDir)
@@ -113,6 +126,11 @@ public class BodyPart
 		}
 	}
 
+	/// <summary>
+	/// Reverts a body part into its default form.
+	/// </summary>
+	/// <param name="rotation">The rotation to assign it, as pieces obtain
+	/// a rotation of Quat.Identity after becoming corners.</param>
 	public void MakeNotCorner(Quaternion rotation)
 	{
 		_isCorner = false;
@@ -120,6 +138,11 @@ public class BodyPart
 		p_Sprite = p_DefaultSprite;
 	}
 
+	/// <summary>
+	/// Core movement method, adds to the position and reduces the teleport
+	/// counter.
+	/// </summary>
+	/// <param name="direction">The direction to move in next</param>
 	public void Move(Vector2 direction)
 	{
 		p_Direction = direction;
@@ -133,6 +156,8 @@ public class BodyPart
 	/// Complex movement handling with corner piece handling.
 	/// </summary>
 	/// <param name="newDirection">The new direction to move along.</param>
+	/// <param name="next">The "next" body part - directly after this one
+	/// in the child ordering</param>
 	public void HandleMovement(Vector2 newDirection, BodyPart next)
 	{
 		// Store the previous direction for use in angles

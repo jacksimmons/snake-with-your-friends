@@ -14,7 +14,10 @@ public enum Food
 	Pizza,
 	Pineapple,
 	PineapplePizza,
-	IceCream
+	IceCream,
+	CrapALot,
+	Balti,
+	Brownie,
 }
 
 public interface IItem {

@@ -300,14 +300,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 43177ceb1eddc2f469df828261a999a5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  groundTilemap: {fileID: 0}
-  wallTilemap: {fileID: 0}
   _lightTile: {fileID: 11400000, guid: 044c243fd2a30a348a78044e5f4906a5, type: 2}
   _darkTile: {fileID: 11400000, guid: 07b747c9dcfc66f4db45e88c86928a9c, type: 2}
   _wallTile: {fileID: 11400000, guid: 2a1c06836de000d4bb5cdb4ca8f49847, type: 2}
   _players:
   - {fileID: 1332599340}
-  groundSize: 15
+  _foodTemplate: {fileID: 0}
+  _menuSelectTemplate: {fileID: 0}
+  groundSize: 45
 --- !u!4 &312712080
 Transform:
   m_ObjectHideFlags: 0
@@ -1162,6 +1162,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6a34c55c6eb3089409794d5498a3bca6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  freeMovement: 0
+  _freeMovementSpeedMod: 1
   _bp_template: {fileID: 8458232058558454434, guid: a3b0ac531d48ea6408b0d91bf3f30add, type: 3}
   _headPiece: {fileID: 21300000, guid: cab13cca9bd8fc74ab7f14aaeca14351, type: 3}
   _tailPiece: {fileID: 21300000, guid: 3c87179ca0462b143b23667696bd799e, type: 3}
@@ -1173,6 +1175,7 @@ MonoBehaviour:
   - {fileID: 21300000, guid: ea088e9a0d887c14ca57ea19dfdbc818, type: 3}
   direction: {x: 0, y: 0}
   movement: {x: 0, y: 0}
+  _movementSpeed: 1
   timer: 0
   moveTimer: 0
   frozen: 0

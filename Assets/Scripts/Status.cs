@@ -11,23 +11,36 @@ public class Status
 	// Positive active effects (only one at a time)
 	private bool _hasPositiveActive;
 	private float _positiveTimer;
-	private bool _isBreathingFire;
-	private bool _isPissing;
 
-	// Passive effects (can have as many as you want)
-	private bool _isFast;
-	private bool _isBrainFreezed;
-	private bool _isHallucinating;
-	private bool _isAppleTeethed;
-	private bool _isWobbling;
+	private Dictionary<string, bool> _active_effects = new Dictionary<string, bool>
+	{
+		{ "breathing_fire", false },
+		{ "buff", false },
+		{ "pissing", false }
+	};
+
+	private Dictionary<string, bool> _passive_effects = new Dictionary<string, bool>
+	{
+		{ "caffeinated", false },
+		{ "brain_freeze", false },
+		{ "hallucination", false },
+		{ "too_many_pints", false },
+		{ "unicorn", false },
+		{ "laxative", false },
+		{ "rocket_shitting", false }
+	};
 
 	// Counters
+	private int _shit_o_counter;
 	private float _speedIncrease;
 	private int _potassiumLevels;
 
 	public Status(List<BodyPartStatus> bpsx)
 	{
 		_bodyPartStatuses = bpsx;
+		_shit_o_counter = 0;
+		_speedIncrease = 0;
+		_potassiumLevels = 0;
 		p_NumPieces = 2;
 	}
 
@@ -38,24 +51,25 @@ public class Status
 		}
 	}
 
-	// ! need to update ui after
 	/// <summary>
-	/// Disables all positive active effects.
+	/// Disables all active effects.
 	/// </summary>
-	public void ClearPositiveActive()
+	public void ClearActive()
 	{
-		_isBreathingFire = false;
-		_isPissing = false;
+		foreach (var key in _active_effects.Keys)
+		{
+			_active_effects[key] = false;
+		}
 	}
 
 	public void ClearPassive()
 	{
-		_isFast = false;
-		_isBrainFreezed = false;
-		_isHallucinating = false;
-		_isAppleTeethed = false;
-		_isWobbling = false;
+		foreach (var key in _passive_effects.Keys)
+		{
+			_passive_effects[key] = false;
+		}
 
+		_shit_o_counter = 0;
 		_speedIncrease = 0;
 		_potassiumLevels = 0;
 	}
@@ -63,28 +77,26 @@ public class Status
 	public Dictionary<string, string> GetStatusDebug()
 	{
 		Dictionary<string, string> statuses = new Dictionary<string, string>();
-		statuses["isBreathingFire"] = _isBreathingFire.ToString();
-		statuses["isPissing"] = _isPissing.ToString();
-		statuses["isFast"] = _isFast.ToString();
-		statuses["isBrainFreezed"] = _isBrainFreezed.ToString();
-		statuses["isHallucinating"] = _isHallucinating.ToString();
-		statuses["isAppleTeethed"] = _isAppleTeethed.ToString();
-		statuses["isWobbling"] = _isWobbling.ToString();
+		foreach (var key in _active_effects.Keys)
+			statuses[key] = _active_effects[key].ToString();
+		foreach (var key in _passive_effects.Keys)
+			statuses[key] = _passive_effects[key].ToString();
 
+		statuses["shit_o_counter"] = _shit_o_counter.ToString();
 		statuses["speedIncrease"] = _speedIncrease.ToString();
 		statuses["potassiumLevels"] = _potassiumLevels.ToString();
-
+		statuses["NumPieces"] = p_NumPieces.ToString();
 		return statuses;
 	}
 
 	/// <summary>
-	/// Resets all positive active effects, and handles setting
-	/// the values required for a new positive active effect to
+	/// Handles setting
+	/// the values required for a new active effect to
 	/// be in place.
 	/// </summary>
 	/// <param name="duration">The length of time the new active
 	/// effect will last.</param>
-	public void NewPositiveActive(float duration)
+	public void NewActive(float duration)
 	{
 		_hasPositiveActive = true;
 		_positiveTimer = duration;
@@ -133,68 +145,107 @@ public class Status
 			case Food.IceCream:
 				EatIceCream();
 				break;
+			case Food.CrapALot:
+				EatCrapALot();
+				break;
+			case Food.Balti:
+				EatBalti();
+				break;
+			case Food.Brownie:
+				EatBrownie();
+				break;
 		}
 	}
 
 	private void DrinkCoffee()
 	{
-		NewPositiveActive(10);
-		_isFast = true;
+		NewActive(10);
+		_active_effects["caffeinated"] = true;
 		_speedIncrease += 0.1f;
 	}
 
 	private void DrinkBooze()
 	{
-		NewPositiveActive(10);
-		_isPissing = true;
+		NewActive(10);
+		_active_effects["pissing"] = true;
 	}
 
 	private void EatApple()
 	{
 		ClearPassive();
-		_isAppleTeethed = true;
 	}
 
 	private void EatOrange()
 	{
+		// Produce projectile
 	}
 
 	private void EatBanana()
 	{
+		// Produce peel
+		_potassiumLevels++;
+		if (_potassiumLevels >= 3)
+		{
+			// Die ... ?
+		}
 	}
 
 	private void EatFireFruit()
 	{
-		NewPositiveActive(5);
-		_isBreathingFire = true;
+		NewActive(5);
+		_active_effects["breathing_fire"] = true;
 	}
 
 	private void EatDrumstick()
 	{
+		NewActive(15);
+		_active_effects["buff"] = true;
+		EatBone();
 	}
 
 	private void EatBone()
 	{
+		// Rupture asshole
 	}
 
 	private void EatCheese()
 	{
+		// Get to eat it again
 	}
 
 	private void EatPizza()
 	{
+		// Get to eat it again twice
 	}
 
 	private void EatPineapple()
 	{
+		// ?
 	}
 
 	private void EatPineapplePizza()
 	{
+		// Die
 	}
 
 	private void EatIceCream()
 	{
+		_passive_effects["unicorn"] = true;
+	}
+
+	private void EatCrapALot()
+	{
+		_passive_effects["laxative"] = true;
+	}
+
+	private void EatBalti()
+	{
+		// Add rocket shit for 1 second after 10 seconds
+	}
+
+	private void EatBrownie()
+	{
+		// Sleep for 5 turns
 	}
 }
 

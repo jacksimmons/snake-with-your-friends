@@ -38,6 +38,14 @@ public class GameBehaviour : MonoBehaviour
 
 	void Start()
 	{
+		Vector2Int bl = Vector2Int.zero;
+		Tilemap gameGT = CreateAndReturnTilemap(gridName: "Ground", hasCollider: false);
+		Tilemap gameWT = CreateAndReturnTilemap(gridName: "Wall", hasCollider: true);
+		CreateGroundTilemap(gameGT, bl);
+		CreateWallTilemap(gameWT, bl);
+
+		PlaceSnakes(1, _players, gameGT, bl);
+
 		//Vector2Int custBL = Vector2Int.left * ((int)groundSize + 1);
 
 		//// Create the customise area tilemaps
