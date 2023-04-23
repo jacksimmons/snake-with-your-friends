@@ -13,13 +13,13 @@ using UnityEngine;
 
 public class PlayerBehaviour : MonoBehaviour
 {
-	public Status status;
+	[SerializeField]
+	public StatusBehaviour status;
 
 	// Templates and sprites
 	[SerializeField]
 	private GameObject _bp_template;
 	[SerializeField]
-	private GameObject _ef_too_many_pints_template;
 	private TooManyPints _ef_too_many_pints_script = null;
 
 	[SerializeField]
@@ -143,7 +143,6 @@ public class PlayerBehaviour : MonoBehaviour
 			BodyPartStatus bps = new BodyPartStatus(false, false);
 			bpss.Add(bps);
 		}
-		status = new Status(bpss);
 
 		// Handle free movement
 		if (freeMovement)
@@ -162,7 +161,7 @@ public class PlayerBehaviour : MonoBehaviour
 
 	private void Update()
 	{
-		HandleInputs();
+		HandleInput();
 		HandleStatus();
 	}
 
@@ -175,7 +174,7 @@ public class PlayerBehaviour : MonoBehaviour
 		HandleMovementLoop();
 	}
 
-	void HandleInputs()
+	void HandleInput()
 	{
 		// Movement
 		float x_input = Input.GetAxisRaw("Horizontal");
@@ -214,6 +213,13 @@ public class PlayerBehaviour : MonoBehaviour
 		// So cancel the new input.
 		if (direction == -p_PrevMovement)
 			direction = Vector2.zero;
+
+		// Powerups
+		if (status.p_ActiveInputEffects.Count > 0)
+		{
+			if (Input.GetKey(KeyCode.Space))
+				status.HandleInput();
+		}
 	}
 
 	void HandleStatus()
@@ -324,9 +330,6 @@ public class PlayerBehaviour : MonoBehaviour
 
 		// Set the tail to the new tail
 		tail = newBodyPart;
-
-		// Increase the number of pieces
-		status.p_NumPieces++;
 	}
 
 	public void Q(Action action)

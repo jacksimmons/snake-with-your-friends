@@ -56,26 +56,29 @@
     <Analyzer Include="C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\Extensions\Microsoft\Visual Studio Tools for Unity\Analyzers\Microsoft.Unity.Analyzers.dll" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Assets\Scripts\Item.cs" />
-    <Compile Include="Assets\Scripts\Effects\TooManyPints.cs" />
-    <Compile Include="Assets\Scripts\Teleporter.cs" />
-    <Compile Include="Assets\Scripts\GameBehaviour.cs" />
-    <Compile Include="Assets\Scripts\ScootileTilemap.cs" />
+    <Compile Include="Assets\Scripts\Powerup\Projectile.cs" />
+    <Compile Include="Assets\Scripts\Powerup\TooManyPints.cs" />
+    <Compile Include="Assets\Scripts\Object\Teleporter.cs" />
+    <Compile Include="Assets\Scripts\Game\GameBehaviour.cs" />
+    <Compile Include="Assets\Scripts\Object\ScootileTilemap.cs" />
     <Compile Include="Assets\Scripts\Vectors.cs" />
-    <Compile Include="Assets\Scripts\JoinMenu.cs" />
-    <Compile Include="Assets\Scripts\Status.cs" />
+    <Compile Include="Assets\Scripts\Menu\JoinMenu.cs" />
+    <Compile Include="Assets\Scripts\Powerup\StatusBehaviour.cs" />
+    <Compile Include="Assets\Scripts\Game\WallTilemap.cs" />
     <Compile Include="Assets\Scripts\DebugBehaviour.cs" />
-    <Compile Include="Assets\Scripts\PlayerBehaviour.cs" />
-    <Compile Include="Assets\Scripts\FollowPlayer.cs" />
+    <Compile Include="Assets\Scripts\Player\PlayerBehaviour.cs" />
+    <Compile Include="Assets\Scripts\Unused\FollowPlayer.cs" />
     <Compile Include="Assets\Scripts\NetworkBehaviour.cs" />
     <Compile Include="Assets\Scripts\Arrays.cs" />
     <Compile Include="Assets\Scripts\Steamworks.NET\SteamManager.cs" />
-    <Compile Include="Assets\Scripts\FoodBehaviour.cs" />
-    <Compile Include="Assets\Scripts\BodyPart.cs" />
+    <Compile Include="Assets\Scripts\Powerup\FoodBehaviour.cs" />
+    <Compile Include="Assets\Scripts\Player\BodyPart.cs" />
     <Compile Include="Assets\Scripts\CamBehaviour.cs" />
-    <Compile Include="Assets\Scripts\MainMenu.cs" />
+    <Compile Include="Assets\Scripts\Menu\MainMenu.cs" />
     <Compile Include="Assets\Scripts\Lobby.cs" />
-    <Compile Include="Assets\Scripts\WallTilemap.cs" />
+    <Compile Include="Assets\Scripts\Powerup\StatusManager.cs" />
+    <Compile Include="Assets\Scripts\Powerup\BodyPartStatus.cs" />
+    <Compile Include="Assets\Scripts\Powerup\Effect.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />

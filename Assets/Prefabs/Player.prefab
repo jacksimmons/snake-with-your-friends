@@ -71,7 +71,7 @@ MonoBehaviour:
   _bp_template: {fileID: 8458232058558454434, guid: a3b0ac531d48ea6408b0d91bf3f30add, type: 3}
   _ef_too_many_pints_template: {fileID: 0}
   _headPiece: {fileID: 21300000, guid: cab13cca9bd8fc74ab7f14aaeca14351, type: 3}
-  _tailPiece: {fileID: 21300000, guid: 9d2fc6af15053b149b847ad800fe27b6, type: 3}
+  _tailPiece: {fileID: 21300000, guid: 895c58017397a7a47b7c31c8ebe71234, type: 3}
   _straightPiece: {fileID: 21300000, guid: 5dbd08e1b155aad469cbcf43e9563923, type: 3}
   _cornerPieces:
   - {fileID: 21300000, guid: d9aa5ab9caf99a54db513b335fc29ede, type: 3}
