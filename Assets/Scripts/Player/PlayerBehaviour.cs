@@ -41,7 +41,7 @@ public class PlayerBehaviour : MonoBehaviour
 	// The last valid, non-zero direction vector
 	public Vector2 movement = Vector2.zero;
 	// The last `movement` which was used
-	public Vector2 p_PrevMovement { get; private set; }
+	public Vector2 PrevMovement { get; private set; }
 
 	// Free movement
 	[SerializeField]
@@ -57,11 +57,6 @@ public class PlayerBehaviour : MonoBehaviour
 	// Restored after forced movement ends
 	private List<Vector2> _stored_bp_directions = new List<Vector2>();
 
-	// Movement values
-
-	[SerializeField]
-	private float _defaultMovementSpeed;
-	public float p_MovementSpeed { get; private set; }
 	// Increments to _moveTime * childCount, then resets
 	public int timer = 0;
 	// Increments to _moveTime, then resets
@@ -69,14 +64,13 @@ public class PlayerBehaviour : MonoBehaviour
 	private int _moveTime = 20;
 	public bool frozen = false;
 
+	public float DefaultMovementSpeed { get; private set; } = 1.0f;
+	public float MovementSpeed { get; set; } = 1.0f;
+
 	// Body Parts
 	public BodyPart head;
 	public BodyPart tail;
-	private List<BodyPart> _bodyParts;
-	public List<BodyPart> BodyParts
-	{
-		get { return _bodyParts; }
-	}
+	public List<BodyPart> BodyParts { get; private set; }
 
 	// All actions are executed after the next movement frame
 	private List<Action> _queuedActions;
@@ -86,11 +80,8 @@ public class PlayerBehaviour : MonoBehaviour
 
 	void Awake()
 	{
-		// Set movement speed
-		p_MovementSpeed = _defaultMovementSpeed;
-
 		// Create BodyParts
-		_bodyParts = new List<BodyPart>();
+		BodyParts = new List<BodyPart>();
 		for (int i = 0; i < transform.childCount; i++)
 		{
 			Sprite _sprite;
@@ -113,7 +104,7 @@ public class PlayerBehaviour : MonoBehaviour
 			// Head and body
 			if (i < transform.childCount - 1)
 			{
-				bp = new BodyPart(_transform, _startingDirection, _sprite, _cornerSprites, p_MovementSpeed);
+				bp = new BodyPart(_transform, _startingDirection, _sprite, _cornerSprites);
 				if (i == 0)
 					head = bp;
 			}
@@ -121,10 +112,10 @@ public class PlayerBehaviour : MonoBehaviour
 			// Tail
 			else
 			{
-				bp = new BodyPart(_transform, _startingDirection, _sprite, null, p_MovementSpeed);
+				bp = new BodyPart(_transform, _startingDirection, _sprite, null);
 				tail = bp;
 			}
-			_bodyParts.Add(bp);
+			BodyParts.Add(bp);
 		}
 
 		// Create QueuedActions
@@ -138,7 +129,7 @@ public class PlayerBehaviour : MonoBehaviour
 
 		// Create Status
 		List<BodyPartStatus> bpss = new List<BodyPartStatus>();
-		for (int i = 0; i < _bodyParts.Count; i++)
+		for (int i = 0; i < BodyParts.Count; i++)
 		{
 			BodyPartStatus bps = new BodyPartStatus(false, false);
 			bpss.Add(bps);
@@ -211,7 +202,7 @@ public class PlayerBehaviour : MonoBehaviour
 
 		// We can't have the snake going back on itself.
 		// So cancel the new input.
-		if (direction == -p_PrevMovement)
+		if (direction == -PrevMovement)
 			direction = Vector2.zero;
 
 		// Powerups
@@ -247,7 +238,7 @@ public class PlayerBehaviour : MonoBehaviour
 
 	void HandleMovementLoop()
 	{
-		if (moveTimer >= _moveTime)
+		if (moveTimer >= _moveTime / MovementSpeed)
 		{
 			// Reset the timer(s)
 			if (timer >= transform.childCount * _moveTime)
@@ -268,29 +259,29 @@ public class PlayerBehaviour : MonoBehaviour
 			if (movement != Vector2.zero)
 			{
 				// Update prevMovement
-				p_PrevMovement = movement;
+				PrevMovement = movement;
 
 				// Iterate backwards through the body parts, from tail to head
 				// The reason for doing this is so every part inherits its next
 				// direction from the part before it.
-				if (_bodyParts.Count > 1)
+				if (BodyParts.Count > 1)
 				{
 					// Tail first
-					BodyPart tailPrev = _bodyParts[_bodyParts.Count - 2];
-					_bodyParts[_bodyParts.Count - 1].Move(tailPrev.p_Direction);
+					BodyPart tailPrev = BodyParts[BodyParts.Count - 2];
+					BodyParts[BodyParts.Count - 1].Move(tailPrev.p_Direction);
 
 					// Then the rest of the body, tail - 1 to head
-					for (int i = _bodyParts.Count - 2; i >= 0; i--)
+					for (int i = BodyParts.Count - 2; i >= 0; i--)
 					{
 						BodyPart next = null;
 						Vector2 dir = movement;
 						if (i > 0)
 						{
-							dir = _bodyParts[i - 1].p_Direction;
+							dir = BodyParts[i - 1].p_Direction;
 						}
-						if (i + 1 < _bodyParts.Count)
-							next = _bodyParts[i + 1];
-						_bodyParts[i].HandleMovement(dir, next);
+						if (i + 1 < BodyParts.Count)
+							next = BodyParts[i + 1];
+						BodyParts[i].HandleMovement(dir, next);
 					}
 				}
 			}
@@ -320,13 +311,13 @@ public class PlayerBehaviour : MonoBehaviour
 		newBodyPart.p_CornerSprites = null;
 
 		// The snake will end with ~- (~ is the new tail), as expected
-		float angle = Vector2.SignedAngle(tail.p_Direction, _bodyParts[_bodyParts.Count - 2].p_Direction);
+		float angle = Vector2.SignedAngle(tail.p_Direction, BodyParts[BodyParts.Count - 2].p_Direction);
 		if (angle != 0)
 		{
 			newBodyPart.p_Rotation = tail.prevRot;
-			tail.MakeCorner(_bodyParts[_bodyParts.Count - 2].p_Direction);
+			tail.MakeCorner(BodyParts[BodyParts.Count - 2].p_Direction);
 		}
-		_bodyParts.Add(newBodyPart);
+		BodyParts.Add(newBodyPart);
 
 		// Set the tail to the new tail
 		tail = newBodyPart;
@@ -342,7 +333,7 @@ public class PlayerBehaviour : MonoBehaviour
 		if (transform.childCount > 2)
 		{
 			Destroy(transform.GetChild(transform.childCount - 2));
-			_bodyParts.RemoveAt(transform.childCount - 2);
+			BodyParts.RemoveAt(transform.childCount - 2);
 			return true;
 		}
 		return false;
@@ -360,7 +351,7 @@ public class PlayerBehaviour : MonoBehaviour
 			frozen = true;
 			_forcedMovement = direction * speed;
 			movement = _forcedMovement;
-			foreach (var part in _bodyParts)
+			foreach (var part in BodyParts)
 			{
 				_stored_bp_directions.Add(part.p_Direction);
 				part.p_Direction = _forcedMovement;
@@ -379,12 +370,17 @@ public class PlayerBehaviour : MonoBehaviour
 			// they start without input.
 			movement = _forcedMovement.normalized;
 			_forcedMovement = Vector2.zero;
-			for (int i = 0; i < _bodyParts.Count; i++)
+			for (int i = 0; i < BodyParts.Count; i++)
 			{
-				_bodyParts[i].p_Direction = _stored_bp_directions[i];
+				BodyParts[i].p_Direction = _stored_bp_directions[i];
 			}
 			_stored_bp_directions.Clear();
 		}));
+	}
+
+	public void ResetMovementSpeed()
+	{
+		MovementSpeed = DefaultMovementSpeed;
 	}
 
 	public void HandleDeath()
@@ -393,12 +389,12 @@ public class PlayerBehaviour : MonoBehaviour
 		AddBodyPart();
 
 		// Half move so covered by head, and increase every sorting order other than this new part
-		_bodyParts[1].Move(p_PrevMovement * 0.5f);
+		BodyParts[1].Move(PrevMovement * 0.5f);
 		head.p_Transform.GetComponent<SpriteRenderer>().sortingOrder += 1;
-		for (int i = 2; i < _bodyParts.Count; i++)
+		for (int i = 2; i < BodyParts.Count; i++)
 		{
-			_bodyParts[i].Move(p_PrevMovement);
-			_bodyParts[i].p_Transform.GetComponent<SpriteRenderer>().sortingOrder += 1;
+			BodyParts[i].Move(PrevMovement);
+			BodyParts[i].p_Transform.GetComponent<SpriteRenderer>().sortingOrder += 1;
 		}
 		frozen = true;
 	}
@@ -409,7 +405,7 @@ public class PlayerBehaviour : MonoBehaviour
 		{
 			{ "direction", direction.ToString() },
 			{ "movement", movement.ToString() },
-			{ "prevMovement", p_PrevMovement.ToString() }
+			{ "prevMovement", PrevMovement.ToString() }
 		};
 		for (int i = 0; i < _queuedActions.Count; i++)
 			playerValues.Add("queuedActions [" + i.ToString() + "]" , _queuedActions[i].Target.ToString());

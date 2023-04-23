@@ -27,7 +27,6 @@ public class BodyPart
 	public Sprite p_DefaultSprite { get; set; }
 	public Sprite[] p_CornerSprites { get; set; }
 
-	public float p_Speed { get; set; }
 	public Vector2 p_Direction { get; set; }
 
 	public int p_TeleportCounter { get; set; }
@@ -51,7 +50,6 @@ public class BodyPart
 	{
 		_transform = transform;
 		p_Direction = old.p_Direction;
-		p_Speed = old.p_Speed;
 		p_Sprite = old.p_Sprite;
 		p_DefaultSprite = old.p_DefaultSprite;
 		p_CornerSprites = old.p_CornerSprites;
@@ -68,9 +66,8 @@ public class BodyPart
 	/// <param name="direction"></param>
 	/// <param name="defaultSprite"></param>
 	/// <param name="cornerSprites"></param>
-	/// <param name="movementSpeed"></param>
 	public BodyPart(Transform transform, Vector2 direction, Sprite defaultSprite,
-		Sprite[] cornerSprites, float movementSpeed)
+		Sprite[] cornerSprites)
 	{
 		_transform = transform;
 		p_Direction = direction;
@@ -80,7 +77,6 @@ public class BodyPart
 		_isCorner = false;
 		p_TeleportCounter = 0;
 		p_Sprite = p_DefaultSprite;
-		p_Speed = movementSpeed;
 	}
 
 	/// <summary>
@@ -147,16 +143,7 @@ public class BodyPart
 	public void Move(Vector2 direction)
 	{
 		p_Direction = direction;
-
-		for (int i = 0; i < 10; i++)
-		{
-			ContactFilter2D contactFilter2D = new ContactFilter2D();
-			Collider2D[] collider2Ds = new Collider2D[10];
-			if (p_Transform.GetComponent<Collider2D>().OverlapCollider(contactFilter2D, collider2Ds) == 0)
-				p_Position += (Vector3)(p_Direction * p_Speed * 0.1f);
-			else
-				Debug.Log(i);
-		}
+		p_Position += (Vector3)p_Direction;
 
 		if (p_TeleportCounter > 0)
 			p_TeleportCounter--;

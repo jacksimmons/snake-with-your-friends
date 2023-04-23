@@ -9,6 +9,8 @@ public class StatusBehaviour : MonoBehaviour
 	private PlayerBehaviour _player;
 	[SerializeField]
 	private GameObject _fireball;
+	[SerializeField]
+	private GameObject _static_shit;
 
 	private List<BodyPartStatus> _bodyPartStatuses;
 
@@ -17,6 +19,8 @@ public class StatusBehaviour : MonoBehaviour
 
 	private float _inputEffectCooldownMax = 0f;
 	private float _inputEffectCooldown = 0f;
+
+	private float _rocketShitMult = 5f;
 
 	// Counters
 	private int _shit_o_counter = 0;
@@ -48,11 +52,36 @@ public class StatusBehaviour : MonoBehaviour
 		print("active input: " + p_ActiveInputEffects.Count);
 		_inputEffectCooldown -= Time.deltaTime;
 		if (p_ActiveInputEffects.Count > 0)
-			if (!p_ActiveInputEffects[0].SubtractTime(Time.deltaTime))
-				p_ActiveInputEffects.RemoveAt(0);
-		foreach (Effect effect in p_ActivePassiveEffects)
+		{
+			Effect effect = p_ActiveInputEffects[0];
 			if (!effect.SubtractTime(Time.deltaTime))
-				p_ActivePassiveEffects.Remove(effect);
+			{
+				AddCausedEffect(effect);
+				RemoveInputEffect(0);
+			}
+		}
+		for (int i = 0; i < p_ActivePassiveEffects.Count; i++)
+		{
+			Effect effect = p_ActivePassiveEffects[i];
+			Projectile proj;
+			switch (effect.p_EffectName)
+			{
+				case e_Effect.RocketShitting:
+					GameObject shit = Instantiate(_static_shit, GameObject.Find("Projectiles").transform);
+					proj = shit.GetComponent<Projectile>();
+					proj.Create(Mathf.Infinity, _player.tail.p_Position - (Vector3)_player.tail.p_Direction,
+						-_player.tail.p_Direction, _player.tail.p_Rotation, 0.5f);
+					_player.MovementSpeed = _player.DefaultMovementSpeed * _rocketShitMult;
+					break;
+			}
+
+			if (!effect.SubtractTime(Time.deltaTime))
+			{
+				AddCausedEffect(effect);
+				RemovePassiveEffect(i);
+				i--;
+			}
+		}
 	}
 
 	public void HandleInput()
@@ -60,12 +89,15 @@ public class StatusBehaviour : MonoBehaviour
 		if (_inputEffectCooldown < 0f)
 		{
 			_inputEffectCooldown = _inputEffectCooldownMax;
-			if (p_ActiveInputEffects[0].p_EffectName == e_Effect.BreathingFire)
+			Projectile proj;
+			switch (p_ActiveInputEffects[0].p_EffectName)
 			{
-				GameObject fireball = Instantiate(_fireball, GameObject.Find("Projectiles").transform);
-				Projectile proj = fireball.GetComponent<Projectile>();
-				proj.Create(Mathf.Infinity, _player.head.p_Position + (Vector3)_player.head.p_Direction,
-					_player.head.p_Direction, _player.head.p_Rotation, 0.2f);
+				case e_Effect.BreathingFire:
+					GameObject fireball = Instantiate(_fireball, GameObject.Find("Projectiles").transform);
+					proj = fireball.GetComponent<Projectile>();
+					proj.Create(Mathf.Infinity, _player.head.p_Position + (Vector3)_player.head.p_Direction,
+						_player.head.p_Direction, _player.head.p_Rotation, 0.2f);
+					break;
 			}
 		}
 	}
@@ -73,6 +105,7 @@ public class StatusBehaviour : MonoBehaviour
 	public void AddInputEffect(Effect effect, float cooldown)
 	{
 		// Clear the old effect for the new one
+		_player.ResetMovementSpeed();
 		if (p_ActiveInputEffects.Count > 0)
 			ClearInputEffects();
 		p_ActiveInputEffects.Add(effect);
@@ -83,6 +116,41 @@ public class StatusBehaviour : MonoBehaviour
 	public void AddPassiveEffect(Effect effect)
 	{
 		p_ActivePassiveEffects.Add(effect);
+	}
+
+	private void AddCausedEffect(Effect effect)
+	{
+		Effect cause = effect.p_Causes;
+		if (cause != null)
+		{
+			if (effect.p_CausesInputEffect)
+				AddInputEffect(cause, effect.p_CausesCooldown);
+			else
+				AddPassiveEffect(cause);
+		}
+	}
+
+	private void UndoEffect(Effect effect)
+	{
+		switch (effect.p_EffectName)
+		{
+			case e_Effect.RocketShitting:
+				_player.MovementSpeed /= _rocketShitMult; break;
+		}
+	}
+
+	private void RemoveInputEffect(int i)
+	{
+		Effect effect = p_ActiveInputEffects[i];
+		UndoEffect(effect);
+		p_ActiveInputEffects.RemoveAt(i);
+	}
+
+	private void RemovePassiveEffect(int i)
+	{
+		Effect effect = p_ActivePassiveEffects[i];
+		UndoEffect(effect);
+		p_ActivePassiveEffects.RemoveAt(i);
 	}
 
 	/// <summary>
@@ -105,6 +173,8 @@ public class StatusBehaviour : MonoBehaviour
 		_numPints = 0;
 		_speedIncrease = 0;
 		_potassiumLevels = 0;
+
+		_player.ResetMovementSpeed();
 	}
 
 	public Dictionary<string, string> GetStatusDebug()
@@ -185,15 +255,15 @@ public class StatusBehaviour : MonoBehaviour
 
 	private void DrinkCoffee()
 	{
-		Effect minor = new Effect(e_Effect.MinorSpeedBoost);
-		Effect major = new Effect(e_Effect.MajorSpeedBoost, 10, minor);
+		Effect minor = new Effect(e_Effect.MinorSpeedBoost, Mathf.Infinity);
+		Effect major = new Effect(e_Effect.MajorSpeedBoost, 10, minor, false, 0);
 		AddPassiveEffect(major);
 	}
 
 	private void DrinkBooze()
 	{
-		Effect drunk = new Effect(e_Effect.Drunk, 100, null);
-		Effect pissing = new Effect(e_Effect.Pissing, 10, null);
+		Effect drunk = new Effect(e_Effect.Drunk, 100);
+		Effect pissing = new Effect(e_Effect.Pissing, 10);
 		AddInputEffect(pissing, 1);
 		AddPassiveEffect(drunk);
 	}
@@ -220,13 +290,14 @@ public class StatusBehaviour : MonoBehaviour
 
 	private void EatDragonfruit()
 	{
-		Effect fireBreath = new Effect(e_Effect.BreathingFire, 5, null);
-		AddInputEffect(fireBreath, 0.1f);
+		Effect fireBreath = new Effect(e_Effect.BreathingFire, 5);
+		AddInputEffect(fireBreath, 0.3f);
 	}
 
 	private void EatDrumstick()
 	{
-		Effect buff = new Effect(e_Effect.Buff, 20, null);
+		Effect buff = new Effect(e_Effect.Buff, 20);
+		AddPassiveEffect(buff);
 		EatBone();
 	}
 
@@ -257,20 +328,23 @@ public class StatusBehaviour : MonoBehaviour
 
 	private void EatIceCream()
 	{
-		Effect brainFreeze = new Effect(e_Effect.BrainFreeze, 3, null);
-		Effect unicorn = new Effect(e_Effect.Unicorn, 3, brainFreeze);
+		Effect brainFreeze = new Effect(e_Effect.BrainFreeze, 3);
+		Effect unicorn = new Effect(e_Effect.Unicorn, 3, brainFreeze, false, 0);
 		AddPassiveEffect(unicorn);
 	}
 
 	private void EatCrapALot()
 	{
-		Effect laxative = new Effect(e_Effect.Laxative, 20, null);
+		Effect laxative = new Effect(e_Effect.Laxative, 20);
 		AddInputEffect(laxative, 1);
 	}
 
 	private void EatBalti()
 	{
 		// Add rocket shit for 1 second after 10 seconds
+		Effect rocketShit = new Effect(e_Effect.RocketShitting, 10);
+		Effect balti = new Effect(e_Effect.None, 2, rocketShit, false, 0.3f);
+		AddPassiveEffect(balti);
 	}
 
 	private void EatBrownie()

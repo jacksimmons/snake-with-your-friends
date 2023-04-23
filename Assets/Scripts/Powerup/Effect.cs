@@ -22,6 +22,8 @@ public enum e_Food
 
 public enum e_Effect
 {
+	None,
+
 	BreathingFire,
 	Pissing,
 	RocketShitting,
@@ -41,22 +43,25 @@ public class Effect
 	public e_Effect p_EffectName { get; private set; }
 	public float p_Lifetime { get; private set; }
 	public float p_TimeRemaining { get; set; }
-	public Effect p_Causes { get; private set; }
+	public Effect p_Causes { get; private set; } = null;
+	public bool p_CausesInputEffect { get; private set; } = false;
+	public float p_CausesCooldown { get; private set; } = 0f;
 
-	public Effect(e_Effect effectName)
+	public Effect(e_Effect effectName, float lifetime)
 	{
 		p_EffectName = effectName;
-		p_Lifetime = Mathf.Infinity;
-		p_Causes = null;
+		p_Lifetime = lifetime;
 		p_TimeRemaining = p_Lifetime;
 	}
 
-	public Effect(e_Effect effectName, float lifetime, Effect causes)
+	public Effect(e_Effect effectName, float lifetime, Effect causes, bool causesInputEffect, float causesCooldown)
 	{
 		p_EffectName = effectName;
 		p_Lifetime = lifetime;
 		p_Causes = causes;
 		p_TimeRemaining = p_Lifetime;
+		p_CausesInputEffect = causesInputEffect;
+		p_CausesCooldown = causesCooldown;
 	}
 
 	/// <summary>
