@@ -20,15 +20,10 @@ public class StatusBehaviour : MonoBehaviour
 	private float _inputEffectCooldownMax = 0f;
 	private float _inputEffectCooldown = 0f;
 
-	private float _rocketShitMult = 5f;
+	private float _majorSpeedBoost = 3f;
+	private float _minorSpeedBoost = 1f;
 
 	// Counters
-	private int _shit_o_counter = 0;
-	public int p_ShitOCounter
-	{
-		get { return _shit_o_counter; }
-	}
-
 	private int _numPints = 0;
 	public int p_NumPints
 	{
@@ -63,18 +58,6 @@ public class StatusBehaviour : MonoBehaviour
 		for (int i = 0; i < p_ActivePassiveEffects.Count; i++)
 		{
 			Effect effect = p_ActivePassiveEffects[i];
-			Projectile proj;
-			switch (effect.p_EffectName)
-			{
-				case e_Effect.RocketShitting:
-					GameObject shit = Instantiate(_static_shit, GameObject.Find("Projectiles").transform);
-					proj = shit.GetComponent<Projectile>();
-					proj.Create(Mathf.Infinity, _player.tail.p_Position - (Vector3)_player.tail.p_Direction,
-						-_player.tail.p_Direction, _player.tail.p_Rotation, 0.5f);
-					_player.MovementSpeed = _player.DefaultMovementSpeed * _rocketShitMult;
-					break;
-			}
-
 			if (!effect.SubtractTime(Time.deltaTime))
 			{
 				AddCausedEffect(effect);
@@ -82,11 +65,47 @@ public class StatusBehaviour : MonoBehaviour
 				i--;
 			}
 		}
-	}
+
+        // Powerups
+        if (p_ActiveInputEffects.Count > 0)
+        {
+            if (Input.GetKey(KeyCode.Space))
+                HandleInput();
+        }
+
+        HandleStatus();
+        HandlePassive();
+    }
+
+    private void HandleStatus()
+    {
+        Transform tooManyPints = transform.Find("TooManyPints");
+        if (p_NumPints > 0 && tooManyPints != null)
+        {
+            // Add the effect as a child
+            GameObject go = new GameObject("TooManyPints");
+            go.transform.parent = transform;
+            go.layer = LayerMask.NameToLayer("Effects");
+            go.AddComponent<TooManyPints>();
+            go.GetComponent<TooManyPints>();
+        }
+
+        if (tooManyPints != null)
+        {
+            if (p_NumPints > 0)
+            {
+                tooManyPints.GetComponent<TooManyPints>().UpdatePints(p_NumPints);
+            }
+            else
+            {
+                Destroy(tooManyPints.gameObject);
+            }
+        }
+    }
 
 	public void HandleInput()
 	{
-		if (_inputEffectCooldown < 0f)
+		if (_inputEffectCooldown <= 0f)
 		{
 			_inputEffectCooldown = _inputEffectCooldownMax;
 			Projectile proj;
@@ -102,6 +121,29 @@ public class StatusBehaviour : MonoBehaviour
 		}
 	}
 
+	public void HandlePassive()
+	{
+		for (int i = 0; i < p_ActivePassiveEffects.Count; i++)
+		{
+			Effect effect = p_ActivePassiveEffects[i];
+			if (_inputEffectCooldown <= 0f)
+			{
+				_inputEffectCooldown = _inputEffectCooldownMax;
+				Projectile proj;
+				switch (effect.p_EffectName)
+				{
+					case e_Effect.RocketShitting:
+						GameObject shit = Instantiate(_static_shit, GameObject.Find("Projectiles").transform);
+						proj = shit.GetComponent<Projectile>();
+						proj.Create(Mathf.Infinity, _player.tail.p_Position - (Vector3)_player.tail.p_Direction,
+							-_player.tail.p_Direction, _player.tail.p_Rotation, 0.2f);
+						_player.MovementSpeed = _player.DefaultMovementSpeed + _majorSpeedBoost;
+						break;
+				}
+			}
+		}
+	}
+
 	public void AddInputEffect(Effect effect, float cooldown)
 	{
 		// Clear the old effect for the new one
@@ -113,9 +155,11 @@ public class StatusBehaviour : MonoBehaviour
 		_inputEffectCooldownMax = cooldown;
 	}
 
-	public void AddPassiveEffect(Effect effect)
+	public void AddPassiveEffect(Effect effect, float cooldown=0)
 	{
 		p_ActivePassiveEffects.Add(effect);
+		_inputEffectCooldown = 0;
+		_inputEffectCooldownMax = cooldown;
 	}
 
 	private void AddCausedEffect(Effect effect)
@@ -126,7 +170,7 @@ public class StatusBehaviour : MonoBehaviour
 			if (effect.p_CausesInputEffect)
 				AddInputEffect(cause, effect.p_CausesCooldown);
 			else
-				AddPassiveEffect(cause);
+				AddPassiveEffect(cause, effect.p_CausesCooldown);
 		}
 	}
 
@@ -135,7 +179,7 @@ public class StatusBehaviour : MonoBehaviour
 		switch (effect.p_EffectName)
 		{
 			case e_Effect.RocketShitting:
-				_player.MovementSpeed /= _rocketShitMult; break;
+				_player.MovementSpeed -= _majorSpeedBoost; break;
 		}
 	}
 
@@ -169,9 +213,7 @@ public class StatusBehaviour : MonoBehaviour
 	{
 		p_ActivePassiveEffects.Clear();
 
-		_shit_o_counter = 0;
 		_numPints = 0;
-		_speedIncrease = 0;
 		_potassiumLevels = 0;
 
 		_player.ResetMovementSpeed();
@@ -190,9 +232,7 @@ public class StatusBehaviour : MonoBehaviour
 				statuses[e_name] = "False";
 		}
 
-		statuses["shit_o_counter"] = _shit_o_counter.ToString();
 		statuses["numPints"] = _numPints.ToString();
-		statuses["speedIncrease"] = _speedIncrease.ToString();
 		statuses["potassiumLevels"] = _potassiumLevels.ToString();
 		statuses["NumPieces"] = _player.BodyParts.Count.ToString();
 		return statuses;
@@ -343,7 +383,7 @@ public class StatusBehaviour : MonoBehaviour
 	{
 		// Add rocket shit for 1 second after 10 seconds
 		Effect rocketShit = new Effect(e_Effect.RocketShitting, 10);
-		Effect balti = new Effect(e_Effect.None, 2, rocketShit, false, 0.3f);
+		Effect balti = new Effect(e_Effect.None, 2, rocketShit, false, 0.05f);
 		AddPassiveEffect(balti);
 	}
 

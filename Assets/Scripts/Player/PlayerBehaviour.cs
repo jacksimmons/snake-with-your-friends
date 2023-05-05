@@ -153,7 +153,6 @@ public class PlayerBehaviour : MonoBehaviour
 	private void Update()
 	{
 		HandleInput();
-		HandleStatus();
 	}
 
 	void FixedUpdate()
@@ -204,36 +203,6 @@ public class PlayerBehaviour : MonoBehaviour
 		// So cancel the new input.
 		if (direction == -PrevMovement)
 			direction = Vector2.zero;
-
-		// Powerups
-		if (status.p_ActiveInputEffects.Count > 0)
-		{
-			if (Input.GetKey(KeyCode.Space))
-				status.HandleInput();
-		}
-	}
-
-	void HandleStatus()
-	{
-		if (status.p_NumPints > 0 && _ef_too_many_pints_script == null)
-		{
-			GameObject go = new GameObject("Effect:TooManyPints");
-			go.layer = LayerMask.NameToLayer("Effects");
-			go.AddComponent<TooManyPints>();
-			_ef_too_many_pints_script = go.GetComponent<TooManyPints>();
-		}
-
-		if (_ef_too_many_pints_script != null)
-		{
-			if (status.p_NumPints > 0)
-			{
-				_ef_too_many_pints_script.UpdatePints(status.p_NumPints);
-			}
-			else
-			{
-				Destroy(_ef_too_many_pints_script.transform.gameObject);
-			}
-		}
 	}
 
 	void HandleMovementLoop()
@@ -405,7 +374,8 @@ public class PlayerBehaviour : MonoBehaviour
 		{
 			{ "direction", direction.ToString() },
 			{ "movement", movement.ToString() },
-			{ "prevMovement", PrevMovement.ToString() }
+			{ "PrevMovement", PrevMovement.ToString() },
+			{ "MovementSpeed", MovementSpeed.ToString() }
 		};
 		for (int i = 0; i < _queuedActions.Count; i++)
 			playerValues.Add("queuedActions [" + i.ToString() + "]" , _queuedActions[i].Target.ToString());

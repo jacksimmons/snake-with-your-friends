@@ -73,7 +73,6 @@
     <Compile Include="Assets\Scripts\Arrays.cs" />
     <Compile Include="Assets\Scripts\Steamworks.NET\SteamManager.cs" />
     <Compile Include="Assets\Scripts\Powerup\FoodBehaviour.cs" />
-    <Compile Include="Assets\Scripts\Powerup\StatusManager.cs" />
     <Compile Include="Assets\Scripts\Player\BodyPart.cs" />
     <Compile Include="Assets\Scripts\CamBehaviour.cs" />
     <Compile Include="Assets\Scripts\Menu\MainMenu.cs" />
