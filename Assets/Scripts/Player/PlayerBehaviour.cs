@@ -19,8 +19,6 @@ public class PlayerBehaviour : MonoBehaviour
 	// Templates and sprites
 	[SerializeField]
 	private GameObject _bp_template;
-	[SerializeField]
-	private TooManyPints _ef_too_many_pints_script = null;
 
 	[SerializeField]
 	private Sprite _headPiece;
@@ -292,11 +290,6 @@ public class PlayerBehaviour : MonoBehaviour
 		tail = newBodyPart;
 	}
 
-	public void Q(Action action)
-	{
-		_queuedActions.Add(action);
-	}
-
 	private bool RemoveBodyPart()
 	{
 		if (transform.childCount > 2)
@@ -308,7 +301,50 @@ public class PlayerBehaviour : MonoBehaviour
 		return false;
 	}
 
-	public void QAddBodyPart()
+    public void ResetMovementSpeed()
+    {
+        MovementSpeed = DefaultMovementSpeed;
+    }
+
+    public void HandleDeath()
+    {
+        _rb.simulated = false;
+        AddBodyPart();
+
+        // Half move so covered by head, and increase every sorting order other than this new part
+        BodyParts[1].Move(PrevMovement * 0.5f);
+        head.p_Transform.GetComponent<SpriteRenderer>().sortingOrder += 1;
+        for (int i = 2; i < BodyParts.Count; i++)
+        {
+            BodyParts[i].Move(PrevMovement);
+            BodyParts[i].p_Transform.GetComponent<SpriteRenderer>().sortingOrder += 1;
+        }
+        frozen = true;
+    }
+
+    public Dictionary<string, string> GetPlayerDebug()
+    {
+        Dictionary<string, string> playerValues = new Dictionary<string, string>
+        {
+            { "direction", direction.ToString() },
+            { "movement", movement.ToString() },
+            { "PrevMovement", PrevMovement.ToString() },
+            { "MovementSpeed", MovementSpeed.ToString() }
+        };
+        for (int i = 0; i < _queuedActions.Count; i++)
+            playerValues.Add("queuedActions [" + i.ToString() + "]", _queuedActions[i].Target.ToString());
+        playerValues.Add("forcedMovement", _forcedMovement.ToString());
+        for (int i = 0; i < _stored_bp_directions.Count; i++)
+            playerValues.Add("storedBpDirections [" + i.ToString() + "]", _stored_bp_directions[i].ToString());
+        return playerValues;
+    }
+
+    public void Q(Action action)
+    {
+        _queuedActions.Add(action);
+    }
+
+    public void QAddBodyPart()
 	{
 		_queuedActions.Add(new Action(AddBodyPart));
 	}
@@ -345,43 +381,5 @@ public class PlayerBehaviour : MonoBehaviour
 			}
 			_stored_bp_directions.Clear();
 		}));
-	}
-
-	public void ResetMovementSpeed()
-	{
-		MovementSpeed = DefaultMovementSpeed;
-	}
-
-	public void HandleDeath()
-	{
-		_rb.simulated = false;
-		AddBodyPart();
-
-		// Half move so covered by head, and increase every sorting order other than this new part
-		BodyParts[1].Move(PrevMovement * 0.5f);
-		head.p_Transform.GetComponent<SpriteRenderer>().sortingOrder += 1;
-		for (int i = 2; i < BodyParts.Count; i++)
-		{
-			BodyParts[i].Move(PrevMovement);
-			BodyParts[i].p_Transform.GetComponent<SpriteRenderer>().sortingOrder += 1;
-		}
-		frozen = true;
-	}
-
-	public Dictionary<string, string> GetPlayerDebug()
-	{
-		Dictionary<string, string> playerValues = new Dictionary<string, string>
-		{
-			{ "direction", direction.ToString() },
-			{ "movement", movement.ToString() },
-			{ "PrevMovement", PrevMovement.ToString() },
-			{ "MovementSpeed", MovementSpeed.ToString() }
-		};
-		for (int i = 0; i < _queuedActions.Count; i++)
-			playerValues.Add("queuedActions [" + i.ToString() + "]" , _queuedActions[i].Target.ToString());
-		playerValues.Add("forcedMovement", _forcedMovement.ToString());
-		for (int i = 0; i < _stored_bp_directions.Count; i++)
-			playerValues.Add("storedBpDirections [" + i.ToString() + "]" , _stored_bp_directions[i].ToString());
-		return playerValues;
 	}
 }

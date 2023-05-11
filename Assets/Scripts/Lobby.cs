@@ -9,21 +9,23 @@ public class Lobby : MonoBehaviour
 {
 	static ulong lobbyId = 0;
 
-	static protected Callback<LobbyEnter_t> m_LobbyEnter;
 	static protected Callback<LobbyChatUpdate_t> m_LobbyChatUpdate;
+    static protected Callback<LobbyDataUpdate_t> m_LobbyDataUpdate;
 
-	static private CallResult<LobbyCreated_t> m_LobbyCreated;
+    static private CallResult<LobbyEnter_t> m_LobbyEnter;
+    static private CallResult<LobbyCreated_t> m_LobbyCreated;
 
 	// Start is called before the first frame update
-	void Start()
+	private void Awake()
 	{
 		if (SteamManager.Initialized)
 		{
-			m_LobbyEnter = Callback<LobbyEnter_t>.Create(OnLobbyEnter);
 			m_LobbyChatUpdate = Callback<LobbyChatUpdate_t>.Create(OnLobbyChatUpdate);
-			m_LobbyCreated = CallResult<LobbyCreated_t>.Create(OnLobbyCreated);
+            m_LobbyDataUpdate = Callback<LobbyDataUpdate_t>.Create(OnLobbyDataUpdate);
+			m_LobbyEnter = CallResult<LobbyEnter_t>.Create(OnLobbyEnter);
+            m_LobbyCreated = CallResult<LobbyCreated_t>.Create(OnLobbyCreated);
 
-			CreateLobby();
+            DontDestroyOnLoad(this);
 		}
 	}
 
@@ -37,15 +39,20 @@ public class Lobby : MonoBehaviour
 		SceneManager.LoadScene("MainMenu");
 	}
 
-	static void CreateLobby()
+	static public void CreateLobby()
 	{
 		SteamAPICall_t handle = SteamMatchmaking.CreateLobby(
 			ELobbyType.k_ELobbyTypePublic, cMaxMembers: 4);
 		m_LobbyCreated.Set(handle);
 	}
 
+    static public void JoinLobby(CSteamID id)
+    {
+        SteamMatchmaking.JoinLobby(id);
+    }
+
 	// Callbacks
-	static void OnLobbyCreated(LobbyCreated_t result, bool bIOFailure)
+	static private void OnLobbyCreated(LobbyCreated_t result, bool bIOFailure)
 	{
 		switch (result.m_eResult)
 		{
@@ -61,14 +68,32 @@ public class Lobby : MonoBehaviour
 			(CSteamID)result.m_ulSteamIDLobby,
 			"name",
 			SteamFriends.GetPersonaName() + "'s lobby");
-		if (success)
-		{
-			print("Yay set name!");
-		}
+        if (success)
+        {
+            print("Yay set name!");
+        }
+        else
+            print("Nay didn't set name...");
 	}
 
-	// A user has joined, left, disconnected, etc.
-	static void OnLobbyChatUpdate(LobbyChatUpdate_t pCallback)
+    static private void OnLobbyEnter(LobbyEnter_t result, bool bIOFailure)
+    {
+        if (result.m_EChatRoomEnterResponse ==
+            (uint)EChatRoomEnterResponse.k_EChatRoomEnterResponseSuccess)
+        {
+            lobbyId = result.m_ulSteamIDLobby;
+            print("Joined lobby successfully.");
+
+            print("Number of members: " + SteamMatchmaking.GetNumLobbyMembers((CSteamID)lobbyId).ToString());
+        }
+        else
+        {
+            print(result.m_EChatRoomEnterResponse);
+        }
+    }
+
+    // A user has joined, left, disconnected, etc.
+    static private void OnLobbyChatUpdate(LobbyChatUpdate_t pCallback)
 	{
 		string affects = SteamFriends.GetFriendPersonaName(
 			(CSteamID)(pCallback.m_ulSteamIDUserChanged));
@@ -99,15 +124,13 @@ public class Lobby : MonoBehaviour
 		}
 	}
 
-	static void OnLobbyEnter(LobbyEnter_t pCallback)
-	{
-		if (pCallback.m_EChatRoomEnterResponse ==
-			(uint)EChatRoomEnterResponse.k_EChatRoomEnterResponseSuccess)
-		{
-			lobbyId = pCallback.m_ulSteamIDLobby;
-			print("Joined lobby successfully.");
-		}
-	}
+    static private void OnLobbyDataUpdate(LobbyDataUpdate_t pCallback)
+    {
+        if (pCallback.m_bSuccess == 1)
+            print("Data changed for " + pCallback.m_ulSteamIDMember.ToString() + " successfully.");
+        else
+            print("Data was unable to be changed for " + pCallback.m_ulSteamIDMember.ToString());
+    }
 
 	static public Dictionary<string, string> GetLobbyDebug()
 	{

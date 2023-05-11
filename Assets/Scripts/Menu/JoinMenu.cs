@@ -38,14 +38,6 @@ public class JoinMenu : MonoBehaviour
 		Any
 	}
 
-	private void Awake()
-	{
-		if (SteamManager.Initialized)
-		{
-			m_LobbyDataUpdate = Callback<LobbyDataUpdate_t>.Create(OnLobbyDataUpdate);
-		}
-	}
-
 	private void Start()
 	{
 		if (SteamManager.Initialized)
@@ -69,18 +61,16 @@ public class JoinMenu : MonoBehaviour
 		SceneManager.LoadScene("MainMenu");
 	}
 
-	public void OnLobbyJoinPressed(TextMeshProUGUI idField)
-	{
-		uint id;
-		uint.TryParse(idField.text, out id);
-		id--;
+    public void OnLobbyJoinPressed(TextMeshProUGUI idField)
+    {
+        uint id;
+        uint.TryParse(idField.text, out id);
+        id--;
 
-		m_LobbyEnter = CallResult<LobbyEnter_t>.Create(OnLobbyEnter);
-		SteamAPICall_t handle = SteamMatchmaking.JoinLobby(new CSteamID(id));
-		m_LobbyEnter.Set(handle);
-	}
+        Lobby.JoinLobby(new CSteamID(id));
+    }
 
-	public void OnDistanceDropdownUpdated(int distance)
+    public void OnDistanceDropdownUpdated(int distance)
 	{
 		ELobbyDistanceFilter filter;
 		switch (distance)
@@ -165,19 +155,5 @@ public class JoinMenu : MonoBehaviour
 			//		break;
 			//}
 		}
-	}
-
-	private void OnLobbyEnter(LobbyEnter_t result, bool bIOFailure)
-	{
-		if (result.m_EChatRoomEnterResponse
-			== (uint)EChatRoomEnterResponse.k_EChatRoomEnterResponseSuccess)
-		{
-			print("Successfully joined lobby.");
-		}
-	}
-
-	private void OnLobbyDataUpdate(LobbyDataUpdate_t result)
-	{
-
 	}
 }
