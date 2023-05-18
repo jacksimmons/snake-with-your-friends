@@ -1,80 +1,78 @@
-using System.Collections;
+using Steamworks;
 using System.Collections.Generic;
 using UnityEngine;
-using Steamworks;
-using System;
 using UnityEngine.SceneManagement;
 
 public class Lobby : MonoBehaviour
 {
-	static ulong lobbyId = 0;
+    static ulong lobbyId = 0;
 
-	static protected Callback<LobbyChatUpdate_t> m_LobbyChatUpdate;
+    static protected Callback<LobbyChatUpdate_t> m_LobbyChatUpdate;
     static protected Callback<LobbyDataUpdate_t> m_LobbyDataUpdate;
 
     static private CallResult<LobbyEnter_t> m_LobbyEnter;
     static private CallResult<LobbyCreated_t> m_LobbyCreated;
 
-	// Start is called before the first frame update
-	private void Awake()
-	{
-		if (SteamManager.Initialized)
-		{
-			m_LobbyChatUpdate = Callback<LobbyChatUpdate_t>.Create(OnLobbyChatUpdate);
+    // Start is called before the first frame update
+    private void Awake()
+    {
+        if (SteamManager.Initialized)
+        {
+            m_LobbyChatUpdate = Callback<LobbyChatUpdate_t>.Create(OnLobbyChatUpdate);
             m_LobbyDataUpdate = Callback<LobbyDataUpdate_t>.Create(OnLobbyDataUpdate);
-			m_LobbyEnter = CallResult<LobbyEnter_t>.Create(OnLobbyEnter);
+            m_LobbyEnter = CallResult<LobbyEnter_t>.Create(OnLobbyEnter);
             m_LobbyCreated = CallResult<LobbyCreated_t>.Create(OnLobbyCreated);
 
             DontDestroyOnLoad(this);
-		}
-	}
+        }
+    }
 
-	static public void OnBackPressed()
-	{
-		if (lobbyId != 0)
-		{
-			SteamMatchmaking.LeaveLobby((CSteamID)lobbyId);
-			print("Left the lobby.");
-		}
-		SceneManager.LoadScene("MainMenu");
-	}
+    static public void OnBackPressed()
+    {
+        if (lobbyId != 0)
+        {
+            SteamMatchmaking.LeaveLobby((CSteamID)lobbyId);
+            print("Left the lobby.");
+        }
+        SceneManager.LoadScene("MainMenu");
+    }
 
-	static public void CreateLobby()
-	{
-		SteamAPICall_t handle = SteamMatchmaking.CreateLobby(
-			ELobbyType.k_ELobbyTypePublic, cMaxMembers: 4);
-		m_LobbyCreated.Set(handle);
-	}
+    static public void CreateLobby()
+    {
+        SteamAPICall_t handle = SteamMatchmaking.CreateLobby(
+            ELobbyType.k_ELobbyTypePublic, cMaxMembers: 4);
+        m_LobbyCreated.Set(handle);
+    }
 
     static public void JoinLobby(CSteamID id)
     {
         SteamMatchmaking.JoinLobby(id);
     }
 
-	// Callbacks
-	static private void OnLobbyCreated(LobbyCreated_t result, bool bIOFailure)
-	{
-		switch (result.m_eResult)
-		{
-			case EResult.k_EResultOK:
-				print("Lobby created successfully.");
-				break;
-			default:
-				print("Failed to create lobby.");
-				return;
-		}
+    // Callbacks
+    static private void OnLobbyCreated(LobbyCreated_t result, bool bIOFailure)
+    {
+        switch (result.m_eResult)
+        {
+            case EResult.k_EResultOK:
+                print("Lobby created successfully.");
+                break;
+            default:
+                print("Failed to create lobby.");
+                return;
+        }
 
-		bool success = SteamMatchmaking.SetLobbyData(
-			(CSteamID)result.m_ulSteamIDLobby,
-			"name",
-			SteamFriends.GetPersonaName() + "'s lobby");
+        bool success = SteamMatchmaking.SetLobbyData(
+            (CSteamID)result.m_ulSteamIDLobby,
+            "name",
+            SteamFriends.GetPersonaName() + "'s lobby");
         if (success)
         {
             print("Yay set name!");
         }
         else
             print("Nay didn't set name...");
-	}
+    }
 
     static private void OnLobbyEnter(LobbyEnter_t result, bool bIOFailure)
     {
@@ -94,35 +92,35 @@ public class Lobby : MonoBehaviour
 
     // A user has joined, left, disconnected, etc.
     static private void OnLobbyChatUpdate(LobbyChatUpdate_t pCallback)
-	{
-		string affects = SteamFriends.GetFriendPersonaName(
-			(CSteamID)(pCallback.m_ulSteamIDUserChanged));
-		string changer = SteamFriends.GetFriendPersonaName(
-			(CSteamID)(pCallback.m_ulSteamIDMakingChange));
+    {
+        string affects = SteamFriends.GetFriendPersonaName(
+            (CSteamID)(pCallback.m_ulSteamIDUserChanged));
+        string changer = SteamFriends.GetFriendPersonaName(
+            (CSteamID)(pCallback.m_ulSteamIDMakingChange));
 
-		uint bf_stateChange = pCallback.m_rgfChatMemberStateChange;
-		switch (bf_stateChange)
-		{
-			case 1 << 0:
-				// Entered
-				break;
-			case 1 << 1:
-				// Left
-				break;
-			case 1 << 2:
-				// DCd
-				break;
-			case 1 << 3:
-				// Kicked
-				break;
-			case 1 << 4:
-				// Banned
-				break;
-			default:
-				// ???
-				break;
-		}
-	}
+        uint bf_stateChange = pCallback.m_rgfChatMemberStateChange;
+        switch (bf_stateChange)
+        {
+            case 1 << 0:
+                // Entered
+                break;
+            case 1 << 1:
+                // Left
+                break;
+            case 1 << 2:
+                // DCd
+                break;
+            case 1 << 3:
+                // Kicked
+                break;
+            case 1 << 4:
+                // Banned
+                break;
+            default:
+                // ???
+                break;
+        }
+    }
 
     static private void OnLobbyDataUpdate(LobbyDataUpdate_t pCallback)
     {
@@ -132,22 +130,22 @@ public class Lobby : MonoBehaviour
             print("Data was unable to be changed for " + pCallback.m_ulSteamIDMember.ToString());
     }
 
-	static public Dictionary<string, string> GetLobbyDebug()
-	{
-		Dictionary<string, string> lobbyValues;
-		if (SteamManager.Initialized)
-		{
-			lobbyValues = new Dictionary<string, string>
-			{
-				{ "Steam Name", SteamFriends.GetPersonaName() },
-				{ "Steam State", SteamFriends.GetPersonaState().ToString().Substring(15) },
-				{ "Lobby ID", lobbyId == 0 ? "False" : lobbyId.ToString() },
-				{ "Lobby Name", lobbyId == 0 ? "False" : SteamMatchmaking.GetLobbyData((CSteamID)lobbyId, "name") }
-			};
-		}
-		else
-			lobbyValues = new Dictionary<string, string>();
+    static public Dictionary<string, string> GetLobbyDebug()
+    {
+        Dictionary<string, string> lobbyValues;
+        if (SteamManager.Initialized)
+        {
+            lobbyValues = new Dictionary<string, string>
+            {
+                { "Steam Name", SteamFriends.GetPersonaName() },
+                { "Steam State", SteamFriends.GetPersonaState().ToString().Substring(15) },
+                { "Lobby ID", lobbyId == 0 ? "False" : lobbyId.ToString() },
+                { "Lobby Name", lobbyId == 0 ? "False" : SteamMatchmaking.GetLobbyData((CSteamID)lobbyId, "name") }
+            };
+        }
+        else
+            lobbyValues = new Dictionary<string, string>();
 
-		return lobbyValues;
-	}
+        return lobbyValues;
+    }
 }
