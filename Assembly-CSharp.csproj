@@ -8,8 +8,7 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>10.0.20506</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <RootNamespace>
-    </RootNamespace>
+    <RootNamespace></RootNamespace>
     <ProjectGuid>{02A1D8AB-7066-746D-0152-080D65C02CC8}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
@@ -74,13 +73,13 @@
     <Compile Include="Assets\Scripts\Arrays.cs" />
     <Compile Include="Assets\Scripts\Steamworks.NET\SteamManager.cs" />
     <Compile Include="Assets\Scripts\Powerup\FoodBehaviour.cs" />
+    <Compile Include="Assets\Scripts\Object\ColliderToggleTilemap.cs" />
     <Compile Include="Assets\Scripts\Player\BodyPart.cs" />
     <Compile Include="Assets\Scripts\CamBehaviour.cs" />
     <Compile Include="Assets\Scripts\Menu\MainMenu.cs" />
     <Compile Include="Assets\Scripts\Powerup\BodyPartStatus.cs" />
     <Compile Include="Assets\Scripts\Lobby.cs" />
     <Compile Include="Assets\Scripts\Menu\LobbyMenu.cs" />
-    <Compile Include="Assets\Scripts\Object\ColliderToggleTilemap.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />

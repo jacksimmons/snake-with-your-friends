@@ -5,6 +5,9 @@ using UnityEngine;
 public class DebugBehaviour : MonoBehaviour
 {
     [SerializeField]
+    private Lobby _lobby;
+
+    [SerializeField]
     private PlayerBehaviour _player;
 
     [SerializeField]
@@ -46,7 +49,7 @@ public class DebugBehaviour : MonoBehaviour
                 UpdateDisplay(stringPlayerValues);
                 break;
             case e_Display.Lobby:
-                Dictionary<string, string> stringLobbyValues = Lobby.GetLobbyDebug();
+                Dictionary<string, string> stringLobbyValues = _lobby.GetLobbyDebug();
                 UpdateDisplay(stringLobbyValues);
                 break;
             default:

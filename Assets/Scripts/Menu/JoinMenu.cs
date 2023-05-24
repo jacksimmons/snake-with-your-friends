@@ -6,6 +6,9 @@ using UnityEngine.SceneManagement;
 public class JoinMenu : MonoBehaviour
 {
     [SerializeField]
+    private Lobby _lobby;
+
+    [SerializeField]
     private GameObject _contentOutput;
 
     [SerializeField]
@@ -67,7 +70,9 @@ public class JoinMenu : MonoBehaviour
         uint.TryParse(idField.text, out id);
         id--;
 
-        Lobby.JoinLobby(new CSteamID(id));
+        print(id);
+
+        _lobby.JoinLobby((CSteamID)id);
     }
 
     public void OnDistanceDropdownUpdated(int distance)
@@ -134,6 +139,7 @@ public class JoinMenu : MonoBehaviour
             tmps[0].text = (i + 1).ToString();
             tmps[2].text = name;
             tmps[4].text = players.ToString() + "/" + player_limit.ToString();
+            tmps[6].text = lobby_id.ToString();
 
             //string lobbyTypeName;
             //switch (lobbyType)

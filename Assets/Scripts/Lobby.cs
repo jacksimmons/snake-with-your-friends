@@ -5,7 +5,7 @@ using UnityEngine.SceneManagement;
 
 public class Lobby : MonoBehaviour
 {
-    static ulong lobbyId = 0;
+    ulong lobbyId = 0;
 
     protected Callback<LobbyChatUpdate_t> m_LobbyChatUpdate;
     protected Callback<LobbyDataUpdate_t> m_LobbyDataUpdate;
@@ -27,7 +27,7 @@ public class Lobby : MonoBehaviour
         }
     }
 
-    static public void OnBackPressed()
+    public void OnBackPressed()
     {
         if (lobbyId != 0)
         {
@@ -37,20 +37,20 @@ public class Lobby : MonoBehaviour
         SceneManager.LoadScene("MainMenu");
     }
 
-    static public void CreateLobby()
+    public void CreateLobby()
     {
         SteamAPICall_t handle = SteamMatchmaking.CreateLobby(
             ELobbyType.k_ELobbyTypePublic, cMaxMembers: 4);
         m_LobbyCreated.Set(handle);
     }
 
-    static public void JoinLobby(CSteamID id)
+    public void JoinLobby(CSteamID id)
     {
         SteamMatchmaking.JoinLobby(id);
     }
 
     // Callbacks
-    static private void OnLobbyCreated(LobbyCreated_t result, bool bIOFailure)
+    private void OnLobbyCreated(LobbyCreated_t result, bool bIOFailure)
     {
         switch (result.m_eResult)
         {
@@ -74,7 +74,7 @@ public class Lobby : MonoBehaviour
             print("Nay didn't set name...");
     }
 
-    static private void OnLobbyEnter(LobbyEnter_t result, bool bIOFailure)
+    private void OnLobbyEnter(LobbyEnter_t result, bool bIOFailure)
     {
         if (result.m_EChatRoomEnterResponse ==
             (uint)EChatRoomEnterResponse.k_EChatRoomEnterResponseSuccess)
@@ -91,7 +91,7 @@ public class Lobby : MonoBehaviour
     }
 
     // A user has joined, left, disconnected, etc.
-    static private void OnLobbyChatUpdate(LobbyChatUpdate_t pCallback)
+    private void OnLobbyChatUpdate(LobbyChatUpdate_t pCallback)
     {
         string affects = SteamFriends.GetFriendPersonaName(
             (CSteamID)(pCallback.m_ulSteamIDUserChanged));
@@ -122,7 +122,7 @@ public class Lobby : MonoBehaviour
         }
     }
 
-    static private void OnLobbyDataUpdate(LobbyDataUpdate_t pCallback)
+    private void OnLobbyDataUpdate(LobbyDataUpdate_t pCallback)
     {
         if (pCallback.m_bSuccess == 1)
             print("Data changed for " + pCallback.m_ulSteamIDMember.ToString() + " successfully.");
@@ -130,7 +130,7 @@ public class Lobby : MonoBehaviour
             print("Data was unable to be changed for " + pCallback.m_ulSteamIDMember.ToString());
     }
 
-    static public Dictionary<string, string> GetLobbyDebug()
+    public Dictionary<string, string> GetLobbyDebug()
     {
         Dictionary<string, string> lobbyValues;
         if (SteamManager.Initialized)

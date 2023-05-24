@@ -6,24 +6,25 @@
 // Changes to this file will be reverted when you update Steamworks.NET
 
 #if !(UNITY_STANDALONE_WIN || UNITY_STANDALONE_LINUX || UNITY_STANDALONE_OSX || STEAMWORKS_WIN || STEAMWORKS_LIN_OSX)
-#define DISABLESTEAMWORKS
+	#define DISABLESTEAMWORKS
 #endif
 
 #if !DISABLESTEAMWORKS
 
 using System.Runtime.InteropServices;
+using IntPtr = System.IntPtr;
 
 namespace Steamworks
 {
-    /// Used to return English-language diagnostic error messages to caller.
-    /// (For debugging or spewing to a console, etc.  Not intended for UI.)
-    [System.Serializable]
-    [StructLayout(LayoutKind.Sequential)]
-    public struct SteamNetworkingErrMsg
-    {
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = Constants.k_cchMaxSteamNetworkingErrMsg)]
-        public byte[] m_SteamNetworkingErrMsg;
-    }
+	/// Used to return English-language diagnostic error messages to caller.
+	/// (For debugging or spewing to a console, etc.  Not intended for UI.)
+	[System.Serializable]
+	[StructLayout(LayoutKind.Sequential)]
+	public struct SteamNetworkingErrMsg
+	{
+		[MarshalAs(UnmanagedType.ByValArray, SizeConst = Constants.k_cchMaxSteamNetworkingErrMsg)]
+		public byte[] m_SteamNetworkingErrMsg;
+	}
 }
 
 #endif // !DISABLESTEAMWORKS
