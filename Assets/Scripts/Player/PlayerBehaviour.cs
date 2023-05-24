@@ -398,6 +398,9 @@ public class PlayerBehaviour : MonoBehaviour
         }));
     }
 
+    /// <summary>
+    /// Queues the ending of forced movement.
+    /// </summary>
     public void QEndForcedMovement()
     {
         _queuedActions.Add(new Action(() =>
