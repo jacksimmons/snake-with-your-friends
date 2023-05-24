@@ -178,13 +178,13 @@ public class PlayerBehaviour : MonoBehaviour
             movement = _forcedMovement;
         }
 
+        // Direction
+        direction = Vector2.zero;
         // Raw user input
         if (x_input > 0)
             direction = Vector2.right;
         else if (x_input < 0)
             direction = Vector2.left;
-        else
-            direction = Vector2.zero;
 
         // If no x input was provided, check for y input
         if (direction == Vector2.zero)
@@ -193,14 +193,20 @@ public class PlayerBehaviour : MonoBehaviour
                 direction = Vector2.up;
             else if (y_input < 0)
                 direction = Vector2.down;
-            else
-                direction = Vector2.zero;
         }
 
         // We can't have the snake going back on itself.
         // So cancel the new input.
         if (direction == -PrevMovement)
             direction = Vector2.zero;
+
+        // Pausing
+        if (Input.GetButtonDown("Pause"))
+        {
+            // 1 -> 0, 0 -> 1
+            // ! Steam callbacks will NOT WORK after this as Update is not called.
+            Time.timeScale = Mathf.Abs(Time.timeScale - 1f);
+        }
     }
 
     /// <summary>

@@ -7,11 +7,11 @@ public class Lobby : MonoBehaviour
 {
     static ulong lobbyId = 0;
 
-    static protected Callback<LobbyChatUpdate_t> m_LobbyChatUpdate;
-    static protected Callback<LobbyDataUpdate_t> m_LobbyDataUpdate;
+    protected Callback<LobbyChatUpdate_t> m_LobbyChatUpdate;
+    protected Callback<LobbyDataUpdate_t> m_LobbyDataUpdate;
 
-    static private CallResult<LobbyEnter_t> m_LobbyEnter;
-    static private CallResult<LobbyCreated_t> m_LobbyCreated;
+    private CallResult<LobbyEnter_t> m_LobbyEnter;
+    private CallResult<LobbyCreated_t> m_LobbyCreated;
 
     // Start is called before the first frame update
     private void Awake()
