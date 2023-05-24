@@ -146,7 +146,7 @@ public class StatusBehaviour : MonoBehaviour
     public void AddInputEffect(Effect effect, float cooldown)
     {
         // Clear the old effect for the new one
-        _player.ResetMovementSpeed();
+        _player.MovementSpeed = _player.DefaultMovementSpeed;
         if (p_ActiveInputEffects.Count > 0)
             ClearInputEffects();
         p_ActiveInputEffects.Add(effect);
@@ -215,7 +215,7 @@ public class StatusBehaviour : MonoBehaviour
         _numPints = 0;
         _potassiumLevels = 0;
 
-        _player.ResetMovementSpeed();
+        _player.MovementSpeed = _player.DefaultMovementSpeed;
     }
 
     public Dictionary<string, string> GetStatusDebug()

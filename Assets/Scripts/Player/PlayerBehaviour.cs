@@ -45,11 +45,11 @@ public class PlayerBehaviour : MonoBehaviour
     private float _freeMovementSpeedMod = 1.0f;
 
     // Forced movement
-
     // The movement vector to be moved along every frame
     // When the player is in forced movement state
     private Vector2 _forcedMovement = Vector2.zero;
     // Restored after forced movement ends
+
     private List<Vector2> _stored_bp_directions = new List<Vector2>();
 
     // Increments to _moveTime * childCount, then resets
@@ -73,9 +73,12 @@ public class PlayerBehaviour : MonoBehaviour
     // Components
     private Rigidbody2D _rb;
 
+    /// <summary>
+    /// Initialise data structures and objects.
+    /// </summary>
     void Awake()
     {
-        // Create BodyParts
+        // Data structures
         BodyParts = new List<BodyPart>();
         for (int i = 0; i < transform.childCount; i++)
         {
@@ -112,17 +115,9 @@ public class PlayerBehaviour : MonoBehaviour
             }
             BodyParts.Add(bp);
         }
-
-        // Create QueuedActions
+        
         _queuedActions = new List<Action>();
-    }
-
-    void Start()
-    {
-        // Initialise components
-        _rb = GetComponent<Rigidbody2D>();
-
-        // Create Status
+        
         List<BodyPartStatus> bpss = new List<BodyPartStatus>();
         for (int i = 0; i < BodyParts.Count; i++)
         {
@@ -130,11 +125,16 @@ public class PlayerBehaviour : MonoBehaviour
             bpss.Add(bps);
         }
 
-        // Handle free movement
+        // Initialisation
+        _rb = GetComponent<Rigidbody2D>();
         if (freeMovement)
             _moveTime = Mathf.CeilToInt(_moveTime / _freeMovementSpeedMod);
     }
 
+    /// <summary>
+    /// Custom reset method; removes all body parts,
+    /// and resets head and tail rotation.
+    /// </summary>
     public void Reset()
     {
         while (RemoveBodyPart()) { }
@@ -150,7 +150,7 @@ public class PlayerBehaviour : MonoBehaviour
         HandleInput();
     }
 
-    void FixedUpdate()
+    private void FixedUpdate()
     {
         // Increment the timers
         timer++;
@@ -159,7 +159,7 @@ public class PlayerBehaviour : MonoBehaviour
         HandleMovementLoop();
     }
 
-    void HandleInput()
+    private void HandleInput()
     {
         // Movement
         float x_input = Input.GetAxisRaw("Horizontal");
@@ -203,7 +203,10 @@ public class PlayerBehaviour : MonoBehaviour
             direction = Vector2.zero;
     }
 
-    void HandleMovementLoop()
+    /// <summary>
+    /// Handles movement for all body parts, and the frequency of movement ticks.
+    /// </summary>
+    private void HandleMovementLoop()
     {
         if (moveTimer >= _moveTime / MovementSpeed)
         {
@@ -293,22 +296,34 @@ public class PlayerBehaviour : MonoBehaviour
         tail = newBodyPart;
     }
 
+    /// <summary>
+    /// Removes the i-1th body part from the snake.
+    /// ! This needs testing.
+    /// </summary>
+    /// <returns>
+    /// A boolean, `true` meaning the body part was removed and the snake is
+    /// still alive.
+    /// `false` meaning the body part was not removed, as there is only a head
+    /// and a tail left; so the snake should die.
+    /// </returns>
     private bool RemoveBodyPart()
     {
         if (transform.childCount > 2)
         {
-            Destroy(transform.GetChild(transform.childCount - 2).gameObject);
-            BodyParts.RemoveAt(transform.childCount - 2);
+            Destroy(transform.GetChild(transform.childCount - 1).gameObject);
+            BodyParts.RemoveAt(transform.childCount - 1);
+            tail = BodyParts[transform.childCount - 1];
+            tail.p_DefaultSprite = _straightPiece;
+            tail.p_CornerSprites = null;
+            tail.MakeNotCorner(tail.prevRot);
             return true;
         }
         return false;
     }
 
-    public void ResetMovementSpeed()
-    {
-        MovementSpeed = DefaultMovementSpeed;
-    }
-
+    /// <summary>
+    /// Handles death.
+    /// </summary>
     public void HandleDeath()
     {
         _rb.simulated = false;
@@ -325,6 +340,10 @@ public class PlayerBehaviour : MonoBehaviour
         frozen = true;
     }
 
+    /// <summary>
+    /// Outputs debug values for this object.
+    /// </summary>
+    /// <returns>A dictionary containing variable names and their values.</returns>
     public Dictionary<string, string> GetPlayerDebug()
     {
         Dictionary<string, string> playerValues = new Dictionary<string, string>
@@ -342,16 +361,28 @@ public class PlayerBehaviour : MonoBehaviour
         return playerValues;
     }
 
+    /// <summary>
+    /// Queue a new ambiguous action.
+    /// </summary>
+    /// <param name="action">An action (call).</param>
     public void Q(Action action)
     {
         _queuedActions.Add(action);
     }
 
+    /// <summary>
+    /// Queues an AddBodyPart action.
+    /// </summary>
     public void QAddBodyPart()
     {
         _queuedActions.Add(new Action(AddBodyPart));
     }
 
+    /// <summary>
+    /// Queues the beginning of forced movement.
+    /// </summary>
+    /// <param name="direction">The direction of the forced movement.</param>
+    /// <param name="speed">The number of tiles per tick to move at.</param>
     public void QBeginForcedMovement(Vector2 direction, float speed)
     {
         _queuedActions.Add(new Action(() =>
