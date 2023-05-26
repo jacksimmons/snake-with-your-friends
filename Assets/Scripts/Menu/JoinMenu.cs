@@ -3,11 +3,11 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
+/// <summary>
+/// Client-side lobby joining.
+/// </summary>
 public class JoinMenu : MonoBehaviour
 {
-    [SerializeField]
-    private Lobby _lobby;
-
     [SerializeField]
     private GameObject _contentOutput;
 
@@ -66,13 +66,14 @@ public class JoinMenu : MonoBehaviour
 
     public void OnLobbyJoinPressed(TextMeshProUGUI idField)
     {
-        uint id;
-        uint.TryParse(idField.text, out id);
+        ulong id;
+        ulong.TryParse(idField.text, out id);
         id--;
 
         print(id);
 
-        _lobby.JoinLobby((CSteamID)id);
+        Lobby lobby = GameObject.FindWithTag("Lobby").GetComponent<Lobby>();
+        lobby.JoinLobby((CSteamID)id);
     }
 
     public void OnDistanceDropdownUpdated(int distance)

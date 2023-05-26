@@ -1,11 +1,21 @@
 using Steamworks;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
+using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
+/// <summary>
+/// Server-side lobby management.
+/// </summary>
 public class Lobby : MonoBehaviour
 {
-    ulong lobbyId = 0;
+    [SerializeField]
+    private GameObject _lobbyEntryTemplate;
+
+    private CSteamID lobbyId = new CSteamID();
 
     protected Callback<LobbyChatUpdate_t> m_LobbyChatUpdate;
     protected Callback<LobbyDataUpdate_t> m_LobbyDataUpdate;
@@ -29,9 +39,9 @@ public class Lobby : MonoBehaviour
 
     public void OnBackPressed()
     {
-        if (lobbyId != 0)
+        if ((ulong)lobbyId != 0)
         {
-            SteamMatchmaking.LeaveLobby((CSteamID)lobbyId);
+            SteamMatchmaking.LeaveLobby(lobbyId);
             print("Left the lobby.");
         }
         SceneManager.LoadScene("MainMenu");
@@ -46,7 +56,8 @@ public class Lobby : MonoBehaviour
 
     public void JoinLobby(CSteamID id)
     {
-        SteamMatchmaking.JoinLobby(id);
+        SteamAPICall_t handle = SteamMatchmaking.JoinLobby(id);
+        m_LobbyEnter.Set(handle);
     }
 
     // Callbacks
@@ -76,17 +87,21 @@ public class Lobby : MonoBehaviour
 
     private void OnLobbyEnter(LobbyEnter_t result, bool bIOFailure)
     {
-        if (result.m_EChatRoomEnterResponse ==
-            (uint)EChatRoomEnterResponse.k_EChatRoomEnterResponseSuccess)
+        switch (result.m_EChatRoomEnterResponse)
         {
-            lobbyId = result.m_ulSteamIDLobby;
-            print("Joined lobby successfully.");
-
-            print("Number of members: " + SteamMatchmaking.GetNumLobbyMembers((CSteamID)lobbyId).ToString());
-        }
-        else
-        {
-            print(result.m_EChatRoomEnterResponse);
+            case (uint)EChatRoomEnterResponse.k_EChatRoomEnterResponseSuccess:
+                print("Joined lobby successfully.");
+                StartCoroutine(LoadLobby());
+                break;
+            case (uint)EChatRoomEnterResponse.k_EChatRoomEnterResponseNotAllowed:
+                print("Not allowed to join lobby.");
+                break;
+            case (uint)EChatRoomEnterResponse.k_EChatRoomEnterResponseError:
+                print("An error occurred.");
+                break;
+            case (uint)EChatRoomEnterResponse.k_EChatRoomEnterResponseDoesntExist:
+                print("This lobby no longer exists.");
+                break;
         }
     }
 
@@ -98,8 +113,8 @@ public class Lobby : MonoBehaviour
         string changer = SteamFriends.GetFriendPersonaName(
             (CSteamID)(pCallback.m_ulSteamIDMakingChange));
 
-        uint bf_stateChange = pCallback.m_rgfChatMemberStateChange;
-        switch (bf_stateChange)
+        uint stateChange = pCallback.m_rgfChatMemberStateChange;
+        switch (stateChange)
         {
             case 1 << 0:
                 // Entered
@@ -139,13 +154,42 @@ public class Lobby : MonoBehaviour
             {
                 { "Steam Name", SteamFriends.GetPersonaName() },
                 { "Steam State", SteamFriends.GetPersonaState().ToString().Substring(15) },
-                { "Lobby ID", lobbyId == 0 ? "False" : lobbyId.ToString() },
-                { "Lobby Name", lobbyId == 0 ? "False" : SteamMatchmaking.GetLobbyData((CSteamID)lobbyId, "name") }
+                { "Lobby ID", (ulong) lobbyId == 0 ? "False" : lobbyId.ToString() },
+                { "Lobby Name", (ulong) lobbyId, "name") }
             };
         }
         else
             lobbyValues = new Dictionary<string, string>();
 
         return lobbyValues;
+    }
+
+    private IEnumerator LoadLobby()
+    {
+        SceneManager.LoadSceneAsync("LobbyMenu");
+
+        while (SceneManager.GetActiveScene().name != "LobbyMenu")
+        {
+            yield return new WaitForSeconds(1);
+        }
+
+        // The "Content" child has this tag.
+        GameObject content = GameObject.FindWithTag("LobbyPanel");
+
+        TextMeshProUGUI[] tmps = entry.GetComponentsInChildren<TextMeshProUGUI>();
+
+        int numPlayers = SteamMatchmaking.GetNumLobbyMembers(lobbyId);
+
+        for (int i = 0; i < numPlayers; i++)
+        {
+            GameObject entry = Instantiate(_lobbyEntryTemplate, content.transform);
+
+            CSteamID memberId = SteamMatchmaking.GetLobbyMemberByIndex(lobbyId, i);
+            string name = SteamFriends.GetFriendPersonaName(memberId);
+
+            tmps[0].text = i.ToString();
+            tmps[1].text = name;
+        }
+        yield break;
     }
 }

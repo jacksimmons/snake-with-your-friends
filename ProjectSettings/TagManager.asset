@@ -9,6 +9,7 @@ TagManager:
   - Tail
   - Projectile
   - Lobby
+  - LobbyPanel
   layers:
   - Default
   - TransparentFX
