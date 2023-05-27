@@ -3534,7 +3534,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _contentOutput: {fileID: 950525689}
-  _lobbyButtonTemplate: {fileID: 5020935675706754096, guid: 30fdfa5a5a70ff841baa6558ae655ff4, type: 3}
+  _joinEntryTemplate: {fileID: 8144917099292546596, guid: f5b6dc183b65f1f4f84204aacc995d6c, type: 3}
 --- !u!1 &1319000576
 GameObject:
   m_ObjectHideFlags: 0
@@ -5509,6 +5509,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3081178988538383436, guid: 035d7d1d5d9a8b6449c8423e0e7b014f, type: 3}
+      propertyPath: _lobbyEntryTemplate
+      value: 
+      objectReference: {fileID: 8749268797645109097, guid: d408b2826811a0645ad4457ffa56e00f, type: 3}
     - target: {fileID: 3081178988538383437, guid: 035d7d1d5d9a8b6449c8423e0e7b014f, type: 3}
       propertyPath: m_Name
       value: Lobby

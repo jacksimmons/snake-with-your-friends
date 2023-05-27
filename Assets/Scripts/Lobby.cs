@@ -91,6 +91,7 @@ public class Lobby : MonoBehaviour
         {
             case (uint)EChatRoomEnterResponse.k_EChatRoomEnterResponseSuccess:
                 print("Joined lobby successfully.");
+                lobbyId = (CSteamID)result.m_ulSteamIDLobby;
                 StartCoroutine(LoadLobby());
                 break;
             case (uint)EChatRoomEnterResponse.k_EChatRoomEnterResponseNotAllowed:
@@ -117,51 +118,55 @@ public class Lobby : MonoBehaviour
         switch (stateChange)
         {
             case 1 << 0:
-                // Entered
+                print(affects + " entered.");
                 break;
             case 1 << 1:
-                // Left
+                print(affects + " left.");
                 break;
             case 1 << 2:
-                // DCd
+                print(affects + " disconnected.");
                 break;
             case 1 << 3:
-                // Kicked
+                print(changer + " kicked " + affects);
                 break;
             case 1 << 4:
-                // Banned
+                print(changer + " banned " + affects);
                 break;
             default:
-                // ???
+                print("[OnLobbyChatUpdate] Something...happened?");
                 break;
         }
+
+        UpdatePlayersPanel();
     }
 
     private void OnLobbyDataUpdate(LobbyDataUpdate_t pCallback)
     {
         if (pCallback.m_bSuccess == 1)
-            print("Data changed for " + pCallback.m_ulSteamIDMember.ToString() + " successfully.");
-        else
-            print("Data was unable to be changed for " + pCallback.m_ulSteamIDMember.ToString());
-    }
-
-    public Dictionary<string, string> GetLobbyDebug()
-    {
-        Dictionary<string, string> lobbyValues;
-        if (SteamManager.Initialized)
         {
-            lobbyValues = new Dictionary<string, string>
-            {
-                { "Steam Name", SteamFriends.GetPersonaName() },
-                { "Steam State", SteamFriends.GetPersonaState().ToString().Substring(15) },
-                { "Lobby ID", (ulong) lobbyId == 0 ? "False" : lobbyId.ToString() },
-                { "Lobby Name", (ulong) lobbyId, "name") }
-            };
         }
         else
-            lobbyValues = new Dictionary<string, string>();
+        {
+            print("Data was unable to be changed for ID " + pCallback.m_ulSteamIDMember + ".");
+        }
+    }
 
-        return lobbyValues;
+    public void UpdatePlayersPanel()
+    {
+        GameObject content = GameObject.FindWithTag("LobbyPanel");
+        int numPlayers = SteamMatchmaking.GetNumLobbyMembers(lobbyId);
+        for (int i = 0; i < numPlayers; i++)
+        {
+            print(i);
+            GameObject entry = Instantiate(_lobbyEntryTemplate, content.transform);
+            TextMeshProUGUI[] tmps = entry.GetComponentsInChildren<TextMeshProUGUI>();
+
+            CSteamID memberId = SteamMatchmaking.GetLobbyMemberByIndex(lobbyId, i);
+            string name = SteamFriends.GetFriendPersonaName(memberId);
+
+            tmps[0].text = i.ToString();
+            tmps[1].text = name;
+        }
     }
 
     private IEnumerator LoadLobby()
@@ -174,22 +179,26 @@ public class Lobby : MonoBehaviour
         }
 
         // The "Content" child has this tag.
-        GameObject content = GameObject.FindWithTag("LobbyPanel");
-
-        TextMeshProUGUI[] tmps = entry.GetComponentsInChildren<TextMeshProUGUI>();
-
-        int numPlayers = SteamMatchmaking.GetNumLobbyMembers(lobbyId);
-
-        for (int i = 0; i < numPlayers; i++)
-        {
-            GameObject entry = Instantiate(_lobbyEntryTemplate, content.transform);
-
-            CSteamID memberId = SteamMatchmaking.GetLobbyMemberByIndex(lobbyId, i);
-            string name = SteamFriends.GetFriendPersonaName(memberId);
-
-            tmps[0].text = i.ToString();
-            tmps[1].text = name;
-        }
+        UpdatePlayersPanel();
         yield break;
+    }
+
+    public Dictionary<string, string> GetLobbyDebug()
+    {
+        Dictionary<string, string> lobbyValues;
+        if (SteamManager.Initialized)
+        {
+            lobbyValues = new Dictionary<string, string>
+            {
+                { "Steam Name", SteamFriends.GetPersonaName() },
+                { "Steam State", SteamFriends.GetPersonaState().ToString().Substring(15) },
+                { "Lobby ID", (ulong) lobbyId == 0 ? "False" : lobbyId.ToString() },
+                { "Lobby Name", (ulong) lobbyId == 0 ? "-" : SteamMatchmaking.GetLobbyData(lobbyId, "name") }
+            };
+        }
+        else
+            lobbyValues = new Dictionary<string, string>();
+
+        return lobbyValues;
     }
 }

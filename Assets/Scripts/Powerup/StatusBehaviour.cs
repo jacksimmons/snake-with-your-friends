@@ -43,7 +43,6 @@ public class StatusBehaviour : MonoBehaviour
 
     private void Update()
     {
-        print("active input: " + p_ActiveInputEffects.Count);
         _inputEffectCooldown -= Time.deltaTime;
         if (p_ActiveInputEffects.Count > 0)
         {

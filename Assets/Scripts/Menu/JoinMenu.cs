@@ -12,7 +12,7 @@ public class JoinMenu : MonoBehaviour
     private GameObject _contentOutput;
 
     [SerializeField]
-    private GameObject _lobbyButtonTemplate;
+    private GameObject _joinEntryTemplate;
 
     protected Callback<LobbyDataUpdate_t> m_LobbyDataUpdate;
 
@@ -129,7 +129,7 @@ public class JoinMenu : MonoBehaviour
         for (int i = 0; i < count; i++)
         {
             CSteamID lobby_id = SteamMatchmaking.GetLobbyByIndex(i);
-            GameObject newElement = Instantiate(_lobbyButtonTemplate, _contentOutput.transform);
+            GameObject newElement = Instantiate(_joinEntryTemplate, _contentOutput.transform);
             TextMeshProUGUI[] tmps = newElement.GetComponentsInChildren<TextMeshProUGUI>();
 
             string name = SteamMatchmaking.GetLobbyData(lobby_id, "name");
