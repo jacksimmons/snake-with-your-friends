@@ -52,11 +52,6 @@ public class PlayerBehaviour : MonoBehaviour
 
     private List<Vector2> _stored_bp_directions = new List<Vector2>();
 
-    // Increments to _moveTime * childCount, then resets
-    public int timer = 0;
-    // Increments to _moveTime, then resets
-    public int moveTimer = 0;
-    private int _moveTime = 20;
     public bool frozen = false;
 
     public float DefaultMovementSpeed { get; private set; } = 1.0f;
@@ -127,8 +122,8 @@ public class PlayerBehaviour : MonoBehaviour
 
         // Initialisation
         _rb = GetComponent<Rigidbody2D>();
-        if (freeMovement)
-            _moveTime = Mathf.CeilToInt(_moveTime / _freeMovementSpeedMod);
+        //if (freeMovement)
+        //    _moveTime = Mathf.CeilToInt(_moveTime / _freeMovementSpeedMod);
     }
 
     /// <summary>
@@ -148,15 +143,6 @@ public class PlayerBehaviour : MonoBehaviour
     private void Update()
     {
         HandleInput();
-    }
-
-    private void FixedUpdate()
-    {
-        // Increment the timers
-        timer++;
-        moveTimer++;
-
-        HandleMovementLoop();
     }
 
     private void HandleInput()
@@ -211,55 +197,46 @@ public class PlayerBehaviour : MonoBehaviour
 
     /// <summary>
     /// Handles movement for all body parts, and the frequency of movement ticks.
+    /// Called by the lobby every synced moveframe.
     /// </summary>
-    private void HandleMovementLoop()
+    public void HandleMovementLoop()
     {
-        if (moveTimer >= _moveTime / MovementSpeed)
+        // Queued actions happen every move frame, before movement occurs.
+        // Handle queued actions (other than any that
+        // get added by said actions)
+        for (int i = 0; i < _queuedActions.Count; i++)
         {
-            // Reset the timer(s)
-            if (timer >= transform.childCount * _moveTime)
-            {
-                timer = 0;
-            }
-            moveTimer = 0;
+            _queuedActions[0]();
+            _queuedActions.RemoveAt(0);
+        }
 
-            // Queued actions happen every move frame, before movement occurs.
-            // Handle queued actions (other than any that
-            // get added by said actions)
-            for (int i = 0; i < _queuedActions.Count; i++)
-            {
-                _queuedActions[0]();
-                _queuedActions.RemoveAt(0);
-            }
+        // Ensures the first movement has been made
+        if (movement != Vector2.zero)
+        {
+            // Update prevMovement
+            PrevMovement = movement;
 
-            // Ensures the first movement has been made
-            if (movement != Vector2.zero)
+            // Iterate backwards through the body parts, from tail to head
+            // The reason for doing this is so every part inherits its next
+            // direction from the part before it.
+            if (BodyParts.Count > 1)
             {
-                // Update prevMovement
-                PrevMovement = movement;
+                // Tail first
+                BodyPart tailPrev = BodyParts[^2];
+                BodyParts[^1].Move(tailPrev.p_Direction);
 
-                // Iterate backwards through the body parts, from tail to head
-                // The reason for doing this is so every part inherits its next
-                // direction from the part before it.
-                if (BodyParts.Count > 1)
+                // Then the rest of the body, tail - 1 to head
+                for (int i = BodyParts.Count - 2; i >= 0; i--)
                 {
-                    // Tail first
-                    BodyPart tailPrev = BodyParts[^2];
-                    BodyParts[^1].Move(tailPrev.p_Direction);
-
-                    // Then the rest of the body, tail - 1 to head
-                    for (int i = BodyParts.Count - 2; i >= 0; i--)
+                    BodyPart next = null;
+                    Vector2 dir = movement;
+                    if (i > 0)
                     {
-                        BodyPart next = null;
-                        Vector2 dir = movement;
-                        if (i > 0)
-                        {
-                            dir = BodyParts[i - 1].p_Direction;
-                        }
-                        if (i + 1 < BodyParts.Count)
-                            next = BodyParts[i + 1];
-                        BodyParts[i].HandleMovement(dir, next);
+                        dir = BodyParts[i - 1].p_Direction;
                     }
+                    if (i + 1 < BodyParts.Count)
+                        next = BodyParts[i + 1];
+                    BodyParts[i].HandleMovement(dir, next);
                 }
             }
         }

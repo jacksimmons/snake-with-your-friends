@@ -2,10 +2,17 @@ using Steamworks;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Data;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+using System.Text;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+
+// Channels are used for different types:
+// 0 - Non-FixedUpdate strings
+// 1 - FixedUpdate strings
 
 /// <summary>
 /// Server-side lobby management.
@@ -15,11 +22,35 @@ public class Lobby : MonoBehaviour
     [SerializeField]
     private GameObject _lobbyEntryTemplate;
 
-    private CSteamID lobbyId = new CSteamID();
+    // Other Data
+    private PlayerBehaviour _player;
 
+    // User Data
+    private CSteamID _id;
+
+    // Lobby Data
+    private enum LobbyState
+    {
+        NotInOne,
+        InLobbyMenu,
+        InGame
+    }
+    private CSteamID _lobbyId = new CSteamID();
+    private bool _isOwner = false;
+    private LobbyState _lobbyState = LobbyState.NotInOne;
+    private Dictionary<CSteamID, Dictionary<string, string>> _lobbyPlayerList
+        = new Dictionary<CSteamID, Dictionary<string, string>>();
+
+    // Packet data
+    private int _moveTimer = 0;
+    private int _frequency = 60;
+    private IntPtr _sendBuf = Marshal.AllocHGlobal(65536);
+    private const int _MAX_MESSAGES = 16;
+    private IntPtr[] _receiveBufs = new IntPtr[_MAX_MESSAGES];
+
+    // SteamAPI
     protected Callback<LobbyChatUpdate_t> m_LobbyChatUpdate;
     protected Callback<LobbyDataUpdate_t> m_LobbyDataUpdate;
-
     private CallResult<LobbyEnter_t> m_LobbyEnter;
     private CallResult<LobbyCreated_t> m_LobbyCreated;
 
@@ -33,15 +64,143 @@ public class Lobby : MonoBehaviour
             m_LobbyEnter = CallResult<LobbyEnter_t>.Create(OnLobbyEnter);
             m_LobbyCreated = CallResult<LobbyCreated_t>.Create(OnLobbyCreated);
 
+            _id = SteamUser.GetSteamID();
+
             DontDestroyOnLoad(this);
         }
     }
 
+    private void Update()
+    {
+        ReceiveMessages<string>(0);
+    }
+
+    private void FixedUpdate()
+    {
+        ReceiveMessages<string>(1);
+        if (_lobbyState != LobbyState.NotInOne && _isOwner)
+        {
+            IncrementGlobalTimer();
+        }
+    }
+
+    private void IncrementGlobalTimer()
+    {
+        _moveTimer++;
+        if (_moveTimer % _frequency == 0)
+        {
+            // Call all player movement loops, including our own.
+            string message = "move_timer";
+            byte[] data = ToBytes(message);
+            SendMessageTo("all", data, 1);
+            _player.HandleMovementLoop();
+        }
+    }
+
+    private byte[] ToBytes<T>(T data)
+    {
+        int size = Marshal.SizeOf(data);
+        byte[] arr = new byte[size];
+
+        IntPtr ptr = IntPtr.Zero;
+        try
+        {
+            ptr = Marshal.AllocHGlobal(size);
+            Marshal.StructureToPtr(data, ptr, true);
+            Marshal.Copy(ptr, arr, 0, size);
+        }
+        finally
+        {
+            Marshal.FreeHGlobal(ptr);
+        }
+        return arr;
+    }
+
+    private T FromBytes<T>(byte[] data)
+    {
+        T message;
+
+        IntPtr ptr = IntPtr.Zero;
+        try
+        {
+            ptr = Marshal.AllocHGlobal(data.Length);
+            Marshal.Copy(data, 0, ptr, data.Length);
+            message = Marshal.PtrToStructure<T>(ptr);
+        }
+        finally
+        {
+            Marshal.FreeHGlobal(ptr);
+        }
+        return message;
+    }
+
+    private void SendMessageTo(string target, byte[] message, int channel)
+    {
+        print("Message to " + target + ", length: " + message.Length + " bytes");
+        Marshal.Copy(message, 0, _sendBuf, message.Length);
+        try
+        {
+            if (target == "all")
+            {
+                foreach (CSteamID id in _lobbyPlayerList.Keys)
+                {
+                    SteamNetworkingIdentity identity = new SteamNetworkingIdentity();
+                    identity.SetSteamID(id);
+                    SteamNetworkingMessages.SendMessageToUser(ref identity, _sendBuf, (uint)message.Length, 0, channel);
+                }
+            }
+            else
+            {
+                ulong.TryParse(target, out ulong id);
+                CSteamID steamId = new CSteamID(id);
+                SteamNetworkingIdentity identity = new SteamNetworkingIdentity();
+                identity.SetSteamID(steamId);
+                SteamNetworkingMessages.SendMessageToUser(ref identity, _sendBuf, (uint)message.Length, 0, channel);
+            }
+        }
+        catch
+        {
+            Marshal.FreeHGlobal(_sendBuf);
+        }
+    }
+
+    private void ReceiveMessages<T>(int channel)
+    {
+        int messageCount = SteamNetworkingMessages.ReceiveMessagesOnChannel(channel, _receiveBufs, _MAX_MESSAGES);
+        for (int i = 0; i < messageCount; i++)
+        {
+            try
+            {
+                SteamNetworkingMessage_t netMessage = Marshal.PtrToStructure<SteamNetworkingMessage_t>(_receiveBufs[i]);
+                byte[] message = new byte[netMessage.m_cbSize];
+                Marshal.Copy(netMessage.m_pData, message, 0, message.Length);
+                ProcessMessage(FromBytes<T>(message));
+            }
+            finally
+            {
+                Marshal.DestroyStructure<SteamNetworkingMessage_t>(_receiveBufs[i]);
+            }
+        }
+    }
+
+    private void ProcessMessage<T>(T data)
+    {
+        if (typeof(T) == typeof(string))
+        {
+            string message = data.ToString();
+            if (message == "move_timer")
+            {
+                _player.HandleMovementLoop();
+            }
+        }
+    }
+
+    // Lobby Menu
     public void OnBackPressed()
     {
-        if ((ulong)lobbyId != 0)
+        if ((ulong)_lobbyId != 0)
         {
-            SteamMatchmaking.LeaveLobby(lobbyId);
+            SteamMatchmaking.LeaveLobby(_lobbyId);
             print("Left the lobby.");
         }
         SceneManager.LoadScene("MainMenu");
@@ -52,6 +211,7 @@ public class Lobby : MonoBehaviour
         SteamAPICall_t handle = SteamMatchmaking.CreateLobby(
             ELobbyType.k_ELobbyTypePublic, cMaxMembers: 4);
         m_LobbyCreated.Set(handle);
+        _isOwner = true;
     }
 
     public void JoinLobby(CSteamID id)
@@ -91,7 +251,7 @@ public class Lobby : MonoBehaviour
         {
             case (uint)EChatRoomEnterResponse.k_EChatRoomEnterResponseSuccess:
                 print("Joined lobby successfully.");
-                lobbyId = (CSteamID)result.m_ulSteamIDLobby;
+                _lobbyId = (CSteamID)result.m_ulSteamIDLobby;
                 StartCoroutine(LoadLobby());
                 break;
             case (uint)EChatRoomEnterResponse.k_EChatRoomEnterResponseNotAllowed:
@@ -106,7 +266,7 @@ public class Lobby : MonoBehaviour
         }
     }
 
-    // A user has joined, left, disconnected, etc.
+    // A user has joined, left, disconnected, etc. Need to check if we are the new owner.
     private void OnLobbyChatUpdate(LobbyChatUpdate_t pCallback)
     {
         string affects = SteamFriends.GetFriendPersonaName(
@@ -137,7 +297,9 @@ public class Lobby : MonoBehaviour
                 break;
         }
 
-        UpdatePlayersPanel();
+        _isOwner = _id == SteamMatchmaking.GetLobbyOwner(_lobbyId);
+
+        UpdatePlayerList();
     }
 
     private void OnLobbyDataUpdate(LobbyDataUpdate_t pCallback)
@@ -151,17 +313,35 @@ public class Lobby : MonoBehaviour
         }
     }
 
-    public void UpdatePlayersPanel()
+    private void UpdatePlayerList()
     {
+        int numPlayers = SteamMatchmaking.GetNumLobbyMembers(_lobbyId);
+        for (int i = 0; i < numPlayers; i++)
+        {
+            CSteamID memberId = SteamMatchmaking.GetLobbyMemberByIndex(_lobbyId, i);
+            string name = SteamFriends.GetFriendPersonaName(memberId);
+
+            _lobbyPlayerList.Add(memberId,
+                new Dictionary<string, string> { { "name", name } });
+        }
+    }
+
+    public void UpdatePlayerPanel()
+    {
+        // The "Content" child has this tag.
         GameObject content = GameObject.FindWithTag("LobbyPanel");
-        int numPlayers = SteamMatchmaking.GetNumLobbyMembers(lobbyId);
+        foreach (Transform child in content.transform)
+        {
+            Destroy(child.gameObject);
+        }
+        int numPlayers = SteamMatchmaking.GetNumLobbyMembers(_lobbyId);
         for (int i = 0; i < numPlayers; i++)
         {
             print(i);
             GameObject entry = Instantiate(_lobbyEntryTemplate, content.transform);
             TextMeshProUGUI[] tmps = entry.GetComponentsInChildren<TextMeshProUGUI>();
 
-            CSteamID memberId = SteamMatchmaking.GetLobbyMemberByIndex(lobbyId, i);
+            CSteamID memberId = SteamMatchmaking.GetLobbyMemberByIndex(_lobbyId, i);
             string name = SteamFriends.GetFriendPersonaName(memberId);
 
             tmps[0].text = i.ToString();
@@ -171,6 +351,7 @@ public class Lobby : MonoBehaviour
 
     private IEnumerator LoadLobby()
     {
+        _lobbyState = LobbyState.InLobbyMenu;
         SceneManager.LoadSceneAsync("LobbyMenu");
 
         while (SceneManager.GetActiveScene().name != "LobbyMenu")
@@ -178,8 +359,9 @@ public class Lobby : MonoBehaviour
             yield return new WaitForSeconds(1);
         }
 
-        // The "Content" child has this tag.
-        UpdatePlayersPanel();
+        _player = GameObject.FindWithTag("Player").GetComponent<PlayerBehaviour>();
+
+        UpdatePlayerList();
         yield break;
     }
 
@@ -192,8 +374,8 @@ public class Lobby : MonoBehaviour
             {
                 { "Steam Name", SteamFriends.GetPersonaName() },
                 { "Steam State", SteamFriends.GetPersonaState().ToString().Substring(15) },
-                { "Lobby ID", (ulong) lobbyId == 0 ? "False" : lobbyId.ToString() },
-                { "Lobby Name", (ulong) lobbyId == 0 ? "-" : SteamMatchmaking.GetLobbyData(lobbyId, "name") }
+                { "Lobby ID", (ulong) _lobbyId == 0 ? "False" : _lobbyId.ToString() },
+                { "Lobby Name", (ulong) _lobbyId == 0 ? "-" : SteamMatchmaking.GetLobbyData(_lobbyId, "name") }
             };
         }
         else
