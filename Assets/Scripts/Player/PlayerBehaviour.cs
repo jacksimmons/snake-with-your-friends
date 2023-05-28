@@ -10,6 +10,8 @@ using UnityEngine;
 
 public class PlayerBehaviour : MonoBehaviour
 {
+    public Lobby lobby;
+
     [SerializeField]
     public StatusBehaviour status;
 
@@ -124,6 +126,12 @@ public class PlayerBehaviour : MonoBehaviour
         _rb = GetComponent<Rigidbody2D>();
         //if (freeMovement)
         //    _moveTime = Mathf.CeilToInt(_moveTime / _freeMovementSpeedMod);
+    }
+
+    private void Start()
+    {
+        lobby = GameObject.FindWithTag("Lobby").GetComponent<Lobby>();
+        lobby.PlayerLoaded();
     }
 
     /// <summary>

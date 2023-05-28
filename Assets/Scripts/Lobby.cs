@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -11,8 +12,10 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 
 // Channels are used for different types:
-// 0 - Non-FixedUpdate strings
-// 1 - FixedUpdate strings
+// 0 - Update
+// 1 - FixedUpdate
+// 2 - Console Output
+// 3 - Body Parts (List<BodyPart>)
 
 /// <summary>
 /// Server-side lobby management.
@@ -40,6 +43,9 @@ public class Lobby : MonoBehaviour
     private LobbyState _lobbyState = LobbyState.NotInOne;
     private Dictionary<CSteamID, Dictionary<string, string>> _lobbyPlayerList
         = new Dictionary<CSteamID, Dictionary<string, string>>();
+
+    // Loading data
+    private int _playersLoaded = 0;
 
     // Packet data
     private int _moveTimer = 0;
@@ -73,14 +79,35 @@ public class Lobby : MonoBehaviour
     private void Update()
     {
         ReceiveMessages<string>(0);
+        ReceiveMessages<string>(2, true);
+        ReceiveMessages<List<BodyPart>>(3);
     }
 
     private void FixedUpdate()
     {
         ReceiveMessages<string>(1);
-        if (_lobbyState != LobbyState.NotInOne && _isOwner)
+        ReceiveMessages<float>(3);
+
+        if ((_lobbyState != LobbyState.NotInOne) && _isOwner)
         {
             IncrementGlobalTimer();
+        }
+    }
+
+    public void PlayerLoaded()
+    {
+        if (!_isOwner)
+        {
+            SendMessageTo(SteamMatchmaking.GetLobbyOwner(_lobbyId), ToBytes("player_loaded"), 0);
+        }
+        else
+        {
+            _playersLoaded++;
+            if (_playersLoaded == _lobbyPlayerList.Keys.Count)
+            {
+                SendMessageTo((CSteamID)0, ToBytes("all_players_loaded"), 0);
+                SendMessageTo((CSteamID)0, ToBytes("All players have loaded successfully."), 2);
+            }
         }
     }
 
@@ -90,11 +117,16 @@ public class Lobby : MonoBehaviour
         if (_moveTimer % _frequency == 0)
         {
             // Call all player movement loops, including our own.
-            string message = "move_timer";
-            byte[] data = ToBytes(message);
-            SendMessageTo("all", data, 1);
+            SendMessageTo((CSteamID)0, ToBytes("move_timer"), 1);
+            SendMessageTo((CSteamID)0, ToBytes("Move timer."), 2);
             _player.HandleMovementLoop();
+            SendMessageTo((CSteamID)0, ToBytes(_player.BodyParts), 3);
         }
+    }
+
+    private byte[] ToBytes(string str)
+    {
+        return Encoding.ASCII.GetBytes(str.ToString());
     }
 
     private byte[] ToBytes<T>(T data)
@@ -116,6 +148,11 @@ public class Lobby : MonoBehaviour
         return arr;
     }
 
+    private string FromBytes(byte[] data)
+    {
+        return Encoding.ASCII.GetString(data);
+    }
+
     private T FromBytes<T>(byte[] data)
     {
         T message;
@@ -134,13 +171,12 @@ public class Lobby : MonoBehaviour
         return message;
     }
 
-    private void SendMessageTo(string target, byte[] message, int channel)
+    private void SendMessageTo(CSteamID target, byte[] message, int channel)
     {
-        print("Message to " + target + ", length: " + message.Length + " bytes");
         Marshal.Copy(message, 0, _sendBuf, message.Length);
         try
         {
-            if (target == "all")
+            if (target.m_SteamID == 0)
             {
                 foreach (CSteamID id in _lobbyPlayerList.Keys)
                 {
@@ -151,10 +187,8 @@ public class Lobby : MonoBehaviour
             }
             else
             {
-                ulong.TryParse(target, out ulong id);
-                CSteamID steamId = new CSteamID(id);
                 SteamNetworkingIdentity identity = new SteamNetworkingIdentity();
-                identity.SetSteamID(steamId);
+                identity.SetSteamID(target);
                 SteamNetworkingMessages.SendMessageToUser(ref identity, _sendBuf, (uint)message.Length, 0, channel);
             }
         }
@@ -164,7 +198,9 @@ public class Lobby : MonoBehaviour
         }
     }
 
-    private void ReceiveMessages<T>(int channel)
+    /// <typeparam name="T">The type of the return value in the dictionary.
+    /// If `string`, then it is not a dictionary, but simply a string message.</typeparam>
+    private void ReceiveMessages<T>(int channel, bool outputMessage=false)
     {
         int messageCount = SteamNetworkingMessages.ReceiveMessagesOnChannel(channel, _receiveBufs, _MAX_MESSAGES);
         for (int i = 0; i < messageCount; i++)
@@ -172,25 +208,44 @@ public class Lobby : MonoBehaviour
             try
             {
                 SteamNetworkingMessage_t netMessage = Marshal.PtrToStructure<SteamNetworkingMessage_t>(_receiveBufs[i]);
-                byte[] message = new byte[netMessage.m_cbSize];
-                Marshal.Copy(netMessage.m_pData, message, 0, message.Length);
-                ProcessMessage(FromBytes<T>(message));
+                byte[] data = new byte[netMessage.m_cbSize];
+                Marshal.Copy(netMessage.m_pData, data, 0, data.Length);
+
+                if (typeof(T) == typeof(string))
+                {
+                    string message = FromBytes(data);
+
+                    if (outputMessage)
+                        print(message);
+
+                    switch (message)
+                    {
+                        case "move_timer":
+                            _player.HandleMovementLoop();
+                            SendMessageTo((CSteamID)0, ToBytes(_player.BodyParts), 3);
+                            break;
+                        case "player_loaded":
+                            if (_isOwner)
+                            {
+                                _playersLoaded++;
+                            }
+                            else
+                            {
+                                SendMessageTo(netMessage.m_identityPeer.GetSteamID(), ToBytes("player_loaded sent to non-host."), 2);
+                            }
+                            break;
+                    }
+                }
+
+                else if (typeof(T) == typeof(List<BodyPart>))
+                {
+                    // ... Needs player object implementation.
+                    List<BodyPart> bps = FromBytes<List<BodyPart>>(data);
+                }
             }
             finally
             {
                 Marshal.DestroyStructure<SteamNetworkingMessage_t>(_receiveBufs[i]);
-            }
-        }
-    }
-
-    private void ProcessMessage<T>(T data)
-    {
-        if (typeof(T) == typeof(string))
-        {
-            string message = data.ToString();
-            if (message == "move_timer")
-            {
-                _player.HandleMovementLoop();
             }
         }
     }
@@ -211,7 +266,16 @@ public class Lobby : MonoBehaviour
         SteamAPICall_t handle = SteamMatchmaking.CreateLobby(
             ELobbyType.k_ELobbyTypePublic, cMaxMembers: 4);
         m_LobbyCreated.Set(handle);
+        m_LobbyEnter.Set(handle);
         _isOwner = true;
+
+        foreach (GameObject go in GameObject.FindGameObjectsWithTag("PlayerInput"))
+        {
+            if (go.name == "SpeedValue")
+            {
+                int.TryParse(go.GetComponent<TextMeshProUGUI>().text, out _frequency);
+            }
+        }
     }
 
     public void JoinLobby(CSteamID id)
@@ -243,6 +307,7 @@ public class Lobby : MonoBehaviour
         }
         else
             print("Nay didn't set name...");
+        StartCoroutine(LoadLobby());
     }
 
     private void OnLobbyEnter(LobbyEnter_t result, bool bIOFailure)

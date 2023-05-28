@@ -10,6 +10,7 @@ TagManager:
   - Projectile
   - Lobby
   - LobbyPanel
+  - PlayerInput
   layers:
   - Default
   - TransparentFX

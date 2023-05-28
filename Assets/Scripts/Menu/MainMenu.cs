@@ -5,7 +5,7 @@ public class MainMenu : MonoBehaviour
 {
     public void OnCreateServerButtonPressed()
     {
-        SceneManager.LoadScene("LobbyMenu");
+        SceneManager.LoadScene("CreateMenu");
     }
 
     public void OnJoinServerButtonPressed()
