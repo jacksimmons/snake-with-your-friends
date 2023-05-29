@@ -135,6 +135,7 @@ GameObject:
   - component: {fileID: 18165311}
   - component: {fileID: 18165310}
   - component: {fileID: 18165309}
+  - component: {fileID: 18165312}
   m_Layer: 5
   m_Name: BackButton
   m_TagString: Untagged
@@ -207,9 +208,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 3081178988538383436, guid: 035d7d1d5d9a8b6449c8423e0e7b014f, type: 3}
-        m_TargetAssemblyTypeName: Lobby, Assembly-CSharp
-        m_MethodName: OnBackPressed
+      - m_Target: {fileID: 18165312}
+        m_TargetAssemblyTypeName: BackButton, Assembly-CSharp
+        m_MethodName: OnBackButtonPressed
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -257,6 +258,18 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 18165307}
   m_CullTransparentMesh: 1
+--- !u!114 &18165312
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 18165307}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a7a9743745d5bb44391bcac7b21c7e48, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &256766584
 GameObject:
   m_ObjectHideFlags: 0
@@ -1756,7 +1769,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1732592703304815149, guid: cec9101626eb8a243bd3294939ee247a, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 0.00082529016
+      value: 0.00055716856
       objectReference: {fileID: 0}
     - target: {fileID: 1732592703420222981, guid: cec9101626eb8a243bd3294939ee247a, type: 3}
       propertyPath: m_AnchorMax.x
@@ -7367,7 +7380,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5207022035935932376, guid: 40f7a3a081ee2c44ab48254a78546933, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 19.77078
+      value: 19.770546
       objectReference: {fileID: 0}
     - target: {fileID: 5207022036057985250, guid: 40f7a3a081ee2c44ab48254a78546933, type: 3}
       propertyPath: m_AnchorMax.y

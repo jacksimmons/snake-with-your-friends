@@ -11,6 +11,7 @@ using TMPro;
 using UnityEditor.PackageManager.Requests;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using static UnityEngine.Networking.UnityWebRequest;
 
 // Channels are used for different types:
 // 0 - Update
@@ -181,16 +182,24 @@ public class Lobby : MonoBehaviour
             {
                 foreach (CSteamID id in _lobbyNames.Keys)
                 {
-                    SteamNetworkingIdentity identity = new SteamNetworkingIdentity();
-                    identity.SetSteamID(id);
-                    SteamNetworkingMessages.SendMessageToUser(ref identity, _sendBuf, (uint)message.Length, 0, channel);
+                    if (id != _id)
+                    {
+                        SteamNetworkingIdentity identity = new SteamNetworkingIdentity();
+                        identity.SetSteamID(id);
+                        print(SteamFriends.GetFriendPersonaName(id));
+                        EResult result = SteamNetworkingMessages.SendMessageToUser(ref identity, _sendBuf, (uint)message.Length, 0, channel);
+                        if (result != EResult.k_EResultOK)
+                        {
+                            print(":( all");
+                        }
+                    }
                 }
             }
             else
             {
                 SteamNetworkingIdentity identity = new SteamNetworkingIdentity();
                 identity.SetSteamID(target);
-                SteamNetworkingMessages.SendMessageToUser(ref identity, _sendBuf, (uint)message.Length, 0, channel);
+                EResult result = SteamNetworkingMessages.SendMessageToUser(ref identity, _sendBuf, (uint)message.Length, 0, channel);
             }
         }
         catch
