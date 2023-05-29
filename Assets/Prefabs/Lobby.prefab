@@ -45,3 +45,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _lobbyEntryTemplate: {fileID: 8749268797645109097, guid: d408b2826811a0645ad4457ffa56e00f, type: 3}
+  _snakeTemplate: {fileID: 4165315088379130911, guid: 4634c72776595a24fba608f81388cc39, type: 3}

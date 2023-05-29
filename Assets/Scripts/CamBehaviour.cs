@@ -3,14 +3,26 @@ using UnityEngine;
 public class CamBehaviour : MonoBehaviour
 {
     [SerializeField]
-    private PlayerBehaviour _playerBehaviour;
+    private Lobby _lobby;
+    private PlayerBehaviour _player;
     private Transform _playerHead;
 
     private float _followSharpness = 0.1f;
 
-    void Awake()
+    private void Awake()
     {
-        _playerHead = _playerBehaviour.transform.GetChild(0);
+        // i.e. Lobby "DontDestroyOnLoad"s into this scene
+        if (_lobby == null)
+        {
+            _lobby = GameObject.FindWithTag("Lobby").GetComponent<Lobby>();
+        }
+
+        _player = _lobby.Player;
+    }
+
+    private void Start()
+    {
+        _playerHead = _player.transform.GetChild(0);
     }
 
     void LateUpdate()

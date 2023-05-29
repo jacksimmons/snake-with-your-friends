@@ -24,9 +24,11 @@ public class Lobby : MonoBehaviour
 {
     [SerializeField]
     private GameObject _lobbyEntryTemplate;
+    [SerializeField]
+    private GameObject _snakeTemplate;
 
     // Other Data
-    private PlayerBehaviour _player;
+    public PlayerBehaviour Player { get; private set; }
 
     // User Data
     private CSteamID _id;
@@ -119,8 +121,12 @@ public class Lobby : MonoBehaviour
             // Call all player movement loops, including our own.
             SendMessageTo((CSteamID)0, ToBytes("move_timer"), 1);
             SendMessageTo((CSteamID)0, ToBytes("Move timer."), 2);
-            _player.HandleMovementLoop();
-            SendMessageTo((CSteamID)0, ToBytes(_player.BodyParts), 3);
+
+            if (Player != null)
+            {
+                Player.HandleMovementLoop();
+                SendMessageTo((CSteamID)0, ToBytes(Player.BodyParts), 3);
+            }
         }
     }
 
@@ -221,25 +227,21 @@ public class Lobby : MonoBehaviour
                     switch (message)
                     {
                         case "move_timer":
-                            _player.HandleMovementLoop();
-                            SendMessageTo((CSteamID)0, ToBytes(_player.BodyParts), 3);
+                            Player.HandleMovementLoop();
+                            SendMessageTo((CSteamID)0, ToBytes(Player.BodyParts), 3);
                             break;
                         case "player_loaded":
                             if (_isOwner)
-                            {
                                 _playersLoaded++;
-                            }
                             else
-                            {
                                 SendMessageTo(netMessage.m_identityPeer.GetSteamID(), ToBytes("player_loaded sent to non-host."), 2);
-                            }
                             break;
                     }
                 }
 
                 else if (typeof(T) == typeof(List<BodyPart>))
                 {
-                    // ... Needs player object implementation.
+                    // ...Needs player object implementation.
                     List<BodyPart> bps = FromBytes<List<BodyPart>>(data);
                 }
             }
@@ -291,43 +293,35 @@ public class Lobby : MonoBehaviour
         {
             case EResult.k_EResultOK:
                 print("Lobby created successfully.");
+                bool success = SteamMatchmaking.SetLobbyData(
+                (CSteamID)result.m_ulSteamIDLobby,
+                "name",
+                SteamFriends.GetPersonaName() + "'s lobby");
+
+                    if (success)
+                    {
+                        print("Yay set name!");
+                    }
+                    else
+                        print("Nay didn't set name...");
+
                 break;
             default:
                 print("Failed to create lobby.");
                 return;
         }
-
-        bool success = SteamMatchmaking.SetLobbyData(
-            (CSteamID)result.m_ulSteamIDLobby,
-            "name",
-            SteamFriends.GetPersonaName() + "'s lobby");
-        if (success)
-        {
-            print("Yay set name!");
-        }
-        else
-            print("Nay didn't set name...");
-        StartCoroutine(LoadLobby());
     }
 
     private void OnLobbyEnter(LobbyEnter_t result, bool bIOFailure)
     {
-        switch (result.m_EChatRoomEnterResponse)
+        if (bIOFailure || result.m_EChatRoomEnterResponse == (uint)EChatRoomEnterResponse.k_EChatRoomEnterResponseError)
         {
-            case (uint)EChatRoomEnterResponse.k_EChatRoomEnterResponseSuccess:
-                print("Joined lobby successfully.");
-                _lobbyId = (CSteamID)result.m_ulSteamIDLobby;
-                StartCoroutine(LoadLobby());
-                break;
-            case (uint)EChatRoomEnterResponse.k_EChatRoomEnterResponseNotAllowed:
-                print("Not allowed to join lobby.");
-                break;
-            case (uint)EChatRoomEnterResponse.k_EChatRoomEnterResponseError:
-                print("An error occurred.");
-                break;
-            case (uint)EChatRoomEnterResponse.k_EChatRoomEnterResponseDoesntExist:
-                print("This lobby no longer exists.");
-                break;
+            print("Failed to enter lobby.");
+        }
+        else
+        {
+            _lobbyId = (CSteamID)result.m_ulSteamIDLobby;
+            StartCoroutine(LoadLobby());
         }
     }
 
@@ -388,7 +382,10 @@ public class Lobby : MonoBehaviour
 
             _lobbyPlayerList.Add(memberId,
                 new Dictionary<string, string> { { "name", name } });
+            CreatePlayer(memberId);
         }
+
+        UpdatePlayerPanel();
     }
 
     public void UpdatePlayerPanel()
@@ -414,6 +411,22 @@ public class Lobby : MonoBehaviour
         }
     }
 
+    private void CreatePlayer(CSteamID id)
+    {
+        // Need to do all but finding PlayerParent locally, and not with Find,
+        // else other already created players may ping up in the search.
+        GameObject playerParent = GameObject.FindWithTag("PlayerParent");
+        GameObject snake = Instantiate(_snakeTemplate, playerParent.transform);
+        GameObject nameLabel = new GameObject("Name");
+        TextMeshProUGUI tmp = nameLabel.AddComponent<TextMeshProUGUI>();
+        tmp.text = _lobbyPlayerList[id]["name"];
+        print(tmp.text);
+        nameLabel.transform.SetParent(snake.transform.Find("Player").Find("Head"));
+
+        if (id == _id)
+            Player = snake.GetComponentInChildren<PlayerBehaviour>();
+    }
+
     private IEnumerator LoadLobby()
     {
         _lobbyState = LobbyState.InLobbyMenu;
@@ -424,9 +437,8 @@ public class Lobby : MonoBehaviour
             yield return new WaitForSeconds(1);
         }
 
-        _player = GameObject.FindWithTag("Player").GetComponent<PlayerBehaviour>();
-
         UpdatePlayerList();
+
         yield break;
     }
 
