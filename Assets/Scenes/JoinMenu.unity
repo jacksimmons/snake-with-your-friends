@@ -3439,8 +3439,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1291198457}
-        m_TargetAssemblyTypeName: JoinMenu, Assembly-CSharp
+      - m_Target: {fileID: 1810764744}
+        m_TargetAssemblyTypeName: Lobby, Assembly-CSharp
         m_MethodName: OnBackPressed
         m_Mode: 1
         m_Arguments:
@@ -4539,6 +4539,17 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 035d7d1d5d9a8b6449c8423e0e7b014f, type: 3}
+--- !u!114 &1810764744 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3081178988538383436, guid: 035d7d1d5d9a8b6449c8423e0e7b014f, type: 3}
+  m_PrefabInstance: {fileID: 1810764743}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8107f601567f60d45bab8b850b20f366, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1827483020
 GameObject:
   m_ObjectHideFlags: 0

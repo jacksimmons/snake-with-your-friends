@@ -105,8 +105,8 @@ public class Lobby : MonoBehaviour
             _playersLoaded++;
             if (_playersLoaded == _lobbyNames.Keys.Count)
             {
-                SendMessageTo((CSteamID)0, ToBytes("all_players_loaded"), 0);
-                SendMessageTo((CSteamID)0, ToBytes("All players have loaded successfully."), 2);
+                SendMessageTo(CSteamID.Nil, ToBytes("all_players_loaded"), 0);
+                SendMessageTo(CSteamID.Nil, ToBytes("All players have loaded successfully."), 2);
             }
         }
     }
@@ -117,8 +117,8 @@ public class Lobby : MonoBehaviour
         if (_moveTimer % _frequency == 0)
         {
             // Call all player movement loops, including our own.
-            SendMessageTo((CSteamID)0, ToBytes("move_timer"), 1);
-            SendMessageTo((CSteamID)0, ToBytes("Move timer."), 2);
+            SendMessageTo(CSteamID.Nil, ToBytes("move_timer"), 1);
+            SendMessageTo(CSteamID.Nil, ToBytes("Move timer."), 2);
 
             Player.HandleMovementLoop();
             SendBodyPartPackets(CSteamID.Nil);
@@ -297,8 +297,8 @@ public class Lobby : MonoBehaviour
         {
             SteamMatchmaking.LeaveLobby(_lobbyId);
             print("Left the lobby.");
-            Destroy(gameObject);
         }
+        Destroy(gameObject);
         SceneManager.LoadScene("MainMenu");
     }
 

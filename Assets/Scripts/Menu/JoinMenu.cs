@@ -59,11 +59,6 @@ public class JoinMenu : MonoBehaviour
         m_LobbyMatchList.Set(handle);
     }
 
-    public void OnBackPressed()
-    {
-        SceneManager.LoadScene("MainMenu");
-    }
-
     public void OnLobbyJoinPressed(TextMeshProUGUI idField)
     {
         ulong id;
