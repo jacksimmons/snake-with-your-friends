@@ -8,6 +8,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 using TMPro;
+using UnityEditor.PackageManager.Requests;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -15,7 +16,6 @@ using UnityEngine.SceneManagement;
 // 0 - Update
 // 1 - FixedUpdate
 // 2 - Console Output
-// 3 - Body Parts (List<BodyPart>)
 
 /// <summary>
 /// Server-side lobby management.
@@ -40,11 +40,11 @@ public class Lobby : MonoBehaviour
         InLobbyMenu,
         InGame
     }
-    private CSteamID _lobbyId = new CSteamID();
+    private CSteamID _lobbyId = CSteamID.Nil;
     private bool _isOwner = false;
     private LobbyState _lobbyState = LobbyState.NotInOne;
-    private Dictionary<CSteamID, Dictionary<string, string>> _lobbyPlayerList
-        = new Dictionary<CSteamID, Dictionary<string, string>>();
+    private Dictionary<CSteamID, string> _lobbyNames = new Dictionary<CSteamID, string>();
+    private Dictionary<CSteamID, PlayerBehaviour> _lobbyPlayers = new Dictionary<CSteamID, PlayerBehaviour>();
 
     // Loading data
     private int _playersLoaded = 0;
@@ -80,17 +80,15 @@ public class Lobby : MonoBehaviour
 
     private void Update()
     {
-        ReceiveMessages<string>(0);
-        ReceiveMessages<string>(2, true);
-        ReceiveMessages<List<BodyPart>>(3);
+        ReceiveMessages(0);
+        ReceiveMessages(2, true);
     }
 
     private void FixedUpdate()
     {
-        ReceiveMessages<string>(1);
-        ReceiveMessages<float>(3);
+        ReceiveMessages(1);
 
-        if ((_lobbyState != LobbyState.NotInOne) && _isOwner)
+        if ((_lobbyState != LobbyState.NotInOne) && _isOwner && Player != null)
         {
             IncrementGlobalTimer();
         }
@@ -105,7 +103,7 @@ public class Lobby : MonoBehaviour
         else
         {
             _playersLoaded++;
-            if (_playersLoaded == _lobbyPlayerList.Keys.Count)
+            if (_playersLoaded == _lobbyNames.Keys.Count)
             {
                 SendMessageTo((CSteamID)0, ToBytes("all_players_loaded"), 0);
                 SendMessageTo((CSteamID)0, ToBytes("All players have loaded successfully."), 2);
@@ -122,11 +120,8 @@ public class Lobby : MonoBehaviour
             SendMessageTo((CSteamID)0, ToBytes("move_timer"), 1);
             SendMessageTo((CSteamID)0, ToBytes("Move timer."), 2);
 
-            if (Player != null)
-            {
-                Player.HandleMovementLoop();
-                SendMessageTo((CSteamID)0, ToBytes(Player.BodyParts), 3);
-            }
+            Player.HandleMovementLoop();
+            SendBodyPartPackets(CSteamID.Nil);
         }
     }
 
@@ -135,9 +130,9 @@ public class Lobby : MonoBehaviour
         return Encoding.ASCII.GetBytes(str.ToString());
     }
 
-    private byte[] ToBytes<T>(T data)
+    private byte[] ToBytes<T>(T[] data)
     {
-        int size = Marshal.SizeOf(data);
+        int size = Marshal.SizeOf(data.Length);
         byte[] arr = new byte[size];
 
         IntPtr ptr = IntPtr.Zero;
@@ -159,32 +154,32 @@ public class Lobby : MonoBehaviour
         return Encoding.ASCII.GetString(data);
     }
 
-    private T FromBytes<T>(byte[] data)
+    private T[] FromBytes<T>(byte[] data)
     {
-        T message;
+        T[] payload;
 
         IntPtr ptr = IntPtr.Zero;
         try
         {
             ptr = Marshal.AllocHGlobal(data.Length);
             Marshal.Copy(data, 0, ptr, data.Length);
-            message = Marshal.PtrToStructure<T>(ptr);
+            payload = Marshal.PtrToStructure<T[]>(ptr);
         }
         finally
         {
             Marshal.FreeHGlobal(ptr);
         }
-        return message;
+        return payload;
     }
 
     private void SendMessageTo(CSteamID target, byte[] message, int channel)
     {
-        Marshal.Copy(message, 0, _sendBuf, message.Length);
         try
         {
-            if (target.m_SteamID == 0)
+            Marshal.Copy(message, 0, _sendBuf, message.Length);
+            if (target == CSteamID.Nil)
             {
-                foreach (CSteamID id in _lobbyPlayerList.Keys)
+                foreach (CSteamID id in _lobbyNames.Keys)
                 {
                     SteamNetworkingIdentity identity = new SteamNetworkingIdentity();
                     identity.SetSteamID(id);
@@ -204,11 +199,10 @@ public class Lobby : MonoBehaviour
         }
     }
 
-    /// <typeparam name="T">The type of the return value in the dictionary.
-    /// If `string`, then it is not a dictionary, but simply a string message.</typeparam>
-    private void ReceiveMessages<T>(int channel, bool outputMessage=false)
+    private void ReceiveMessages(int channel, bool outputMessage=false)
     {
         int messageCount = SteamNetworkingMessages.ReceiveMessagesOnChannel(channel, _receiveBufs, _MAX_MESSAGES);
+        string message = "none";
         for (int i = 0; i < messageCount; i++)
         {
             try
@@ -216,33 +210,77 @@ public class Lobby : MonoBehaviour
                 SteamNetworkingMessage_t netMessage = Marshal.PtrToStructure<SteamNetworkingMessage_t>(_receiveBufs[i]);
                 byte[] data = new byte[netMessage.m_cbSize];
                 Marshal.Copy(netMessage.m_pData, data, 0, data.Length);
+                CSteamID sender = netMessage.m_identityPeer.GetSteamID();
 
-                if (typeof(T) == typeof(string))
+                if (i == 0)
                 {
-                    string message = FromBytes(data);
-
+                    message = FromBytes(data);
                     if (outputMessage)
                         print(message);
-
-                    switch (message)
-                    {
-                        case "move_timer":
-                            Player.HandleMovementLoop();
-                            SendMessageTo((CSteamID)0, ToBytes(Player.BodyParts), 3);
-                            break;
-                        case "player_loaded":
-                            if (_isOwner)
-                                _playersLoaded++;
-                            else
-                                SendMessageTo(netMessage.m_identityPeer.GetSteamID(), ToBytes("player_loaded sent to non-host."), 2);
-                            break;
-                    }
                 }
 
-                else if (typeof(T) == typeof(List<BodyPart>))
+                switch (message)
                 {
-                    // ...Needs player object implementation.
-                    List<BodyPart> bps = FromBytes<List<BodyPart>>(data);
+                    case "move_timer":
+                        Player.HandleMovementLoop();
+                        SendBodyPartPackets(CSteamID.Nil);
+                        break;
+                    case "player_loaded":
+                        if (_isOwner)
+                            _playersLoaded++;
+                        else
+                            SendMessageTo(netMessage.m_identityPeer.GetSteamID(), ToBytes("player_loaded sent to non-host."), 2);
+                        break;
+                    case "body_parts":
+                        // "body_parts" packet:
+                        // Payload 1 - position_xs
+                        // Payload 2 - position_ys
+                        // Payload 3 - rotations
+                        // Payload 4 - sprites
+                        PlayerBehaviour player = _lobbyPlayers[sender];
+                        if (i == 1)
+                        {
+                            float[] position_xs = FromBytes<float>(data);
+                            // The loop ends if body parts were modified in transit
+                            for (int j = 0; (j < position_xs.Length && j < player.BodyParts.Count); j++)
+                            {
+                                BodyPart bp = player.BodyParts[j];
+                                bp.p_Position = new Vector3(position_xs[j], bp.p_Position.y, bp.p_Position.z);
+                            }
+                        }
+                        else if (i == 2)
+                        {
+                            float[] position_ys = FromBytes<float>(data);
+                            // The loop ends if body parts were modified in transit
+                            for (int j = 0; (j < position_ys.Length && j < player.BodyParts.Count); j++)
+                            {
+                                BodyPart bp = player.BodyParts[j];
+                                bp.p_Position = new Vector3(bp.p_Position.x, position_ys[j], bp.p_Position.z);
+                            }
+                        }
+                        else if (i == 3)
+                        {
+                            float[] rotations = FromBytes<float>(data);
+                            // The loop ends if body parts were modified in transit
+                            for (int j = 0; (j < rotations.Length && j < player.BodyParts.Count); j++)
+                            {
+                                BodyPart bp = player.BodyParts[j];
+                                bp.p_Rotation = Quaternion.Euler(Vector3.forward * rotations[j]);
+                            }
+                        }
+                        else if (i == 4)
+                        {
+                            BodyPartSprite[] sprites = FromBytes<BodyPartSprite>(data);
+                            // The loop ends if body parts were modified in transit
+                            for (int j = 0; (j < sprites.Length && j < player.BodyParts.Count); j++)
+                            {
+                                BodyPart bp = player.BodyParts[j];
+                                bp.p_Sprite = sprites[j];
+                            }
+                        }
+                        break;
+                    default:
+                        break;
                 }
             }
             finally
@@ -255,10 +293,11 @@ public class Lobby : MonoBehaviour
     // Lobby Menu
     public void OnBackPressed()
     {
-        if ((ulong)_lobbyId != 0)
+        if (_lobbyId != CSteamID.Nil)
         {
             SteamMatchmaking.LeaveLobby(_lobbyId);
             print("Left the lobby.");
+            Destroy(gameObject);
         }
         SceneManager.LoadScene("MainMenu");
     }
@@ -292,18 +331,19 @@ public class Lobby : MonoBehaviour
         switch (result.m_eResult)
         {
             case EResult.k_EResultOK:
-                print("Lobby created successfully.");
+                print("Lobby [ID: " + result.m_ulSteamIDLobby + "] created successfully.");
                 bool success = SteamMatchmaking.SetLobbyData(
                 (CSteamID)result.m_ulSteamIDLobby,
                 "name",
                 SteamFriends.GetPersonaName() + "'s lobby");
+                _lobbyId = (CSteamID)result.m_ulSteamIDLobby;
 
-                    if (success)
-                    {
-                        print("Yay set name!");
-                    }
-                    else
-                        print("Nay didn't set name...");
+                if (success)
+                {
+                    print("Yay set name!");
+                }
+                else
+                    print("Nay didn't set name...");
 
                 break;
             default:
@@ -320,8 +360,11 @@ public class Lobby : MonoBehaviour
         }
         else
         {
-            _lobbyId = (CSteamID)result.m_ulSteamIDLobby;
+            // If lobbyId hasn't already been set (i.e. by creating a lobby)
+            if (_lobbyId == CSteamID.Nil)
+                _lobbyId = (CSteamID)result.m_ulSteamIDLobby;
             StartCoroutine(LoadLobby());
+            print("Entered lobby successfully.");
         }
     }
 
@@ -329,9 +372,9 @@ public class Lobby : MonoBehaviour
     private void OnLobbyChatUpdate(LobbyChatUpdate_t pCallback)
     {
         string affects = SteamFriends.GetFriendPersonaName(
-            (CSteamID)(pCallback.m_ulSteamIDUserChanged));
+            (CSteamID)pCallback.m_ulSteamIDUserChanged);
         string changer = SteamFriends.GetFriendPersonaName(
-            (CSteamID)(pCallback.m_ulSteamIDMakingChange));
+            (CSteamID)pCallback.m_ulSteamIDMakingChange);
 
         uint stateChange = pCallback.m_rgfChatMemberStateChange;
         switch (stateChange)
@@ -375,13 +418,14 @@ public class Lobby : MonoBehaviour
     private void UpdatePlayerList()
     {
         int numPlayers = SteamMatchmaking.GetNumLobbyMembers(_lobbyId);
+        print(_lobbyId);
+        print(SteamMatchmaking.GetLobbyData(_lobbyId, "name"));
         for (int i = 0; i < numPlayers; i++)
         {
             CSteamID memberId = SteamMatchmaking.GetLobbyMemberByIndex(_lobbyId, i);
             string name = SteamFriends.GetFriendPersonaName(memberId);
 
-            _lobbyPlayerList.Add(memberId,
-                new Dictionary<string, string> { { "name", name } });
+            _lobbyNames.Add(memberId, name);
             CreatePlayer(memberId);
         }
 
@@ -399,7 +443,6 @@ public class Lobby : MonoBehaviour
         int numPlayers = SteamMatchmaking.GetNumLobbyMembers(_lobbyId);
         for (int i = 0; i < numPlayers; i++)
         {
-            print(i);
             GameObject entry = Instantiate(_lobbyEntryTemplate, content.transform);
             TextMeshProUGUI[] tmps = entry.GetComponentsInChildren<TextMeshProUGUI>();
 
@@ -419,12 +462,13 @@ public class Lobby : MonoBehaviour
         GameObject snake = Instantiate(_snakeTemplate, playerParent.transform);
         GameObject nameLabel = new GameObject("Name");
         TextMeshProUGUI tmp = nameLabel.AddComponent<TextMeshProUGUI>();
-        tmp.text = _lobbyPlayerList[id]["name"];
-        print(tmp.text);
+        tmp.text = _lobbyNames[id];
         nameLabel.transform.SetParent(snake.transform.Find("Player").Find("Head"));
 
+        _lobbyPlayers[id] = snake.GetComponentInChildren<PlayerBehaviour>();
+
         if (id == _id)
-            Player = snake.GetComponentInChildren<PlayerBehaviour>();
+            Player = _lobbyPlayers[id];
     }
 
     private IEnumerator LoadLobby()
@@ -440,6 +484,27 @@ public class Lobby : MonoBehaviour
         UpdatePlayerList();
 
         yield break;
+    }
+
+    private void SendBodyPartPackets(CSteamID to)
+    {
+        float[] position_xs = new float[Player.BodyParts.Count];
+        float[] position_ys = new float[Player.BodyParts.Count];
+        float[] rotations = new float[Player.BodyParts.Count];
+        BodyPartSprite[] sprites = new BodyPartSprite[Player.BodyParts.Count];
+        for (int j = 0; j < Player.BodyParts.Count; j++)
+        {
+            BodyPart bp = Player.BodyParts[j];
+            position_xs[j] = bp.p_Position.x;
+            position_ys[j] = bp.p_Position.y;
+            rotations[j] = bp.p_Rotation.z;
+            sprites[j] = bp.p_Sprite;
+        }
+        SendMessageTo(to, ToBytes("body_parts"), 1);
+        SendMessageTo(to, ToBytes(position_xs), 1);
+        SendMessageTo(to, ToBytes(position_ys), 1);
+        SendMessageTo(to, ToBytes(rotations), 1);
+        SendMessageTo(to, ToBytes(sprites), 1);
     }
 
     public Dictionary<string, string> GetLobbyDebug()

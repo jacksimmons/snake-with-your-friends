@@ -28,7 +28,7 @@ public class PlayerBehaviour : MonoBehaviour
 
     // Corner pieces
     [SerializeField]
-    private Sprite[] _cornerPieces = new Sprite[4];
+    private Sprite[] _spriteSheet; // Must match with length of BodyPartSprite
 
     // Directions and movement
 
@@ -79,27 +79,21 @@ public class PlayerBehaviour : MonoBehaviour
         BodyParts = new List<BodyPart>();
         for (int i = 0; i < transform.childCount; i++)
         {
-            Sprite _sprite;
-            Sprite[] _cornerSprites = null;
-
-            if (i == 0)
-                _sprite = _headPiece;
-            else if (i == transform.childCount - 1)
-                _sprite = _tailPiece;
-            else
-            {
-                _sprite = _straightPiece;
-                _cornerSprites = _cornerPieces;
-            }
-
             Transform _transform = transform.GetChild(i);
-
             BodyPart bp;
 
             // Head and body
             if (i < transform.childCount - 1)
             {
-                bp = new BodyPart(_transform, _startingDirection, _sprite, _cornerSprites);
+                BodyPartSprite _sprite;
+
+                // Calculate sprites for head and straights
+                if (i == 0)
+                    _sprite = BodyPartSprite.Head;
+                else
+                    _sprite = BodyPartSprite.Straight;
+
+                bp = new BodyPart(_transform, _startingDirection, _sprite, _spriteSheet);
                 if (i == 0)
                     head = bp;
             }
@@ -107,7 +101,7 @@ public class PlayerBehaviour : MonoBehaviour
             // Tail
             else
             {
-                bp = new BodyPart(_transform, _startingDirection, _sprite, null);
+                bp = new BodyPart(_transform, _startingDirection, BodyPartSprite.Tail, null);
                 tail = bp;
             }
             BodyParts.Add(bp);
@@ -259,9 +253,9 @@ public class PlayerBehaviour : MonoBehaviour
         Vector2 position = tail.p_Position - (Vector3)tail.p_Direction;
 
         // Update the (previously) tail into a normal body part
-        tail.p_DefaultSprite = _straightPiece;
-        tail.p_Sprite = _straightPiece;
-        tail.p_CornerSprites = _cornerPieces;
+        tail.p_DefaultSprite = BodyPartSprite.Straight;
+        tail.p_Sprite = BodyPartSprite.Straight;
+        tail.p_SpriteSheet = _spriteSheet;
 
         // Instantiate the new body part
         GameObject newBodyPartObj = Instantiate(_bp_template, position, tail.p_Rotation, transform);
@@ -269,9 +263,9 @@ public class PlayerBehaviour : MonoBehaviour
         // Create the new BodyPart object, and turn it into the tail
         BodyPart newBodyPart = new BodyPart(tail, newBodyPartObj.transform)
         {
-            p_DefaultSprite = _tailPiece,
-            p_Sprite = _tailPiece,
-            p_CornerSprites = null
+            p_DefaultSprite = BodyPartSprite.Tail,
+            p_Sprite = BodyPartSprite.Tail,
+            p_SpriteSheet = null
         };
 
         // The snake will end with ~- (~ is the new tail), as expected
@@ -304,8 +298,8 @@ public class PlayerBehaviour : MonoBehaviour
             Destroy(transform.GetChild(transform.childCount - 1).gameObject);
             BodyParts.RemoveAt(transform.childCount - 1);
             tail = BodyParts[transform.childCount - 1];
-            tail.p_DefaultSprite = _straightPiece;
-            tail.p_CornerSprites = null;
+            tail.p_DefaultSprite = BodyPartSprite.Straight;
+            tail.p_SpriteSheet = null;
             tail.MakeNotCorner(tail.prevRot);
             return true;
         }

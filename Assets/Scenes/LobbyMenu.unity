@@ -1380,7 +1380,7 @@ GameObject:
   - component: {fileID: 707000766}
   m_Layer: 0
   m_Name: Players
-  m_TagString: Untagged
+  m_TagString: PlayerParent
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1393,7 +1393,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 707000765}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 73.1972, y: 33.344906, z: 4.227179}
+  m_LocalPosition: {x: 0, y: -5, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1706,7 +1706,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1732592703304815149, guid: cec9101626eb8a243bd3294939ee247a, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 0.000010864458
+      value: 0.000833106
       objectReference: {fileID: 0}
     - target: {fileID: 1732592703420222981, guid: cec9101626eb8a243bd3294939ee247a, type: 3}
       propertyPath: m_AnchorMax.x
@@ -7313,7 +7313,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5207022035935932376, guid: 40f7a3a081ee2c44ab48254a78546933, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 19.77002
+      value: 19.770807
       objectReference: {fileID: 0}
     - target: {fileID: 5207022036057985250, guid: 40f7a3a081ee2c44ab48254a78546933, type: 3}
       propertyPath: m_AnchorMax.y

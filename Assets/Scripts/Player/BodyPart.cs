@@ -1,4 +1,17 @@
+using System;
+using System.Runtime.InteropServices;
 using UnityEngine;
+
+public enum BodyPartSprite
+{
+    Head,
+    Tail,
+    Straight,
+    CornerTopLeft, // r
+    CornerTopRight, // 7
+    CornerBottomLeft, // l
+    CornerBottomRight, // _|
+}
 
 public class BodyPart
 {
@@ -17,17 +30,26 @@ public class BodyPart
         get { return _transform.rotation; }
         set { _transform.rotation = value; }
     }
-
-    public Sprite p_Sprite
+    private BodyPartSprite _sprite;
+    public BodyPartSprite p_Sprite
     {
-        get { return _transform.gameObject.GetComponent<SpriteRenderer>().sprite; }
-        set { _transform.gameObject.GetComponent<SpriteRenderer>().sprite = value; }
+        get { return _sprite; }
+        set
+        {
+            if (p_SpriteSheet != null)
+            {
+                _sprite = value;
+                _transform.gameObject.GetComponent<SpriteRenderer>().sprite = p_SpriteSheet[(int)_sprite];
+            }
+            else
+            {
+                Debug.LogError("Cannot allocate sprite when there is no sprite sheet.");
+            }
+        }
     }
-    public Sprite p_DefaultSprite { get; set; }
-    public Sprite[] p_CornerSprites { get; set; }
-
+    public BodyPartSprite p_DefaultSprite { get; set; }
+    public Sprite[] p_SpriteSheet { get; set; }
     public Vector2 p_Direction { get; set; }
-
     public int p_TeleportCounter { get; set; }
 
     // Read-only outside of this class
@@ -51,7 +73,6 @@ public class BodyPart
         p_Direction = old.p_Direction;
         p_Sprite = old.p_Sprite;
         p_DefaultSprite = old.p_DefaultSprite;
-        p_CornerSprites = old.p_CornerSprites;
         _isCorner = old.p_IsCorner;
         // Will not affect teleporting UNLESS necessary
         p_TeleportCounter = old.p_TeleportCounter + 1;
@@ -65,13 +86,13 @@ public class BodyPart
     /// <param name="direction"></param>
     /// <param name="defaultSprite"></param>
     /// <param name="cornerSprites"></param>
-    public BodyPart(Transform transform, Vector2 direction, Sprite defaultSprite,
-        Sprite[] cornerSprites)
+    public BodyPart(Transform transform, Vector2 direction, BodyPartSprite defaultSprite,
+        Sprite[] spriteSheet)
     {
         _transform = transform;
         p_Direction = direction;
         p_DefaultSprite = defaultSprite;
-        p_CornerSprites = cornerSprites;
+        p_SpriteSheet = spriteSheet;
 
         _isCorner = false;
         p_TeleportCounter = 0;
@@ -92,33 +113,44 @@ public class BodyPart
         if (p_Direction == Vector2.up)
         {
             if (prevDir == Vector2.left)
-                p_Sprite = p_CornerSprites[3]; // -R
+                p_Sprite = BodyPartSprite.CornerTopRight;
+            //p_Sprite = p_CornerSprites[3]; // -R
             else if (prevDir == Vector2.right)
-                p_Sprite = p_CornerSprites[2]; // R
+                p_Sprite = BodyPartSprite.CornerTopLeft;
+            //p_Sprite = p_CornerSprites[2]; // R
         }
 
         else if (p_Direction == Vector2.left)
         {
             if (prevDir == Vector2.up)
-                p_Sprite = p_CornerSprites[0]; // L
+                p_Sprite = BodyPartSprite.CornerBottomLeft;
+                //p_Sprite = p_CornerSprites[0]; // L
             else if (prevDir == Vector2.down)
-                p_Sprite = p_CornerSprites[2]; // R
+                p_Sprite = BodyPartSprite.CornerTopLeft;
+                //p_Sprite = p_CornerSprites[2]; // R
         }
 
         else if (p_Direction == Vector2.down)
         {
             if (prevDir == Vector2.left)
-                p_Sprite = p_CornerSprites[1]; // -L
+                p_Sprite = BodyPartSprite.CornerBottomRight;
+                //p_Sprite = p_CornerSprites[1]; // -L
             else if (prevDir == Vector2.right)
-                p_Sprite = p_CornerSprites[0]; // L
+                p_Sprite = BodyPartSprite.CornerBottomLeft;
+
+            //p_Sprite = p_CornerSprites[0]; // L
         }
 
         else if (p_Direction == Vector2.right)
         {
             if (prevDir == Vector2.up)
-                p_Sprite = p_CornerSprites[1]; // -L
+                p_Sprite = BodyPartSprite.CornerBottomRight;
+
+            //p_Sprite = p_CornerSprites[1]; // -L
             else if (prevDir == Vector2.down)
-                p_Sprite = p_CornerSprites[3]; // -R
+                p_Sprite = BodyPartSprite.CornerTopRight;
+
+            //p_Sprite = p_CornerSprites[3]; // -R
         }
     }
 
@@ -171,7 +203,7 @@ public class BodyPart
         {
             // If the next part isn't a tail, and is an angled body part,
             // make it a corner.
-            if (next.p_CornerSprites != null)
+            if (next.p_SpriteSheet != null)
             {
                 if (angle != 0)
                 {

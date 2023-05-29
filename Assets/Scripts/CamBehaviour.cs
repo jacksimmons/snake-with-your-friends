@@ -1,4 +1,6 @@
+using System.Collections;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class CamBehaviour : MonoBehaviour
 {
@@ -18,21 +20,33 @@ public class CamBehaviour : MonoBehaviour
         }
 
         _player = _lobby.Player;
-    }
 
-    private void Start()
-    {
-        _playerHead = _player.transform.GetChild(0);
+        if (_player == null)
+            StartCoroutine(WaitForPlayer());
     }
 
     void LateUpdate()
     {
-        float blend = 1 - Mathf.Pow(1 - _followSharpness, Time.deltaTime * 30);
+        if (_player != null)
+        {
+            float blend = 1 - Mathf.Pow(1 - _followSharpness, Time.deltaTime * 30);
 
-        if (_playerHead != null)
-            transform.position = Vector3.Lerp(
-            transform.position,
-            _playerHead.position + Vector3.back,
-            blend);
+            if (_playerHead != null)
+                transform.position = Vector3.Lerp(
+                transform.position,
+                _playerHead.position + Vector3.back,
+                blend);
+        }
+    }
+
+    private IEnumerator WaitForPlayer()
+    {
+        _player = _lobby.Player;
+        while (_player == null)
+        {
+            yield return new WaitForSeconds(1);
+        }
+        _playerHead = _player.transform.GetChild(0);
+        yield break;
     }
 }

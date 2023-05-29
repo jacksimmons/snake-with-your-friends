@@ -68,9 +68,6 @@ public class JoinMenu : MonoBehaviour
     {
         ulong id;
         ulong.TryParse(idField.text, out id);
-        id--;
-
-        print(id);
 
         Lobby lobby = GameObject.FindWithTag("Lobby").GetComponent<Lobby>();
         lobby.JoinLobby((CSteamID)id);
