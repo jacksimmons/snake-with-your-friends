@@ -1,4 +1,5 @@
 using System.Collections;
+using UnityEditorInternal;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -6,23 +7,13 @@ public class CamBehaviour : MonoBehaviour
 {
     [SerializeField]
     private Lobby _lobby;
-    private PlayerBehaviour _player;
-    private Transform _playerHead;
+    public PlayerBehaviour _player;
 
     private float _followSharpness = 0.1f;
 
     private void Awake()
     {
-        // i.e. Lobby "DontDestroyOnLoad"s into this scene
-        if (_lobby == null)
-        {
-            _lobby = GameObject.FindWithTag("Lobby").GetComponent<Lobby>();
-        }
-
-        _player = _lobby.Player;
-
-        if (_player == null)
-            StartCoroutine(WaitForPlayer());
+        StartCoroutine(WaitForPlayer());
     }
 
     void LateUpdate()
@@ -31,22 +22,25 @@ public class CamBehaviour : MonoBehaviour
         {
             float blend = 1 - Mathf.Pow(1 - _followSharpness, Time.deltaTime * 30);
 
-            if (_playerHead != null)
-                transform.position = Vector3.Lerp(
-                transform.position,
-                _playerHead.position + Vector3.back,
-                blend);
+            transform.position = Vector3.Lerp(
+            transform.position,
+            _player.head.p_Position + Vector3.back,
+            blend);
         }
     }
 
     private IEnumerator WaitForPlayer()
     {
-        _player = _lobby.Player;
-        while (_player == null)
+        while (_lobby == null || _player == null)
         {
+            try
+            {
+                _lobby = GameObject.FindWithTag("Lobby").GetComponent<Lobby>();
+                _player = _lobby.Player;
+            }
+            catch { }
             yield return new WaitForSeconds(1);
         }
-        _playerHead = _player.transform.GetChild(0);
         yield break;
     }
 }

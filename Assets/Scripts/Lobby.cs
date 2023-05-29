@@ -468,7 +468,9 @@ public class Lobby : MonoBehaviour
         _lobbyPlayers[id] = snake.GetComponentInChildren<PlayerBehaviour>();
 
         if (id == _id)
+        {
             Player = _lobbyPlayers[id];
+        }
     }
 
     private IEnumerator LoadLobby()
@@ -505,6 +507,7 @@ public class Lobby : MonoBehaviour
         SendMessageTo(to, ToBytes(position_ys), 1);
         SendMessageTo(to, ToBytes(rotations), 1);
         SendMessageTo(to, ToBytes(sprites), 1);
+        SendMessageTo(to, ToBytes("Sent body part data"), 2);
     }
 
     public Dictionary<string, string> GetLobbyDebug()
