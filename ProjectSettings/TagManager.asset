@@ -12,6 +12,7 @@ TagManager:
   - LobbyPanel
   - PlayerInput
   - PlayerParent
+  - AudioHandler
   layers:
   - Default
   - TransparentFX

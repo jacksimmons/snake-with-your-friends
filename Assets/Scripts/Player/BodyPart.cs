@@ -11,6 +11,7 @@ public enum BodyPartSprite
     CornerTopRight, // 7
     CornerBottomLeft, // l
     CornerBottomRight, // _|
+    None
 }
 
 public class BodyPart
@@ -36,6 +37,9 @@ public class BodyPart
         get { return _sprite; }
         set
         {
+            if (value == BodyPartSprite.None)
+                return;
+
             if (p_SpriteSheet != null)
             {
                 _sprite = value;
@@ -71,7 +75,7 @@ public class BodyPart
     {
         _transform = transform;
         p_Direction = old.p_Direction;
-        p_Sprite = old.p_Sprite;
+        p_SpriteSheet = old.p_SpriteSheet;
         p_DefaultSprite = old.p_DefaultSprite;
         _isCorner = old.p_IsCorner;
         // Will not affect teleporting UNLESS necessary
@@ -96,6 +100,7 @@ public class BodyPart
 
         _isCorner = false;
         p_TeleportCounter = 0;
+
         p_Sprite = p_DefaultSprite;
     }
 

@@ -101,7 +101,7 @@ public class PlayerBehaviour : MonoBehaviour
             // Tail
             else
             {
-                bp = new BodyPart(_transform, _startingDirection, BodyPartSprite.Tail, null);
+                bp = new BodyPart(_transform, _startingDirection, BodyPartSprite.None, null);
                 tail = bp;
             }
             BodyParts.Add(bp);
