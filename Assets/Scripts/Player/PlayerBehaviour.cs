@@ -124,8 +124,12 @@ public class PlayerBehaviour : MonoBehaviour
 
     private void Start()
     {
-        lobby = GameObject.FindWithTag("Lobby").GetComponent<Lobby>();
-        lobby.PlayerLoaded();
+        try
+        {
+            lobby = GameObject.FindWithTag("Lobby").GetComponent<Lobby>();
+            lobby.PlayerLoaded();
+        }
+        catch { }
     }
 
     /// <summary>
@@ -145,6 +149,11 @@ public class PlayerBehaviour : MonoBehaviour
     private void Update()
     {
         HandleInput();
+    }
+
+    private void OnCounterThresholdReached()
+    {
+        HandleMovementLoop();
     }
 
     private void HandleInput()

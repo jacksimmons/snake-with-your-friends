@@ -1,4 +1,5 @@
 using Extensions;
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Tilemaps;
@@ -14,6 +15,7 @@ public class GameBehaviour : MonoBehaviour
 
     [SerializeField]
     private GameObject[] _players;
+
     private bool[] _objects;
 
     [SerializeField]
@@ -38,13 +40,7 @@ public class GameBehaviour : MonoBehaviour
 
     void Start()
     {
-        Vector2Int bl = Vector2Int.zero;
-        Tilemap gameGT = CreateAndReturnTilemap(gridName: "Ground", hasCollider: false);
-        Tilemap gameWT = CreateAndReturnTilemap(gridName: "Wall", hasCollider: true);
-        CreateGroundTilemap(gameGT, bl);
-        CreateWallTilemap(gameWT, bl);
-
-        PlaceSnakes(1, _players, gameGT, bl);
+        
 
         //Vector2Int custBL = Vector2Int.left * ((int)groundSize + 1);
 
@@ -87,6 +83,22 @@ public class GameBehaviour : MonoBehaviour
         //	"Ready", "Unready",
         //	new Vector3(baseBL.x + 1.5f + ((int)groundSize / 2), baseBL.y + (int)groundSize + 0.5f, 0),
         //	new Vector3(readyBL.x + 1.5f + ((int)groundSize / 2), readyBL.y + 1.5f, 0));
+    }
+
+    public void SetupGame(GameObject[] players, PlayerBehaviour localP1)
+    {
+        _players = players;
+        GameObject cam = GameObject.FindWithTag("MainCamera");
+        print("hi");
+        cam.GetComponent<CamBehaviour>().SetupCamera(localP1);
+
+        Vector2Int bl = Vector2Int.zero;
+        Tilemap gameGT = CreateAndReturnTilemap(gridName: "Ground", hasCollider: false);
+        Tilemap gameWT = CreateAndReturnTilemap(gridName: "Wall", hasCollider: true);
+        CreateGroundTilemap(gameGT, bl);
+        CreateWallTilemap(gameWT, bl);
+
+        PlaceSnakes(1, _players, gameGT, bl);
     }
 
     Tilemap CreateAndReturnTilemap(string gridName, bool hasCollider)

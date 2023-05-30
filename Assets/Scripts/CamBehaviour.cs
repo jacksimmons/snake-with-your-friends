@@ -5,16 +5,8 @@ using UnityEngine.SceneManagement;
 
 public class CamBehaviour : MonoBehaviour
 {
-    [SerializeField]
-    private Lobby _lobby;
-    public PlayerBehaviour _player;
-
+    private PlayerBehaviour _player = null;
     private float _followSharpness = 0.1f;
-
-    private void Awake()
-    {
-        StartCoroutine(WaitForPlayer());
-    }
 
     void LateUpdate()
     {
@@ -29,18 +21,8 @@ public class CamBehaviour : MonoBehaviour
         }
     }
 
-    private IEnumerator WaitForPlayer()
+    public void SetupCamera(PlayerBehaviour player)
     {
-        while (_lobby == null || _player == null)
-        {
-            try
-            {
-                _lobby = GameObject.FindWithTag("Lobby").GetComponent<Lobby>();
-                _player = _lobby.Player;
-            }
-            catch { }
-            yield return new WaitForSeconds(1);
-        }
-        yield break;
+        _player = player;
     }
 }

@@ -2,6 +2,24 @@ using System;
 using System.Runtime.InteropServices;
 using UnityEngine;
 
+/// <summary>
+/// Struct to represent data of a BodyPart needed for networking.
+/// </summary>
+public struct BodyPartData
+{
+    public float pos_x, pos_y;
+    public float rotation;
+    public BodyPartSprite sprite;
+}
+
+/// <summary>
+/// Enum used to represent which sprite is being used.
+/// Passed as a message to the other users.
+/// For other users, every body part has their full sprite sheet,
+/// and sprites are selected by these messages.
+/// For local user, only body parts with changing sprites need the
+/// full sprite sheet, or a BodyPartSprite property at all.
+/// </summary>
 public enum BodyPartSprite
 {
     Head,
@@ -129,17 +147,17 @@ public class BodyPart
         {
             if (prevDir == Vector2.up)
                 p_Sprite = BodyPartSprite.CornerBottomLeft;
-                //p_Sprite = p_CornerSprites[0]; // L
+            //p_Sprite = p_CornerSprites[0]; // L
             else if (prevDir == Vector2.down)
                 p_Sprite = BodyPartSprite.CornerTopLeft;
-                //p_Sprite = p_CornerSprites[2]; // R
+            //p_Sprite = p_CornerSprites[2]; // R
         }
 
         else if (p_Direction == Vector2.down)
         {
             if (prevDir == Vector2.left)
                 p_Sprite = BodyPartSprite.CornerBottomRight;
-                //p_Sprite = p_CornerSprites[1]; // -L
+            //p_Sprite = p_CornerSprites[1]; // -L
             else if (prevDir == Vector2.right)
                 p_Sprite = BodyPartSprite.CornerBottomLeft;
 
@@ -236,5 +254,15 @@ public class BodyPart
                 next.p_Transform.Rotate(Vector3.forward, angle);
             }
         }
+    }
+
+    public BodyPartData ToData()
+    {
+        BodyPartData data;
+        data.pos_x = p_Position.x;
+        data.pos_y = p_Position.y;
+        data.rotation = p_Rotation.z;
+        data.sprite = p_Sprite;
+        return data;
     }
 }
