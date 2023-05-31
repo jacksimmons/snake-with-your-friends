@@ -42,7 +42,7 @@ public class MainMenu : MonoBehaviour
         GameObject counter = Instantiate(_counterTemplate, snake.transform);
         Counter counterScript = counter.GetComponent<Counter>();
         counterScript.SetListener(snake.transform.Find("Player").gameObject);
-        counterScript.SetThreshold(30);
+        counterScript.SetThreshold(15);
         counterScript.Paused = false;
         // Cleanup
         Destroy(gameObject);

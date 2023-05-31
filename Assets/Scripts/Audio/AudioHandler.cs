@@ -7,8 +7,9 @@ using UnityEngine;
 /// </summary>
 public class AudioHandler : MonoBehaviour
 {
-    private static AudioSource _clickAudioSource;
-    public static AudioSource _buttonPressAudioSource;
+    private AudioSource _clickAudioSource;
+    private static AudioSource _buttonPressAudioSource;
+    public AudioSource eatAudioSource;
 
     private void Awake()
     {
@@ -24,6 +25,7 @@ public class AudioHandler : MonoBehaviour
         DontDestroyOnLoad(this);
         _clickAudioSource = transform.Find("ClickHandler").GetComponent<AudioSource>();
         _buttonPressAudioSource = transform.Find("ButtonPressHandler").GetComponent<AudioSource>();
+        eatAudioSource = transform.Find("EatHandler").GetComponent<AudioSource>();
     }
 
     private void Update()

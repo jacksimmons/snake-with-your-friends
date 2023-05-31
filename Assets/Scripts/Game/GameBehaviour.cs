@@ -1,5 +1,7 @@
 using Extensions;
+using JetBrains.Annotations;
 using System.Collections.Generic;
+using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Tilemaps;
@@ -15,11 +17,10 @@ public class GameBehaviour : MonoBehaviour
 
     [SerializeField]
     private GameObject[] _players;
-
     private bool[] _objects;
 
     [SerializeField]
-    private GameObject _foodTemplate;
+    private GameObject[] _foodTemplates;
     [SerializeField]
     private GameObject _menuSelectTemplate;
 
@@ -33,6 +34,8 @@ public class GameBehaviour : MonoBehaviour
     [SerializeField]
     private E_WorldSize groundSize;
 
+    Vector2Int bl = Vector2Int.zero;
+
     // Soft limit is preferred, but if it is too small, the hard limit is used (1 tile).
     // The minimum ratio between the distance between two snakes, and the WORLD_SIZE, before an inner square must be established.
     private const float SOFT_MIN_DIST_WORLD_SIZE_RATIO = 0.2f;
@@ -40,49 +43,25 @@ public class GameBehaviour : MonoBehaviour
 
     void Start()
     {
-        
+        groundSize = E_WorldSize.LOBBY;
 
-        //Vector2Int custBL = Vector2Int.left * ((int)groundSize + 1);
+        // Defaults every value to false.
+        _objects = new bool[(int)groundSize * (int)groundSize];
 
-        //// Create the customise area tilemaps
-        //Tilemap custGT = CreateAndReturnTilemap(gridName: "CustGround", hasCollider: false);
-        //Tilemap custWT = CreateAndReturnTilemap(gridName: "CustWall", hasCollider: true);
+        GenerateStartingFood();
+    }
 
-        //CreateGroundTilemap(custGT, custBL);
-        //CreateWallTilemap(custWT, custBL);
+    private void GenerateStartingFood()
+    {
+        for (int i = 0; i < _players.Length; i++)
+        {
+            AddObjectToGrid(Random.Range(0, _objects.Length), _foodTemplates[Random.Range(0, _foodTemplates.Length)]);
+        }
+    }
 
-        //Vector2Int readyBL = Vector2Int.up * ((int)groundSize + 1);
-
-        //// Create the ready area tilemaps
-        //Tilemap readyGT = CreateAndReturnTilemap(gridName: "ReadyGround", hasCollider: false);
-        //Tilemap readyWT = CreateAndReturnTilemap(gridName: "ReadyWall", hasCollider: true);
-
-        //CreateGroundTilemap(readyGT, readyBL);
-        //CreateWallTilemap(readyWT, readyBL);
-
-        //Vector2Int baseBL = Vector2Int.zero;
-
-        //// Create the base area tilemaps
-        //Tilemap baseGT = CreateAndReturnTilemap(gridName: "BaseGround", hasCollider: false);
-        //Tilemap baseWT = CreateAndReturnTilemap(gridName: "BaseWall", hasCollider: true);
-
-        //CreateGroundTilemap(baseGT, baseBL);
-        //CreateWallTilemap(baseWT, baseBL);
-
-        //PlaceSnakes(1, _players, baseGT, baseBL);
-
-        //// Create the object array (the size of the map has been defined now)
-        //_objects = new bool[(int)groundSize * (int)groundSize];
-
-        //CreateTeleportingMenuPair(
-        //	"Customise", "Back",
-        //	new Vector3(baseBL.x + 1.5f + ((int)groundSize / 2), baseBL.y + 1.5f, 0),
-        //	new Vector3(custBL.x + 1.5f + ((int)groundSize / 2), custBL.y + (int)groundSize + 0.5f, 0));
-
-        //CreateTeleportingMenuPair(
-        //	"Ready", "Unready",
-        //	new Vector3(baseBL.x + 1.5f + ((int)groundSize / 2), baseBL.y + (int)groundSize + 0.5f, 0),
-        //	new Vector3(readyBL.x + 1.5f + ((int)groundSize / 2), readyBL.y + 1.5f, 0));
+    public void GenerateFood()
+    {
+        AddObjectToGrid(Random.Range(0, _objects.Length), _foodTemplates[Random.Range(0, _foodTemplates.Length)]);
     }
 
     public void SetupGame(GameObject[] players, PlayerBehaviour localP1)
@@ -92,12 +71,12 @@ public class GameBehaviour : MonoBehaviour
         print("hi");
         cam.GetComponent<CamBehaviour>().SetupCamera(localP1);
 
-        Vector2Int bl = Vector2Int.zero;
         Tilemap gameGT = CreateAndReturnTilemap(gridName: "Ground", hasCollider: false);
         Tilemap gameWT = CreateAndReturnTilemap(gridName: "Wall", hasCollider: true);
+
         CreateGroundTilemap(gameGT, bl);
         CreateWallTilemap(gameWT, bl);
-
+        
         PlaceSnakes(1, _players, gameGT, bl);
     }
 
@@ -220,19 +199,38 @@ public class GameBehaviour : MonoBehaviour
         }
     }
 
-    GameObject CreateObjectOnGrid(Vector2Int gridPos, GameObject obj)
+    GameObject AddObjectToGrid(int objectPos, GameObject obj)
     {
-        int index = ((int)groundSize - 1) * gridPos.y + gridPos.x;
-        if (!_objects[index])
+        if (_objects[objectPos])
         {
-            _objects[index] = true;
-            return Instantiate(obj, (Vector3)(Vector2)gridPos, obj.transform.rotation);
+            // If there already is an object at given pos, try to put
+            // the object on the first different free slot in the array.
+            for (int i = 0; (i < _objects.Length) && (i != objectPos); i++)
+            {
+                // Won't cause an infinite recursion due to the check
+                // which ensures this block won't be entered again.
+                if (!_objects[i])
+                {
+                    return AddObjectToGrid(i, obj);
+                }
+            }
+
+            Debug.LogError("Grid filled with objects!");
+            return null;
         }
         else
         {
-            // Unsuccessful; already an object there
-            return null;
+            Vector2 vectorPos = new Vector2((objectPos % (int)groundSize) + (bl.x + 1.5f), (objectPos / (int)groundSize) + (bl.y + 1.5f));
+            Instantiate(obj, (Vector3)vectorPos, obj.transform.rotation);
+            obj.GetComponent<FoodBehaviour>().gridPos = objectPos;
+            _objects[objectPos] = true;
+            return obj;
         }
+    }
+
+    public void RemoveObjectFromGrid(int gridPos)
+    {
+        _objects[gridPos] = false;
     }
 
     void CreateTeleportingMenuPair(
