@@ -1,3 +1,4 @@
+using Steamworks;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -42,7 +43,7 @@ public class MainMenu : MonoBehaviour
         GameObject counter = Instantiate(_counterTemplate, snake.transform);
         Counter counterScript = counter.GetComponent<Counter>();
         counterScript.SetListener(snake.transform.Find("Player").gameObject);
-        counterScript.SetThreshold(15);
+        counterScript.ThresholdSeconds = 0.2f;
         counterScript.Paused = false;
         // Cleanup
         Destroy(gameObject);

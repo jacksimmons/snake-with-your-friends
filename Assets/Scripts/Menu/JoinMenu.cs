@@ -65,7 +65,10 @@ public class JoinMenu : MonoBehaviour
         ulong.TryParse(idField.text, out id);
 
         Lobby lobby = GameObject.FindWithTag("Lobby").GetComponent<Lobby>();
-        lobby.JoinLobby((CSteamID)id);
+        if (SteamUser.BLoggedOn())
+            lobby.JoinLobby((CSteamID)id);
+        else
+            Debug.LogWarning("You must be online to join a lobby.");
     }
 
     public void OnDistanceDropdownUpdated(int distance)

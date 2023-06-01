@@ -14,6 +14,9 @@ TagManager:
   - PlayerParent
   - AudioHandler
   - GameHandler
+  - Foreground
+  - PoopProjectile
+  - Counter
   layers:
   - Default
   - TransparentFX
@@ -50,7 +53,4 @@ TagManager:
   m_SortingLayers:
   - name: Default
     uniqueID: 0
-    locked: 0
-  - name: Snake
-    uniqueID: 3684412699
     locked: 0

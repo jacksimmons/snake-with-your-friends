@@ -13,6 +13,7 @@ using UnityEditor.PackageManager.Requests;
 using UnityEditor.VersionControl;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 using static UnityEngine.Networking.UnityWebRequest;
 
 // Channels are used for different types:
@@ -119,17 +120,32 @@ public class Lobby : MonoBehaviour
         }
     }
 
-    private void OnCounterThresholdReached()
+    /// <summary>
+    /// The global counter threshold handles all players with default move speed.
+    /// </summary>
+    public void OnCounterThresholdReached()
     {
-        // Call all player movement loops, including our own.
-        SendMessageTo(CSteamID.Nil, ToBytes("move_timer"), Channel.Physics);
-        SendMessageTo(CSteamID.Nil, ToBytes("Move timer."), Channel.Console);
+        // Call all movement loops with default movement speed.
+        foreach (var kvp in _lobbyPlayers)
+        {
+            if (kvp.Value.MovementSpeed != 1.0f)
+                SendMessageTo(kvp.Key, ToBytes("move_timer"), Channel.Physics);
+        }
 
-        Player.HandleMovementLoop();
-        List<byte[]> msgs = new List<byte[]>();
-        foreach (BodyPart bp in Player.BodyParts)
-            msgs.Add(ToBytes(bp.ToData()));
-        SendFormattedMessageTo(CSteamID.Nil, "bp_data", msgs, Channel.Physics);
+        if (Player.MovementSpeed == 1.0f)
+        {
+            Message_PlayerMovement();
+        }
+    }
+
+    /// <summary>
+    /// Player counter thresholds handle individual players with non-standard move
+    /// speed.
+    /// </summary>
+    /// <param name="mover">The player with a custom threshold that got triggered.</param>
+    public void OnCounterThresholdReached(CSteamID mover)
+    {
+        SendMessageTo(mover, ToBytes("move_timer"), Channel.Physics);
     }
 
     private byte[] ToBytes(string str)
@@ -276,15 +292,11 @@ public class Lobby : MonoBehaviour
                 switch (message)
                 {
                     case "move_timer":
-                        Player.HandleMovementLoop();
                         if (_isOwner)
                             Debug.LogError("Owner should never receive a move_timer packet!");
                         else
                         {
-                            List<byte[]> msgs = new List<byte[]>();
-                            foreach (BodyPart bp in Player.BodyParts)
-                                msgs.Add(ToBytes(bp.ToData()));
-                            SendFormattedMessageTo(CSteamID.Nil, "bp_data", msgs, Channel.Physics);
+                            Message_PlayerMovement();
                         }
                         break;
                     case "player_loaded":
@@ -305,6 +317,7 @@ public class Lobby : MonoBehaviour
                             bp.p_Sprite = bpData.sprite;
                         }
                         break;
+                    case "movement_speed_update":
                     default:
                         break;
                 }
@@ -314,6 +327,15 @@ public class Lobby : MonoBehaviour
                 Marshal.DestroyStructure<SteamNetworkingMessage_t>(_receiveBufs[i]);
             }
         }
+    }
+
+    private void Message_PlayerMovement()
+    {
+        Player.HandleMovementLoop();
+        List<byte[]> msgs = new List<byte[]>();
+        foreach (BodyPart bp in Player.BodyParts)
+            msgs.Add(ToBytes(bp.ToData()));
+        SendFormattedMessageTo(CSteamID.Nil, "bp_data", msgs, Channel.Physics);
     }
 
     // Lobby Menu
@@ -338,10 +360,10 @@ public class Lobby : MonoBehaviour
 
         foreach (GameObject go in GameObject.FindGameObjectsWithTag("PlayerInput"))
         {
-            if (go.name == "SpeedValue")
+            if (go.name == "SpeedSlider")
             {
-                int.TryParse(go.GetComponent<TextMeshProUGUI>().text, out int threshold);
-                _counter.SetThreshold(threshold);
+                Slider slider = go.GetComponent<Slider>();
+                _counter.ThresholdSeconds = slider.value;
             }
         }
     }
@@ -513,8 +535,23 @@ public class Lobby : MonoBehaviour
         }
 
         AddAllLobbyMembers();
+        GameObject.FindWithTag("MainCamera").GetComponent<CamBehaviour>().SetupCamera(Player);
+
+        _counter.Paused = false;
 
         yield break;
+    }
+
+    public void OnPlayerMovementSpeedUpdate(float movementSpeed)
+    {
+        if (_isOwner)
+        {
+            
+        }
+        List<byte[]> data = new();
+        byte[] movement_speed = ToBytes(movementSpeed);
+        data.Add(movement_speed);
+        SendFormattedMessageTo(SteamMatchmaking.GetLobbyOwner(_lobbyId), "movement_speed_update", data, Channel.Physics);
     }
 
     public Dictionary<string, string> GetLobbyDebug()

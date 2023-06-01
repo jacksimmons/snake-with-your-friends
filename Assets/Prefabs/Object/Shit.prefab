@@ -11,6 +11,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Shit
       objectReference: {fileID: 0}
+    - target: {fileID: 5210743148125606962, guid: a9390a10e77adec4bae6236616e05b40, type: 3}
+      propertyPath: m_TagString
+      value: PoopProjectile
+      objectReference: {fileID: 0}
     - target: {fileID: 6700415503553030697, guid: a9390a10e77adec4bae6236616e05b40, type: 3}
       propertyPath: m_RootOrder
       value: 0
@@ -88,7 +92,7 @@ BoxCollider2D:
   m_Enabled: 1
   m_Density: 1
   m_Material: {fileID: 0}
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_UsedByEffector: 0
   m_UsedByComposite: 0
   m_Offset: {x: 0, y: -0.041461468}

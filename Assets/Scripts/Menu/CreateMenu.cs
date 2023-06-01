@@ -1,3 +1,4 @@
+using Steamworks;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
@@ -23,5 +24,17 @@ public class CreateMenu : MonoBehaviour
     {
         _speedValue.text = "-" + value.ToString();
         _speed = (int)value;
+    }
+
+    public void OnLobbyCreatePressed()
+    {
+        if (SteamUser.BLoggedOn())
+        {
+            GameObject.FindWithTag("Lobby").GetComponent<Lobby>().CreateLobby();
+        }
+        else
+        {
+            Debug.LogWarning("You must be online to create a lobby.");
+        }
     }
 }

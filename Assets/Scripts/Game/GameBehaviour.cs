@@ -26,13 +26,14 @@ public class GameBehaviour : MonoBehaviour
 
     public enum E_WorldSize : int
     {
+        FUNNY = 2,
         LOBBY = 10,
         GAME_SMALL = 15,
         GAME_MEDIUM = 30,
         GAME_LARGE = 45
     }
     [SerializeField]
-    private E_WorldSize groundSize;
+    private E_WorldSize groundSize = E_WorldSize.LOBBY;
 
     Vector2Int bl = Vector2Int.zero;
 
@@ -43,8 +44,6 @@ public class GameBehaviour : MonoBehaviour
 
     void Start()
     {
-        groundSize = E_WorldSize.LOBBY;
-
         // Defaults every value to false.
         _objects = new bool[(int)groundSize * (int)groundSize];
 
@@ -68,7 +67,6 @@ public class GameBehaviour : MonoBehaviour
     {
         _players = players;
         GameObject cam = GameObject.FindWithTag("MainCamera");
-        print("hi");
         cam.GetComponent<CamBehaviour>().SetupCamera(localP1);
 
         Tilemap gameGT = CreateAndReturnTilemap(gridName: "Ground", hasCollider: false);
@@ -142,7 +140,6 @@ public class GameBehaviour : MonoBehaviour
             (Vector3Int)bl,
             (Vector3Int)(((int)groundSize + 2) * Vector2Int.one) + Vector3Int.forward);
         Tile[] tiles = new Tile[((int)groundSize + 2) * ((int)groundSize + 2)];
-        print(bounds.size);
         for (int i = 0; i < (int)groundSize + 2; i++)
         {
             for (int j = 0; j < (int)groundSize + 2; j++)

@@ -16,7 +16,15 @@ public class StatusBehaviour : MonoBehaviour
     public List<Effect> p_ActiveInputEffects { get; private set; } = new List<Effect>();
     public List<Effect> p_ActivePassiveEffects { get; private set; } = new List<Effect>();
 
+    /// <summary>
+    /// The duration of the cooldown for input effects.
+    /// </summary>
     private float _inputEffectCooldownMax = 0f;
+    /// <summary>
+    /// The current time counter of the cooldown,
+    /// which goes from the cooldown max to 0, then back to the cooldown max.
+    /// When it hits 0, the current input effect can be used.
+    /// </summary>
     private float _inputEffectCooldown = 0f;
 
     private float _majorSpeedBoost = 3f;
@@ -70,7 +78,6 @@ public class StatusBehaviour : MonoBehaviour
             if (Input.GetKey(KeyCode.Space))
                 HandleInput();
         }
-
         HandleStatus();
         HandlePassive();
     }
@@ -111,9 +118,9 @@ public class StatusBehaviour : MonoBehaviour
             {
                 case e_Effect.BreathingFire:
                     GameObject fireball = Instantiate(_fireball, GameObject.Find("Projectiles").transform);
+                    fireball.transform.position = _player.head.p_Position + (Vector3)_player.head.p_Direction;
                     proj = fireball.GetComponent<Projectile>();
-                    proj.Create(Mathf.Infinity, _player.head.p_Position + (Vector3)_player.head.p_Direction,
-                        _player.head.p_Direction, _player.head.p_Rotation, 0.2f);
+                    proj.Create(5, _player.head.p_Direction, _player.head.p_Rotation, _player.MovementSpeed * 0.2f, _player.head.p_Transform.gameObject);
                     break;
             }
         }
@@ -132,9 +139,10 @@ public class StatusBehaviour : MonoBehaviour
                 {
                     case e_Effect.RocketShitting:
                         GameObject shit = Instantiate(_static_shit, GameObject.Find("Projectiles").transform);
+                        print(_player.MovementSpeed);
+                        shit.transform.position = _player.tail.p_Position - (Vector3)_player.tail.p_Direction;
                         proj = shit.GetComponent<Projectile>();
-                        proj.Create(Mathf.Infinity, _player.tail.p_Position - (Vector3)_player.tail.p_Direction,
-                            -_player.tail.p_Direction, _player.tail.p_Rotation, 0.2f);
+                        proj.Create(5, -_player.tail.p_Direction, _player.tail.p_Rotation, _player.MovementSpeed * 0.25f);
                         _player.MovementSpeed = _player.DefaultMovementSpeed + _majorSpeedBoost;
                         break;
                 }
@@ -309,6 +317,9 @@ public class StatusBehaviour : MonoBehaviour
     private void EatApple()
     {
         ClearPassiveEffects();
+        GameObject foreground = GameObject.FindWithTag("Foreground");
+        foreach (Transform fgObj in foreground.transform)
+            Destroy(fgObj.gameObject);
     }
 
     private void EatOrange()

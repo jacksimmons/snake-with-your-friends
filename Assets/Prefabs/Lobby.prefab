@@ -63,6 +63,14 @@ PrefabInstance:
       propertyPath: threshold
       value: 60
       objectReference: {fileID: 0}
+    - target: {fileID: -5830134078427122286, guid: 1d37eb311e796354c88138caf76afd9c, type: 3}
+      propertyPath: _threshold
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -5830134078427122286, guid: 1d37eb311e796354c88138caf76afd9c, type: 3}
+      propertyPath: _thresholdSeconds
+      value: 0.5
+      objectReference: {fileID: 0}
     - target: {fileID: 1950805756671913085, guid: 1d37eb311e796354c88138caf76afd9c, type: 3}
       propertyPath: m_RootOrder
       value: 0

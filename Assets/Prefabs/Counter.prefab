@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: -5830134078427122286}
   m_Layer: 0
   m_Name: Counter
-  m_TagString: Untagged
+  m_TagString: Counter
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -44,3 +44,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 70c6889aa786db94285613a0d6b92ec0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _thresholdSeconds: 0
+  _listener: {fileID: 0}

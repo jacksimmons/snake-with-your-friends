@@ -53,7 +53,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5210743148125606962, guid: a9390a10e77adec4bae6236616e05b40, type: 3}
       propertyPath: m_Name
-      value: Fire
+      value: Fireball
       objectReference: {fileID: 0}
     - target: {fileID: 6700415503553030697, guid: a9390a10e77adec4bae6236616e05b40, type: 3}
       propertyPath: m_RootOrder

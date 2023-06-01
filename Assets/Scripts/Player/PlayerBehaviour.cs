@@ -1,3 +1,4 @@
+using Steamworks;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -10,7 +11,7 @@ using UnityEngine;
 
 public class PlayerBehaviour : MonoBehaviour
 {
-    public Lobby lobby;
+    public Lobby lobby = null;
 
     [SerializeField]
     public StatusBehaviour status;
@@ -57,8 +58,22 @@ public class PlayerBehaviour : MonoBehaviour
     public bool frozen = false;
 
     public float DefaultMovementSpeed { get; private set; } = 1.0f;
-    public float MovementSpeed { get; set; } = 1.0f;
-
+    private float _movementSpeed = 1.0f;
+    public float MovementSpeed
+    {
+        get
+        {
+            return _movementSpeed;
+        }
+        set
+        {
+            _movementSpeed = value;
+            if (lobby)
+            {
+            }
+        }
+    }
+    
     // Body Parts
     public BodyPart head;
     public BodyPart tail;
@@ -70,10 +85,20 @@ public class PlayerBehaviour : MonoBehaviour
     // Components
     private Rigidbody2D _rb;
 
+    public void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (collision.gameObject.CompareTag("PoopProjectile"))
+        {
+            ForegroundBehaviour fg = GameObject.FindWithTag("Foreground").GetComponent<ForegroundBehaviour>();
+            fg.AddToForeground(collision.gameObject.GetComponent<SpriteRenderer>().sprite);
+            Destroy(collision.gameObject);
+        }
+    }
+
     /// <summary>
     /// Initialise data structures and objects.
     /// </summary>
-    void Awake()
+    private void Awake()
     {
         // Data structures
         BodyParts = new List<BodyPart>();
@@ -122,12 +147,14 @@ public class PlayerBehaviour : MonoBehaviour
         //    _moveTime = Mathf.CeilToInt(_moveTime / _freeMovementSpeedMod);
     }
 
+    /// <summary>
+    /// Initialise lobby.
+    /// </summary>
     private void Start()
     {
         try
         {
             lobby = GameObject.FindWithTag("Lobby").GetComponent<Lobby>();
-            lobby.PlayerLoaded();
         }
         catch { }
     }
@@ -263,8 +290,8 @@ public class PlayerBehaviour : MonoBehaviour
 
         // Update the (previously) tail into a normal body part
         tail.p_DefaultSprite = BodyPartSprite.Straight;
-        tail.p_Sprite = BodyPartSprite.Straight;
         tail.p_SpriteSheet = _spriteSheet;
+        tail.p_Sprite = BodyPartSprite.Straight;
 
         // Instantiate the new body part
         GameObject newBodyPartObj = Instantiate(_bp_template, position, tail.p_Rotation, transform);
@@ -332,6 +359,16 @@ public class PlayerBehaviour : MonoBehaviour
             BodyParts[i].p_Transform.GetComponent<SpriteRenderer>().sortingOrder += 1;
         }
         frozen = true;
+    }
+
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (collision.collider.gameObject.TryGetComponent(out Projectile proj))
+        {
+            // If the local collider is immune, no collision has occurred.
+            if (proj.immune == collision.otherCollider.gameObject)
+                return;
+        }
     }
 
     /// <summary>
