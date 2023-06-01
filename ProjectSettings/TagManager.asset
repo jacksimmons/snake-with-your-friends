@@ -17,6 +17,7 @@ TagManager:
   - Foreground
   - PoopProjectile
   - Counter
+  - Debug
   layers:
   - Default
   - TransparentFX

@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -26,6 +27,24 @@ public class DebugBehaviour : MonoBehaviour
     }
     private e_Display Display { get; set; }
 
+    private void Start()
+    {
+        try
+        {
+            _lobby = GameObject.FindWithTag("Lobby").GetComponent<Lobby>();
+        }
+        catch { }
+
+        try
+        {
+            _player = _lobby.Player;
+        }
+        catch
+        {
+            StartCoroutine(WaitForPlayer());
+        }
+    }
+
     private void Update()
     {
         if (Input.GetKey(KeyCode.LeftShift))
@@ -41,16 +60,25 @@ public class DebugBehaviour : MonoBehaviour
         switch (Display)
         {
             case e_Display.Status:
-                Dictionary<string, string> stringStatuses = _player.status.GetStatusDebug();
-                UpdateDisplay(stringStatuses);
+                if (_player)
+                {
+                    Dictionary<string, string> stringStatuses = _player.status.GetStatusDebug();
+                    UpdateDisplay(stringStatuses);
+                }
                 break;
             case e_Display.Player:
-                Dictionary<string, string> stringPlayerValues = _player.GetPlayerDebug();
-                UpdateDisplay(stringPlayerValues);
+                if (_player)
+                {
+                    Dictionary<string, string> stringPlayerValues = _player.GetPlayerDebug();
+                    UpdateDisplay(stringPlayerValues);
+                }
                 break;
             case e_Display.Lobby:
-                Dictionary<string, string> stringLobbyValues = _lobby.GetLobbyDebug();
-                UpdateDisplay(stringLobbyValues);
+                if (_lobby)
+                {
+                    Dictionary<string, string> stringLobbyValues = _lobby.GetLobbyDebug();
+                    UpdateDisplay(stringLobbyValues);
+                }
                 break;
             default:
                 break;
@@ -84,5 +112,17 @@ public class DebugBehaviour : MonoBehaviour
         {
             Destroy(child.gameObject);
         }
+    }
+
+    private IEnumerator WaitForPlayer()
+    {
+        GameObject player = null;
+        while (player == null)
+        {
+            player = GameObject.FindWithTag("Player");
+            yield return new WaitForSeconds(1);
+        }
+        _player = player.GetComponent<PlayerBehaviour>();
+        yield break;
     }
 }

@@ -201,6 +201,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Debug_UI
       objectReference: {fileID: 0}
+    - target: {fileID: 7208155231810767152, guid: 005bb74eec346d44b89be5b4fc6a694b, type: 3}
+      propertyPath: m_TagString
+      value: Debug
+      objectReference: {fileID: 0}
     - target: {fileID: 7208155231810767159, guid: 005bb74eec346d44b89be5b4fc6a694b, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
@@ -323,7 +327,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7208155232660270188, guid: 005bb74eec346d44b89be5b4fc6a694b, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 0.00016465533
+      value: 232.11237
       objectReference: {fileID: 0}
     - target: {fileID: 7208155232816010070, guid: 005bb74eec346d44b89be5b4fc6a694b, type: 3}
       propertyPath: m_AnchorMax.y
@@ -357,11 +361,24 @@ PrefabInstance:
       propertyPath: m_AnchorMax.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 9218719053799535455, guid: 005bb74eec346d44b89be5b4fc6a694b, type: 3}
+      propertyPath: _statusBlock
+      value: 
+      objectReference: {fileID: 470512012}
+    - target: {fileID: 9218719053799535455, guid: 005bb74eec346d44b89be5b4fc6a694b, type: 3}
+      propertyPath: _debugTextField
+      value: 
+      objectReference: {fileID: 1620728988649047122, guid: 679ca06b9e7750b4abebbfdf736a4309, type: 3}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 005bb74eec346d44b89be5b4fc6a694b, type: 3}
 --- !u!224 &470512011 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 7208155231810767159, guid: 005bb74eec346d44b89be5b4fc6a694b, type: 3}
+  m_PrefabInstance: {fileID: 470512010}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &470512012 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7208155232816010071, guid: 005bb74eec346d44b89be5b4fc6a694b, type: 3}
   m_PrefabInstance: {fileID: 470512010}
   m_PrefabAsset: {fileID: 0}
 --- !u!1 &784630286
