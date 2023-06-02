@@ -1,3 +1,4 @@
+using Extensions;
 using Steamworks;
 using System;
 using System.Collections.Generic;
@@ -67,9 +68,27 @@ public class PlayerBehaviour : MonoBehaviour
         }
         set
         {
-            _movementSpeed = value;
             if (lobby)
             {
+            }
+            else
+            {
+                if (value != DefaultMovementSpeed && value != MovementSpeed)
+                {
+                    Counter counter = GameObject.FindWithTag("Counter").GetComponent<Counter>();
+                    // Remove existing custom counter if there is one
+                    // Thus, custom counters are only cleaned up when the next custom counter is requested.
+                    if (counter.PlayerCounters.Count > 0)
+                        counter.RemovePlayerCounter(CSteamID.Nil);
+                    counter.AddPlayerCounter(CSteamID.Nil, value, Counter.Cnt);
+                }
+                else if (value == DefaultMovementSpeed)
+                {
+                    Counter counter = GameObject.FindWithTag("Counter").GetComponent<Counter>();
+                    if (counter.PlayerCounters.Count > 0)
+                        counter.RemovePlayerCounter(CSteamID.Nil);
+                }
+                _movementSpeed = value;
             }
         }
     }
@@ -180,7 +199,18 @@ public class PlayerBehaviour : MonoBehaviour
 
     private void OnCounterThresholdReached()
     {
-        HandleMovementLoop();
+        if (MovementSpeed == 1.0f)
+            HandleMovementLoop();
+    }
+
+    /// <summary>
+    /// Fitted to the same parameters as the local counter procedure for Lobby,
+    /// but does not use the `id` param.
+    /// </summary>
+    private void OnCustomCounterThresholdReached(CSteamID _)
+    {
+        if (MovementSpeed != 1.0f)
+            HandleMovementLoop();
     }
 
     private void HandleInput()
@@ -251,6 +281,9 @@ public class PlayerBehaviour : MonoBehaviour
         // Ensures the first movement has been made
         if (movement != Vector2.zero)
         {
+            // Prevents an extra move occurring before death
+            if (CheckForInternalCollisions()) return;
+
             // Update prevMovement
             PrevMovement = movement;
 
@@ -278,6 +311,25 @@ public class PlayerBehaviour : MonoBehaviour
                 }
             }
         }
+    }
+
+    /// <summary>
+    /// Only collisions that are possible without invincibility are head and other parts.
+    /// Therefore, check if the head's position matches any of the others.
+    /// </summary>
+    private bool CheckForInternalCollisions()
+    {
+        BoxCollider2D head = transform.Find("Head").GetComponent<BoxCollider2D>();
+        Collider2D[] result = new Collider2D[1];
+        if (head.OverlapCollider(new ContactFilter2D(), result) > 0)
+        {
+            if (result[0].gameObject.CompareTag("BodyPart"))
+            {
+                HandleDeath();
+                return true;
+            }
+        }
+        return false;
     }
 
     /// <summary>
@@ -348,27 +400,10 @@ public class PlayerBehaviour : MonoBehaviour
     public void HandleDeath()
     {
         _rb.simulated = false;
-        AddBodyPart();
-
-        // Half move so covered by head, and increase every sorting order other than this new part
-        BodyParts[1].Move(PrevMovement * 0.5f);
-        head.p_Transform.GetComponent<SpriteRenderer>().sortingOrder += 1;
-        for (int i = 2; i < BodyParts.Count; i++)
-        {
-            BodyParts[i].Move(PrevMovement);
-            BodyParts[i].p_Transform.GetComponent<SpriteRenderer>().sortingOrder += 1;
-        }
         frozen = true;
-    }
-
-    private void OnCollisionEnter2D(Collision2D collision)
-    {
-        if (collision.collider.gameObject.TryGetComponent(out Projectile proj))
-        {
-            // If the local collider is immune, no collision has occurred.
-            if (proj.immune == collision.otherCollider.gameObject)
-                return;
-        }
+        foreach (BodyPart part in BodyParts)
+            part.p_Transform.gameObject.GetComponent<SpriteRenderer>().color = Color.gray;
+        status.gameObject.SetActive(false);
     }
 
     /// <summary>

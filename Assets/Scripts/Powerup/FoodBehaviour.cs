@@ -21,7 +21,7 @@ public class FoodBehaviour : MonoBehaviour
                 GameObject.FindWithTag("AudioHandler").GetComponent<AudioHandler>().eatAudioSource.Play();
             }
 
-            game.RemoveObjectFromGrid(gridPos);
+            game.RemoveFromGrid(gridPos);
             game.GenerateFood();
             Destroy(gameObject);
         }

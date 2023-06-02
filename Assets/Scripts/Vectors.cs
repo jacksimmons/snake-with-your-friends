@@ -9,6 +9,11 @@ namespace Extensions
             return new Vector2(vec.x % mod, vec.y % mod);
         }
 
+        public static bool Approximately(Vector2 v1, Vector2 v2)
+        {
+            return Mathf.Approximately(v1.x, v2.x) && Mathf.Approximately(v1.y, v2.y);
+        }
+
         // The next two methods are used to compare the only component of the first vector to the same component of the second
         // Only the first vector must have only one component
         public static bool OnlyComponentOfFirstGT(Vector2 v1, Vector2 v2)

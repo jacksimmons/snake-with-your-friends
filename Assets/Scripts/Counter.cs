@@ -6,12 +6,12 @@ using UnityEngine;
 
 public class Counter : MonoBehaviour
 {
-    private static float cnt = 0;
+    public static float Cnt { get; private set; } = 0;
     public bool Paused { get; set; } = true;
     [SerializeField]
     public float ThresholdSeconds { get; set; } = 0f;
 
-    private Dictionary<CSteamID, Dictionary<string, float>> _playerCounters = new();
+    public Dictionary<CSteamID, Dictionary<string, float>> PlayerCounters { get; private set; } = new();
 
     [SerializeField]
     private GameObject _listener = null;
@@ -26,27 +26,27 @@ public class Counter : MonoBehaviour
 
     public void Increment()
     {
-        cnt += Time.fixedDeltaTime;
-        if (cnt >= ThresholdSeconds)
+        Cnt += Time.fixedDeltaTime;
+        if (Cnt >= ThresholdSeconds)
         {
-            cnt = 0;
+            Cnt = 0;
             _listener.SendMessage("OnCounterThresholdReached");
         }
 
-        foreach (var kvp in _playerCounters)
+        foreach (var kvp in PlayerCounters)
         {
             kvp.Value["cnt"] += Time.fixedDeltaTime;
             if (kvp.Value["cnt"] >= kvp.Value["threshold_seconds"])
             {
                 kvp.Value["cnt"] = 0;
-                _listener.SendMessage("OnCounterThresholdReached", kvp.Key);
+                _listener.SendMessage("OnCustomCounterThresholdReached", kvp.Key);
             }
         }
     }
 
     public void Reset()
     {
-        cnt = 0;
+        Cnt = 0;
     }
 
     public void SetListener(GameObject listener)
@@ -56,16 +56,18 @@ public class Counter : MonoBehaviour
 
     public void AddPlayerCounter(CSteamID player, float movementSpeed, float cntStart)
     {
-        _playerCounters.Add(player,
+        // movementSpeed is a divisor for ThresholdSeconds
+        float thresholdSeconds = ThresholdSeconds / movementSpeed;
+        PlayerCounters.Add(player,
         new Dictionary<string, float>
         {
-            { "movement_speed", movementSpeed },
+            { "threshold_seconds", thresholdSeconds },
             { "cnt", cntStart },
         });
     }
 
     public void RemovePlayerCounter(CSteamID player)
     {
-        _playerCounters.Remove(player);
+        PlayerCounters.Remove(player);
     }
 }

@@ -3,10 +3,15 @@ using UnityEngine.Rendering.PostProcessing;
 
 public class TooManyPints : MonoBehaviour
 {
-    private float _wooziness_per_pint = 33f;
-    private float _wooziness;
+    // Lens Distortion bounce
+    private float _dizziness = 0f;
+    private float _dizzinessPerPint = 33f;
     // Makes wooziness last longer
-    private float _wooziness_duration_mod = 3f;
+    private float _dizzinessDurationMod = 3f;
+
+    // Chromatic Aberration
+    private float _wooziness = 0f;
+    private float _woozinessPerPint = 1f;
 
     private PostProcessVolume _volume;
     private LensDistortion _ld;
@@ -14,15 +19,13 @@ public class TooManyPints : MonoBehaviour
 
     private void Start()
     {
-        _wooziness = _wooziness_per_pint;
-
         _ld = ScriptableObject.CreateInstance<LensDistortion>();
         _ld.enabled.Override(true);
-        _ld.intensity.Override(1);
+        _ld.intensity.Override(0);
 
         _chromaticAberration = ScriptableObject.CreateInstance<ChromaticAberration>();
         _chromaticAberration.enabled.Override(true);
-        _chromaticAberration.intensity.Override(1);
+        _chromaticAberration.intensity.Override(0);
 
         PostProcessEffectSettings[] settings = { _ld, _chromaticAberration };
 
@@ -32,14 +35,33 @@ public class TooManyPints : MonoBehaviour
 
     private void Update()
     {
-        print(_ld.intensity.value);
-        _ld.intensity.value = Mathf.PingPong(Time.time * (_wooziness / _wooziness_duration_mod), _wooziness * 2) - _wooziness;
-        _chromaticAberration.intensity.value = _wooziness / 33;
+        if (!Mathf.Approximately(_dizziness, 0f))
+        {
+            _ld.intensity.value = Mathf.PingPong(Time.time * (_dizziness / _dizzinessDurationMod), _dizziness * 2) - _dizziness;
+        }
+
+        if (!Mathf.Approximately(_wooziness, 0f))
+        {
+            _chromaticAberration.intensity.value = _wooziness;
+        }
     }
 
+    /// <summary>
+    /// Converts pints to wooziness/dizziness.
+    /// </summary>
+    /// <param name="pints">Number of pints consumed.</param>
     public void UpdatePints(int pints)
     {
-        _wooziness = _wooziness_per_pint * pints;
+        _dizziness = _dizzinessPerPint * pints;
+        if (Mathf.Approximately(_dizziness, 0f))
+        {
+            _ld.intensity.value = 0f;
+        }
+        _wooziness = _woozinessPerPint * pints;
+        if (Mathf.Approximately(_wooziness, 0f))
+        {
+            _chromaticAberration.intensity.value = 0f;
+        }
     }
 
     private void OnDestroy()

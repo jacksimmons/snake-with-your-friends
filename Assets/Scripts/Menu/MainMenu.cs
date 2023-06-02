@@ -8,8 +8,6 @@ public class MainMenu : MonoBehaviour
     [SerializeField]
     private GameObject _snakeTemplate;
     [SerializeField]
-    private GameObject _gameTemplate;
-    [SerializeField]
     private GameObject _counterTemplate;
 
     public void OnNoFriendsButtonPressed()
@@ -29,13 +27,17 @@ public class MainMenu : MonoBehaviour
         SceneManager.LoadScene("JoinMenu");
     }
 
+    public void OnSettingsButtonPressed()
+    {
+        SceneManager.LoadScene("SettingsMenu");
+    }
+
     private IEnumerator LoadGame()
     {
         SceneManager.LoadScene("Game");
         while (SceneManager.GetActiveScene().name != "Game")
             yield return new WaitForSeconds(1);
-        // Create Game from template
-        GameBehaviour gameBehaviour = Instantiate(_gameTemplate).GetComponent<GameBehaviour>();
+        GameBehaviour gameBehaviour = GameObject.FindWithTag("GameHandler").GetComponent<GameBehaviour>();
         // Create Snake from template, under the Players object (which has tag PlayerParent)
         GameObject snake = Instantiate(_snakeTemplate, GameObject.FindWithTag("PlayerParent").transform);
         gameBehaviour.SetupGame(new GameObject[] { snake }, snake.GetComponentInChildren<PlayerBehaviour>());

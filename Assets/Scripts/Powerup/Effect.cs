@@ -1,3 +1,5 @@
+using UnityEditorInternal;
+
 public enum e_Food
 {
     Coffee,
@@ -26,9 +28,10 @@ public enum e_Effect
     Pissing,
     RocketShitting,
 
+    NoSpeedBoost,
     MajorSpeedBoost,
     MinorSpeedBoost,
-    Drunk,
+    SoberUp,
     Hallucination,
     Unicorn,
     BrainFreeze,
@@ -38,28 +41,44 @@ public enum e_Effect
 
 public class Effect
 {
-    public e_Effect p_EffectName { get; private set; }
-    public float p_Lifetime { get; private set; }
-    public float p_TimeRemaining { get; set; }
-    public Effect p_Causes { get; private set; } = null;
-    public bool p_CausesInputEffect { get; private set; } = false;
-    public float p_CausesCooldown { get; private set; } = 0f;
+    public e_Effect EffectName { get; private set; }
+    public float Lifetime { get; private set; }
+    public float TimeRemaining { get; set; }
+    // The current value of the cooldown counter, which goes from CooldownMax to 0.
+    public float Cooldown { get; private set; } = 0f;
+    // The max value of the Cooldown, set once it gets used to restart the cooldown.
+    public float CooldownMax { get; private set; } = 0f;
+    public Effect[] Causes { get; private set; } = null;
+    public bool BCausesInputEffect { get; private set; } = false;
+    public bool IsOneOff { get; set; } = false;
 
-    public Effect(e_Effect effectName, float lifetime)
+    // An effect which lasts for one frame, i.e. an action
+    public Effect(e_Effect effectName)
     {
-        p_EffectName = effectName;
-        p_Lifetime = lifetime;
-        p_TimeRemaining = p_Lifetime;
+        EffectName = effectName;
+        IsOneOff = true;
     }
 
-    public Effect(e_Effect effectName, float lifetime, Effect causes, bool causesInputEffect, float causesCooldown)
+    // An effect which causes no other effects
+    public Effect(e_Effect effectName, float lifetime, float cooldown=0f)
     {
-        p_EffectName = effectName;
-        p_Lifetime = lifetime;
-        p_Causes = causes;
-        p_TimeRemaining = p_Lifetime;
-        p_CausesInputEffect = causesInputEffect;
-        p_CausesCooldown = causesCooldown;
+        EffectName = effectName;
+        Lifetime = lifetime;
+        TimeRemaining = Lifetime;
+        Cooldown = cooldown;
+        CooldownMax = cooldown;
+    }
+
+    // An effect which may cause another effect.
+    public Effect(e_Effect effectName, float lifetime, Effect[] causes, bool causesInputEffect, float cooldown=0f)
+    {
+        EffectName = effectName;
+        Lifetime = lifetime;
+        Causes = causes;
+        TimeRemaining = Lifetime;
+        BCausesInputEffect = causesInputEffect;
+        Cooldown = cooldown;
+        CooldownMax = cooldown;
     }
 
     /// <summary>
@@ -72,9 +91,25 @@ public class Effect
     /// if the effect needs to be removed.</returns>
     public bool SubtractTime(float seconds)
     {
-        p_TimeRemaining -= seconds;
-        if (p_TimeRemaining <= 0)
+        if (IsOneOff) return true;
+
+        TimeRemaining -= seconds;
+        if (TimeRemaining <= 0)
             return false;
         return true;
+    }
+
+    /// <summary>
+    /// Subtracts time from the cooldown.
+    /// </summary>
+    /// <param name="seconds">Number of seconds to subtract.</param>
+    public void SubtractCooldown(float seconds)
+    {
+        Cooldown -= seconds;
+    }
+
+    public void ResetCooldown()
+    {
+        Cooldown = CooldownMax;
     }
 }

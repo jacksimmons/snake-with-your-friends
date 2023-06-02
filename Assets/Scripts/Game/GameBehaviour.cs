@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Pool;
 using UnityEngine.Tilemaps;
 
 public class GameBehaviour : MonoBehaviour
@@ -54,13 +55,13 @@ public class GameBehaviour : MonoBehaviour
     {
         for (int i = 0; i < _players.Length; i++)
         {
-            AddObjectToGrid(Random.Range(0, _objects.Length), _foodTemplates[Random.Range(0, _foodTemplates.Length)]);
+            AddAndInstantiateObjectToGrid(Random.Range(0, _objects.Length), _foodTemplates[Random.Range(0, _foodTemplates.Length)]);
         }
     }
 
     public void GenerateFood()
     {
-        AddObjectToGrid(Random.Range(0, _objects.Length), _foodTemplates[Random.Range(0, _foodTemplates.Length)]);
+        AddAndInstantiateObjectToGrid(Random.Range(0, _objects.Length), _foodTemplates[Random.Range(0, _foodTemplates.Length)]);
     }
 
     public void SetupGame(GameObject[] players, PlayerBehaviour localP1)
@@ -196,7 +197,13 @@ public class GameBehaviour : MonoBehaviour
         }
     }
 
-    GameObject AddObjectToGrid(int objectPos, GameObject obj)
+    /// <summary>
+    /// Checks if index `objectPos` is true in objects, if so it recursively
+    /// searches for a valid index.
+    /// </summary>
+    /// <param name="objectPos"></param>
+    /// <returns>The final position of the object.</returns>
+    public int AddToGrid(int objectPos)
     {
         if (_objects[objectPos])
         {
@@ -208,13 +215,23 @@ public class GameBehaviour : MonoBehaviour
                 // which ensures this block won't be entered again.
                 if (!_objects[i])
                 {
-                    return AddObjectToGrid(i, obj);
+                    return AddToGrid(i);
                 }
             }
 
             Debug.LogError("Grid filled with objects!");
-            return null;
+            return -1;
         }
+        _objects[objectPos] = true;
+        return objectPos;
+    }
+
+    GameObject AddAndInstantiateObjectToGrid(int objectPos, GameObject obj)
+    {
+        // Overwrite objectPos with the selected objectPos
+        objectPos = AddToGrid(objectPos);
+        if (objectPos == -1)
+            return null;
         else
         {
             Vector2 vectorPos = new Vector2((objectPos % (int)groundSize) + (bl.x + 1.5f), (objectPos / (int)groundSize) + (bl.y + 1.5f));
@@ -225,9 +242,9 @@ public class GameBehaviour : MonoBehaviour
         }
     }
 
-    public void RemoveObjectFromGrid(int gridPos)
+    public void RemoveFromGrid(int objectPos)
     {
-        _objects[gridPos] = false;
+        _objects[objectPos] = false;
     }
 
     void CreateTeleportingMenuPair(

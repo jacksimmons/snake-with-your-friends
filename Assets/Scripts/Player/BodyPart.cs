@@ -34,20 +34,16 @@ public enum BodyPartSprite
 
 public class BodyPart
 {
-    private Transform _transform;
-    public Transform p_Transform
-    {
-        get { return _transform; }
-    }
+    public Transform p_Transform { get; private set; }
     public Vector3 p_Position
     {
-        get { return _transform.position; }
-        set { _transform.position = value; }
+        get { return p_Transform.position; }
+        set { p_Transform.position = value; }
     }
     public Quaternion p_Rotation
     {
-        get { return _transform.rotation; }
-        set { _transform.rotation = value; }
+        get { return p_Transform.rotation; }
+        set { p_Transform.rotation = value; }
     }
     private BodyPartSprite _sprite;
     public BodyPartSprite p_Sprite
@@ -61,7 +57,7 @@ public class BodyPart
             if (p_SpriteSheet != null)
             {
                 _sprite = value;
-                _transform.gameObject.GetComponent<SpriteRenderer>().sprite = p_SpriteSheet[(int)_sprite];
+                p_Transform.gameObject.GetComponent<SpriteRenderer>().sprite = p_SpriteSheet[(int)_sprite];
             }
             else
             {
@@ -91,7 +87,7 @@ public class BodyPart
     /// <param name="transform"></param>
     public BodyPart(BodyPart old, Transform transform)
     {
-        _transform = transform;
+        p_Transform = transform;
         p_Direction = old.p_Direction;
         p_SpriteSheet = old.p_SpriteSheet;
         p_DefaultSprite = old.p_DefaultSprite;
@@ -111,7 +107,7 @@ public class BodyPart
     public BodyPart(Transform transform, Vector2 direction, BodyPartSprite defaultSprite,
         Sprite[] spriteSheet)
     {
-        _transform = transform;
+        p_Transform = transform;
         p_Direction = direction;
         p_DefaultSprite = defaultSprite;
         p_SpriteSheet = spriteSheet;
@@ -219,7 +215,7 @@ public class BodyPart
 
         // Rotate the body part
         float angle = Vector2.SignedAngle(prevDirection, p_Direction);
-        _transform.Rotate(Vector3.forward, angle);
+        p_Transform.Rotate(Vector3.forward, angle);
 
         // If the body part is a corner piece
         if (next != null)

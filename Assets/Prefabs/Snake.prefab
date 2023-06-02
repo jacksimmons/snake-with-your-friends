@@ -218,9 +218,25 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6700e0e07bf1a8049910e76b30e4b4c3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _spriteCoffee: {fileID: 0}
+  _spriteBooze: {fileID: 21300000, guid: 3e8950d30a6f0b746b3b4f4e69012a6c, type: 3}
+  _spriteApple: {fileID: 21300000, guid: 0e2a9133a1e406b49a184e3541e8c928, type: 3}
+  _spriteOrange: {fileID: 21300000, guid: 60dde592f2246e54691df1ba74d0c9d3, type: 3}
+  _spriteBanana: {fileID: 0}
+  _spriteDragonfruit: {fileID: 21300000, guid: cc0c599d216355c458a9c2502a74424c, type: 3}
+  _spriteDrumstick: {fileID: 21300000, guid: 46237619613771f449525ab3b0647479, type: 3}
+  _spriteBone: {fileID: 0}
+  _spriteCheese: {fileID: 0}
+  _spritePizza: {fileID: 21300000, guid: 2094db1395fb0a948b77b3c6d39c8dbb, type: 3}
+  _spritePineapple: {fileID: 0}
+  _spritePineapplePizza: {fileID: 0}
+  _spriteIceCream: {fileID: 0}
+  _spriteCrapALot: {fileID: 0}
+  _spriteBalti: {fileID: 21300000, guid: 42969d740ee613646930a13d4bf0b299, type: 3}
+  _spriteBrownie: {fileID: 0}
   _player: {fileID: 4458634067785427670}
   _fireball: {fileID: 454872681040166018, guid: 42f111e0042b8da47bacd4f388020667, type: 3}
-  _static_shit: {fileID: 8571051461681396745, guid: f045dd42fe85deb4abbaf393a5043e56, type: 3}
+  _staticShit: {fileID: 8571051461681396745, guid: f045dd42fe85deb4abbaf393a5043e56, type: 3}
 --- !u!1001 &2311256582934996607
 PrefabInstance:
   m_ObjectHideFlags: 0

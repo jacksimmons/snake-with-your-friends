@@ -1,79 +1,106 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class StatusBehaviour : MonoBehaviour
 {
+    [SerializeField]
+    private Sprite _spriteCoffee;
+    [SerializeField]
+    private Sprite _spriteBooze;
+    [SerializeField]
+    private Sprite _spriteApple;
+    [SerializeField]
+    private Sprite _spriteOrange;
+    [SerializeField]
+    private Sprite _spriteBanana;
+    [SerializeField]
+    private Sprite _spriteDragonfruit;
+    [SerializeField]
+    private Sprite _spriteDrumstick;
+    [SerializeField]
+    private Sprite _spriteBone;
+    [SerializeField]
+    private Sprite _spriteCheese;
+    [SerializeField]
+    private Sprite _spritePizza;
+    [SerializeField]
+    private Sprite _spritePineapple;
+    [SerializeField]
+    private Sprite _spritePineapplePizza;
+    [SerializeField]
+    private Sprite _spriteIceCream;
+    [SerializeField]
+    private Sprite _spriteCrapALot;
+    [SerializeField]
+    private Sprite _spriteBalti;
+    [SerializeField]
+    private Sprite _spriteBrownie;
+
     [SerializeField]
     private PlayerBehaviour _player;
     [SerializeField]
     private GameObject _fireball;
     [SerializeField]
-    private GameObject _static_shit;
+    private GameObject _staticShit;
 
     private List<BodyPartStatus> _bodyPartStatuses;
 
-    public List<Effect> p_ActiveInputEffects { get; private set; } = new List<Effect>();
-    public List<Effect> p_ActivePassiveEffects { get; private set; } = new List<Effect>();
+    public List<Effect> ActiveInputEffects { get; private set; } = new List<Effect>();
+    public List<Effect> ActivePassiveEffects { get; private set; } = new List<Effect>();
 
-    /// <summary>
-    /// The duration of the cooldown for input effects.
-    /// </summary>
-    private float _inputEffectCooldownMax = 0f;
-    /// <summary>
-    /// The current time counter of the cooldown,
-    /// which goes from the cooldown max to 0, then back to the cooldown max.
-    /// When it hits 0, the current input effect can be used.
-    /// </summary>
-    private float _inputEffectCooldown = 0f;
+    private float _passiveEffectCooldownMax = 0f;
+    private float _passiveEffectCooldown = 0f;
 
-    private float _majorSpeedBoost = 3f;
-    private float _minorSpeedBoost = 1f;
+    private float _majorSpeedBoost = 2f;
+    private float _minorSpeedBoost = 0.1f;
 
     // Counters
     private int _numPints = 0;
-    public int p_NumPints
+    public int NumPints
     {
-        get { return _numPints; }
+        get
+        {
+            return _numPints;
+        }
+        private set
+        {
+            _numPints = value;
+            GameObject effects = GameObject.FindWithTag("Effects");
+            TooManyPints tmp = effects.transform.Find("TooManyPints").GetComponent<TooManyPints>();
+            tmp.UpdatePints(value);
+        }
     }
-
-    private float _speedIncrease = 0f;
-    public float p_SpeedIncrease
-    {
-        get { return _speedIncrease; }
-    }
-
-    private int _potassiumLevels = 0;
-    public int p_PotassiumLevels
-    {
-        get { return _potassiumLevels; }
-    }
+    public float SpeedIncrease { get; private set; } = 0f;
+    public int PotassiumLevels { get; private set; } = 0;
 
     private void Update()
     {
-        _inputEffectCooldown -= Time.deltaTime;
-        if (p_ActiveInputEffects.Count > 0)
+        if (ActiveInputEffects.Count > 0)
         {
-            Effect effect = p_ActiveInputEffects[0];
+            Effect effect = ActiveInputEffects[0];
             if (!effect.SubtractTime(Time.deltaTime))
             {
                 AddCausedEffect(effect);
                 RemoveInputEffect(0);
             }
+            effect.SubtractCooldown(Time.deltaTime);
         }
-        for (int i = 0; i < p_ActivePassiveEffects.Count; i++)
+        for (int i = 0; i < ActivePassiveEffects.Count; i++)
         {
-            Effect effect = p_ActivePassiveEffects[i];
+            Effect effect = ActivePassiveEffects[i];
             if (!effect.SubtractTime(Time.deltaTime))
             {
                 AddCausedEffect(effect);
                 RemovePassiveEffect(i);
                 i--;
             }
+            effect.SubtractCooldown(Time.deltaTime);
         }
 
         // Powerups
-        if (p_ActiveInputEffects.Count > 0)
+        if (ActiveInputEffects.Count > 0)
         {
             if (Input.GetKey(KeyCode.Space))
                 HandleInput();
@@ -85,7 +112,7 @@ public class StatusBehaviour : MonoBehaviour
     private void HandleStatus()
     {
         Transform tooManyPints = transform.Find("TooManyPints");
-        if (p_NumPints > 0 && tooManyPints != null)
+        if (NumPints > 0 && tooManyPints != null)
         {
             // Add the effect as a child
             GameObject go = new GameObject("TooManyPints");
@@ -94,27 +121,16 @@ public class StatusBehaviour : MonoBehaviour
             go.AddComponent<TooManyPints>();
             go.GetComponent<TooManyPints>();
         }
-
-        if (tooManyPints != null)
-        {
-            if (p_NumPints > 0)
-            {
-                tooManyPints.GetComponent<TooManyPints>().UpdatePints(p_NumPints);
-            }
-            else
-            {
-                Destroy(tooManyPints.gameObject);
-            }
-        }
     }
 
     public void HandleInput()
     {
-        if (_inputEffectCooldown <= 0f)
+        Effect effect = ActiveInputEffects[0];
+        if (effect.Cooldown <= 0)
         {
-            _inputEffectCooldown = _inputEffectCooldownMax;
+            effect.ResetCooldown();
             Projectile proj;
-            switch (p_ActiveInputEffects[0].p_EffectName)
+            switch (effect.EffectName)
             {
                 case e_Effect.BreathingFire:
                     GameObject fireball = Instantiate(_fireball, GameObject.Find("Projectiles").transform);
@@ -123,84 +139,120 @@ public class StatusBehaviour : MonoBehaviour
                     proj.Create(5, _player.head.p_Direction, _player.head.p_Rotation, _player.MovementSpeed * 0.2f, _player.head.p_Transform.gameObject);
                     break;
             }
+            // Execute a OneOff effect only once its cooldown (which it typically won't have) reaches 0.
+            // Then as they must have a duration of 0s, they will get cleaned up before being executed again.
+            effect.IsOneOff = false;
         }
     }
 
     public void HandlePassive()
     {
-        for (int i = 0; i < p_ActivePassiveEffects.Count; i++)
+        for (int i = 0; i < ActivePassiveEffects.Count; i++)
         {
-            Effect effect = p_ActivePassiveEffects[i];
-            if (_inputEffectCooldown <= 0f)
+            Effect effect = ActivePassiveEffects[i];
+            if (effect.Cooldown <= 0)
             {
-                _inputEffectCooldown = _inputEffectCooldownMax;
+                effect.ResetCooldown();
                 Projectile proj;
-                switch (effect.p_EffectName)
+                switch (effect.EffectName)
                 {
+                    case e_Effect.NoSpeedBoost:
+                        _player.MovementSpeed = _player.DefaultMovementSpeed;
+                        break;
+                    case e_Effect.MinorSpeedBoost:
+                        _player.MovementSpeed = _player.DefaultMovementSpeed + _minorSpeedBoost;
+                        break;
+                    case e_Effect.MajorSpeedBoost:
+                        _player.MovementSpeed = _player.DefaultMovementSpeed + _majorSpeedBoost;
+                        break;
                     case e_Effect.RocketShitting:
-                        GameObject shit = Instantiate(_static_shit, GameObject.Find("Projectiles").transform);
-                        print(_player.MovementSpeed);
+                        GameObject shit = Instantiate(_staticShit, GameObject.Find("Projectiles").transform);
                         shit.transform.position = _player.tail.p_Position - (Vector3)_player.tail.p_Direction;
                         proj = shit.GetComponent<Projectile>();
                         proj.Create(5, -_player.tail.p_Direction, _player.tail.p_Rotation, _player.MovementSpeed * 0.25f);
-                        _player.MovementSpeed = _player.DefaultMovementSpeed + _majorSpeedBoost;
                         break;
+                    case e_Effect.SoberUp:
+                        NumPints--;
+                        break;
+                }
+
+                // Execute a OneOff effect only once its cooldown (which it typically won't have) reaches 0.
+                // Then as they must have a duration of 0s, they will get cleaned up before being executed again.
+                effect.IsOneOff = false;
+            }
+        }
+    }
+
+    public void AddInputEffect(Effect effect)
+    {
+        // Clear the old effect for the new one
+        _player.MovementSpeed = _player.DefaultMovementSpeed;
+        if (ActiveInputEffects.Count > 0)
+            ClearInputEffects();
+        ActiveInputEffects.Add(effect);
+    }
+
+    public void AddPassiveEffect(Effect effect)
+    {
+        ActivePassiveEffects.Add(effect);
+        _passiveEffectCooldown = 0;
+        _passiveEffectCooldownMax = 0;
+    }
+
+    private void AddCausedEffect(Effect effect)
+    {
+        if (effect.Causes != null)
+        {
+            foreach (Effect cause in effect.Causes)
+            {
+                if (cause != null)
+                {
+                    if (effect.BCausesInputEffect)
+                        AddInputEffect(cause);
+                    else
+                        AddPassiveEffect(cause);
                 }
             }
         }
     }
 
-    public void AddInputEffect(Effect effect, float cooldown)
-    {
-        // Clear the old effect for the new one
-        _player.MovementSpeed = _player.DefaultMovementSpeed;
-        if (p_ActiveInputEffects.Count > 0)
-            ClearInputEffects();
-        p_ActiveInputEffects.Add(effect);
-        _inputEffectCooldown = 0;
-        _inputEffectCooldownMax = cooldown;
-    }
-
-    public void AddPassiveEffect(Effect effect, float cooldown = 0)
-    {
-        p_ActivePassiveEffects.Add(effect);
-        _inputEffectCooldown = 0;
-        _inputEffectCooldownMax = cooldown;
-    }
-
-    private void AddCausedEffect(Effect effect)
-    {
-        Effect cause = effect.p_Causes;
-        if (cause != null)
-        {
-            if (effect.p_CausesInputEffect)
-                AddInputEffect(cause, effect.p_CausesCooldown);
-            else
-                AddPassiveEffect(cause, effect.p_CausesCooldown);
-        }
-    }
-
     private void UndoEffect(Effect effect)
     {
-        switch (effect.p_EffectName)
+        switch (effect.EffectName)
         {
-            case e_Effect.RocketShitting:
-                _player.MovementSpeed -= _majorSpeedBoost; break;
         }
+    }
+
+    private void ClearInputEffectImage()
+    {
+        Image powerupImg = GameObject.FindWithTag("PowerupUI").GetComponent<Image>();
+        powerupImg.sprite = null;
+        powerupImg.color = Color.clear;
     }
 
     private void RemoveInputEffect(int i)
     {
-        Effect effect = p_ActiveInputEffects[i];
+        ClearInputEffectImage();
+        Effect effect = ActiveInputEffects[i];
         UndoEffect(effect);
-        p_ActiveInputEffects.RemoveAt(i);
+        ActiveInputEffects.RemoveAt(i);
+    }
+
+    private void RemovePassiveEffectImage(int i)
+    {
+    }
+
+    private void ClearPassiveEffectImages()
+    {
+        for (int i = 0; i < ActivePassiveEffects.Count; i++)
+            RemovePassiveEffectImage(i);
     }
 
     private void RemovePassiveEffect(int i)
     {
-        Effect effect = p_ActivePassiveEffects[i];
+        Effect effect = ActivePassiveEffects[i];
         UndoEffect(effect);
-        p_ActivePassiveEffects.RemoveAt(i);
+        ActivePassiveEffects.RemoveAt(i);
     }
 
     /// <summary>
@@ -208,8 +260,8 @@ public class StatusBehaviour : MonoBehaviour
     /// </summary>
     public void ClearInputEffects()
     {
-        p_ActiveInputEffects.Clear();
-        _inputEffectCooldown = 0f;
+        ClearInputEffectImage();
+        ActiveInputEffects.Clear();
     }
 
     /// <summary>
@@ -217,10 +269,10 @@ public class StatusBehaviour : MonoBehaviour
     /// </summary>
     public void ClearPassiveEffects()
     {
-        p_ActivePassiveEffects.Clear();
+        ActivePassiveEffects.Clear();
 
-        _numPints = 0;
-        _potassiumLevels = 0;
+        NumPints = 0;
+        PotassiumLevels = 0;
 
         _player.MovementSpeed = _player.DefaultMovementSpeed;
     }
@@ -228,24 +280,25 @@ public class StatusBehaviour : MonoBehaviour
     public Dictionary<string, string> GetStatusDebug()
     {
         Dictionary<string, string> statuses = new Dictionary<string, string>();
-        foreach (Effect effect in p_ActiveInputEffects)
-            statuses[Enum.GetName(typeof(e_Effect), effect.p_EffectName)] = "True";
-        foreach (Effect effect in p_ActivePassiveEffects)
-            statuses[Enum.GetName(typeof(e_Effect), effect.p_EffectName)] = "True";
+        foreach (Effect effect in ActiveInputEffects)
+            statuses[Enum.GetName(typeof(e_Effect), effect.EffectName)] = "True";
+        foreach (Effect effect in ActivePassiveEffects)
+            statuses[Enum.GetName(typeof(e_Effect), effect.EffectName)] = "True";
         foreach (string e_name in Enum.GetNames(typeof(e_Effect)))
         {
             if (!statuses.ContainsKey(e_name))
                 statuses[e_name] = "False";
         }
 
-        statuses["numPints"] = _numPints.ToString();
-        statuses["potassiumLevels"] = _potassiumLevels.ToString();
+        statuses["numPints"] = NumPints.ToString();
+        statuses["potassiumLevels"] = PotassiumLevels.ToString();
         statuses["NumPieces"] = _player.BodyParts.Count.ToString();
         return statuses;
     }
 
     public void Eat(e_Food food)
     {
+        Image powerupImg = GameObject.FindWithTag("PowerupUI").GetComponent<Image>();
         switch (food)
         {
             case e_Food.Coffee:
@@ -264,6 +317,8 @@ public class StatusBehaviour : MonoBehaviour
                 EatBanana();
                 break;
             case e_Food.Dragonfruit:
+                powerupImg.color = Color.white;
+                powerupImg.sprite = _spriteDragonfruit;
                 EatDragonfruit();
                 break;
             case e_Food.Drumstick:
@@ -301,21 +356,30 @@ public class StatusBehaviour : MonoBehaviour
 
     private void DrinkCoffee()
     {
-        Effect minor = new Effect(e_Effect.MinorSpeedBoost, Mathf.Infinity);
-        Effect major = new Effect(e_Effect.MajorSpeedBoost, 10, minor, false, 0);
+        Effect noSpdBoost = new Effect(e_Effect.NoSpeedBoost);
+        Effect resetMovSpd = new Effect(e_Effect.None, lifetime: 10, new Effect[] { noSpdBoost }, false);
+
+        Effect major = new Effect(e_Effect.MajorSpeedBoost);
+        AddPassiveEffect(resetMovSpd);
         AddPassiveEffect(major);
     }
 
     private void DrinkBooze()
     {
-        Effect drunk = new Effect(e_Effect.Drunk, 100);
-        Effect pissing = new Effect(e_Effect.Pissing, 10);
-        AddInputEffect(pissing, 1);
-        AddPassiveEffect(drunk);
+        NumPints++;
+
+        Effect soberUp = new Effect(e_Effect.SoberUp);
+        Effect drunkAPint = new Effect(e_Effect.None, lifetime: 20, new Effect[] { soberUp }, false);
+
+        Effect pissing = new Effect(e_Effect.Pissing, lifetime:5, cooldown:0.1f);
+        Effect needToPee = new Effect(e_Effect.None, lifetime:10, new Effect[] { pissing }, true);
+        AddPassiveEffect(needToPee);
+        AddPassiveEffect(drunkAPint);
     }
 
     private void EatApple()
     {
+        ClearInputEffects();
         ClearPassiveEffects();
         GameObject foreground = GameObject.FindWithTag("Foreground");
         foreach (Transform fgObj in foreground.transform)
@@ -330,8 +394,8 @@ public class StatusBehaviour : MonoBehaviour
     private void EatBanana()
     {
         // Produce peel
-        _potassiumLevels++;
-        if (_potassiumLevels >= 3)
+        PotassiumLevels++;
+        if (PotassiumLevels >= 3)
         {
             // Die ... ?
         }
@@ -339,13 +403,13 @@ public class StatusBehaviour : MonoBehaviour
 
     private void EatDragonfruit()
     {
-        Effect fireBreath = new Effect(e_Effect.BreathingFire, 5);
-        AddInputEffect(fireBreath, 0.3f);
+        Effect fireBreath = new Effect(e_Effect.BreathingFire, lifetime:5f, cooldown:1f);
+        AddInputEffect(fireBreath);
     }
 
     private void EatDrumstick()
     {
-        Effect buff = new Effect(e_Effect.Buff, 20);
+        Effect buff = new Effect(e_Effect.Buff, lifetime: 20);
         AddPassiveEffect(buff);
         EatBone();
     }
@@ -378,21 +442,26 @@ public class StatusBehaviour : MonoBehaviour
     private void EatIceCream()
     {
         Effect brainFreeze = new Effect(e_Effect.BrainFreeze, 3);
-        Effect unicorn = new Effect(e_Effect.Unicorn, 3, brainFreeze, false, 0);
+        Effect unicorn = new Effect(e_Effect.Unicorn, 3, new Effect[] { brainFreeze }, false, 0);
         AddPassiveEffect(unicorn);
     }
 
     private void EatCrapALot()
     {
-        Effect laxative = new Effect(e_Effect.Laxative, 20);
-        AddInputEffect(laxative, 1);
+        Effect laxative = new Effect(e_Effect.Laxative, 20, 1);
+        AddInputEffect(laxative);
     }
 
     private void EatBalti()
     {
-        // Add rocket shit for 1 second after 10 seconds
-        Effect rocketShit = new Effect(e_Effect.RocketShitting, 10);
-        Effect balti = new Effect(e_Effect.None, 2, rocketShit, false, 0.05f);
+        Effect rocketShit = new Effect(e_Effect.RocketShitting, lifetime: 10, cooldown: 0.05f);
+
+        Effect noSpdBoost = new Effect(e_Effect.NoSpeedBoost);
+        Effect resetMovSpd = new Effect(e_Effect.None, lifetime: 10, new Effect[] { noSpdBoost }, false);
+        Effect majorSpdBoost = new Effect(e_Effect.MajorSpeedBoost);
+
+        Effect balti = new Effect(e_Effect.None, lifetime: 2, new Effect[] { rocketShit, resetMovSpd, majorSpdBoost }, false, cooldown: 0.05f);
+
         AddPassiveEffect(balti);
     }
 
