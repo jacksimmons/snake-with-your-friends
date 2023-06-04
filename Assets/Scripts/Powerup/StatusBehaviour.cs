@@ -157,13 +157,13 @@ public class StatusBehaviour : MonoBehaviour
                 switch (effect.EffectName)
                 {
                     case e_Effect.NoSpeedBoost:
-                        _player.MovementSpeed = _player.DefaultMovementSpeed;
+                        _player.MovementSpeed = PlayerBehaviour.DefaultMovementSpeed;
                         break;
                     case e_Effect.MinorSpeedBoost:
-                        _player.MovementSpeed = _player.DefaultMovementSpeed + _minorSpeedBoost;
+                        _player.MovementSpeed = PlayerBehaviour.DefaultMovementSpeed + _minorSpeedBoost;
                         break;
                     case e_Effect.MajorSpeedBoost:
-                        _player.MovementSpeed = _player.DefaultMovementSpeed + _majorSpeedBoost;
+                        _player.MovementSpeed = PlayerBehaviour.DefaultMovementSpeed + _majorSpeedBoost;
                         break;
                     case e_Effect.RocketShitting:
                         GameObject shit = Instantiate(_staticShit, GameObject.Find("Projectiles").transform);
@@ -186,7 +186,7 @@ public class StatusBehaviour : MonoBehaviour
     public void AddInputEffect(Effect effect)
     {
         // Clear the old effect for the new one
-        _player.MovementSpeed = _player.DefaultMovementSpeed;
+        _player.MovementSpeed = PlayerBehaviour.DefaultMovementSpeed;
         if (ActiveInputEffects.Count > 0)
             ClearInputEffects();
         ActiveInputEffects.Add(effect);
@@ -274,7 +274,7 @@ public class StatusBehaviour : MonoBehaviour
         NumPints = 0;
         PotassiumLevels = 0;
 
-        _player.MovementSpeed = _player.DefaultMovementSpeed;
+        _player.MovementSpeed = PlayerBehaviour.DefaultMovementSpeed;
     }
 
     public Dictionary<string, string> GetStatusDebug()

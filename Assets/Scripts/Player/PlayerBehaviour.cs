@@ -58,7 +58,7 @@ public class PlayerBehaviour : MonoBehaviour
 
     public bool frozen = false;
 
-    public float DefaultMovementSpeed { get; private set; } = 1.0f;
+    public const float DefaultMovementSpeed = 1.0f;
     private float _movementSpeed = 1.0f;
     public float MovementSpeed
     {

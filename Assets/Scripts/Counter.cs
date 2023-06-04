@@ -18,7 +18,7 @@ public class Counter : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (!Paused && _listener)
+        if (!Paused && _listener && (ThresholdSeconds > 0))
         {
             Increment();
         }

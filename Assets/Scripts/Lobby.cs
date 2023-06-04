@@ -107,15 +107,15 @@ public class Lobby : MonoBehaviour
     {
         if (!_isOwner)
         {
-            SendMessageTo(SteamMatchmaking.GetLobbyOwner(_lobbyId), ToBytes("player_loaded"), 0);
+            SendMessageToUser(SteamMatchmaking.GetLobbyOwner(_lobbyId), ToBytes("player_loaded"), 0);
         }
         else
         {
             _playersLoaded++;
             if (_playersLoaded == _lobbyNames.Keys.Count)
             {
-                SendMessageTo(CSteamID.Nil, ToBytes("all_players_loaded"), Channel.Default);
-                SendMessageTo(CSteamID.Nil, ToBytes("All players have loaded successfully."), Channel.Console);
+                SendMessagesTo(CSteamID.Nil, "all_players_loaded", null, Channel.Default);
+                SendMessagesTo(CSteamID.Nil, "All players have loaded successfully.", null, Channel.Console);
             }
         }
     }
@@ -128,11 +128,11 @@ public class Lobby : MonoBehaviour
         // Call all movement loops with default movement speed.
         foreach (var kvp in _lobbyPlayers)
         {
-            if (kvp.Value.MovementSpeed != 1.0f)
-                SendMessageTo(kvp.Key, ToBytes("move_timer"), Channel.Physics);
+            if (kvp.Value.MovementSpeed == PlayerBehaviour.DefaultMovementSpeed)
+                SendMessageToUser(kvp.Key, ToBytes("move_timer"), Channel.Physics);
         }
 
-        if (Player.MovementSpeed == 1.0f)
+        if (Player.MovementSpeed == PlayerBehaviour.DefaultMovementSpeed)
         {
             Message_PlayerMovement();
         }
@@ -145,7 +145,7 @@ public class Lobby : MonoBehaviour
     /// <param name="mover">The player with a custom threshold that got triggered.</param>
     public void OnCounterThresholdReached(CSteamID mover)
     {
-        SendMessageTo(mover, ToBytes("move_timer"), Channel.Physics);
+        SendMessageToUser(mover, ToBytes("move_timer"), Channel.Physics);
     }
 
     private byte[] ToBytes(string str)
@@ -203,7 +203,7 @@ public class Lobby : MonoBehaviour
     /// Raw send procedure, used by SendMessageTo.
     /// Sends a message to one user.
     /// </summary>
-    private void SendMessageToUser(CSteamID cSteamID, byte[] message, int channel)
+    private void SendMessageToUser(CSteamID cSteamID, byte[] message, Channel channel)
     {
         // Don't need to waste time clearing the buffer; only message.Length
         // bytes of it are going to be used.
@@ -216,7 +216,7 @@ public class Lobby : MonoBehaviour
             case EResult.k_EResultOK:
                 break;
             default:
-                Debug.LogError("Message failed to send.");
+                Debug.LogError(FromBytes(message) + " failed to send.");
                 break;
         }
     }
@@ -227,7 +227,7 @@ public class Lobby : MonoBehaviour
     /// <param name="target">Either a valid CSteamID, or CSteamID.Nil to send to all.</param>
     /// <param name="message">The bytes representation of the message to send.</param>
     /// <param name="channel">The channel to send the message on.</param>
-    private void SendMessageTo(CSteamID target, byte[] message, Channel channel)
+    private void SendMessagesTo(CSteamID target, string title, List<byte[]> messages, Channel channel)
     {
         try
         {
@@ -235,10 +235,24 @@ public class Lobby : MonoBehaviour
             {
                 foreach (CSteamID id in _lobbyNames.Keys)
                     if (id != _id)
-                        SendMessageToUser(id, message, (int)channel);
+                    {
+                        SendMessageToUser(id, ToBytes(title), channel);
+                        if (messages != null)
+                        {
+                            foreach (byte[] message in messages)
+                                SendMessageToUser(id, message, channel);
+                        }
+                    }
             }
             else if (target != _id)
-                SendMessageToUser(target, message, (int)channel);
+            {
+                SendMessageToUser(target, ToBytes(title), channel);
+                if (messages != null)
+                {
+                    foreach (byte[] message in messages)
+                        SendMessageToUser(target, message, channel);
+                }
+            }
         }
         catch
         {
@@ -246,20 +260,20 @@ public class Lobby : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Sends one or more messages to one or all users.
-    /// </summary>
-    /// <param name="target">Either a valid CSteamID, or CSteamID.Nil to send to all.</param>
-    /// <param name="title">The first message, i.e. the string title, which infers the type of the remaining contents.</param>
-    /// <param name="messages">The remaining messages.</param>
-    /// <param name="channel">The channel to send on.</param>
-    private void SendFormattedMessageTo(CSteamID target, string title, List<byte[]> messages, Channel channel)
+    private void SendBodyPartData()
     {
-        SendMessageTo(target, ToBytes(title), channel);
-        foreach (byte[] msg in messages)
-        {
-            SendMessageTo(target, msg, channel);
-        }
+        List<byte[]> msgs = new List<byte[]>();
+        foreach (BodyPart bp in Player.BodyParts)
+            msgs.Add(ToBytes(bp.ToData()));
+        SendMessagesTo(CSteamID.Nil, "bp_data", msgs, Channel.Physics);
+    }
+
+    public void SendMovementSpeedUpdateData(float movementSpeed)
+    {
+        List<byte[]> data = new();
+        byte[] movement_speed = ToBytes(movementSpeed);
+        data.Add(movement_speed);
+        SendMessagesTo(SteamMatchmaking.GetLobbyOwner(_lobbyId), "movement_speed_update", data, Channel.Physics);
     }
 
     /// <summary>
@@ -301,7 +315,7 @@ public class Lobby : MonoBehaviour
                         if (_isOwner)
                             _playersLoaded++;
                         else
-                            SendMessageTo(netMessage.m_identityPeer.GetSteamID(), ToBytes("player_loaded sent to non-host."), Channel.Console);
+                            SendMessageToUser(netMessage.m_identityPeer.GetSteamID(), ToBytes("player_loaded sent to non-host."), (int)Channel.Console);
                         break;
                     case "bp_data":
                         if (i > 0)
@@ -311,13 +325,17 @@ public class Lobby : MonoBehaviour
                             BodyPartData bpData = FromBytes<BodyPartData>(data);
                             BodyPart bp = player.BodyParts[i - 1];
                             bp.p_Position = new Vector3(bpData.pos_x, bpData.pos_y, bp.p_Position.z);
-                            print(bp.p_Rotation);
                             bp.p_Rotation = Quaternion.Euler(Vector3.forward * bpData.rotation);
                             bp.p_Sprite = bpData.sprite;
                         }
                         break;
                     case "movement_speed_update":
+                        break;
+                    case "none":
+                        print("none");
+                        break;
                     default:
+                        print(message);
                         break;
                 }
             }
@@ -330,11 +348,9 @@ public class Lobby : MonoBehaviour
 
     private void Message_PlayerMovement()
     {
+        print("hi");
         Player.HandleMovementLoop();
-        List<byte[]> msgs = new List<byte[]>();
-        foreach (BodyPart bp in Player.BodyParts)
-            msgs.Add(ToBytes(bp.ToData()));
-        SendFormattedMessageTo(CSteamID.Nil, "bp_data", msgs, Channel.Physics);
+        SendBodyPartData();
     }
 
     // Lobby Menu
@@ -539,18 +555,6 @@ public class Lobby : MonoBehaviour
         _counter.Paused = false;
 
         yield break;
-    }
-
-    public void OnPlayerMovementSpeedUpdate(float movementSpeed)
-    {
-        if (_isOwner)
-        {
-            
-        }
-        List<byte[]> data = new();
-        byte[] movement_speed = ToBytes(movementSpeed);
-        data.Add(movement_speed);
-        SendFormattedMessageTo(SteamMatchmaking.GetLobbyOwner(_lobbyId), "movement_speed_update", data, Channel.Physics);
     }
 
     public Dictionary<string, string> GetLobbyDebug()
