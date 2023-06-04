@@ -295,9 +295,7 @@ public class Lobby : MonoBehaviour
                         if (_isOwner)
                             Debug.LogError("Owner should never receive a move_timer packet!");
                         else
-                        {
                             Message_PlayerMovement();
-                        }
                         break;
                     case "player_loaded":
                         if (_isOwner)
@@ -313,6 +311,7 @@ public class Lobby : MonoBehaviour
                             BodyPartData bpData = FromBytes<BodyPartData>(data);
                             BodyPart bp = player.BodyParts[i - 1];
                             bp.p_Position = new Vector3(bpData.pos_x, bpData.pos_y, bp.p_Position.z);
+                            print(bp.p_Rotation);
                             bp.p_Rotation = Quaternion.Euler(Vector3.forward * bpData.rotation);
                             bp.p_Sprite = bpData.sprite;
                         }

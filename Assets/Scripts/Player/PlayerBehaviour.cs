@@ -80,7 +80,7 @@ public class PlayerBehaviour : MonoBehaviour
                     // Thus, custom counters are only cleaned up when the next custom counter is requested.
                     if (counter.PlayerCounters.Count > 0)
                         counter.RemovePlayerCounter(CSteamID.Nil);
-                    counter.AddPlayerCounter(CSteamID.Nil, value, Counter.Cnt);
+                    counter.AddPlayerCounter(CSteamID.Nil, value, counter.Cnt);
                 }
                 else if (value == DefaultMovementSpeed)
                 {

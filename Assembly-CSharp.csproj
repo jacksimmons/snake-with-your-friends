@@ -65,6 +65,7 @@
     <Compile Include="Assets\Scripts\Object\ScootileTilemap.cs" />
     <Compile Include="Assets\Scripts\Powerup\Effect.cs" />
     <Compile Include="Assets\Scripts\Vectors.cs" />
+    <Compile Include="Assets\Scripts\Menu\SettingsMenu.cs" />
     <Compile Include="Assets\Scripts\Menu\JoinMenu.cs" />
     <Compile Include="Assets\Scripts\Powerup\StatusBehaviour.cs" />
     <Compile Include="Assets\Scripts\Game\WallTilemap.cs" />
@@ -86,7 +87,6 @@
     <Compile Include="Assets\Scripts\Menu\MainMenu.cs" />
     <Compile Include="Assets\Scripts\Powerup\BodyPartStatus.cs" />
     <Compile Include="Assets\Scripts\Lobby.cs" />
-    <Compile Include="Assets\Scripts\Menu\SettingsMenu.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />

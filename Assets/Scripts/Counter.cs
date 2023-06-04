@@ -6,7 +6,7 @@ using UnityEngine;
 
 public class Counter : MonoBehaviour
 {
-    public static float Cnt { get; private set; } = 0;
+    public float Cnt { get; private set; } = 0;
     public bool Paused { get; set; } = true;
     [SerializeField]
     public float ThresholdSeconds { get; set; } = 0f;

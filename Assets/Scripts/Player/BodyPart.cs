@@ -257,7 +257,7 @@ public class BodyPart
         BodyPartData data;
         data.pos_x = p_Position.x;
         data.pos_y = p_Position.y;
-        data.rotation = p_Rotation.z;
+        data.rotation = p_Rotation.eulerAngles.z;
         data.sprite = p_Sprite;
         return data;
     }
