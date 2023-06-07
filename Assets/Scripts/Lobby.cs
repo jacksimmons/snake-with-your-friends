@@ -315,7 +315,7 @@ public class Lobby : MonoBehaviour
                         if (_isOwner)
                             _playersLoaded++;
                         else
-                            SendMessageToUser(netMessage.m_identityPeer.GetSteamID(), ToBytes("player_loaded sent to non-host."), (int)Channel.Console);
+                            SendMessageToUser(netMessage.m_identityPeer.GetSteamID(), ToBytes("player_loaded sent to non-host."), Channel.Console);
                         break;
                     case "bp_data":
                         if (i > 0)
