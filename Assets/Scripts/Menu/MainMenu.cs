@@ -48,7 +48,7 @@ public class MainMenu : MonoBehaviour
         gameBehaviour.SetupGame(player, new GameObject[] { snake });
         
         // Create Counter from template, set LocalLobby as parent and listener
-        GameObject lobby = Instantiate(_lobbyTemplate, gameBehaviour.gameObject.transform.parent);
+        GameObject lobby = Instantiate(_lobbyTemplate);
         lobby.GetComponent<Lobby>().SetupOffline(player);
 
         // Cleanup

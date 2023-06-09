@@ -72,6 +72,8 @@ public class Lobby : MonoBehaviour
     private CallResult<LobbyEnter_t> m_LobbyEnter;
     private CallResult<LobbyCreated_t> m_LobbyCreated;
 
+    protected Callback<SteamNetworkingMessagesSessionFailed_t> m_SteamNetworkingMessagesSessionFailed;
+
     // Start is called before the first frame update
     private void Awake()
     {
@@ -81,6 +83,8 @@ public class Lobby : MonoBehaviour
             m_LobbyDataUpdate = Callback<LobbyDataUpdate_t>.Create(OnLobbyDataUpdate);
             m_LobbyEnter = CallResult<LobbyEnter_t>.Create(OnLobbyEnter);
             m_LobbyCreated = CallResult<LobbyCreated_t>.Create(OnLobbyCreated);
+
+            m_SteamNetworkingMessagesSessionFailed = Callback<SteamNetworkingMessagesSessionFailed_t>.Create(OnMessageSessionFailed);
 
             Id = SteamUser.GetSteamID();
             DontDestroyOnLoad(this);
@@ -217,16 +221,21 @@ public class Lobby : MonoBehaviour
     {
         // Don't need to waste time clearing the buffer; only message.Length
         // bytes of it are going to be used.
+        string name = SteamFriends.GetFriendPersonaName(cSteamID);
         Marshal.Copy(message, 0, _sendBuf, message.Length);
+
         SteamNetworkingIdentity identity = new SteamNetworkingIdentity();
         identity.SetSteamID(cSteamID);
         EResult result = SteamNetworkingMessages.SendMessageToUser(ref identity, _sendBuf, (uint)message.Length, 0, (int)channel);
+
+        BodyPartData bp_data = FromBytes<BodyPartData>(message);
+        string str_data = FromBytes(message);
+
         switch (result)
         {
             case EResult.k_EResultOK:
                 break;
             default:
-                Debug.LogError(FromBytes(message) + " failed to send.");
                 break;
         }
     }
@@ -235,7 +244,7 @@ public class Lobby : MonoBehaviour
     /// Sends a message to one or all users.
     /// </summary>
     /// <param name="target">Either a valid CSteamID, or CSteamID.Nil to send to all.</param>
-    /// <param name="message">The bytes representation of the message to send.</param>
+    /// <param name="messages">The bytes representation of the messages to send.</param>
     /// <param name="channel">The channel to send the message on.</param>
     private void SendMessagesTo(CSteamID target, string title, List<byte[]> messages, Channel channel)
     {
@@ -275,7 +284,7 @@ public class Lobby : MonoBehaviour
         List<byte[]> msgs = new List<byte[]>();
         foreach (BodyPart bp in Player.BodyParts)
             msgs.Add(ToBytes(bp.ToData()));
-        SendMessagesTo(CSteamID.Nil, "bp_data", msgs, Channel.Physics);
+            SendMessagesTo(CSteamID.Nil, "bp_data", msgs, Channel.Physics);
     }
 
 
@@ -523,6 +532,11 @@ public class Lobby : MonoBehaviour
         }
     }
 
+    private void OnMessageSessionFailed(SteamNetworkingMessagesSessionFailed_t pCallback)
+    {
+        SteamNetConnectionInfo_t info = pCallback.m_info;
+    }
+
     private void AddLobbyMember(CSteamID id)
     {
         string name = SteamFriends.GetFriendPersonaName(id);
@@ -561,6 +575,7 @@ public class Lobby : MonoBehaviour
 
     private void CreatePlayer(CSteamID id)
     {
+        print("hi");
         // Need to do all but finding PlayerParent locally, and not with Find,
         // else other already created players may ping up in the search.
         string name = SteamFriends.GetFriendPersonaName(id);
