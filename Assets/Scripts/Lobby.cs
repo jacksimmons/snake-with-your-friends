@@ -284,7 +284,7 @@ public class Lobby : MonoBehaviour
         List<byte[]> msgs = new List<byte[]>();
         foreach (BodyPart bp in Player.BodyParts)
             msgs.Add(ToBytes(bp.ToData()));
-            SendMessagesTo(CSteamID.Nil, "bp_data", msgs, Channel.Physics);
+        SendMessagesTo(CSteamID.Nil, "bp_data", msgs, Channel.Physics);
     }
 
 
@@ -361,7 +361,7 @@ public class Lobby : MonoBehaviour
                         if (IsOwner)
                             _playersLoaded++;
                         else
-                            SendMessageToUser(netMessage.m_identityPeer.GetSteamID(), ToBytes("player_loaded sent to non-host."), Channel.Console);
+                            Debug.LogError("player_loaded sent to a non-owner!");
                         break;
                     case "bp_data":
                         if (i > 0)
