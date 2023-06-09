@@ -9,16 +9,16 @@ public class Counter : MonoBehaviour
     public float Cnt { get; private set; } = 0;
     public bool Paused { get; set; } = true;
     [SerializeField]
-    public float ThresholdSeconds { get; set; } = 0f;
+    public float thresholdSeconds = 0f;
 
     public Dictionary<CSteamID, Dictionary<string, float>> PlayerCounters { get; private set; } = new();
 
     [SerializeField]
-    private GameObject _listener = null;
+    private GameObject _listener;
 
     private void FixedUpdate()
     {
-        if (!Paused && _listener && (ThresholdSeconds > 0))
+        if (!Paused && _listener && (thresholdSeconds > 0))
         {
             Increment();
         }
@@ -27,7 +27,7 @@ public class Counter : MonoBehaviour
     public void Increment()
     {
         Cnt += Time.fixedDeltaTime;
-        if (Cnt >= ThresholdSeconds)
+        if (Cnt >= thresholdSeconds)
         {
             Cnt = 0;
             _listener.SendMessage("OnCounterThresholdReached");
@@ -56,12 +56,11 @@ public class Counter : MonoBehaviour
 
     public void AddPlayerCounter(CSteamID player, float movementSpeed, float cntStart)
     {
-        // movementSpeed is a divisor for ThresholdSeconds
-        float thresholdSeconds = ThresholdSeconds / movementSpeed;
+        // movementSpeed is a divisor for thresholdSeconds
         PlayerCounters.Add(player,
         new Dictionary<string, float>
         {
-            { "threshold_seconds", thresholdSeconds },
+            { "threshold_seconds", thresholdSeconds / movementSpeed },
             { "cnt", cntStart },
         });
     }

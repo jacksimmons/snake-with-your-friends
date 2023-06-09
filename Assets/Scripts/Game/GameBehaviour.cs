@@ -1,10 +1,6 @@
 using Extensions;
-using JetBrains.Annotations;
-using System.Collections.Generic;
-using System.Linq;
 using TMPro;
 using UnityEngine;
-using UnityEngine.Pool;
 using UnityEngine.Tilemaps;
 
 public class GameBehaviour : MonoBehaviour
@@ -16,6 +12,7 @@ public class GameBehaviour : MonoBehaviour
     [SerializeField]
     private Tile _wallTile;
 
+    private PlayerBehaviour _player;
     [SerializeField]
     private GameObject[] _players;
     private bool[] _objects;
@@ -25,16 +22,28 @@ public class GameBehaviour : MonoBehaviour
     [SerializeField]
     private GameObject _menuSelectTemplate;
 
-    public enum E_WorldSize : int
+    [SerializeField]
+    private Vector2 _spawnPoint;
+
+    public enum EWorldSize : int
     {
-        FUNNY = 2,
-        LOBBY = 10,
-        GAME_SMALL = 15,
-        GAME_MEDIUM = 30,
-        GAME_LARGE = 45
+        Lobby = 10,
+        Small = 20,
+        Medium = 40,
+        Large = 60,
+        Massive = 80
     }
     [SerializeField]
-    private E_WorldSize groundSize = E_WorldSize.LOBBY;
+    private EWorldSize groundSize = EWorldSize.Lobby;
+
+    public enum EWorldMode : int
+    {
+        None,
+        Lobby,
+        Offline,
+        Online
+    }
+    public EWorldMode WorldMode;
 
     Vector2Int bl = Vector2Int.zero;
 
@@ -45,6 +54,8 @@ public class GameBehaviour : MonoBehaviour
 
     void Start()
     {
+        SetGameOverScreenActivity(false);
+
         // Defaults every value to false.
         _objects = new bool[(int)groundSize * (int)groundSize];
 
@@ -64,19 +75,26 @@ public class GameBehaviour : MonoBehaviour
         AddAndInstantiateObjectToGrid(Random.Range(0, _objects.Length), _foodTemplates[Random.Range(0, _foodTemplates.Length)]);
     }
 
-    public void SetupGame(GameObject[] players, PlayerBehaviour localP1)
+    public void SetupGame(PlayerBehaviour player, GameObject[] players = null)
     {
+        _player = player;
+        if (players == null)
+            players = new GameObject[] { player.gameObject };
+
         _players = players;
         GameObject cam = GameObject.FindWithTag("MainCamera");
-        cam.GetComponent<CamBehaviour>().SetupCamera(localP1);
+        cam.GetComponent<CamBehaviour>().SetupCamera(player);
 
         Tilemap gameGT = CreateAndReturnTilemap(gridName: "Ground", hasCollider: false);
         Tilemap gameWT = CreateAndReturnTilemap(gridName: "Wall", hasCollider: true);
 
         CreateGroundTilemap(gameGT, bl);
         CreateWallTilemap(gameWT, bl);
-        
-        PlaceSnakes(1, _players, gameGT, bl);
+
+        if (WorldMode == EWorldMode.Online || WorldMode == EWorldMode.Offline)
+            PlacePlayers(depth: 1, _players, gameGT, bl);
+        else
+            SpawnPlayer();
     }
 
     Tilemap CreateAndReturnTilemap(string gridName, bool hasCollider)
@@ -161,7 +179,7 @@ public class GameBehaviour : MonoBehaviour
         wallTilemap.SetTilesBlock(bounds, tiles);
     }
 
-    void PlaceSnakes(int depth, GameObject[] remainingPlayers, Tilemap groundTilemap, Vector2Int bl)
+    void PlacePlayers(int depth, GameObject[] remainingPlayers, Tilemap groundTilemap, Vector2Int bl)
     {
         // Outer snakes (along the walls)
         // Calculate the maximum distance between snakes.
@@ -191,10 +209,18 @@ public class GameBehaviour : MonoBehaviour
                 }
                 else
                 {
-                    PlaceSnakes(newDepth, Arrays.SubArray(remainingPlayers, 4), groundTilemap, bl);
+                    PlacePlayers(newDepth, Arrays.SubArray(remainingPlayers, 4), groundTilemap, bl);
                 }
             }
         }
+    }
+
+    public void SpawnPlayer()
+    {
+        _player.Reset();
+        _player.transform.position = (Vector3)_spawnPoint;
+        SetGameOverScreenActivity(false);
+        _player.SetDead(false);
     }
 
     /// <summary>
@@ -259,5 +285,25 @@ public class GameBehaviour : MonoBehaviour
         teleporter.A.GetComponentInChildren<TextMeshProUGUI>().text = text1;
         teleporter.B.transform.position = to;
         teleporter.B.GetComponentInChildren<TextMeshProUGUI>().text = text2;
+    }
+
+    private void SetGameOverScreenActivity(bool active)
+    {
+        transform.Find("GameOver").gameObject.SetActive(active);
+    }
+
+    public void OnGameOver(int score)
+    {
+        SetGameOverScreenActivity(true);
+        Transform gameOver = transform.Find("GameOver");
+        gameOver.Find("Lobby").gameObject.SetActive(WorldMode == EWorldMode.Lobby);
+        gameOver.Find("Online").gameObject.SetActive(WorldMode == EWorldMode.Online);
+        gameOver.Find("Offline").gameObject.SetActive(WorldMode == EWorldMode.Offline);
+        gameOver.Find("Score").GetComponent<TextMeshProUGUI>().text = "Score: " + score.ToString();
+    }
+
+    public void OnGameOverDecision()
+    {
+        SetGameOverScreenActivity(false);
     }
 }

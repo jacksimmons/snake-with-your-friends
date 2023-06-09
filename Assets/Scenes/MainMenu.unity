@@ -592,8 +592,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _snakeTemplate: {fileID: 4165315088379130911, guid: 4634c72776595a24fba608f81388cc39, type: 3}
-  _gameTemplate: {fileID: 3422690775116552752, guid: 2c4bb62db1ac2db4e9a9c448d731f0f0, type: 3}
   _counterTemplate: {fileID: 5148222703367215955, guid: 1d37eb311e796354c88138caf76afd9c, type: 3}
+  _localLobbyTemplate: {fileID: 3081178988538383437, guid: 2e6d9cad0c27cba4781746f997bb1f99, type: 3}
 --- !u!1001 &1094220808
 PrefabInstance:
   m_ObjectHideFlags: 0

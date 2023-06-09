@@ -14,7 +14,6 @@ using UnityEditor.VersionControl;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-using static UnityEngine.Networking.UnityWebRequest;
 
 // Channels are used for different types:
 // 0 - Update
@@ -38,7 +37,7 @@ public class Lobby : MonoBehaviour
     public PlayerBehaviour Player { get; private set; }
 
     // User Data
-    private CSteamID _id;
+    public CSteamID Id { get; private set; }
 
     // Lobby Data
     private enum Channel : int
@@ -54,10 +53,10 @@ public class Lobby : MonoBehaviour
         InGame
     }
     private CSteamID _lobbyId = CSteamID.Nil;
-    private bool _isOwner = false;
+    public bool IsOwner { get; private set; } = false;
     private LobbyState _lobbyState = LobbyState.NotInOne;
     private Dictionary<CSteamID, string> _lobbyNames = new Dictionary<CSteamID, string>();
-    private Dictionary<CSteamID, PlayerBehaviour> _lobbyPlayers = new Dictionary<CSteamID, PlayerBehaviour>();
+    public Dictionary<CSteamID, PlayerBehaviour> LobbyPlayers { get; private set; } = new Dictionary<CSteamID, PlayerBehaviour>();
 
     // Loading data
     private int _playersLoaded = 0;
@@ -83,7 +82,7 @@ public class Lobby : MonoBehaviour
             m_LobbyEnter = CallResult<LobbyEnter_t>.Create(OnLobbyEnter);
             m_LobbyCreated = CallResult<LobbyCreated_t>.Create(OnLobbyCreated);
 
-            _id = SteamUser.GetSteamID();
+            Id = SteamUser.GetSteamID();
 
             DontDestroyOnLoad(this);
         }
@@ -99,13 +98,13 @@ public class Lobby : MonoBehaviour
     {
         ReceiveMessages(Channel.Physics);
 
-        if (!_isOwner && !_counter.Paused)
+        if (!IsOwner && !_counter.Paused)
             _counter.Paused = true;
     }
 
     public void PlayerLoaded()
     {
-        if (!_isOwner)
+        if (!IsOwner)
         {
             SendMessageToUser(SteamMatchmaking.GetLobbyOwner(_lobbyId), ToBytes("player_loaded"), 0);
         }
@@ -123,19 +122,19 @@ public class Lobby : MonoBehaviour
     /// <summary>
     /// The global counter threshold handles all players with default move speed.
     /// </summary>
-    public void OnCounterThresholdReached()
+    private void OnCounterThresholdReached()
     {
-        // Call all movement loops with default movement speed.
-        foreach (var kvp in _lobbyPlayers)
+        // Call all other player movement loops with default movement speed.
+        foreach (var kvp in LobbyPlayers)
         {
-            if (kvp.Value.MovementSpeed == PlayerBehaviour.DefaultMovementSpeed)
-                SendMessageToUser(kvp.Key, ToBytes("move_timer"), Channel.Physics);
+            if (kvp.Key != Id)
+                if (kvp.Value.MovementSpeed == PlayerBehaviour.DEFAULT_MOVEMENT_SPEED)
+                    SendMessageToUser(kvp.Key, ToBytes("move_timer"), Channel.Physics);
         }
 
-        if (Player.MovementSpeed == PlayerBehaviour.DefaultMovementSpeed)
-        {
-            Message_PlayerMovement();
-        }
+        // Call our own player's movement loop if it has default movement speed
+        if (Player.MovementSpeed == PlayerBehaviour.DEFAULT_MOVEMENT_SPEED)
+            Message_MoveTimer();
     }
 
     /// <summary>
@@ -143,9 +142,15 @@ public class Lobby : MonoBehaviour
     /// speed.
     /// </summary>
     /// <param name="mover">The player with a custom threshold that got triggered.</param>
-    public void OnCounterThresholdReached(CSteamID mover)
+    /// 
+    private void OnCustomCounterThresholdReached(CSteamID mover)
     {
-        SendMessageToUser(mover, ToBytes("move_timer"), Channel.Physics);
+        print("of course");
+        if (mover == Id)
+            if (Player.MovementSpeed != PlayerBehaviour.DEFAULT_MOVEMENT_SPEED)
+                Message_MoveTimer();
+        else
+            SendMessageToUser(mover, ToBytes("move_timer"), Channel.Physics);
     }
 
     private byte[] ToBytes(string str)
@@ -234,7 +239,7 @@ public class Lobby : MonoBehaviour
             if (target == CSteamID.Nil)
             {
                 foreach (CSteamID id in _lobbyNames.Keys)
-                    if (id != _id)
+                    if (id != Id)
                     {
                         SendMessageToUser(id, ToBytes(title), channel);
                         if (messages != null)
@@ -244,7 +249,7 @@ public class Lobby : MonoBehaviour
                         }
                     }
             }
-            else if (target != _id)
+            else if (target != Id)
             {
                 SendMessageToUser(target, ToBytes(title), channel);
                 if (messages != null)
@@ -266,6 +271,30 @@ public class Lobby : MonoBehaviour
         foreach (BodyPart bp in Player.BodyParts)
             msgs.Add(ToBytes(bp.ToData()));
         SendMessagesTo(CSteamID.Nil, "bp_data", msgs, Channel.Physics);
+    }
+
+    public void SetPlayerMovementSpeed(CSteamID id, float value)
+    {
+        if (IsOwner)
+        {
+            if (value != PlayerBehaviour.DEFAULT_MOVEMENT_SPEED && value != Player.MovementSpeed)
+            {
+                // Remove existing custom counter if there is one
+                // Thus, custom counters are only cleaned up when the next custom counter is requested.
+                if (_counter.PlayerCounters.Keys.Contains(id))
+                    _counter.RemovePlayerCounter(id);
+                _counter.AddPlayerCounter(id, value, _counter.Cnt);
+            }
+            else if (value == PlayerBehaviour.DEFAULT_MOVEMENT_SPEED)
+            {
+                if (_counter.PlayerCounters.Keys.Contains(id))
+                    _counter.RemovePlayerCounter(id);
+            }
+        }
+        else
+        {
+            SendMovementSpeedUpdateData(value);
+        }
     }
 
     public void SendMovementSpeedUpdateData(float movementSpeed)
@@ -306,13 +335,13 @@ public class Lobby : MonoBehaviour
                 switch (message)
                 {
                     case "move_timer":
-                        if (_isOwner)
+                        if (IsOwner)
                             Debug.LogError("Owner should never receive a move_timer packet!");
                         else
-                            Message_PlayerMovement();
+                            Message_MoveTimer();
                         break;
                     case "player_loaded":
-                        if (_isOwner)
+                        if (IsOwner)
                             _playersLoaded++;
                         else
                             SendMessageToUser(netMessage.m_identityPeer.GetSteamID(), ToBytes("player_loaded sent to non-host."), Channel.Console);
@@ -321,7 +350,7 @@ public class Lobby : MonoBehaviour
                         if (i > 0)
                         {
                             // Every i is a new BodyPart.
-                            PlayerBehaviour player = _lobbyPlayers[sender];
+                            PlayerBehaviour player = LobbyPlayers[sender];
                             BodyPartData bpData = FromBytes<BodyPartData>(data);
                             BodyPart bp = player.BodyParts[i - 1];
                             bp.p_Position = new Vector3(bpData.pos_x, bpData.pos_y, bp.p_Position.z);
@@ -346,9 +375,8 @@ public class Lobby : MonoBehaviour
         }
     }
 
-    private void Message_PlayerMovement()
+    private void Message_MoveTimer()
     {
-        print("hi");
         Player.HandleMovementLoop();
         SendBodyPartData();
     }
@@ -371,14 +399,14 @@ public class Lobby : MonoBehaviour
             ELobbyType.k_ELobbyTypePublic, cMaxMembers: 4);
         m_LobbyCreated.Set(handle);
         m_LobbyEnter.Set(handle);
-        _isOwner = true;
+        IsOwner = true;
 
         foreach (GameObject go in GameObject.FindGameObjectsWithTag("PlayerInput"))
         {
             if (go.name == "SpeedSlider")
             {
                 Slider slider = go.GetComponent<Slider>();
-                _counter.ThresholdSeconds = slider.value;
+                _counter.thresholdSeconds = slider.value;
             }
         }
     }
@@ -471,7 +499,7 @@ public class Lobby : MonoBehaviour
                 break;
         }
 
-        _isOwner = _id == SteamMatchmaking.GetLobbyOwner(_lobbyId);
+        IsOwner = Id == SteamMatchmaking.GetLobbyOwner(_lobbyId);
     }
 
     private void OnLobbyDataUpdate(LobbyDataUpdate_t pCallback)
@@ -501,9 +529,9 @@ public class Lobby : MonoBehaviour
 
     private void RemoveLobbyMember(CSteamID id)
     {
-        PlayerBehaviour pb = _lobbyPlayers[id];
+        PlayerBehaviour pb = LobbyPlayers[id];
         Destroy(pb.gameObject);
-        _lobbyPlayers.Remove(id);
+        LobbyPlayers.Remove(id);
         _lobbyNames.Remove(id);
     }
 
@@ -531,28 +559,33 @@ public class Lobby : MonoBehaviour
         TextMeshProUGUI text = snake.transform.Find("Name").GetComponent<TextMeshProUGUI>();
         text.text = name;
 
-        _lobbyPlayers[id] = snake.GetComponentInChildren<PlayerBehaviour>();
+        LobbyPlayers[id] = snake.GetComponentInChildren<PlayerBehaviour>();
 
-        if (id == _id)
+        if (id == Id)
         {
-            Player = _lobbyPlayers[id];
+            Player = LobbyPlayers[id];
         }
     }
 
     private IEnumerator LoadLobby()
     {
         _lobbyState = LobbyState.InLobbyMenu;
-        SceneManager.LoadSceneAsync("LobbyMenu");
+        AsyncOperation loadLobbyMenuComplete = SceneManager.LoadSceneAsync("LobbyMenu");
 
-        while (SceneManager.GetActiveScene().name != "LobbyMenu")
+        while (!loadLobbyMenuComplete.isDone)
         {
             yield return new WaitForSeconds(1);
         }
-
         AddAllLobbyMembers();
-        GameObject.FindWithTag("MainCamera").GetComponent<CamBehaviour>().SetupCamera(Player);
+
+        foreach (Transform child in GameObject.FindWithTag("PlayerParent").transform)
+        {
+            child.Find("Player").GetComponent<PlayerBehaviour>().InLobbyMenu = true;
+        }
 
         _counter.Paused = false;
+
+        GameObject.FindWithTag("MainCamera").GetComponent<CamBehaviour>().SetupCamera(Player);
 
         yield break;
     }

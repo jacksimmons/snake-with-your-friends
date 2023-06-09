@@ -81,12 +81,14 @@
     <Compile Include="Assets\Scripts\Object\GridObject.cs" />
     <Compile Include="Assets\Scripts\Steamworks.NET\SteamManager.cs" />
     <Compile Include="Assets\Scripts\Powerup\FoodBehaviour.cs" />
+    <Compile Include="Assets\Scripts\Menu\LobbyMenu.cs" />
     <Compile Include="Assets\Scripts\Object\ColliderToggleTilemap.cs" />
     <Compile Include="Assets\Scripts\Player\BodyPart.cs" />
     <Compile Include="Assets\Scripts\CamBehaviour.cs" />
     <Compile Include="Assets\Scripts\Menu\MainMenu.cs" />
     <Compile Include="Assets\Scripts\Powerup\BodyPartStatus.cs" />
     <Compile Include="Assets\Scripts\Lobby.cs" />
+    <Compile Include="Assets\Scripts\LocalLobby.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />

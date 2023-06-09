@@ -2,6 +2,7 @@ using Extensions;
 using Steamworks;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 /* Movement:
@@ -13,6 +14,7 @@ using UnityEngine;
 public class PlayerBehaviour : MonoBehaviour
 {
     public Lobby lobby = null;
+    public bool InLobbyMenu { get; set; } = false;
 
     [SerializeField]
     public StatusBehaviour status;
@@ -20,7 +22,6 @@ public class PlayerBehaviour : MonoBehaviour
     // Templates and sprites
     [SerializeField]
     private GameObject _bp_template;
-
     [SerializeField]
     private Sprite _headPiece;
     [SerializeField]
@@ -33,7 +34,6 @@ public class PlayerBehaviour : MonoBehaviour
     private Sprite[] _spriteSheet; // Must match with length of BodyPartSprite
 
     // Directions and movement
-
     private Vector2 _startingDirection = Vector2.up;
     // Simple boolean which gets set to false after the starting direction is set
     public Vector2 direction = Vector2.zero;
@@ -44,7 +44,7 @@ public class PlayerBehaviour : MonoBehaviour
 
     // Free movement
     [SerializeField]
-    public bool freeMovement;
+    public bool canMoveFreely;
     [SerializeField]
     private float _freeMovementSpeedMod = 1.0f;
 
@@ -58,7 +58,7 @@ public class PlayerBehaviour : MonoBehaviour
 
     public bool frozen = false;
 
-    public const float DefaultMovementSpeed = 1.0f;
+    public const float DEFAULT_MOVEMENT_SPEED = 1.0f;
     private float _movementSpeed = 1.0f;
     public float MovementSpeed
     {
@@ -68,28 +68,20 @@ public class PlayerBehaviour : MonoBehaviour
         }
         set
         {
+            // If there is no lobby, the custom counter is made for the Nil steam ID.
+            // ! [AI] If adding AI this will need to be changed
+
+            CSteamID id = CSteamID.Nil;
             if (lobby)
             {
+                id = lobby.Id;
+                lobby.SetPlayerMovementSpeed(id, value);
             }
             else
             {
-                if (value != DefaultMovementSpeed && value != MovementSpeed)
-                {
-                    Counter counter = GameObject.FindWithTag("Counter").GetComponent<Counter>();
-                    // Remove existing custom counter if there is one
-                    // Thus, custom counters are only cleaned up when the next custom counter is requested.
-                    if (counter.PlayerCounters.Count > 0)
-                        counter.RemovePlayerCounter(CSteamID.Nil);
-                    counter.AddPlayerCounter(CSteamID.Nil, value, counter.Cnt);
-                }
-                else if (value == DefaultMovementSpeed)
-                {
-                    Counter counter = GameObject.FindWithTag("Counter").GetComponent<Counter>();
-                    if (counter.PlayerCounters.Count > 0)
-                        counter.RemovePlayerCounter(CSteamID.Nil);
-                }
-                _movementSpeed = value;
+                // if locallobby ...
             }
+            _movementSpeed = value;
         }
     }
     
@@ -162,7 +154,7 @@ public class PlayerBehaviour : MonoBehaviour
 
         // Initialisation
         _rb = GetComponent<Rigidbody2D>();
-        //if (freeMovement)
+        //if (canMoveFreely)
         //    _moveTime = Mathf.CeilToInt(_moveTime / _freeMovementSpeedMod);
     }
 
@@ -184,7 +176,9 @@ public class PlayerBehaviour : MonoBehaviour
     /// </summary>
     public void Reset()
     {
-        while (RemoveBodyPart()) { }
+        while (RemoveBodyPart(index: 1)) { }
+
+        transform.position = Vector3.zero;
 
         head.p_Position = Vector3.zero;
         head.p_Rotation = Quaternion.identity;
@@ -197,22 +191,6 @@ public class PlayerBehaviour : MonoBehaviour
         HandleInput();
     }
 
-    private void OnCounterThresholdReached()
-    {
-        if (MovementSpeed == 1.0f)
-            HandleMovementLoop();
-    }
-
-    /// <summary>
-    /// Fitted to the same parameters as the local counter procedure for Lobby,
-    /// but does not use the `id` param.
-    /// </summary>
-    private void OnCustomCounterThresholdReached(CSteamID _)
-    {
-        if (MovementSpeed != 1.0f)
-            HandleMovementLoop();
-    }
-
     private void HandleInput()
     {
         // Movement
@@ -222,7 +200,7 @@ public class PlayerBehaviour : MonoBehaviour
         // Movement states
         if (!frozen)
         {
-            if (freeMovement || (direction != Vector2.zero))
+            if (canMoveFreely || (direction != Vector2.zero))
             {
                 movement = direction;
             }
@@ -379,19 +357,34 @@ public class PlayerBehaviour : MonoBehaviour
     /// `false` meaning the body part was not removed, as there is only a head
     /// and a tail left; so the snake should die.
     /// </returns>
-    private bool RemoveBodyPart()
+    private bool RemoveBodyPart(int index)
     {
-        if (transform.childCount > 2)
+        if (index == 0)
         {
-            Destroy(transform.GetChild(transform.childCount - 1).gameObject);
-            BodyParts.RemoveAt(transform.childCount - 1);
-            tail = BodyParts[transform.childCount - 1];
-            tail.p_DefaultSprite = BodyPartSprite.Straight;
-            tail.p_SpriteSheet = null;
-            tail.MakeNotCorner(tail.prevRot);
+            HandleDeath();
+            return false;
+        }
+
+        if (index < BodyParts.Count && BodyParts.Count > 2)
+        {
+            // Remove and destroy body part at index
+            BodyParts.RemoveAt(index);
+            Destroy(transform.GetChild(index).gameObject);
             return true;
         }
-        return false;
+        else
+        {
+            return false;
+        }
+    }
+
+    public void SetDead(bool dead)
+    {
+        _rb.simulated = !dead;
+        frozen = dead;
+        foreach (BodyPart part in BodyParts)
+            part.p_Transform.gameObject.GetComponent<SpriteRenderer>().color = dead ? Color.gray : Color.white;
+        status.gameObject.SetActive(!dead);
     }
 
     /// <summary>
@@ -399,11 +392,12 @@ public class PlayerBehaviour : MonoBehaviour
     /// </summary>
     public void HandleDeath()
     {
-        _rb.simulated = false;
-        frozen = true;
-        foreach (BodyPart part in BodyParts)
-            part.p_Transform.gameObject.GetComponent<SpriteRenderer>().color = Color.gray;
-        status.gameObject.SetActive(false);
+        if (!InLobbyMenu)
+        {
+            SetDead(true);
+            GameBehaviour game = GameObject.FindWithTag("GameHandler").GetComponent<GameBehaviour>();
+            game.OnGameOver(score: BodyParts.Count);
+        }
     }
 
     /// <summary>
@@ -454,8 +448,8 @@ public class PlayerBehaviour : MonoBehaviour
         _queuedActions.Add(new Action(() =>
         {
             frozen = true;
-            _forcedMovement = direction * speed;
-            movement = _forcedMovement;
+            MovementSpeed = speed;
+            _forcedMovement = direction;
             foreach (var part in BodyParts)
             {
                 _stored_bp_directions.Add(part.p_Direction);
@@ -476,7 +470,7 @@ public class PlayerBehaviour : MonoBehaviour
             // ! Limitation - the snake must continue,
             // this means if the snake starts on a scootile,
             // they start without input.
-            movement = _forcedMovement.normalized;
+            MovementSpeed = DEFAULT_MOVEMENT_SPEED;
             _forcedMovement = Vector2.zero;
             for (int i = 0; i < BodyParts.Count; i++)
             {

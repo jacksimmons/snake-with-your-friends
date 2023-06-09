@@ -13,7 +13,7 @@ public class WallTilemap : MonoBehaviour
                 {
                     PlayerBehaviour pb = col.transform.parent.GetComponent<PlayerBehaviour>();
                     pb.transform.position -= (Vector3)pb.PrevMovement;
-                    if (!pb.freeMovement)
+                    if (!pb.canMoveFreely)
                         pb.HandleDeath();
                 }
                 else if (col.transform.parent.CompareTag("Projectile"))
