@@ -4,21 +4,22 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Handles counters for player movement.
+/// The listener is the parent of this object (transform.parent.gameObject).
+/// </summary>
 public class Counter : MonoBehaviour
 {
     public float Cnt { get; private set; } = 0;
     public bool Paused { get; set; } = true;
     [SerializeField]
-    public float thresholdSeconds = 0f;
+    public float thresholdSeconds;
 
     public Dictionary<CSteamID, Dictionary<string, float>> PlayerCounters { get; private set; } = new();
 
-    [SerializeField]
-    private GameObject _listener;
-
     private void FixedUpdate()
     {
-        if (!Paused && _listener && (thresholdSeconds > 0))
+        if (!Paused && transform.parent.gameObject && (thresholdSeconds > 0))
         {
             Increment();
         }
@@ -30,7 +31,7 @@ public class Counter : MonoBehaviour
         if (Cnt >= thresholdSeconds)
         {
             Cnt = 0;
-            _listener.SendMessage("OnCounterThresholdReached");
+            transform.parent.gameObject.SendMessage("OnCounterThresholdReached");
         }
 
         foreach (var kvp in PlayerCounters)
@@ -39,7 +40,7 @@ public class Counter : MonoBehaviour
             if (kvp.Value["cnt"] >= kvp.Value["threshold_seconds"])
             {
                 kvp.Value["cnt"] = 0;
-                _listener.SendMessage("OnCustomCounterThresholdReached", kvp.Key);
+                transform.parent.gameObject.SendMessage("OnCustomCounterThresholdReached", kvp.Key);
             }
         }
     }
@@ -47,11 +48,6 @@ public class Counter : MonoBehaviour
     public void Reset()
     {
         Cnt = 0;
-    }
-
-    public void SetListener(GameObject listener)
-    {
-        _listener = listener;
     }
 
     public void AddPlayerCounter(CSteamID player, float movementSpeed, float cntStart)

@@ -59,6 +59,7 @@ public class PlayerBehaviour : MonoBehaviour
     public bool frozen = false;
 
     public const float DEFAULT_MOVEMENT_SPEED = 1.0f;
+
     private float _movementSpeed = 1.0f;
     public float MovementSpeed
     {
@@ -73,14 +74,8 @@ public class PlayerBehaviour : MonoBehaviour
 
             CSteamID id = CSteamID.Nil;
             if (lobby)
-            {
                 id = lobby.Id;
-                lobby.SetPlayerMovementSpeed(id, value);
-            }
-            else
-            {
-                // if locallobby ...
-            }
+            lobby.SetPlayerMovementSpeed(id, value);
             _movementSpeed = value;
         }
     }
@@ -96,6 +91,7 @@ public class PlayerBehaviour : MonoBehaviour
     // Components
     private Rigidbody2D _rb;
 
+
     public void OnTriggerEnter2D(Collider2D collision)
     {
         if (collision.gameObject.CompareTag("PoopProjectile"))
@@ -105,6 +101,7 @@ public class PlayerBehaviour : MonoBehaviour
             Destroy(collision.gameObject);
         }
     }
+
 
     /// <summary>
     /// Initialise data structures and objects.
@@ -158,6 +155,7 @@ public class PlayerBehaviour : MonoBehaviour
         //    _moveTime = Mathf.CeilToInt(_moveTime / _freeMovementSpeedMod);
     }
 
+
     /// <summary>
     /// Initialise lobby.
     /// </summary>
@@ -169,6 +167,7 @@ public class PlayerBehaviour : MonoBehaviour
         }
         catch { }
     }
+
 
     /// <summary>
     /// Custom reset method; removes all body parts,
@@ -186,10 +185,12 @@ public class PlayerBehaviour : MonoBehaviour
         tail.p_Rotation = Quaternion.identity;
     }
 
+
     private void Update()
     {
         HandleInput();
     }
+
 
     private void HandleInput()
     {
@@ -241,6 +242,7 @@ public class PlayerBehaviour : MonoBehaviour
         }
     }
 
+
     /// <summary>
     /// Handles movement for all body parts, and the frequency of movement ticks.
     /// Called by the lobby every synced moveframe.
@@ -291,6 +293,7 @@ public class PlayerBehaviour : MonoBehaviour
         }
     }
 
+
     /// <summary>
     /// Only collisions that are possible without invincibility are head and other parts.
     /// Therefore, check if the head's position matches any of the others.
@@ -309,6 +312,7 @@ public class PlayerBehaviour : MonoBehaviour
         }
         return false;
     }
+
 
     /// <summary>
     /// Adds a new body part onto the end of the snake, then makes it the new tail.
@@ -347,6 +351,7 @@ public class PlayerBehaviour : MonoBehaviour
         tail = newBodyPart;
     }
 
+
     /// <summary>
     /// Removes the i-1th body part from the snake.
     /// ! This needs testing.
@@ -378,6 +383,7 @@ public class PlayerBehaviour : MonoBehaviour
         }
     }
 
+
     public void SetDead(bool dead)
     {
         _rb.simulated = !dead;
@@ -386,6 +392,7 @@ public class PlayerBehaviour : MonoBehaviour
             part.p_Transform.gameObject.GetComponent<SpriteRenderer>().color = dead ? Color.gray : Color.white;
         status.gameObject.SetActive(!dead);
     }
+
 
     /// <summary>
     /// Handles death.
@@ -399,6 +406,7 @@ public class PlayerBehaviour : MonoBehaviour
             game.OnGameOver(score: BodyParts.Count);
         }
     }
+
 
     /// <summary>
     /// Outputs debug values for this object.
@@ -421,6 +429,7 @@ public class PlayerBehaviour : MonoBehaviour
         return playerValues;
     }
 
+
     /// <summary>
     /// Queue a new ambiguous action.
     /// </summary>
@@ -430,6 +439,7 @@ public class PlayerBehaviour : MonoBehaviour
         _queuedActions.Add(action);
     }
 
+
     /// <summary>
     /// Queues an AddBodyPart action.
     /// </summary>
@@ -437,6 +447,7 @@ public class PlayerBehaviour : MonoBehaviour
     {
         _queuedActions.Add(new Action(AddBodyPart));
     }
+
 
     /// <summary>
     /// Queues the beginning of forced movement.
@@ -457,6 +468,7 @@ public class PlayerBehaviour : MonoBehaviour
             }
         }));
     }
+
 
     /// <summary>
     /// Queues the ending of forced movement.

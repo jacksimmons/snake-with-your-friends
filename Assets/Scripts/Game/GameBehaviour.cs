@@ -52,6 +52,7 @@ public class GameBehaviour : MonoBehaviour
     private const float SOFT_MIN_DIST_WORLD_SIZE_RATIO = 0.2f;
     private const float HARD_MIN_DIST = 10f;
 
+
     void Start()
     {
         SetGameOverScreenActivity(false);
@@ -62,6 +63,7 @@ public class GameBehaviour : MonoBehaviour
         GenerateStartingFood();
     }
 
+
     private void GenerateStartingFood()
     {
         for (int i = 0; i < _players.Length; i++)
@@ -70,10 +72,12 @@ public class GameBehaviour : MonoBehaviour
         }
     }
 
+
     public void GenerateFood()
     {
         AddAndInstantiateObjectToGrid(Random.Range(0, _objects.Length), _foodTemplates[Random.Range(0, _foodTemplates.Length)]);
     }
+
 
     public void SetupGame(PlayerBehaviour player, GameObject[] players = null)
     {
@@ -97,6 +101,7 @@ public class GameBehaviour : MonoBehaviour
             SpawnPlayer();
     }
 
+
     Tilemap CreateAndReturnTilemap(string gridName, bool hasCollider)
     {
         GameObject gridObject = new GameObject(gridName);
@@ -119,6 +124,7 @@ public class GameBehaviour : MonoBehaviour
 
         return tilemap;
     }
+
 
     void CreateGroundTilemap(Tilemap groundTilemap, Vector2Int bl)
     {
@@ -152,6 +158,7 @@ public class GameBehaviour : MonoBehaviour
         groundTilemap.SetTilesBlock(bounds, tiles);
     }
 
+
     void CreateWallTilemap(Tilemap wallTilemap, Vector2Int bl)
     {
         // This square is (int)groundSize + 2 squared, since it is one bigger on each side of the x and y edges of the inner square
@@ -178,6 +185,7 @@ public class GameBehaviour : MonoBehaviour
 
         wallTilemap.SetTilesBlock(bounds, tiles);
     }
+
 
     void PlacePlayers(int depth, GameObject[] remainingPlayers, Tilemap groundTilemap, Vector2Int bl)
     {
@@ -215,6 +223,7 @@ public class GameBehaviour : MonoBehaviour
         }
     }
 
+
     public void SpawnPlayer()
     {
         _player.Reset();
@@ -222,6 +231,7 @@ public class GameBehaviour : MonoBehaviour
         SetGameOverScreenActivity(false);
         _player.SetDead(false);
     }
+
 
     /// <summary>
     /// Checks if index `objectPos` is true in objects, if so it recursively
@@ -252,6 +262,7 @@ public class GameBehaviour : MonoBehaviour
         return objectPos;
     }
 
+
     GameObject AddAndInstantiateObjectToGrid(int objectPos, GameObject obj)
     {
         // Overwrite objectPos with the selected objectPos
@@ -268,10 +279,12 @@ public class GameBehaviour : MonoBehaviour
         }
     }
 
+
     public void RemoveFromGrid(int objectPos)
     {
         _objects[objectPos] = false;
     }
+
 
     void CreateTeleportingMenuPair(
         string text1, string text2,
@@ -287,10 +300,12 @@ public class GameBehaviour : MonoBehaviour
         teleporter.B.GetComponentInChildren<TextMeshProUGUI>().text = text2;
     }
 
+
     private void SetGameOverScreenActivity(bool active)
     {
         transform.Find("GameOver").gameObject.SetActive(active);
     }
+
 
     public void OnGameOver(int score)
     {
@@ -301,6 +316,7 @@ public class GameBehaviour : MonoBehaviour
         gameOver.Find("Offline").gameObject.SetActive(WorldMode == EWorldMode.Offline);
         gameOver.Find("Score").GetComponent<TextMeshProUGUI>().text = "Score: " + score.ToString();
     }
+
 
     public void OnGameOverDecision()
     {

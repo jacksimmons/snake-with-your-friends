@@ -37,7 +37,7 @@ public class Lobby : MonoBehaviour
     public PlayerBehaviour Player { get; private set; }
 
     // User Data
-    public CSteamID Id { get; private set; }
+    public CSteamID Id { get; private set; } = CSteamID.Nil;
 
     // Lobby Data
     private enum Channel : int
@@ -55,8 +55,8 @@ public class Lobby : MonoBehaviour
     private CSteamID _lobbyId = CSteamID.Nil;
     public bool IsOwner { get; private set; } = false;
     private LobbyState _lobbyState = LobbyState.NotInOne;
-    private Dictionary<CSteamID, string> _lobbyNames = new Dictionary<CSteamID, string>();
-    public Dictionary<CSteamID, PlayerBehaviour> LobbyPlayers { get; private set; } = new Dictionary<CSteamID, PlayerBehaviour>();
+    private Dictionary<CSteamID, string> _lobbyNames = new();
+    public Dictionary<CSteamID, PlayerBehaviour> LobbyPlayers { get; private set; } = new();
 
     // Loading data
     private int _playersLoaded = 0;
@@ -83,7 +83,6 @@ public class Lobby : MonoBehaviour
             m_LobbyCreated = CallResult<LobbyCreated_t>.Create(OnLobbyCreated);
 
             Id = SteamUser.GetSteamID();
-
             DontDestroyOnLoad(this);
         }
     }
@@ -100,6 +99,13 @@ public class Lobby : MonoBehaviour
 
         if (!IsOwner && !_counter.Paused)
             _counter.Paused = true;
+    }
+
+    public void SetupOffline(PlayerBehaviour player)
+    {
+        IsOwner = true;
+        _counter.Paused = false;
+        Player = player;
     }
 
     public void PlayerLoaded()
@@ -145,7 +151,6 @@ public class Lobby : MonoBehaviour
     /// 
     private void OnCustomCounterThresholdReached(CSteamID mover)
     {
-        print("of course");
         if (mover == Id)
             if (Player.MovementSpeed != PlayerBehaviour.DEFAULT_MOVEMENT_SPEED)
                 Message_MoveTimer();
@@ -273,6 +278,7 @@ public class Lobby : MonoBehaviour
         SendMessagesTo(CSteamID.Nil, "bp_data", msgs, Channel.Physics);
     }
 
+
     public void SetPlayerMovementSpeed(CSteamID id, float value)
     {
         if (IsOwner)
@@ -297,6 +303,7 @@ public class Lobby : MonoBehaviour
         }
     }
 
+
     public void SendMovementSpeedUpdateData(float movementSpeed)
     {
         List<byte[]> data = new();
@@ -304,6 +311,7 @@ public class Lobby : MonoBehaviour
         data.Add(movement_speed);
         SendMessagesTo(SteamMatchmaking.GetLobbyOwner(_lobbyId), "movement_speed_update", data, Channel.Physics);
     }
+
 
     /// <summary>
     /// Receives messages from other users.
@@ -375,11 +383,13 @@ public class Lobby : MonoBehaviour
         }
     }
 
+
     private void Message_MoveTimer()
     {
         Player.HandleMovementLoop();
         SendBodyPartData();
     }
+
 
     // Lobby Menu
     public void OnBackPressed()

@@ -57,6 +57,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\Scripts\Powerup\Projectile.cs" />
+    <Compile Include="Assets\Scripts\LocalLobby.cs" />
     <Compile Include="Assets\Scripts\Game\BackButton.cs" />
     <Compile Include="Assets\Scripts\Powerup\TooManyPints.cs" />
     <Compile Include="Assets\Scripts\Object\Teleporter.cs" />
@@ -88,7 +89,6 @@
     <Compile Include="Assets\Scripts\Menu\MainMenu.cs" />
     <Compile Include="Assets\Scripts\Powerup\BodyPartStatus.cs" />
     <Compile Include="Assets\Scripts\Lobby.cs" />
-    <Compile Include="Assets\Scripts\LocalLobby.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />
