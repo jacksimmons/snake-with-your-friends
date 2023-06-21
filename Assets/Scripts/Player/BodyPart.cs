@@ -5,11 +5,12 @@ using UnityEngine;
 /// <summary>
 /// Struct to represent data of a BodyPart needed for networking.
 /// </summary>
+[StructLayout(LayoutKind.Sequential)]
 public struct BodyPartData
 {
     public float pos_x, pos_y;
     public float rotation;
-    public BodyPartSprite sprite;
+    public int e_bodyPartSprite;
 }
 
 /// <summary>
@@ -252,13 +253,28 @@ public class BodyPart
         }
     }
 
+    /// <summary>
+    /// Updates object data by a given BodyPartData struct.
+    /// </summary>
+    /// <param name="data">The struct with updated data.</param>
+    public void FromData(BodyPartData data)
+    {
+        p_Position = new Vector2(data.pos_x, data.pos_y);
+        p_Rotation = Quaternion.Euler(Vector3.forward * data.rotation);
+        p_Sprite = (BodyPartSprite)data.e_bodyPartSprite;
+    }
+
+    /// <summary>
+    /// Exports the object as a BodyPartData struct, ready for marshalling.
+    /// </summary>
+    /// <returns>The exported struct.</returns>
     public BodyPartData ToData()
     {
         BodyPartData data;
         data.pos_x = p_Position.x;
         data.pos_y = p_Position.y;
         data.rotation = p_Rotation.eulerAngles.z;
-        data.sprite = p_Sprite;
+        data.e_bodyPartSprite = (int)p_Sprite;
         return data;
     }
 }

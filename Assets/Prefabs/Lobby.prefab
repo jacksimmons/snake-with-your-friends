@@ -69,7 +69,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -5830134078427122286, guid: 1d37eb311e796354c88138caf76afd9c, type: 3}
       propertyPath: thresholdSeconds
-      value: 0.5
+      value: 0.25
       objectReference: {fileID: 0}
     - target: {fileID: -5830134078427122286, guid: 1d37eb311e796354c88138caf76afd9c, type: 3}
       propertyPath: _thresholdSeconds

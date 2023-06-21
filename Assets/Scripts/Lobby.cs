@@ -74,6 +74,7 @@ public class Lobby : MonoBehaviour
 
     protected Callback<SteamNetworkingMessagesSessionFailed_t> m_SteamNetworkingMessagesSessionFailed;
 
+
     // Start is called before the first frame update
     private void Awake()
     {
@@ -91,11 +92,13 @@ public class Lobby : MonoBehaviour
         }
     }
 
+
     private void Update()
     {
         ReceiveMessages(Channel.Default);
         ReceiveMessages(Channel.Console, true);
     }
+
 
     private void FixedUpdate()
     {
@@ -105,12 +108,14 @@ public class Lobby : MonoBehaviour
             _counter.Paused = true;
     }
 
+
     public void SetupOffline(PlayerBehaviour player)
     {
         IsOwner = true;
         _counter.Paused = false;
         Player = player;
     }
+
 
     public void PlayerLoaded()
     {
@@ -128,6 +133,7 @@ public class Lobby : MonoBehaviour
             }
         }
     }
+
 
     /// <summary>
     /// The global counter threshold handles all players with default move speed.
@@ -147,6 +153,7 @@ public class Lobby : MonoBehaviour
             Message_MoveTimer();
     }
 
+
     /// <summary>
     /// Player counter thresholds handle individual players with non-standard move
     /// speed.
@@ -162,10 +169,12 @@ public class Lobby : MonoBehaviour
             SendMessageToUser(mover, ToBytes("move_timer"), Channel.Physics);
     }
 
+
     private byte[] ToBytes(string str)
     {
         return Encoding.ASCII.GetBytes(str.ToString());
     }
+
 
     private byte[] ToBytes<T>(T data)
     {
@@ -190,10 +199,12 @@ public class Lobby : MonoBehaviour
         return arr;
     }
 
+
     private string FromBytes(byte[] data)
     {
         return Encoding.ASCII.GetString(data);
     }
+
 
     private T FromBytes<T>(byte[] data)
     {
@@ -212,6 +223,7 @@ public class Lobby : MonoBehaviour
         }
         return payload;
     }
+
 
     /// <summary>
     /// Raw send procedure, used by SendMessageTo.
@@ -239,6 +251,7 @@ public class Lobby : MonoBehaviour
                 break;
         }
     }
+
 
     /// <summary>
     /// Sends a message to one or all users.
@@ -278,6 +291,7 @@ public class Lobby : MonoBehaviour
             Marshal.FreeHGlobal(_sendBuf);
         }
     }
+
 
     private void SendBodyPartData()
     {
@@ -366,13 +380,11 @@ public class Lobby : MonoBehaviour
                     case "bp_data":
                         if (i > 0)
                         {
-                            // Every i is a new BodyPart.
+                            // Every i > 0 is a new BodyPart.
                             PlayerBehaviour player = LobbyPlayers[sender];
                             BodyPartData bpData = FromBytes<BodyPartData>(data);
                             BodyPart bp = player.BodyParts[i - 1];
-                            bp.p_Position = new Vector3(bpData.pos_x, bpData.pos_y, bp.p_Position.z);
-                            bp.p_Rotation = Quaternion.Euler(Vector3.forward * bpData.rotation);
-                            bp.p_Sprite = bpData.sprite;
+                            bp.FromData(bpData);
                         }
                         break;
                     case "movement_speed_update":
@@ -412,6 +424,7 @@ public class Lobby : MonoBehaviour
         SceneManager.LoadScene("MainMenu");
     }
 
+
     public void CreateLobby()
     {
         SteamAPICall_t handle = SteamMatchmaking.CreateLobby(
@@ -430,11 +443,13 @@ public class Lobby : MonoBehaviour
         }
     }
 
+
     public void JoinLobby(CSteamID id)
     {
         SteamAPICall_t handle = SteamMatchmaking.JoinLobby(id);
         m_LobbyEnter.Set(handle);
     }
+
 
     // Callbacks
     private void OnLobbyCreated(LobbyCreated_t result, bool bIOFailure)
@@ -463,6 +478,7 @@ public class Lobby : MonoBehaviour
         }
     }
 
+
     private void OnLobbyEnter(LobbyEnter_t result, bool bIOFailure)
     {
         if (bIOFailure || result.m_EChatRoomEnterResponse == (uint)EChatRoomEnterResponse.k_EChatRoomEnterResponseError)
@@ -478,6 +494,7 @@ public class Lobby : MonoBehaviour
             print("Entered lobby successfully.");
         }
     }
+
 
     // A user has joined, left, disconnected, etc. Need to check if we are the new owner.
     private void OnLobbyChatUpdate(LobbyChatUpdate_t pCallback)
@@ -521,6 +538,7 @@ public class Lobby : MonoBehaviour
         IsOwner = Id == SteamMatchmaking.GetLobbyOwner(_lobbyId);
     }
 
+
     private void OnLobbyDataUpdate(LobbyDataUpdate_t pCallback)
     {
         if (pCallback.m_bSuccess == 1)
@@ -532,10 +550,12 @@ public class Lobby : MonoBehaviour
         }
     }
 
+
     private void OnMessageSessionFailed(SteamNetworkingMessagesSessionFailed_t pCallback)
     {
         SteamNetConnectionInfo_t info = pCallback.m_info;
     }
+
 
     private void AddLobbyMember(CSteamID id)
     {
@@ -551,6 +571,7 @@ public class Lobby : MonoBehaviour
         tmps[1].text = name;
     }
 
+
     private void RemoveLobbyMember(CSteamID id)
     {
         PlayerBehaviour pb = LobbyPlayers[id];
@@ -558,6 +579,7 @@ public class Lobby : MonoBehaviour
         LobbyPlayers.Remove(id);
         _lobbyNames.Remove(id);
     }
+
 
     /// <summary>
     /// Should only be used when joining a lobby, to prevent reconstruction on every
@@ -572,6 +594,7 @@ public class Lobby : MonoBehaviour
             AddLobbyMember(memberId);
         }
     }
+
 
     private void CreatePlayer(CSteamID id)
     {
@@ -591,6 +614,7 @@ public class Lobby : MonoBehaviour
             Player = LobbyPlayers[id];
         }
     }
+
 
     private IEnumerator LoadLobby()
     {
@@ -614,6 +638,7 @@ public class Lobby : MonoBehaviour
 
         yield break;
     }
+
 
     public Dictionary<string, string> GetLobbyDebug()
     {
