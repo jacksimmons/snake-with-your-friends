@@ -155,8 +155,12 @@ public class Lobby : MonoBehaviour
         {
             if (kvp.Key != Id)
                 if (Mathf.Approximately(kvp.Value.MovementSpeed, PlayerBehaviour.DEFAULT_MOVEMENT_SPEED))
+				{
+					print("aaaa");
                     SendMessageToUser(kvp.Key, Bytes.ToBytes("move_timer"), Channel.Physics);
-        }
+					SendMessageToUser(kvp.Key, Bytes.ToBytes("move_timer"), Channel.Console);
+				}
+		}
 
         // Call our own player's movement loop if it has default movement speed
         if (Player.MovementSpeed == PlayerBehaviour.DEFAULT_MOVEMENT_SPEED)
