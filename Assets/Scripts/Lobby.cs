@@ -163,8 +163,8 @@ public class Lobby : MonoBehaviour
 		}
 
         // Call our own player's movement loop if it has default movement speed
-        if (Player.MovementSpeed == PlayerBehaviour.DEFAULT_MOVEMENT_SPEED)
-            Message_MoveTimer();
+        if (Mathf.Approximately(Player.MovementSpeed, PlayerBehaviour.DEFAULT_MOVEMENT_SPEED))
+            OnMoveTimerReceived();
     }
 
 
@@ -178,7 +178,7 @@ public class Lobby : MonoBehaviour
     {
         if (mover == Id)
             if (Player.MovementSpeed != PlayerBehaviour.DEFAULT_MOVEMENT_SPEED)
-                Message_MoveTimer();
+                OnMoveTimerReceived();
         else
             SendMessageToUser(mover, Bytes.ToBytes("move_timer"), Channel.Physics);
     }
@@ -329,7 +329,7 @@ public class Lobby : MonoBehaviour
                         if (IsOwner)
                             Debug.LogError("Owner should never receive a move_timer packet!");
                         else
-                            Message_MoveTimer();
+                            OnMoveTimerReceived();
                         break;
                     case "player_loaded":
                         if (IsOwner) { }
@@ -364,7 +364,7 @@ public class Lobby : MonoBehaviour
     }
 
 
-    private void Message_MoveTimer()
+    private void OnMoveTimerReceived()
     {
         Player.HandleMovementLoop();
         SendBodyPartData();
