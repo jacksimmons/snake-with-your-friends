@@ -102,17 +102,16 @@ public class Lobby : MonoBehaviour
 
     private void FixedUpdate()
     {
-        ReceiveMessages(Channel.Physics);
+        // Counter is paused iff you are not the owner.
+        _counter.Paused = !IsOwner;
 
-        if (!IsOwner && !_counter.Paused)
-            _counter.Paused = true;
+        ReceiveMessages(Channel.Physics);
     }
 
 
     public void SetupOffline(PlayerBehaviour player)
     {
         IsOwner = true;
-        _counter.Paused = false;
         Player = player;
     }
 
@@ -140,6 +139,7 @@ public class Lobby : MonoBehaviour
     /// </summary>
     private void OnCounterThresholdReached()
     {
+        print("i am not owner lol");
         // Call all other player movement loops with default movement speed.
         foreach (var kvp in LobbyPlayers)
         {
@@ -631,8 +631,6 @@ public class Lobby : MonoBehaviour
         {
             child.Find("Player").GetComponent<PlayerBehaviour>().InLobbyMenu = true;
         }
-
-        _counter.Paused = false;
 
         GameObject.FindWithTag("MainCamera").GetComponent<CamBehaviour>().SetupCamera(Player);
 
