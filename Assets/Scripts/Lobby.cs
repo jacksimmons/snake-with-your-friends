@@ -493,6 +493,7 @@ public class Lobby : MonoBehaviour
                 break;
         }
 
+        print(Id == SteamMatchmaking.GetLobbyOwner(_lobbyId));
         IsOwner = Id == SteamMatchmaking.GetLobbyOwner(_lobbyId);
     }
 
