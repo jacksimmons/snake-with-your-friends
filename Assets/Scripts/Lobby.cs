@@ -331,8 +331,7 @@ public class Lobby : MonoBehaviour
                             Message_MoveTimer();
                         break;
                     case "player_loaded":
-                        if (IsOwner)
-                            _playersLoaded++;
+                        if (IsOwner) { }
                         else
                             Debug.LogError("player_loaded sent to a non-owner!");
                         break;
