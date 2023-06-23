@@ -381,10 +381,10 @@ public class Lobby : MonoBehaviour
                         if (i > 0)
                         {
                             // Every i > 0 is a new BodyPart.
+                            print(i);
                             PlayerBehaviour player = LobbyPlayers[sender];
                             BodyPartData bpData = FromBytes<BodyPartData>(data);
-                            BodyPart bp = player.BodyParts[i - 1];
-                            bp.FromData(bpData);
+                            player.BodyParts[i - 1].FromData(bpData);
                         }
                         break;
                     case "movement_speed_update":

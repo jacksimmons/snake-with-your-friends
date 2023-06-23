@@ -218,9 +218,9 @@ public class StatusBehaviour : MonoBehaviour
 
     private void UndoEffect(Effect effect)
     {
-        switch (effect.EffectName)
-        {
-        }
+        //switch (effect.EffectName)
+        //{
+        //}
     }
 
     private void ClearInputEffectImage()
