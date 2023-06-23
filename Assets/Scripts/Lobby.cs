@@ -187,8 +187,8 @@ public class Lobby : MonoBehaviour
         identity.SetSteamID(cSteamID);
         EResult result = SteamNetworkingMessages.SendMessageToUser(ref identity, _sendBuf, (uint)message.Length, 0, (int)channel);
 
-        BodyPartData bp_data = FromBytes<BodyPartData>(message);
-        string str_data = FromBytes(message);
+        BodyPartData bp_data = Bytes.FromBytes<BodyPartData>(message);
+        string str_data = Bytes.FromBytes(message);
 
         switch (result)
         {
@@ -305,7 +305,7 @@ public class Lobby : MonoBehaviour
 
                 if (i == 0)
                 {
-                    message = FromBytes(data);
+                    message = Bytes.FromBytes(data);
                     if (outputMessage)
                         print(message);
                 }
@@ -330,7 +330,7 @@ public class Lobby : MonoBehaviour
                             // Every i > 0 is a new BodyPart.
                             print(i);
                             PlayerBehaviour player = LobbyPlayers[sender];
-                            BodyPartData bpData = FromBytes<BodyPartData>(data);
+                            BodyPartData bpData = Bytes.FromBytes<BodyPartData>(data);
                             player.BodyParts[i - 1].FromData(bpData);
                         }
                         break;
