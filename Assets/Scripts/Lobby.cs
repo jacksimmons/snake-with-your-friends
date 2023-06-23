@@ -304,6 +304,7 @@ public class Lobby : MonoBehaviour
         string message = "none";
         for (int i = 0; i < messageCount; i++)
         {
+            print("message" + i);
             try
             {
                 SteamNetworkingMessage_t netMessage = Marshal.PtrToStructure<SteamNetworkingMessage_t>(_receiveBufs[i]);
