@@ -116,9 +116,6 @@ public class Lobby : MonoBehaviour
 
     private void FixedUpdate()
     {
-        // Counter is paused iff you are not the owner.
-        _counter.Paused = !IsOwner;
-
 		// Handle all messages directed to FixedUpdate.
         ReceiveMessages(Channel.Physics);
     }
@@ -135,7 +132,7 @@ public class Lobby : MonoBehaviour
     {
         if (!IsOwner)
         {
-            SendMessageToUser(SteamMatchmaking.GetLobbyOwner(_lobbyId), Extensions.Bytes.ToBytes("player_loaded"), 0);
+            SendMessageToUser(SteamMatchmaking.GetLobbyOwner(_lobbyId), Bytes.ToBytes("player_loaded"), 0);
         }
         else
         {
@@ -153,13 +150,12 @@ public class Lobby : MonoBehaviour
     /// </summary>
     private void OnCounterThresholdReached()
     {
-        print("i am not owner lol");
         // Call all other player movement loops with default movement speed.
         foreach (var kvp in LobbyPlayers)
         {
             if (kvp.Key != Id)
-                if (kvp.Value.MovementSpeed == PlayerBehaviour.DEFAULT_MOVEMENT_SPEED)
-                    SendMessageToUser(kvp.Key, Extensions.Bytes.ToBytes("move_timer"), Channel.Physics);
+                if (Mathf.Approximately(kvp.Value.MovementSpeed, PlayerBehaviour.DEFAULT_MOVEMENT_SPEED))
+                    SendMessageToUser(kvp.Key, Bytes.ToBytes("move_timer"), Channel.Physics);
         }
 
         // Call our own player's movement loop if it has default movement speed
@@ -180,7 +176,7 @@ public class Lobby : MonoBehaviour
             if (Player.MovementSpeed != PlayerBehaviour.DEFAULT_MOVEMENT_SPEED)
                 Message_MoveTimer();
         else
-            SendMessageToUser(mover, Extensions.Bytes.ToBytes("move_timer"), Channel.Physics);
+            SendMessageToUser(mover, Bytes.ToBytes("move_timer"), Channel.Physics);
     }
 
 
@@ -227,7 +223,7 @@ public class Lobby : MonoBehaviour
                 foreach (CSteamID id in _lobbyNames.Keys)
                     if (id != Id)
                     {
-                        SendMessageToUser(id, Extensions.Bytes.ToBytes(title), channel);
+                        SendMessageToUser(id, Bytes.ToBytes(title), channel);
                         if (messages != null)
                         {
                             foreach (byte[] message in messages)
@@ -237,7 +233,7 @@ public class Lobby : MonoBehaviour
             }
             else if (target != Id)
             {
-                SendMessageToUser(target, Extensions.Bytes.ToBytes(title), channel);
+                SendMessageToUser(target, Bytes.ToBytes(title), channel);
                 if (messages != null)
                 {
                     foreach (byte[] message in messages)
@@ -256,7 +252,7 @@ public class Lobby : MonoBehaviour
     {
         List<byte[]> msgs = new List<byte[]>();
         foreach (BodyPart bp in Player.BodyParts)
-            msgs.Add(Extensions.Bytes.ToBytes(bp.ToData()));
+            msgs.Add(Bytes.ToBytes(bp.ToData()));
         SendMessagesTo(CSteamID.Nil, "bp_data", msgs, Channel.Physics);
     }
 
@@ -493,7 +489,6 @@ public class Lobby : MonoBehaviour
                 break;
         }
 
-        print(Id == SteamMatchmaking.GetLobbyOwner(_lobbyId));
         IsOwner = Id == SteamMatchmaking.GetLobbyOwner(_lobbyId);
     }
 
@@ -557,7 +552,6 @@ public class Lobby : MonoBehaviour
 
     private void CreatePlayer(CSteamID id)
     {
-        print("hi");
         // Need to do all but finding PlayerParent locally, and not with Find,
         // else other already created players may ping up in the search.
         string name = SteamFriends.GetFriendPersonaName(id);
