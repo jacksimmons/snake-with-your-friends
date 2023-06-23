@@ -80,10 +80,6 @@ public class Lobby : MonoBehaviour
     private IntPtr[] _receiveBufs = new IntPtr[_MAX_MESSAGES];
 
     // SteamAPI
-    protected Callback<LobbyChatUpdate_t> m_LobbyChatUpdate;
-    protected Callback<LobbyDataUpdate_t> m_LobbyDataUpdate;
-    private CallResult<LobbyEnter_t> m_LobbyEnter;
-    private CallResult<LobbyCreated_t> m_LobbyCreated;
 
     protected Callback<SteamNetworkingMessagesSessionFailed_t> m_SteamNetworkingMessagesSessionFailed;
 
@@ -93,10 +89,6 @@ public class Lobby : MonoBehaviour
     {
         if (SteamManager.Initialized)
         {
-            m_LobbyChatUpdate = Callback<LobbyChatUpdate_t>.Create(OnLobbyChatUpdate);
-            m_LobbyDataUpdate = Callback<LobbyDataUpdate_t>.Create(OnLobbyDataUpdate);
-            m_LobbyEnter = CallResult<LobbyEnter_t>.Create(OnLobbyEnter);
-            m_LobbyCreated = CallResult<LobbyCreated_t>.Create(OnLobbyCreated);
 
             m_SteamNetworkingMessagesSessionFailed = Callback<SteamNetworkingMessagesSessionFailed_t>.Create(OnMessageSessionFailed);
 
@@ -384,174 +376,16 @@ public class Lobby : MonoBehaviour
     }
 
 
-    public void CreateLobby()
-    {
-        SteamAPICall_t handle = SteamMatchmaking.CreateLobby(
-            ELobbyType.k_ELobbyTypePublic, cMaxMembers: 4);
-        m_LobbyCreated.Set(handle);
-        m_LobbyEnter.Set(handle);
-        IsOwner = true;
-
-        foreach (GameObject go in GameObject.FindGameObjectsWithTag("PlayerInput"))
-        {
-            if (go.name == "SpeedSlider")
-            {
-                Slider slider = go.GetComponent<Slider>();
-                _counter.thresholdSeconds = slider.value;
-            }
-        }
-    }
-
-
-    public void JoinLobby(CSteamID id)
-    {
-        SteamAPICall_t handle = SteamMatchmaking.JoinLobby(id);
-        m_LobbyEnter.Set(handle);
-    }
-
-
-    // Callbacks
-    private void OnLobbyCreated(LobbyCreated_t result, bool bIOFailure)
-    {
-        switch (result.m_eResult)
-        {
-            case EResult.k_EResultOK:
-                print("Lobby [ID: " + result.m_ulSteamIDLobby + "] created successfully.");
-                bool success = SteamMatchmaking.SetLobbyData(
-                (CSteamID)result.m_ulSteamIDLobby,
-                "name",
-                SteamFriends.GetPersonaName() + "'s lobby");
-                _lobbyId = (CSteamID)result.m_ulSteamIDLobby;
-
-                if (success)
-                {
-                    print("Yay set name!");
-                }
-                else
-                    print("Nay didn't set name...");
-
-                break;
-            default:
-                print("Failed to create lobby.");
-                return;
-        }
-    }
-
-
-    private void OnLobbyEnter(LobbyEnter_t result, bool bIOFailure)
-    {
-        if (bIOFailure || result.m_EChatRoomEnterResponse == (uint)EChatRoomEnterResponse.k_EChatRoomEnterResponseError)
-        {
-            print("Failed to enter lobby.");
-        }
-        else
-        {
-            // If lobbyId hasn't already been set (i.e. by creating a lobby)
-            if (_lobbyId == CSteamID.Nil)
-                _lobbyId = (CSteamID)result.m_ulSteamIDLobby;
-            StartCoroutine(LoadLobby());
-            print("Entered lobby successfully.");
-        }
-    }
-
-
-    // A user has joined, left, disconnected, etc. Need to check if we are the new owner.
-    private void OnLobbyChatUpdate(LobbyChatUpdate_t pCallback)
-    {
-        CSteamID affects = (CSteamID)pCallback.m_ulSteamIDUserChanged;
-        CSteamID changer = (CSteamID)pCallback.m_ulSteamIDMakingChange;
-
-        string affectsName = SteamFriends.GetFriendPersonaName(
-            (CSteamID)pCallback.m_ulSteamIDUserChanged);
-        string changerName = SteamFriends.GetFriendPersonaName(
-            (CSteamID)pCallback.m_ulSteamIDMakingChange);
-
-        uint stateChange = pCallback.m_rgfChatMemberStateChange;
-        switch (stateChange)
-        {
-            case 1 << 0:
-                print(affectsName + " entered.");
-                AddLobbyMember(affects);
-                break;
-            case 1 << 1:
-                print(affectsName + " left.");
-                RemoveLobbyMember(affects);
-                break;
-            case 1 << 2:
-                print(affectsName + " disconnected.");
-                RemoveLobbyMember(affects);
-                break;
-            case 1 << 3:
-                print(changerName + " kicked " + affects);
-                RemoveLobbyMember(affects);
-                break;
-            case 1 << 4:
-                print(changer + " banned " + affects);
-                RemoveLobbyMember(affects);
-                break;
-            default:
-                print("[OnLobbyChatUpdate] Something...happened?");
-                break;
-        }
-
-        IsOwner = Id == SteamMatchmaking.GetLobbyOwner(_lobbyId);
-    }
-
-
-    private void OnLobbyDataUpdate(LobbyDataUpdate_t pCallback)
-    {
-        if (pCallback.m_bSuccess == 1)
-        {
-        }
-        else
-        {
-            print("Data was unable to be changed for ID " + pCallback.m_ulSteamIDMember + ".");
-        }
-    }
+    //public void JoinLobby(CSteamID id)
+    //{
+    //    SteamAPICall_t handle = SteamMatchmaking.JoinLobby(id);
+    //    m_LobbyEnter.Set(handle);
+    //}
 
 
     private void OnMessageSessionFailed(SteamNetworkingMessagesSessionFailed_t pCallback)
     {
         SteamNetConnectionInfo_t info = pCallback.m_info;
-    }
-
-
-    private void AddLobbyMember(CSteamID id)
-    {
-        string name = SteamFriends.GetFriendPersonaName(id);
-        _lobbyNames.Add(id, name);
-        CreatePlayer(id);
-
-        GameObject content = GameObject.FindWithTag("LobbyPanel");
-        GameObject entry = Instantiate(_lobbyEntryTemplate, content.transform);
-        TextMeshProUGUI[] tmps = entry.GetComponentsInChildren<TextMeshProUGUI>();
-
-        tmps[0].text = _lobbyNames.Count.ToString();
-        tmps[1].text = name;
-    }
-
-
-    private void RemoveLobbyMember(CSteamID id)
-    {
-        PlayerBehaviour pb = LobbyPlayers[id];
-        Destroy(pb.gameObject);
-        LobbyPlayers.Remove(id);
-        _lobbyNames.Remove(id);
-    }
-
-
-    /// <summary>
-    /// Should only be used when joining a lobby, to prevent reconstruction on every
-    /// chat update event.
-    /// </summary>
-    private void AddAllLobbyMembers()
-    {
-        int numPlayers = SteamMatchmaking.GetNumLobbyMembers(_lobbyId);
-        for (int i = 0; i < numPlayers; i++)
-        {
-            CSteamID memberId = SteamMatchmaking.GetLobbyMemberByIndex(_lobbyId, i);
-            AddLobbyMember(memberId);
-        }
     }
 
 
@@ -574,26 +408,26 @@ public class Lobby : MonoBehaviour
     }
 
 
-    private IEnumerator LoadLobby()
-    {
-        _lobbyState = LobbyState.InLobbyMenu;
-        AsyncOperation loadLobbyMenuComplete = SceneManager.LoadSceneAsync("LobbyMenu");
+    //private IEnumerator LoadLobby()
+    //{
+    //    _lobbyState = LobbyState.InLobbyMenu;
+    //    AsyncOperation loadLobbyMenuComplete = SceneManager.LoadSceneAsync("LobbyMenu");
 
-        while (!loadLobbyMenuComplete.isDone)
-        {
-            yield return new WaitForSeconds(1);
-        }
-        AddAllLobbyMembers();
+    //    while (!loadLobbyMenuComplete.isDone)
+    //    {
+    //        yield return new WaitForSeconds(1);
+    //    }
+    //    AddAllLobbyMembers();
 
-        foreach (Transform child in GameObject.FindWithTag("PlayerParent").transform)
-        {
-            child.Find("Player").GetComponent<PlayerBehaviour>().InLobbyMenu = true;
-        }
+    //    foreach (Transform child in GameObject.FindWithTag("PlayerParent").transform)
+    //    {
+    //        child.Find("Player").GetComponent<PlayerBehaviour>().InLobbyMenu = true;
+    //    }
 
-        GameObject.FindWithTag("MainCamera").GetComponent<CamBehaviour>().SetupCamera(Player);
+    //    GameObject.FindWithTag("MainCamera").GetComponent<CamBehaviour>().SetupCamera(Player);
 
-        yield break;
-    }
+    //    yield break;
+    //}
 
 
     public Dictionary<string, string> GetLobbyDebug()
