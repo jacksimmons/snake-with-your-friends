@@ -139,11 +139,11 @@ public class Lobby : MonoBehaviour
         }
         else
         {
-            if (_playersLoaded == _lobbyNames.Keys.Count)
-            {
-                SendMessagesTo(CSteamID.Nil, "all_players_loaded", null, Channel.Default);
-                SendMessagesTo(CSteamID.Nil, "All players have loaded successfully.", null, Channel.Console);
-            }
+            //if (_playersLoaded == _lobbyNames.Keys.Count)
+            //{
+            //    SendMessagesTo(CSteamID.Nil, "all_players_loaded", null, Channel.Default);
+            //    SendMessagesTo(CSteamID.Nil, "All players have loaded successfully.", null, Channel.Console);
+            //}
         }
     }
 
