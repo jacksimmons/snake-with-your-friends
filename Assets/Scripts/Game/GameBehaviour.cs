@@ -217,7 +217,7 @@ public class GameBehaviour : MonoBehaviour
                 }
                 else
                 {
-                    PlacePlayers(newDepth, Extensions.Extensions.SubArray(remainingPlayers, 4), groundTilemap, bl);
+                    PlacePlayers(newDepth, Arrays.SubArray(remainingPlayers, 4), groundTilemap, bl);
                 }
             }
         }
