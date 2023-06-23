@@ -15,6 +15,8 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
+using Extensions;
+
 // Channels are used for different types:
 // 0 - Update
 // 1 - FixedUpdate
@@ -120,7 +122,7 @@ public class Lobby : MonoBehaviour
     {
         if (!IsOwner)
         {
-            SendMessageToUser(SteamMatchmaking.GetLobbyOwner(_lobbyId), ToBytes("player_loaded"), 0);
+            SendMessageToUser(SteamMatchmaking.GetLobbyOwner(_lobbyId), Extensions.Bytes.ToBytes("player_loaded"), 0);
         }
         else
         {
@@ -145,7 +147,7 @@ public class Lobby : MonoBehaviour
         {
             if (kvp.Key != Id)
                 if (kvp.Value.MovementSpeed == PlayerBehaviour.DEFAULT_MOVEMENT_SPEED)
-                    SendMessageToUser(kvp.Key, ToBytes("move_timer"), Channel.Physics);
+                    SendMessageToUser(kvp.Key, Extensions.Bytes.ToBytes("move_timer"), Channel.Physics);
         }
 
         // Call our own player's movement loop if it has default movement speed
@@ -166,62 +168,7 @@ public class Lobby : MonoBehaviour
             if (Player.MovementSpeed != PlayerBehaviour.DEFAULT_MOVEMENT_SPEED)
                 Message_MoveTimer();
         else
-            SendMessageToUser(mover, ToBytes("move_timer"), Channel.Physics);
-    }
-
-
-    private byte[] ToBytes(string str)
-    {
-        return Encoding.ASCII.GetBytes(str.ToString());
-    }
-
-
-    private byte[] ToBytes<T>(T data)
-    {
-        int size = Marshal.SizeOf(data);
-        byte[] arr = new byte[size];
-
-        IntPtr ptr = IntPtr.Zero;
-        try
-        {
-            ptr = Marshal.AllocHGlobal(size);
-            Marshal.StructureToPtr(data, ptr, true);
-            Marshal.Copy(ptr, arr, 0, size);
-        }
-        catch
-        {
-            Debug.LogError("Was unable to convert to bytes.");
-        }
-        finally
-        {
-            Marshal.FreeHGlobal(ptr);
-        }
-        return arr;
-    }
-
-
-    private string FromBytes(byte[] data)
-    {
-        return Encoding.ASCII.GetString(data);
-    }
-
-
-    private T FromBytes<T>(byte[] data)
-    {
-        T payload;
-
-        IntPtr ptr = IntPtr.Zero;
-        try
-        {
-            ptr = Marshal.AllocHGlobal(data.Length);
-            Marshal.Copy(data, 0, ptr, data.Length);
-            payload = Marshal.PtrToStructure<T>(ptr);
-        }
-        finally
-        {
-            Marshal.FreeHGlobal(ptr);
-        }
-        return payload;
+            SendMessageToUser(mover, Extensions.Bytes.ToBytes("move_timer"), Channel.Physics);
     }
 
 
@@ -268,7 +215,7 @@ public class Lobby : MonoBehaviour
                 foreach (CSteamID id in _lobbyNames.Keys)
                     if (id != Id)
                     {
-                        SendMessageToUser(id, ToBytes(title), channel);
+                        SendMessageToUser(id, Extensions.Bytes.ToBytes(title), channel);
                         if (messages != null)
                         {
                             foreach (byte[] message in messages)
@@ -278,7 +225,7 @@ public class Lobby : MonoBehaviour
             }
             else if (target != Id)
             {
-                SendMessageToUser(target, ToBytes(title), channel);
+                SendMessageToUser(target, Extensions.Bytes.ToBytes(title), channel);
                 if (messages != null)
                 {
                     foreach (byte[] message in messages)
@@ -297,7 +244,7 @@ public class Lobby : MonoBehaviour
     {
         List<byte[]> msgs = new List<byte[]>();
         foreach (BodyPart bp in Player.BodyParts)
-            msgs.Add(ToBytes(bp.ToData()));
+            msgs.Add(Extensions.Bytes.ToBytes(bp.ToData()));
         SendMessagesTo(CSteamID.Nil, "bp_data", msgs, Channel.Physics);
     }
 
@@ -330,7 +277,7 @@ public class Lobby : MonoBehaviour
     public void SendMovementSpeedUpdateData(float movementSpeed)
     {
         List<byte[]> data = new();
-        byte[] movement_speed = ToBytes(movementSpeed);
+        byte[] movement_speed = Bytes.ToBytes(movementSpeed);
         data.Add(movement_speed);
         SendMessagesTo(SteamMatchmaking.GetLobbyOwner(_lobbyId), "movement_speed_update", data, Channel.Physics);
     }
