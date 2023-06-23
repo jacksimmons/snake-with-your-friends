@@ -48,20 +48,31 @@ public class Lobby : MonoBehaviour
         Physics,
         Console
     }
+	
     private enum LobbyState
     {
         NotInOne,
         InLobbyMenu,
         InGame
     }
+	
     private CSteamID _lobbyId = CSteamID.Nil;
-    public bool IsOwner { get; private set; } = false;
+	
+	private bool _isOwner = false;
+    public bool IsOwner 
+	{
+		get { return _isOwner; }
+		set 
+		{
+			_counter.Paused = !value;
+			_isOwner = value;
+		}
+	}
+	
     private LobbyState _lobbyState = LobbyState.NotInOne;
     private Dictionary<CSteamID, string> _lobbyNames = new();
-    public Dictionary<CSteamID, PlayerBehaviour> LobbyPlayers { get; private set; } = new();
-
-    // Loading data
-    private int _playersLoaded = 0;
+	
+	public Dictionary<CSteamID, PlayerBehaviour> LobbyPlayers { get; private set; } = new();
 
     // Packet data
     private IntPtr _sendBuf = Marshal.AllocHGlobal(65536);
@@ -97,6 +108,7 @@ public class Lobby : MonoBehaviour
 
     private void Update()
     {
+		// Handle all messages directed to Update.
         ReceiveMessages(Channel.Default);
         ReceiveMessages(Channel.Console, true);
     }
@@ -107,6 +119,7 @@ public class Lobby : MonoBehaviour
         // Counter is paused iff you are not the owner.
         _counter.Paused = !IsOwner;
 
+		// Handle all messages directed to FixedUpdate.
         ReceiveMessages(Channel.Physics);
     }
 
@@ -126,7 +139,6 @@ public class Lobby : MonoBehaviour
         }
         else
         {
-            _playersLoaded++;
             if (_playersLoaded == _lobbyNames.Keys.Count)
             {
                 SendMessagesTo(CSteamID.Nil, "all_players_loaded", null, Channel.Default);
