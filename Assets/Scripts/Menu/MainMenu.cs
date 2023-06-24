@@ -36,6 +36,8 @@ public class MainMenu : MonoBehaviour
 
     private IEnumerator LoadGame()
     {
+        // ..!
+
         AsyncOperation loadGame = SceneManager.LoadSceneAsync("Game");
         while (!loadGame.isDone)
             yield return new WaitForSeconds(0.1f);
@@ -44,12 +46,8 @@ public class MainMenu : MonoBehaviour
         // Create Snake from template, under the Players object (which has tag PlayerParent)
         GameObject snake = Instantiate(_snakeTemplate, GameObject.FindWithTag("PlayerParent").transform);
         gameBehaviour.WorldMode = GameBehaviour.EWorldMode.Offline;
-        PlayerBehaviour player = snake.GetComponentInChildren<PlayerBehaviour>();
+        PlayerMovementController player = snake.GetComponentInChildren<PlayerMovementController>();
         gameBehaviour.SetupGame(player, new GameObject[] { snake });
-        
-        // Create Counter from template, set LocalLobby as parent and listener
-        GameObject lobby = Instantiate(_lobbyTemplate);
-        lobby.GetComponent<Lobby>().SetupOffline(player);
 
         // Cleanup
         Destroy(gameObject);

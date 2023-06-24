@@ -12,7 +12,7 @@ public class GameBehaviour : MonoBehaviour
     [SerializeField]
     private Tile _wallTile;
 
-    private PlayerBehaviour _player;
+    private PlayerMovementController _player;
     [SerializeField]
     private GameObject[] _players;
     private bool[] _objects;
@@ -79,7 +79,7 @@ public class GameBehaviour : MonoBehaviour
     }
 
 
-    public void SetupGame(PlayerBehaviour player, GameObject[] players = null)
+    public void SetupGame(PlayerMovementController player, GameObject[] players = null)
     {
         _player = player;
         if (players == null)

@@ -35,19 +35,19 @@ public enum BodyPartSprite
 
 public class BodyPart
 {
-    public Transform p_Transform { get; private set; }
-    public Vector3 p_Position
+    public Transform Transform { get; private set; }
+    public Vector3 Position
     {
-        get { return p_Transform.position; }
-        set { p_Transform.position = value; }
+        get { return Transform.position; }
+        set { Transform.position = value; }
     }
-    public Quaternion p_Rotation
+    public Quaternion Rotation
     {
-        get { return p_Transform.rotation; }
-        set { p_Transform.rotation = value; }
+        get { return Transform.rotation; }
+        set { Transform.rotation = value; }
     }
     private BodyPartSprite _sprite;
-    public BodyPartSprite p_Sprite
+    public BodyPartSprite Sprite
     {
         get { return _sprite; }
         set
@@ -55,10 +55,10 @@ public class BodyPart
             if (value == BodyPartSprite.None)
                 return;
 
-            if (p_SpriteSheet != null)
+            if (SpriteSheet != null)
             {
                 _sprite = value;
-                p_Transform.gameObject.GetComponent<SpriteRenderer>().sprite = p_SpriteSheet[(int)_sprite];
+                Transform.gameObject.GetComponent<SpriteRenderer>().sprite = SpriteSheet[(int)_sprite];
             }
             else
             {
@@ -66,14 +66,14 @@ public class BodyPart
             }
         }
     }
-    public BodyPartSprite p_DefaultSprite { get; set; }
-    public Sprite[] p_SpriteSheet { get; set; }
-    public Vector2 p_Direction { get; set; }
-    public int p_TeleportCounter { get; set; }
+    public BodyPartSprite DefaultSprite { get; set; }
+    public Sprite[] SpriteSheet { get; set; }
+    public Vector2 Direction { get; set; }
+    public int TeleportCounter { get; set; }
 
     // Read-only outside of this class
     private bool _isCorner;
-    public bool p_IsCorner
+    public bool IsCorner
     {
         get { return _isCorner; }
     }
@@ -88,13 +88,13 @@ public class BodyPart
     /// <param name="transform"></param>
     public BodyPart(BodyPart old, Transform transform)
     {
-        p_Transform = transform;
-        p_Direction = old.p_Direction;
-        p_SpriteSheet = old.p_SpriteSheet;
-        p_DefaultSprite = old.p_DefaultSprite;
-        _isCorner = old.p_IsCorner;
+        Transform = transform;
+        Direction = old.Direction;
+        SpriteSheet = old.SpriteSheet;
+        DefaultSprite = old.DefaultSprite;
+        _isCorner = old.IsCorner;
         // Will not affect teleporting UNLESS necessary
-        p_TeleportCounter = old.p_TeleportCounter + 1;
+        TeleportCounter = old.TeleportCounter + 1;
         prevRot = old.prevRot;
     }
 
@@ -108,15 +108,15 @@ public class BodyPart
     public BodyPart(Transform transform, Vector2 direction, BodyPartSprite defaultSprite,
         Sprite[] spriteSheet)
     {
-        p_Transform = transform;
-        p_Direction = direction;
-        p_DefaultSprite = defaultSprite;
-        p_SpriteSheet = spriteSheet;
+        Transform = transform;
+        Direction = direction;
+        DefaultSprite = defaultSprite;
+        SpriteSheet = spriteSheet;
 
         _isCorner = false;
-        p_TeleportCounter = 0;
+        TeleportCounter = 0;
 
-        p_Sprite = p_DefaultSprite;
+        Sprite = DefaultSprite;
     }
 
     /// <summary>
@@ -128,49 +128,49 @@ public class BodyPart
     public void MakeCorner(Vector2 prevDir)
     {
         _isCorner = true;
-        p_Rotation = Quaternion.identity;
+        Rotation = Quaternion.identity;
 
-        if (p_Direction == Vector2.up)
+        if (Direction == Vector2.up)
         {
             if (prevDir == Vector2.left)
-                p_Sprite = BodyPartSprite.CornerTopRight;
-            //p_Sprite = p_CornerSprites[3]; // -R
+                Sprite = BodyPartSprite.CornerTopRight;
+            //Sprite = CornerSprites[3]; // -R
             else if (prevDir == Vector2.right)
-                p_Sprite = BodyPartSprite.CornerTopLeft;
-            //p_Sprite = p_CornerSprites[2]; // R
+                Sprite = BodyPartSprite.CornerTopLeft;
+            //Sprite = CornerSprites[2]; // R
         }
 
-        else if (p_Direction == Vector2.left)
+        else if (Direction == Vector2.left)
         {
             if (prevDir == Vector2.up)
-                p_Sprite = BodyPartSprite.CornerBottomLeft;
-            //p_Sprite = p_CornerSprites[0]; // L
+                Sprite = BodyPartSprite.CornerBottomLeft;
+            //Sprite = CornerSprites[0]; // L
             else if (prevDir == Vector2.down)
-                p_Sprite = BodyPartSprite.CornerTopLeft;
-            //p_Sprite = p_CornerSprites[2]; // R
+                Sprite = BodyPartSprite.CornerTopLeft;
+            //Sprite = CornerSprites[2]; // R
         }
 
-        else if (p_Direction == Vector2.down)
+        else if (Direction == Vector2.down)
         {
             if (prevDir == Vector2.left)
-                p_Sprite = BodyPartSprite.CornerBottomRight;
-            //p_Sprite = p_CornerSprites[1]; // -L
+                Sprite = BodyPartSprite.CornerBottomRight;
+            //Sprite = CornerSprites[1]; // -L
             else if (prevDir == Vector2.right)
-                p_Sprite = BodyPartSprite.CornerBottomLeft;
+                Sprite = BodyPartSprite.CornerBottomLeft;
 
-            //p_Sprite = p_CornerSprites[0]; // L
+            //Sprite = CornerSprites[0]; // L
         }
 
-        else if (p_Direction == Vector2.right)
+        else if (Direction == Vector2.right)
         {
             if (prevDir == Vector2.up)
-                p_Sprite = BodyPartSprite.CornerBottomRight;
+                Sprite = BodyPartSprite.CornerBottomRight;
 
-            //p_Sprite = p_CornerSprites[1]; // -L
+            //Sprite = CornerSprites[1]; // -L
             else if (prevDir == Vector2.down)
-                p_Sprite = BodyPartSprite.CornerTopRight;
+                Sprite = BodyPartSprite.CornerTopRight;
 
-            //p_Sprite = p_CornerSprites[3]; // -R
+            //Sprite = CornerSprites[3]; // -R
         }
     }
 
@@ -182,8 +182,8 @@ public class BodyPart
     public void MakeNotCorner(Quaternion rotation)
     {
         _isCorner = false;
-        p_Rotation = rotation;
-        p_Sprite = p_DefaultSprite;
+        Rotation = rotation;
+        Sprite = DefaultSprite;
     }
 
     /// <summary>
@@ -193,11 +193,11 @@ public class BodyPart
     /// <param name="direction">The direction to move in next</param>
     public void Move(Vector2 direction)
     {
-        p_Direction = direction;
-        p_Position += (Vector3)p_Direction;
+        Direction = direction;
+        Position += (Vector3)Direction;
 
-        if (p_TeleportCounter > 0)
-            p_TeleportCounter--;
+        if (TeleportCounter > 0)
+            TeleportCounter--;
     }
 
     /// <summary>
@@ -209,26 +209,26 @@ public class BodyPart
     public void HandleMovement(Vector2 newDirection, BodyPart next)
     {
         // Store the previous direction for use in angles
-        Vector2 prevDirection = p_Direction;
+        Vector2 prevDirection = Direction;
 
         // Move the body part
         Move(newDirection);
 
         // Rotate the body part
-        float angle = Vector2.SignedAngle(prevDirection, p_Direction);
-        p_Transform.Rotate(Vector3.forward, angle);
+        float angle = Vector2.SignedAngle(prevDirection, Direction);
+        Transform.Rotate(Vector3.forward, angle);
 
         // If the body part is a corner piece
         if (next != null)
         {
             // If the next part isn't a tail, and is an angled body part,
             // make it a corner.
-            if (next.p_SpriteSheet != null)
+            if (next.SpriteSheet != null)
             {
                 if (angle != 0)
                 {
-                    if (!next.p_IsCorner)
-                        next.prevRot = next.p_Rotation;
+                    if (!next.IsCorner)
+                        next.prevRot = next.Rotation;
                     next.MakeCorner(newDirection);
                 }
                 else
@@ -236,8 +236,8 @@ public class BodyPart
                     // When making `next` not a corner, set its rotation
                     // to our prevRot (if this is a corner), or our rotation
                     // (if this isn't a corner)
-                    Quaternion rot = p_Rotation;
-                    if (p_IsCorner)
+                    Quaternion rot = Rotation;
+                    if (IsCorner)
                         rot = prevRot;
                     next.MakeNotCorner(rot);
                 }
@@ -247,8 +247,8 @@ public class BodyPart
             {
                 // Store the tail's previous rotation in prevRot
                 // This is needed in some situations in HandleAddBodyPart
-                next.prevRot = next.p_Rotation;
-                next.p_Transform.Rotate(Vector3.forward, angle);
+                next.prevRot = next.Rotation;
+                next.Transform.Rotate(Vector3.forward, angle);
             }
         }
     }
@@ -259,9 +259,9 @@ public class BodyPart
     /// <param name="data">The struct with updated data.</param>
     public void FromData(BodyPartData data)
     {
-        p_Position = new Vector2(data.pos_x, data.pos_y);
-        p_Rotation = Quaternion.Euler(Vector3.forward * data.rotation);
-        p_Sprite = (BodyPartSprite)data.e_bodyPartSprite;
+        Position = new Vector2(data.pos_x, data.pos_y);
+        Rotation = Quaternion.Euler(Vector3.forward * data.rotation);
+        Sprite = (BodyPartSprite)data.e_bodyPartSprite;
     }
 
     /// <summary>
@@ -271,10 +271,10 @@ public class BodyPart
     public BodyPartData ToData()
     {
         BodyPartData data;
-        data.pos_x = p_Position.x;
-        data.pos_y = p_Position.y;
-        data.rotation = p_Rotation.eulerAngles.z;
-        data.e_bodyPartSprite = (int)p_Sprite;
+        data.pos_x = Position.x;
+        data.pos_y = Position.y;
+        data.rotation = Rotation.eulerAngles.z;
+        data.e_bodyPartSprite = (int)Sprite;
         return data;
     }
 }

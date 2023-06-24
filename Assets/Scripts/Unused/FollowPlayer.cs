@@ -2,11 +2,10 @@ using UnityEngine;
 
 public class FollowPlayer : MonoBehaviour
 {
-    public PlayerBehaviour p_Player { get; set; }
+    public PlayerMovementController Player { get; set; }
 
     private void Update()
     {
-        transform.position = p_Player.transform.position;
-        print(p_Player.name);
+        transform.position = Player.transform.position;
     }
 }

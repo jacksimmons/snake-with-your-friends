@@ -832,7 +832,7 @@ namespace Steamworks {
 	//-----------------------------------------------------------------------------
 	[StructLayout(LayoutKind.Sequential, Pack = Packsize.value)]
 	[CallbackIdentity(Constants.k_iSteamHTMLSurfaceCallbacks + 24)]
-	public struct HTML_ShowToolTip_t {
+	public struct HTML_ShowToolTit {
 		public const int k_iCallback = Constants.k_iSteamHTMLSurfaceCallbacks + 24;
 		public HHTMLBrowser unBrowserHandle; // the handle of the surface
 		public string pchMsg; // the EMouseCursor to display
@@ -843,7 +843,7 @@ namespace Steamworks {
 	//-----------------------------------------------------------------------------
 	[StructLayout(LayoutKind.Sequential, Pack = Packsize.value)]
 	[CallbackIdentity(Constants.k_iSteamHTMLSurfaceCallbacks + 25)]
-	public struct HTML_UpdateToolTip_t {
+	public struct HTML_UpdateToolTit {
 		public const int k_iCallback = Constants.k_iSteamHTMLSurfaceCallbacks + 25;
 		public HHTMLBrowser unBrowserHandle; // the handle of the surface
 		public string pchMsg; // the EMouseCursor to display
@@ -854,7 +854,7 @@ namespace Steamworks {
 	//-----------------------------------------------------------------------------
 	[StructLayout(LayoutKind.Sequential, Pack = Packsize.value)]
 	[CallbackIdentity(Constants.k_iSteamHTMLSurfaceCallbacks + 26)]
-	public struct HTML_HideToolTip_t {
+	public struct HTML_HideToolTit {
 		public const int k_iCallback = Constants.k_iSteamHTMLSurfaceCallbacks + 26;
 		public HHTMLBrowser unBrowserHandle; // the handle of the surface
 	}

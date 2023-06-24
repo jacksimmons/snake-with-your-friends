@@ -42,11 +42,11 @@ namespace Extensions
             float sin = Mathf.Sin(degrees * Mathf.Deg2Rad);
             float cos = Mathf.Cos(degrees * Mathf.Deg2Rad);
 
-            float temp_x = v.x;
-            float temp_y = v.y;
+            float _x = v.x;
+            float _y = v.y;
 
-            v.x = (cos * temp_x) - (sin * temp_y);
-            v.y = (sin * temp_x) + (cos * temp_y);
+            v.x = (cos * _x) - (sin * _y);
+            v.y = (sin * _x) + (cos * _y);
 
             return v;
         }

@@ -57,7 +57,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\Scripts\Powerup\Projectile.cs" />
-    <Compile Include="Assets\Scripts\LocalLobby.cs" />
     <Compile Include="Assets\Scripts\Game\BackButton.cs" />
     <Compile Include="Assets\Scripts\Powerup\TooManyPints.cs" />
     <Compile Include="Assets\Scripts\Object\Teleporter.cs" />
@@ -76,7 +75,6 @@
     <Compile Include="Assets\Scripts\Menu\CreateMenu.cs" />
     <Compile Include="Assets\Scripts\Audio\AudioHandler.cs" />
     <Compile Include="Assets\Scripts\Object\ForegroundObject.cs" />
-    <Compile Include="Assets\Scripts\Player\PlayerBehaviour.cs" />
     <Compile Include="Assets\Scripts\Object\ForegroundBehaviour.cs" />
     <Compile Include="Assets\Scripts\Unused\FollowPlayer.cs" />
     <Compile Include="Assets\Scripts\Extensions.cs" />
@@ -86,13 +84,11 @@
     <Compile Include="Assets\Scripts\Networking\LobbyController.cs" />
     <Compile Include="Assets\Scripts\Object\ColliderToggleTilemap.cs" />
     <Compile Include="Assets\Scripts\Player\BodyPart.cs" />
-    <Compile Include="Assets\Scripts\Networking\PlayerData.cs" />
     <Compile Include="Assets\Scripts\CamBehaviour.cs" />
     <Compile Include="Assets\Scripts\Menu\MainMenu.cs" />
     <Compile Include="Assets\Scripts\Powerup\BodyPartStatus.cs" />
     <Compile Include="Assets\Scripts\Networking\SteamLobby.cs" />
     <Compile Include="Assets\Scripts\Networking\PlayerObjectController.cs" />
-    <Compile Include="Assets\Scripts\Lobby.cs" />
     <Compile Include="Assets\Scripts\Game\PlayerMovementController.cs" />
   </ItemGroup>
   <ItemGroup>

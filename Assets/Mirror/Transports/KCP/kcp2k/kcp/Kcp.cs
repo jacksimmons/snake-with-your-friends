@@ -95,7 +95,7 @@ namespace kcp2k
             32
         );
 
-        // ikcp_create
+        // ikccreate
         // create a new kcp control object, 'conv' must equal in two endpoint
         // from the same connection.
         public Kcp(uint conv, Action<byte[], int> output)
@@ -117,12 +117,12 @@ namespace kcp2k
             buffer = new byte[(mtu + OVERHEAD) * 3];
         }
 
-        // ikcp_segment_new
+        // ikcsegment_new
         // we keep the original function and add our pooling to it.
         // this way we'll never miss it anywhere.
         Segment SegmentNew() => SegmentPool.Take();
 
-        // ikcp_segment_delete
+        // ikcsegment_delete
         // we keep the original function and add our pooling to it.
         // this way we'll never miss it anywhere.
         void SegmentDelete(Segment seg) => SegmentPool.Return(seg);
@@ -130,7 +130,7 @@ namespace kcp2k
         // calculate how many packets are waiting to be sent
         public int WaitSnd => snd_buf.Count + snd_queue.Count;
 
-        // ikcp_wnd_unused
+        // ikcwnd_unused
         // returns the remaining space in receive window (rcv_wnd - rcv_queue)
         internal uint WndUnused()
         {
@@ -139,7 +139,7 @@ namespace kcp2k
             return 0;
         }
 
-        // ikcp_recv
+        // ikcrecv
         // receive data from kcp state machine
         //   returns number of bytes read.
         //   returns negative on error.
@@ -235,7 +235,7 @@ namespace kcp2k
             return len;
         }
 
-        // ikcp_peeksize
+        // ikcpeeksize
         // check the size of next message in the recv queue.
         // returns -1 if there is no message, or if the message is still incomplete.
         public int PeekSize()
@@ -272,7 +272,7 @@ namespace kcp2k
             return length;
         }
 
-        // ikcp_send
+        // ikcsend
         // splits message into MTU sized fragments, adds them to snd_queue.
         public int Send(byte[] buffer, int offset, int len)
         {
@@ -328,7 +328,7 @@ namespace kcp2k
             return 0;
         }
 
-        // ikcp_update_ack
+        // ikcupdate_ack
         void UpdateAck(int rtt) // round trip time
         {
             // https://tools.ietf.org/html/rfc6298
@@ -349,7 +349,7 @@ namespace kcp2k
             rx_rto = Utils.Clamp(rto, rx_minrto, RTO_MAX);
         }
 
-        // ikcp_shrink_buf
+        // ikcshrink_buf
         internal void ShrinkBuf()
         {
             if (snd_buf.Count > 0)
@@ -363,7 +363,7 @@ namespace kcp2k
             }
         }
 
-        // ikcp_parse_ack
+        // ikcparse_ack
         // removes the segment with 'sn' from send buffer
         internal void ParseAck(uint sn)
         {
@@ -389,7 +389,7 @@ namespace kcp2k
             }
         }
 
-        // ikcp_parse_una
+        // ikcparse_una
         // removes all unacknowledged segments with sequence numbers < una from send buffer
         internal void ParseUna(uint una)
         {
@@ -412,7 +412,7 @@ namespace kcp2k
             snd_buf.RemoveRange(0, removed);
         }
 
-        // ikcp_parse_fastack
+        // ikcparse_fastack
         internal void ParseFastack(uint sn, uint ts) // serial number, timestamp
         {
             // sn needs to be between snd_una and snd_nxt
@@ -445,14 +445,14 @@ namespace kcp2k
             }
         }
 
-        // ikcp_ack_push
+        // ikcack_push
         // appends an ack.
         void AckPush(uint sn, uint ts) // serial number, timestamp
         {
             acklist.Add(new AckItem{ serialNumber = sn, timestamp = ts });
         }
 
-        // ikcp_parse_data
+        // ikcparse_data
         void ParseData(Segment newseg)
         {
             uint sn = newseg.sn;
@@ -538,7 +538,7 @@ namespace kcp2k
             rcv_buf.RemoveRange(0, removed);
         }
 
-        // ikcp_input
+        // ikcinput
         // used when you receive a low level packet (e.g. UDP packet)
         // => original kcp uses offset=0, we made it a parameter so that high
         //    level can skip the channel byte more easily
@@ -715,7 +715,7 @@ namespace kcp2k
             }
         }
 
-        // ikcp_flush
+        // ikcflush
         // flush remain ack segments.
         // flush may output multiple <= MTU messages from MakeSpace / FlushBuffer.
         // the amount of messages depends on the sliding window.
@@ -744,7 +744,7 @@ namespace kcp2k
             foreach (AckItem ack in acklist)
             {
                 MakeSpace(ref size, OVERHEAD);
-                // ikcp_ack_get assigns ack[i] to seg.sn, seg.ts
+                // ikcack_get assigns ack[i] to seg.sn, seg.ts
                 seg.sn = ack.serialNumber;
                 seg.ts = ack.timestamp;
                 size += seg.Encode(buffer, size);
@@ -947,7 +947,7 @@ namespace kcp2k
             }
         }
 
-        // ikcp_update
+        // ikcupdate
         // update state (call it repeatedly, every 10ms-100ms), or you can ask
         // Check() when to call it again (without Input/Send calling).
         //
@@ -994,7 +994,7 @@ namespace kcp2k
             }
         }
 
-        // ikcp_check
+        // ikccheck
         // Determine when should you invoke update
         // Returns when you should invoke update in millisec, if there is no
         // input/send calling. you can call update in that time, instead of
@@ -1043,7 +1043,7 @@ namespace kcp2k
             return current_ + minimal;
         }
 
-        // ikcp_setmtu
+        // ikcsetmtu
         // Change MTU (Maximum Transmission Unit) size.
         public void SetMtu(uint mtu)
         {
@@ -1055,7 +1055,7 @@ namespace kcp2k
             mss = mtu - OVERHEAD;
         }
 
-        // ikcp_interval
+        // ikcinterval
         public void SetInterval(uint interval)
         {
             // clamp interval between 10 and 5000
@@ -1064,14 +1064,14 @@ namespace kcp2k
             this.interval = interval;
         }
 
-        // ikcp_nodelay
+        // ikcnodelay
         // configuration: https://github.com/skywind3000/kcp/blob/master/README.en.md#protocol-configuration
         //   nodelay : Whether nodelay mode is enabled, 0 is not enabled; 1 enabled.
         //   interval ：Protocol internal work interval, in milliseconds, such as 10 ms or 20 ms.
         //   resend ：Fast retransmission mode, 0 represents off by default, 2 can be set (2 ACK spans will result in direct retransmission)
         //   nc ：Whether to turn off flow control, 0 represents “Do not turn off” by default, 1 represents “Turn off”.
-        // Normal Mode: ikcp_nodelay(kcp, 0, 40, 0, 0);
-        // Turbo Mode： ikcp_nodelay(kcp, 1, 10, 2, 1);
+        // Normal Mode: ikcnodelay(kcp, 0, 40, 0, 0);
+        // Turbo Mode： ikcnodelay(kcp, 1, 10, 2, 1);
         public void SetNoDelay(uint nodelay, uint interval = INTERVAL, int resend = 0, bool nocwnd = false)
         {
             this.nodelay = nodelay;
@@ -1100,7 +1100,7 @@ namespace kcp2k
             this.nocwnd = nocwnd;
         }
 
-        // ikcp_wndsize
+        // ikcwndsize
         public void SetWindowSize(uint sendWindow, uint receiveWindow)
         {
             if (sendWindow > 0)

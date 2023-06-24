@@ -31,7 +31,7 @@ namespace kcp2k
         // in other words, Encode only ever writes up to the above amount of bytes.
         internal MemoryStream data = new MemoryStream(Kcp.MTU_DEF);
 
-        // ikcp_encode_seg
+        // ikcencode_seg
         // encode a segment into buffer.
         // buffer is always Kcp.buffer. Kcp ctor creates the buffer of size:
         // (mtu + OVERHEAD) * 3 bytes.

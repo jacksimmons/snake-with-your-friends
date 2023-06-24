@@ -39,7 +39,7 @@ public class StatusBehaviour : MonoBehaviour
     private Sprite _spriteBrownie;
 
     [SerializeField]
-    private PlayerBehaviour _player;
+    private PlayerMovementController _player;
     [SerializeField]
     private GameObject _fireball;
     [SerializeField]
@@ -53,8 +53,13 @@ public class StatusBehaviour : MonoBehaviour
     private float _passiveEffectCooldownMax = 0f;
     private float _passiveEffectCooldown = 0f;
 
-    private float _majorSpeedBoost = 2f;
-    private float _minorSpeedBoost = 0.1f;
+    private float _criticalSpeedDebuff = 1.9f; // +90% counter time
+    private float _majorSpeedDebuff = 1.5f; // +50% counter time
+    private float _minorSpeedDebuff = 1.1f; // +10% counter time
+
+    private float _criticalSpeedBuff = 1 / 1.9f; // +90% movement speed
+    private float _majorSpeedBuff = 1 / 1.5f; // +50% movement speed
+    private float _minorSpeedBuff = 1 / 1.1f; // +10% movement speed
 
     // Counters
     private int _numPints = 0;
@@ -134,9 +139,9 @@ public class StatusBehaviour : MonoBehaviour
             {
                 case e_Effect.BreathingFire:
                     GameObject fireball = Instantiate(_fireball, GameObject.Find("Projectiles").transform);
-                    fireball.transform.position = _player.head.p_Position + (Vector3)_player.head.p_Direction;
+                    fireball.transform.position = _player.head.Position + (Vector3)_player.head.Direction;
                     proj = fireball.GetComponent<Projectile>();
-                    proj.Create(5, _player.head.p_Direction, _player.head.p_Rotation, _player.MovementSpeed * 0.2f, _player.head.p_Transform.gameObject);
+                    proj.Create(5, _player.head.Direction, _player.head.Rotation, PlayerMovementController.DEFAULT_COUNTER_MAX * _majorSpeedDebuff, _player.head.Transform.gameObject);
                     break;
             }
             // Execute a OneOff effect only once its cooldown (which it typically won't have) reaches 0.
@@ -157,19 +162,19 @@ public class StatusBehaviour : MonoBehaviour
                 switch (effect.EffectName)
                 {
                     case e_Effect.NoSpeedBoost:
-                        _player.MovementSpeed = PlayerBehaviour.DEFAULT_MOVEMENT_SPEED;
+                        _player.CounterMax = PlayerMovementController.DEFAULT_COUNTER_MAX;
                         break;
                     case e_Effect.MinorSpeedBoost:
-                        _player.MovementSpeed = PlayerBehaviour.DEFAULT_MOVEMENT_SPEED + _minorSpeedBoost;
+                        _player.CounterMax = Mathf.CeilToInt(PlayerMovementController.DEFAULT_COUNTER_MAX * _minorSpeedBuff);
                         break;
                     case e_Effect.MajorSpeedBoost:
-                        _player.MovementSpeed = PlayerBehaviour.DEFAULT_MOVEMENT_SPEED + _majorSpeedBoost;
+                        _player.CounterMax = Mathf.CeilToInt(PlayerMovementController.DEFAULT_COUNTER_MAX * _minorSpeedBuff);
                         break;
                     case e_Effect.RocketShitting:
                         GameObject shit = Instantiate(_staticShit, GameObject.Find("Projectiles").transform);
-                        shit.transform.position = _player.tail.p_Position - (Vector3)_player.tail.p_Direction;
+                        shit.transform.position = _player.tail.Position - (Vector3)_player.tail.Direction;
                         proj = shit.GetComponent<Projectile>();
-                        proj.Create(5, -_player.tail.p_Direction, _player.tail.p_Rotation, _player.MovementSpeed * 0.25f);
+                        proj.Create(5, -_player.tail.Direction, _player.tail.Rotation, PlayerMovementController.DEFAULT_COUNTER_MAX * _majorSpeedDebuff);
                         break;
                     case e_Effect.SoberUp:
                         NumPints--;
@@ -186,7 +191,7 @@ public class StatusBehaviour : MonoBehaviour
     public void AddInputEffect(Effect effect)
     {
         // Clear the old effect for the new one
-        _player.MovementSpeed = PlayerBehaviour.DEFAULT_MOVEMENT_SPEED;
+        _player.CounterMax = PlayerMovementController.DEFAULT_COUNTER_MAX;
         if (ActiveInputEffects.Count > 0)
             ClearInputEffects();
         ActiveInputEffects.Add(effect);
@@ -274,7 +279,7 @@ public class StatusBehaviour : MonoBehaviour
         NumPints = 0;
         PotassiumLevels = 0;
 
-        _player.MovementSpeed = PlayerBehaviour.DEFAULT_MOVEMENT_SPEED;
+        _player.CounterMax = PlayerMovementController.DEFAULT_COUNTER_MAX;
     }
 
     public Dictionary<string, string> GetStatusDebug()

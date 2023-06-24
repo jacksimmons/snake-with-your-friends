@@ -378,10 +378,10 @@ namespace Steamworks {
 		k_EInputActionOrigin_XBoxOne_DPad_West,
 		k_EInputActionOrigin_XBoxOne_DPad_East,
 		k_EInputActionOrigin_XBoxOne_DPad_Move,
-		k_EInputActionOrigin_XBoxOne_LeftGrip_Lower,
-		k_EInputActionOrigin_XBoxOne_LeftGrip_Upper,
-		k_EInputActionOrigin_XBoxOne_RightGrip_Lower,
-		k_EInputActionOrigin_XBoxOne_RightGrip_Upper,
+		k_EInputActionOrigin_XBoxOne_LeftGriLower,
+		k_EInputActionOrigin_XBoxOne_LeftGriUpper,
+		k_EInputActionOrigin_XBoxOne_RightGriLower,
+		k_EInputActionOrigin_XBoxOne_RightGriUpper,
 		k_EInputActionOrigin_XBoxOne_Share, // Xbox Series X controllers only
 		k_EInputActionOrigin_XBoxOne_Reserved6,
 		k_EInputActionOrigin_XBoxOne_Reserved7,
@@ -487,10 +487,10 @@ namespace Steamworks {
 		k_EInputActionOrigin_Switch_LeftGyro_Pitch,
 		k_EInputActionOrigin_Switch_LeftGyro_Yaw,
 		k_EInputActionOrigin_Switch_LeftGyro_Roll,
-		k_EInputActionOrigin_Switch_LeftGrip_Lower, // Left JoyCon SR Button
-		k_EInputActionOrigin_Switch_LeftGrip_Upper, // Left JoyCon SL Button
-		k_EInputActionOrigin_Switch_RightGrip_Lower,  // Right JoyCon SL Button
-		k_EInputActionOrigin_Switch_RightGrip_Upper,  // Right JoyCon SR Button
+		k_EInputActionOrigin_Switch_LeftGriLower, // Left JoyCon SR Button
+		k_EInputActionOrigin_Switch_LeftGriUpper, // Left JoyCon SL Button
+		k_EInputActionOrigin_Switch_RightGriLower,  // Right JoyCon SL Button
+		k_EInputActionOrigin_Switch_RightGriUpper,  // Right JoyCon SR Button
 		k_EInputActionOrigin_Switch_Reserved11,
 		k_EInputActionOrigin_Switch_Reserved12,
 		k_EInputActionOrigin_Switch_Reserved13,
@@ -872,7 +872,7 @@ namespace Steamworks {
 
 		// The following error codes were removed and will never be sent.
 		// For privacy reasons, there is no reply if the user is offline or playing another game.
-		k_EP2PSessionErrorNotRunningApp_DELETED = 1,
+		k_EP2PSessionErrorNotRunningApDELETED = 1,
 		k_EP2PSessionErrorDestinationNotLoggedIn_DELETED = 3,
 
 		k_EP2PSessionErrorMax = 5
@@ -1192,7 +1192,7 @@ namespace Steamworks {
 		k_EItemPreviewType_Image							= 0,	// standard image file expected (e.g. jpg, png, gif, etc.)
 		k_EItemPreviewType_YouTubeVideo						= 1,	// video id is stored
 		k_EItemPreviewType_Sketchfab						= 2,	// model id is stored
-		k_EItemPreviewType_EnvironmentMap_HorizontalCross	= 3,	// standard image file expected - cube map in the layout
+		k_EItemPreviewType_EnvironmentMaHorizontalCross	= 3,	// standard image file expected - cube map in the layout
 																	// +---+---+-------+
 																	// |   |Up |       |
 																	// +---+---+---+---+
@@ -1200,7 +1200,7 @@ namespace Steamworks {
 																	// +---+---+---+---+
 																	// |   |Dn |       |
 																	// +---+---+---+---+
-		k_EItemPreviewType_EnvironmentMap_LatLong			= 4,	// standard image file expected
+		k_EItemPreviewType_EnvironmentMaLatLong			= 4,	// standard image file expected
 		k_EItemPreviewType_ReservedMax						= 255,	// you can specify your own types above this value
 	}
 
@@ -2030,7 +2030,7 @@ namespace Steamworks {
 		// ISteamNetworkingSockets::CloseConnection.  You can use these codes if
 		// you want to plumb through application-specific reason codes.  If you don't
 		// need this facility, feel free to always pass
-		// k_ESteamNetConnectionEnd_App_Generic.
+		// k_ESteamNetConnectionEnd_ApGeneric.
 		//
 		// The distinction between "normal" and "exceptional" termination is
 		// one you may use if you find useful, but it's not necessary for you
@@ -2043,10 +2043,10 @@ namespace Steamworks {
 		// 1xxx: Application ended the connection in a "usual" manner.
 		//       E.g.: user intentionally disconnected from the server,
 		//             gameplay ended normally, etc
-		k_ESteamNetConnectionEnd_App_Min = 1000,
-		k_ESteamNetConnectionEnd_App_Generic = k_ESteamNetConnectionEnd_App_Min,
+		k_ESteamNetConnectionEnd_ApMin = 1000,
+		k_ESteamNetConnectionEnd_ApGeneric = k_ESteamNetConnectionEnd_ApMin,
 			// Use codes in this range for "normal" disconnection
-		k_ESteamNetConnectionEnd_App_Max = 1999,
+		k_ESteamNetConnectionEnd_ApMax = 1999,
 
 		// 2xxx: Application ended the connection in some sort of exceptional
 		//       or unusual manner that might indicate a bug or configuration
@@ -2138,7 +2138,7 @@ namespace Steamworks {
 
 			// These will never be returned
 			//k_ESteamNetConnectionEnd_Remote_NotLoggedIn_DEPRECATED = 4004,
-			//k_ESteamNetConnectionEnd_Remote_NotRunningApp_DEPRECATED = 4005,
+			//k_ESteamNetConnectionEnd_Remote_NotRunningApDEPRECATED = 4005,
 
 			// Something wrong with the protocol version you are using.
 			// (Probably the code you are running is too old.)
@@ -2492,12 +2492,12 @@ namespace Steamworks {
 		k_ESteamNetworkingConfig_FakePacketReorder_Time = 8,
 
 		/// [global float 0--100] Globally duplicate some percentage of packets we send
-		k_ESteamNetworkingConfig_FakePacketDup_Send = 26,
-		k_ESteamNetworkingConfig_FakePacketDup_Recv = 27,
+		k_ESteamNetworkingConfig_FakePacketDuSend = 26,
+		k_ESteamNetworkingConfig_FakePacketDuRecv = 27,
 
 		/// [global int32] Amount of delay, in ms, to delay duplicated packets.
 		/// (We chose a random delay between 0 and this value)
-		k_ESteamNetworkingConfig_FakePacketDup_TimeMax = 28,
+		k_ESteamNetworkingConfig_FakePacketDuTimeMax = 28,
 
 		/// [global int32] Trace every UDP packet, similar to Wireshark or tcpdump.
 		/// Value is max number of bytes to dump.  -1 disables tracing.

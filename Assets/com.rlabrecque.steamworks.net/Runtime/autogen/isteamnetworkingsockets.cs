@@ -176,7 +176,7 @@ namespace Steamworks {
 		/// <para>/ to communicate any information to the remote host, and do not want analytics to</para>
 		/// <para>/ be able to distinguish "normal" connection terminations from "exceptional" ones,</para>
 		/// <para>/ You may pass zero, in which case the generic value of</para>
-		/// <para>/ k_ESteamNetConnectionEnd_App_Generic will be used.</para>
+		/// <para>/ k_ESteamNetConnectionEnd_ApGeneric will be used.</para>
 		/// <para>/</para>
 		/// <para>/ pszDebug is an optional human-readable diagnostic string that will be received</para>
 		/// <para>/ by the remote host and recorded (when possible) in backend analytics.</para>
@@ -638,7 +638,7 @@ namespace Steamworks {
 		/// <para>/ single poll group.  Adding a connection to a poll group implicitly removes it from</para>
 		/// <para>/ any other poll group it is in.</para>
 		/// <para>/</para>
-		/// <para>/ You can pass k_HSteamNetPollGroup_Invalid to remove a connection from its current</para>
+		/// <para>/ You can pass k_HSteamNetPollGrouInvalid to remove a connection from its current</para>
 		/// <para>/ poll group without adding it to a new poll group.</para>
 		/// <para>/</para>
 		/// <para>/ If there are received messages currently pending on the connection, an attempt</para>
@@ -647,7 +647,7 @@ namespace Steamworks {
 		/// <para>/ group at the time that the messages were received.</para>
 		/// <para>/</para>
 		/// <para>/ Returns false if the connection handle is invalid, or if the poll group handle</para>
-		/// <para>/ is invalid (and not k_HSteamNetPollGroup_Invalid).</para>
+		/// <para>/ is invalid (and not k_HSteamNetPollGrouInvalid).</para>
 		/// </summary>
 		public static bool SetConnectionPollGroup(HSteamNetConnection hConn, HSteamNetPollGroup hPollGroup) {
 			InteropHelp.TestIfAvailableClient();

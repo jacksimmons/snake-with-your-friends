@@ -11,7 +11,7 @@ public class WallTilemap : MonoBehaviour
             {
                 if (col.transform.parent.CompareTag("Player"))
                 {
-                    PlayerBehaviour pb = col.transform.parent.GetComponent<PlayerBehaviour>();
+                    PlayerMovementController pb = col.transform.parent.GetComponent<PlayerMovementController>();
                     pb.transform.position -= (Vector3)pb.PrevMovement;
                     if (!pb.canMoveFreely)
                         pb.HandleDeath();

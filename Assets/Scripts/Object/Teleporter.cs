@@ -16,9 +16,9 @@ public class Teleporter : MonoBehaviour
         GameObject obj = collision.gameObject;
         if (obj.transform.parent.CompareTag("Player"))
         {
-            PlayerBehaviour player = obj.transform.GetComponentInParent<PlayerBehaviour>();
+            PlayerMovementController player = obj.transform.GetComponentInParent<PlayerMovementController>();
             BodyPart bp = player.BodyParts[obj.transform.GetSiblingIndex()];
-            if (bp.p_TeleportCounter == 0)
+            if (bp.TeleportCounter == 0)
             {
                 float dA = (obj.transform.position - A.transform.position).magnitude;
                 float dB = (obj.transform.position - B.transform.position).magnitude;
@@ -43,7 +43,7 @@ public class Teleporter : MonoBehaviour
                 obj.transform.position = teleportTo.transform.position;
 
                 // Add 2 to the counter (very safe)
-                bp.p_TeleportCounter += 2;
+                bp.TeleportCounter += 2;
             }
         }
     }

@@ -12,7 +12,7 @@ public class FoodBehaviour : MonoBehaviour
         if (obj.transform.parent != null && obj.transform.parent.CompareTag("Player"))
         {
             GameBehaviour game = GameObject.FindWithTag("GameHandler").GetComponent<GameBehaviour>();
-            PlayerBehaviour player = obj.transform.GetComponentInParent<PlayerBehaviour>();
+            PlayerMovementController player = obj.transform.GetComponentInParent<PlayerMovementController>();
             if (player != null)
             {
                 player.QAddBodyPart();

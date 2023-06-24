@@ -6,10 +6,7 @@ using UnityEngine;
 public class DebugBehaviour : MonoBehaviour
 {
     [SerializeField]
-    private Lobby _lobby;
-
-    [SerializeField]
-    private PlayerBehaviour _player;
+    private PlayerMovementController _player;
 
     [SerializeField]
     private GameObject _contentOutput;
@@ -27,23 +24,6 @@ public class DebugBehaviour : MonoBehaviour
     }
     private e_Display Display { get; set; }
 
-    private void Start()
-    {
-        try
-        {
-            _lobby = GameObject.FindWithTag("Lobby").GetComponent<Lobby>();
-        }
-        catch { }
-
-        try
-        {
-            _player = _lobby.Player;
-        }
-        catch
-        {
-            StartCoroutine(WaitForPlayer());
-        }
-    }
 
     private void Update()
     {
@@ -71,13 +51,6 @@ public class DebugBehaviour : MonoBehaviour
                 {
                     Dictionary<string, string> stringPlayerValues = _player.GetPlayerDebug();
                     UpdateDisplay(stringPlayerValues);
-                }
-                break;
-            case e_Display.Lobby:
-                if (_lobby)
-                {
-                    Dictionary<string, string> stringLobbyValues = _lobby.GetLobbyDebug();
-                    UpdateDisplay(stringLobbyValues);
                 }
                 break;
             default:
@@ -112,17 +85,5 @@ public class DebugBehaviour : MonoBehaviour
         {
             Destroy(child.gameObject);
         }
-    }
-
-    private IEnumerator WaitForPlayer()
-    {
-        GameObject player = null;
-        while (player == null)
-        {
-            player = GameObject.FindWithTag("Player");
-            yield return new WaitForSeconds(1);
-        }
-        _player = player.GetComponent<PlayerBehaviour>();
-        yield break;
     }
 }

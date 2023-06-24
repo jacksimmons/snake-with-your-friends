@@ -511,15 +511,15 @@ namespace Steamworks {
 		/// <para>			the number of operands.</para>
 		/// <para>			For example, to match servers on a particular map or with a particular tag, would would</para>
 		/// <para>			use these filters.</para>
-		/// <para>				( server.map == "cp_dustbowl" || server.gametags.contains("payload") )</para>
+		/// <para>				( server.map == "cdustbowl" || server.gametags.contains("payload") )</para>
 		/// <para>				"or", "2"</para>
-		/// <para>				"map", "cp_dustbowl"</para>
+		/// <para>				"map", "cdustbowl"</para>
 		/// <para>				"gametagsand", "payload"</para>
 		/// <para>			If logical inputs are nested, then the operand specifies the size of the entire</para>
 		/// <para>			"length" of its operands, not the number of immediate children.</para>
-		/// <para>				( server.map == "cp_dustbowl" || ( server.gametags.contains("payload") &amp;&amp; !server.gametags.contains("payloadrace") ) )</para>
+		/// <para>				( server.map == "cdustbowl" || ( server.gametags.contains("payload") &amp;&amp; !server.gametags.contains("payloadrace") ) )</para>
 		/// <para>				"or", "4"</para>
-		/// <para>				"map", "cp_dustbowl"</para>
+		/// <para>				"map", "cdustbowl"</para>
 		/// <para>				"and", "2"</para>
 		/// <para>				"gametagsand", "payload"</para>
 		/// <para>				"gametagsnor", "payloadrace"</para>

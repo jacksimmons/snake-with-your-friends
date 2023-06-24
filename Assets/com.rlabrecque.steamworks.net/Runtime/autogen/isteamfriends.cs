@@ -416,7 +416,7 @@ namespace Steamworks {
 		/// <para>									  in the Steam client UI. For more info: https://partner.steamgames.com/doc/api/ISteamFriends#richpresencelocalization</para>
 		/// <para>		"steam_player_group"		- When set, indicates to the Steam client that the player is a member of a particular group. Players in the same group</para>
 		/// <para>									  may be organized together in various places in the Steam UI.</para>
-		/// <para>		"steam_player_group_size"	- When set, indicates the total number of players in the steam_player_group. The Steam client may use this number to</para>
+		/// <para>		"steam_player_grousize"	- When set, indicates the total number of players in the steam_player_group. The Steam client may use this number to</para>
 		/// <para>									  display additional information about a group when all of the members are not part of a user's friends list.</para>
 		/// <para> GetFriendRichPresence() returns an empty string "" if no value is set</para>
 		/// <para> SetRichPresence() to a NULL or an empty string deletes the key</para>
