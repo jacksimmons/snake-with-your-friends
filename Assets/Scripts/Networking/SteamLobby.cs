@@ -49,6 +49,7 @@ public class SteamLobby : MonoBehaviour
         SteamID = (ulong)SteamUser.GetSteamID();
 
         gameLobbyJoinRequested = Callback<GameLobbyJoinRequested_t>.Create(OnGameLobbyJoinRequested);
+        lobbyChatUpdate = Callback<LobbyChatUpdate_t>.Create(OnLobbyChatUpdate);
         _lobbyEnter = CallResult<LobbyEnter_t>.Create(OnLobbyEnter);
         _lobbyCreated = CallResult<LobbyCreated_t>.Create(OnLobbyCreated);
     }
@@ -88,13 +89,14 @@ public class SteamLobby : MonoBehaviour
     /// </summary>
     private void OnLobbyCreated(LobbyCreated_t result, bool bIOFailure)
     {
-        if (bIOFailure || result.m_eResult != EResult.k_EResultOK)
+        if (bIOFailure || (result.m_eResult != EResult.k_EResultOK))
         {
             Debug.LogError("Failed to create lobby.");
             return;
         }
 
-        bool success = SteamMatchmaking.SetLobbyData((CSteamID)result.m_ulSteamIDLobby, "name", SteamFriends.GetPersonaName() + "'s lobby");
+        bool success = SteamMatchmaking.SetLobbyData(new CSteamID(result.m_ulSteamIDLobby), "name", SteamFriends.GetPersonaName() + "'s lobby");
+        LobbyID = result.m_ulSteamIDLobby;
 
         if (success)
             print("Successfully set the name of the lobby.");
@@ -115,32 +117,59 @@ public class SteamLobby : MonoBehaviour
             return;
         }
 
+        // LobbyID should only be set if we aren't the owner.
+        // A different ID is sent here if we are the host.
         if (LobbyID == 0)
-            LobbyID = result.m_ulSteamIDLobby;
-        StartCoroutine(LoadLobby());
-        print("Entered lobby successfully.");
-    }
-
-    private IEnumerator LoadLobby()
-    {
-        AsyncOperation loadLobbyMenuComplete = SceneManager.LoadSceneAsync("LobbyMenu");
-
-        while (!loadLobbyMenuComplete.isDone)
         {
-            yield return new WaitForSeconds(0.1f);
+            LobbyID = result.m_ulSteamIDLobby;
         }
 
+        // Determine if we are a client
         if (NetworkServer.active)
         {
             print("I am the host.");
-            yield break;
+            return;
         }
 
-        // Clients
+        // If we are a client then start client.
         print("I am not the host.");
-        _manager.networkAddress = SteamMatchmaking.GetLobbyData((CSteamID)LobbyID, HOST_ADDRESS_KEY);
+        _manager.networkAddress = SteamMatchmaking.GetLobbyData(new CSteamID(LobbyID), HOST_ADDRESS_KEY);
         _manager.StartClient();
 
-        yield break;
+        print("Entered lobby successfully.");
+    }
+
+    private void OnLobbyChatUpdate(LobbyChatUpdate_t callback)
+    {
+        CSteamID affects = (CSteamID)callback.m_ulSteamIDUserChanged;
+        CSteamID changer = (CSteamID)callback.m_ulSteamIDMakingChange;
+
+        string affectsName = SteamFriends.GetFriendPersonaName(
+            (CSteamID)callback.m_ulSteamIDUserChanged);
+        string changerName = SteamFriends.GetFriendPersonaName(
+            (CSteamID)callback.m_ulSteamIDMakingChange);
+
+        uint stateChange = callback.m_rgfChatMemberStateChange;
+        switch (stateChange)
+        {
+            case 1 << 0:
+                print(affectsName + " entered.");
+                break;
+            case 1 << 1:
+                print(affectsName + " left.");
+                break;
+            case 1 << 2:
+                print(affectsName + " disconnected.");
+                break;
+            case 1 << 3:
+                print(changerName + " kicked " + affects);
+                break;
+            case 1 << 4:
+                print(changer + " banned " + affects);
+                break;
+            default:
+                print("[OnLobbyChatUpdate] Something...happened?");
+                break;
+        }
     }
 }

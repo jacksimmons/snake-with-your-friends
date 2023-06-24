@@ -11,7 +11,7 @@ public class CustomNetworkManager : NetworkManager
     [SerializeField]
     private PlayerObjectController _playerPrefab;
 
-    public List<PlayerObjectController> _players { get; } = new List<PlayerObjectController>();
+    public List<PlayerObjectController> players { get; } = new List<PlayerObjectController>();
 
 
     public override void OnServerAddPlayer(NetworkConnectionToClient conn)
@@ -20,8 +20,8 @@ public class CustomNetworkManager : NetworkManager
         {
             PlayerObjectController playerInstance = Instantiate(_playerPrefab);
             playerInstance.connectionID = conn.connectionId;
-            playerInstance.playerNo = _players.Count + 1;
-            playerInstance.playerSteamID = (ulong)SteamMatchmaking.GetLobbyMemberByIndex((CSteamID)SteamLobby.instance.LobbyID, _players.Count);
+            playerInstance.playerNo = players.Count + 1;
+            playerInstance.playerSteamID = (ulong)SteamMatchmaking.GetLobbyMemberByIndex(new CSteamID(SteamLobby.instance.LobbyID), players.Count);
 
             NetworkServer.AddPlayerForConnection(conn, playerInstance.gameObject);
         }

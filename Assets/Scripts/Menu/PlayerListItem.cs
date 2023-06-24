@@ -12,7 +12,9 @@ public class PlayerListItem : MonoBehaviour
     public ulong steamID;
     private bool _avatarReceived;
 
+    [SerializeField]
     public TextMeshProUGUI playerNameLabel;
+    [SerializeField]
     public RawImage icon;
 
     protected Callback<AvatarImageLoaded_t> imageLoaded;
@@ -36,7 +38,8 @@ public class PlayerListItem : MonoBehaviour
 
     private void GetPlayerIcon()
     {
-        int imageID = SteamFriends.GetLargeFriendAvatar((CSteamID)steamID);
+        ulong id = steamID;
+        int imageID = SteamFriends.GetLargeFriendAvatar(new CSteamID(steamID));
         if (imageID == -1) { return; }
         icon.texture = GetSteamImageAsTexture(imageID);
     }
