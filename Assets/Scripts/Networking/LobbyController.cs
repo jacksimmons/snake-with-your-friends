@@ -36,6 +36,12 @@ public class LobbyController : MonoBehaviour
         }
     }
 
+    // Ready
+    [SerializeField]
+    public Button startGameButton;
+    [SerializeField]
+    public TextMeshProUGUI readyButtonText;
+
 
     private void Awake()
     {
@@ -77,8 +83,10 @@ public class LobbyController : MonoBehaviour
         newPlayerListItemScript.playerName = player.playerName;
         newPlayerListItemScript.connectionID = player.connectionID;
         newPlayerListItemScript.steamID = player.playerSteamID;
+        newPlayerListItemScript.ready = player.ready;
         newPlayerListItemScript.SetPlayerValues();
 
+        print(playerListViewContent.name);
         newPlayerItem.transform.SetParent(playerListViewContent.transform);
         newPlayerItem.transform.localScale = Vector3.one;
 
@@ -119,10 +127,19 @@ public class LobbyController : MonoBehaviour
                 if (playerListItemScript.connectionID == player.connectionID)
                 {
                     playerListItemScript.playerName = player.playerName;
+                    playerListItemScript.ready = player.ready;
                     playerListItemScript.SetPlayerValues();
+
+                    // We only want to update buttons individually
+                    if (player == localPlayerController)
+                    {
+                        UpdateButton();
+                    }
                 }
             }
         }
+
+        CheckIfAllReady();
     }
 
     public void RemovePlayerItem()
@@ -147,5 +164,47 @@ public class LobbyController : MonoBehaviour
                 objToRemove = null;
             }
         }
+    }
+
+    public void ReadyPlayer()
+    {
+        localPlayerController.ChangeReady();
+    }
+
+    public void UpdateButton()
+    {
+        if (localPlayerController.ready)
+        {
+            readyButtonText.text = "Not Ready";
+        }
+        else
+        {
+            readyButtonText.text = "Ready";
+        }
+    }
+
+    public void CheckIfAllReady()
+    {
+        bool allReady = true;
+        foreach (PlayerObjectController player in Manager.players)
+        {
+            if (!player.ready)
+            {
+                allReady = false;
+                break;
+            }
+        }
+
+        startGameButton.interactable = false;
+
+        // If everyone is ready and we are the host...
+        if (allReady)
+            if (localPlayerController && localPlayerController.playerNo == 1)
+                startGameButton.interactable = true;
+    }
+
+    public void StartGame(string sceneName)
+    {
+        localPlayerController.CanStartGame(sceneName);
     }
 }

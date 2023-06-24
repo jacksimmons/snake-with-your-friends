@@ -16,8 +16,28 @@ public class PlayerListItem : MonoBehaviour
     public TextMeshProUGUI playerNameLabel;
     [SerializeField]
     public RawImage icon;
+    [SerializeField]
+    public TextMeshProUGUI playerReadyLabel;
+
+    public bool ready;
 
     protected Callback<AvatarImageLoaded_t> imageLoaded;
+
+
+    public void ChangeReadyStatus()
+    {
+        if (ready)
+        {
+            playerReadyLabel.text = "Ready";
+            playerReadyLabel.color = Color.green;
+        }
+        else
+        {
+            playerReadyLabel.text = "Not Ready";
+            playerReadyLabel.color = Color.red;
+        }
+    }
+
 
     private void Awake()
     {
@@ -33,6 +53,7 @@ public class PlayerListItem : MonoBehaviour
     public void SetPlayerValues()
     {
         playerNameLabel.text = playerName;
+        ChangeReadyStatus();
         if (!_avatarReceived) { GetPlayerIcon(); }
     }
 

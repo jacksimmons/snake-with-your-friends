@@ -11,6 +11,7 @@ public class PlayerObjectController : NetworkBehaviour
     [SyncVar] public int playerNo;
     [SyncVar] public ulong playerSteamID;
     [SyncVar(hook = nameof(OnPlayerNameUpdate))] public string playerName;
+    [SyncVar(hook = nameof(OnPlayerReadyUpdate))] public bool ready;
 
     private CustomNetworkManager _manager;
     private CustomNetworkManager Manager
@@ -21,6 +22,13 @@ public class PlayerObjectController : NetworkBehaviour
             return _manager = CustomNetworkManager.singleton as CustomNetworkManager;
         }
     }
+
+
+    private void Start()
+    {
+        DontDestroyOnLoad(this.gameObject);
+    }
+
 
     /// <summary>
     /// Called when starting as a host.
@@ -68,5 +76,45 @@ public class PlayerObjectController : NetworkBehaviour
         {
             LobbyController.instance.UpdatePlayerList();
         }
+    }
+
+    [Command]
+    private void CmdSetPlayerReady()
+    {
+        this.OnPlayerReadyUpdate(this.ready, !this.ready);
+    }
+
+    public void ChangeReady()
+    {
+        if (isOwned)
+        {
+            CmdSetPlayerReady();
+        }
+    }
+
+    public void OnPlayerReadyUpdate(bool oldValue, bool newValue)
+    {
+        if (isServer)
+        {
+            this.ready = newValue;
+        }
+        if (isClient)
+        {
+            LobbyController.instance.UpdatePlayerList();
+        }
+    }
+
+    public void CanStartGame(string sceneName)
+    {
+        if (isOwned)
+        {
+            CmdCanStartGame(sceneName);
+        }
+    }
+
+    [Command]
+    public void CmdCanStartGame(string sceneName)
+    {
+        Manager.StartGame(sceneName);
     }
 }
