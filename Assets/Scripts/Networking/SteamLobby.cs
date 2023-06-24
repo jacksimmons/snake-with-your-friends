@@ -79,7 +79,8 @@ public class SteamLobby : MonoBehaviour
     private void OnGameLobbyJoinRequested(GameLobbyJoinRequested_t result)
     {
         print("Request to join lobby.");
-        SteamMatchmaking.JoinLobby(result.m_steamIDLobby);
+        SteamAPICall_t handle = SteamMatchmaking.JoinLobby(result.m_steamIDLobby);
+        _lobbyEnter.Set(handle);
     }
 
 
@@ -111,7 +112,7 @@ public class SteamLobby : MonoBehaviour
     /// </summary>
     private void OnLobbyEnter(LobbyEnter_t result, bool bIOFailure)
     {
-        if (bIOFailure || result.m_EChatRoomEnterResponse == (uint)EChatRoomEnterResponse.k_EChatRoomEnterResponseError)
+        if (bIOFailure || result.m_EChatRoomEnterResponse != (uint)EChatRoomEnterResponse.k_EChatRoomEnterResponseSuccess)
         {
             print("Failed to enter lobby.");
             return;
