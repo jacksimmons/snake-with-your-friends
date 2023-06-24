@@ -13,6 +13,9 @@ public class PlayerMovementController : NetworkBehaviour
     public StatusBehaviour status;
 
     [SerializeField]
+    private NetworkTransformReliable _networkTransform;
+
+    [SerializeField]
     private GameObject _bodyPartContainer;
 
     // Templates and sprites
@@ -104,6 +107,13 @@ public class PlayerMovementController : NetworkBehaviour
         for (int i = 0; i < containerTransform.childCount; i++)
         {
             Transform _transform = containerTransform.GetChild(i);
+
+            NetworkIdentity _ni = _transform.gameObject.AddComponent<NetworkIdentity>();
+
+            NetworkTransformReliable _nt = _transform.gameObject.AddComponent<NetworkTransformReliable>();
+            _nt.target = _transform;
+            _nt.syncDirection = SyncDirection.ClientToServer;
+
             BodyPart bp;
 
             // Head and body
@@ -158,7 +168,6 @@ public class PlayerMovementController : NetworkBehaviour
         {
             if (!_bodyPartContainer.activeSelf)
             {
-
                 _bodyPartContainer.SetActive(true);
             }
 

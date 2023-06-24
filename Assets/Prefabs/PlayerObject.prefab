@@ -232,6 +232,7 @@ MonoBehaviour:
   syncMode: 0
   syncInterval: 0
   status: {fileID: 7297529085144571617}
+  _networkTransform: {fileID: 2816891794653930043}
   _bodyPartContainer: {fileID: 6366460689727907375}
   _bodyPartTemplate: {fileID: 8458232058558454434, guid: a3b0ac531d48ea6408b0d91bf3f30add, type: 3}
   _headPiece: {fileID: 21300000, guid: cab13cca9bd8fc74ab7f14aaeca14351, type: 3}
