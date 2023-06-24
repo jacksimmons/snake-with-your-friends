@@ -16,12 +16,12 @@ public class CustomNetworkManager : NetworkManager
 
     public override void OnServerAddPlayer(NetworkConnectionToClient conn)
     {
-        if (SceneManager.GetActiveScene().name == "Lobby")
+        if (SceneManager.GetActiveScene().name == "LobbyMenu")
         {
             PlayerObjectController playerInstance = Instantiate(_playerPrefab);
             playerInstance.connectionID = conn.connectionId;
             playerInstance.playerNo = _players.Count + 1;
-            playerInstance.playerSteamID = (ulong)SteamMatchmaking.GetLobbyMemberByIndex(SteamLobby.instance.LobbyID, _players.Count);
+            playerInstance.playerSteamID = (ulong)SteamMatchmaking.GetLobbyMemberByIndex((CSteamID)SteamLobby.instance.LobbyID, _players.Count);
 
             NetworkServer.AddPlayerForConnection(conn, playerInstance.gameObject);
         }

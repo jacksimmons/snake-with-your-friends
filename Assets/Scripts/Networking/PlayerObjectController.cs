@@ -21,7 +21,51 @@ public class PlayerObjectController : NetworkBehaviour
             return _manager = CustomNetworkManager.singleton as CustomNetworkManager;
         }
     }
+
+    /// <summary>
+    /// Called when starting as a host.
+    /// </summary>
+    public override void OnStartAuthority()
+    {
+        CmdSetPlayerName(SteamFriends.GetPersonaName());
+        gameObject.name = "LocalGamePlayer";
+        LobbyController.instance.FindLocalPlayer();
+        LobbyController.instance.UpdateLobbyName();
+    }
+
+    /// <summary>
+    /// Called when starting as a client.
+    /// </summary>
+    public override void OnStartClient()
+    {
+        Manager._players.Add(this);
+        LobbyController.instance.UpdateLobbyName();
+        LobbyController.instance.UpdatePlayerList();
+    }
+
+    /// <summary>
+    /// Called when stopping as a client.
+    /// </summary>
+    public override void OnStopClient()
+    {
+        Manager._players.Remove(this);
+        LobbyController.instance.UpdatePlayerList();
+    }
+
+    [Command]
+    private void CmdSetPlayerName(string playerName)
+    {
+        this.OnPlayerNameUpdate(this.playerName, playerName);
+    }
+
     public void OnPlayerNameUpdate(string oldValue, string newValue)
     {
+        if (isServer)
+        {
+            this.playerName = newValue;
+        }
+        if (isClient)
+        {
+        }
     }
 }

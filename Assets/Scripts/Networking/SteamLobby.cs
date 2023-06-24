@@ -15,16 +15,12 @@ public class SteamLobby : MonoBehaviour
     // Constants
     private const string HOST_ADDRESS_KEY = "hostAddress";
 
-    // Lobby objects
-    [SerializeField]
-    private TextMeshProUGUI _lobbyNameText;
-
     // Mirror
     private CustomNetworkManager _manager;
 
     // Steam IDs
-    public CSteamID SteamID { get; private set; } = CSteamID.Nil;
-    public CSteamID LobbyID { get; private set; } = CSteamID.Nil;
+    public ulong SteamID { get; private set; } = 0;
+    public ulong LobbyID { get; private set; } = 0;
     public Dictionary<CSteamID, string> LobbyPlayerData { get; private set; } = new();
 
     // Callbacks/Callresults
@@ -50,10 +46,8 @@ public class SteamLobby : MonoBehaviour
 
         _manager = GetComponent<CustomNetworkManager>();
 
-        SteamID = SteamUser.GetSteamID();
+        SteamID = (ulong)SteamUser.GetSteamID();
 
-        lobbyChatUpdate = Callback<LobbyChatUpdate_t>.Create(OnLobbyChatUpdate);
-        lobbyDataUpdate = Callback<LobbyDataUpdate_t>.Create(OnLobbyDataUpdate);
         gameLobbyJoinRequested = Callback<GameLobbyJoinRequested_t>.Create(OnGameLobbyJoinRequested);
         _lobbyEnter = CallResult<LobbyEnter_t>.Create(OnLobbyEnter);
         _lobbyCreated = CallResult<LobbyCreated_t>.Create(OnLobbyCreated);
@@ -77,32 +71,6 @@ public class SteamLobby : MonoBehaviour
     }
 
 
-    private void AddLobbyMember(CSteamID id)
-    {
-        string name = SteamFriends.GetFriendPersonaName(id);
-        LobbyPlayerData.Add(id, name);
-    }
-
-    private void RemoveLobbyMember(CSteamID id)
-    {
-        LobbyPlayerData.Remove(id);
-    }
-
-    /// <summary>
-    /// Should only be used when joining a lobby, to prevent reconstruction on every
-    /// chat update event.
-    /// </summary>
-    private void AddAllLobbyMembers()
-    {
-        int numPlayers = SteamMatchmaking.GetNumLobbyMembers(LobbyID);
-        for (int i = 0; i < numPlayers; i++)
-        {
-            CSteamID memberId = SteamMatchmaking.GetLobbyMemberByIndex(LobbyID, i);
-            AddLobbyMember(memberId);
-        }
-    }
-
-
     // Callbacks
     /// <summary>
     /// Called when a user joins through the friends list.
@@ -111,65 +79,6 @@ public class SteamLobby : MonoBehaviour
     {
         print("Request to join lobby.");
         SteamMatchmaking.JoinLobby(result.m_steamIDLobby);
-    }
-
-    /// <summary>
-    /// Called when a user has joined, left, disconnected, etc. Need to check if we are the new owner.
-    /// </summary>
-    private void OnLobbyChatUpdate(LobbyChatUpdate_t callback)
-    {
-        CSteamID affects = (CSteamID)callback.m_ulSteamIDUserChanged;
-        CSteamID changer = (CSteamID)callback.m_ulSteamIDMakingChange;
-
-        string affectsName = SteamFriends.GetFriendPersonaName(
-            (CSteamID)callback.m_ulSteamIDUserChanged);
-        string changerName = SteamFriends.GetFriendPersonaName(
-            (CSteamID)callback.m_ulSteamIDMakingChange);
-
-        uint stateChange = callback.m_rgfChatMemberStateChange;
-        switch (stateChange)
-        {
-            case 1 << 0:
-                print(affectsName + " entered.");
-                AddLobbyMember(affects);
-                break;
-            case 1 << 1:
-                print(affectsName + " left.");
-                RemoveLobbyMember(affects);
-                break;
-            case 1 << 2:
-                print(affectsName + " disconnected.");
-                RemoveLobbyMember(affects);
-                break;
-            case 1 << 3:
-                print(changerName + " kicked " + affects);
-                RemoveLobbyMember(affects);
-                break;
-            case 1 << 4:
-                print(changer + " banned " + affects);
-                RemoveLobbyMember(affects);
-                break;
-            default:
-                print("[OnLobbyChatUpdate] Something...happened?");
-                break;
-        }
-
-        //IsOwner = Id == SteamMatchmaking.GetLobbyOwner(_lobbyId);
-    }
-
-    /// <summary>
-    /// Only tells when a data update occurs, not what is updated.
-    /// Therefore, this function updates all essential data, under a greedy philosophy.
-    /// </summary>
-    private void OnLobbyDataUpdate(LobbyDataUpdate_t callback)
-    {
-        if (callback.m_bSuccess != 1)
-        {
-            Debug.LogError("Data update failed.");
-            return;
-        }
-
-        _lobbyNameText.text = SteamMatchmaking.GetLobbyData(LobbyID, "name");
     }
 
 
@@ -185,10 +94,7 @@ public class SteamLobby : MonoBehaviour
             return;
         }
 
-        LobbyID = (CSteamID)result.m_ulSteamIDLobby;
-        print("Lobby [ID: " + LobbyID.ToString() + "] created successfully.");
-
-        bool success = SteamMatchmaking.SetLobbyData(LobbyID, "name", SteamFriends.GetPersonaName() + "'s lobby");
+        bool success = SteamMatchmaking.SetLobbyData((CSteamID)result.m_ulSteamIDLobby, "name", SteamFriends.GetPersonaName() + "'s lobby");
 
         if (success)
             print("Successfully set the name of the lobby.");
@@ -209,8 +115,8 @@ public class SteamLobby : MonoBehaviour
             return;
         }
 
-        if (LobbyID == CSteamID.Nil)
-            LobbyID = (CSteamID)result.m_ulSteamIDLobby;
+        if (LobbyID == 0)
+            LobbyID = result.m_ulSteamIDLobby;
         StartCoroutine(LoadLobby());
         print("Entered lobby successfully.");
     }
@@ -223,10 +129,6 @@ public class SteamLobby : MonoBehaviour
         {
             yield return new WaitForSeconds(0.1f);
         }
-        AddAllLobbyMembers();
-
-        // Everyone
-        _lobbyNameText.text = SteamMatchmaking.GetLobbyData(LobbyID, "name");
 
         if (NetworkServer.active)
         {
@@ -236,7 +138,7 @@ public class SteamLobby : MonoBehaviour
 
         // Clients
         print("I am not the host.");
-        _manager.networkAddress = SteamMatchmaking.GetLobbyData(LobbyID, HOST_ADDRESS_KEY);
+        _manager.networkAddress = SteamMatchmaking.GetLobbyData((CSteamID)LobbyID, HOST_ADDRESS_KEY);
         _manager.StartClient();
 
         yield break;

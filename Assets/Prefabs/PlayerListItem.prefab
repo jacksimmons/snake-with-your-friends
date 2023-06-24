@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 613060240348592103}
   - component: {fileID: 613060240348592101}
   - component: {fileID: 613060240348592122}
+  - component: {fileID: 8303074381713702158}
   m_Layer: 5
   m_Name: PlayerListItem
   m_TagString: Untagged
@@ -75,6 +76,23 @@ MonoBehaviour:
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
+--- !u!114 &8303074381713702158
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 613060240348592102}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f9fe957043d81a041beb3e09bf57de82, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  playerName: 
+  connectionID: 0
+  steamID: 0
+  playerNameLabel: {fileID: 4666021676541952830}
+  icon: {fileID: 4666021675934773789}
 --- !u!1 &4666021675934773791
 GameObject:
   m_ObjectHideFlags: 0

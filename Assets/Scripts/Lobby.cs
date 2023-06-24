@@ -48,31 +48,31 @@ public class Lobby : MonoBehaviour
         Physics,
         Console
     }
-	
+
     private enum LobbyState
     {
         NotInOne,
         InLobbyMenu,
         InGame
     }
-	
+
     private CSteamID _lobbyId = CSteamID.Nil;
-	
-	private bool _isOwner = false;
-    public bool IsOwner 
-	{
-		get { return _isOwner; }
-		set 
-		{
-			_counter.Paused = !value;
-			_isOwner = value;
-		}
-	}
-	
+
+    private bool _isOwner = false;
+    public bool IsOwner
+    {
+        get { return _isOwner; }
+        set
+        {
+            _counter.Paused = !value;
+            _isOwner = value;
+        }
+    }
+
     private LobbyState _lobbyState = LobbyState.NotInOne;
     private Dictionary<CSteamID, string> _lobbyNames = new();
-	
-	public Dictionary<CSteamID, PlayerBehaviour> LobbyPlayers { get; private set; } = new();
+
+    public Dictionary<CSteamID, PlayerBehaviour> LobbyPlayers { get; private set; } = new();
 
     // Packet data
     private IntPtr _sendBuf = Marshal.AllocHGlobal(65536);
@@ -100,7 +100,7 @@ public class Lobby : MonoBehaviour
 
     private void Update()
     {
-		// Handle all messages directed to Update.
+        // Handle all messages directed to Update.
         ReceiveMessages(Channel.Default);
         ReceiveMessages(Channel.Console, true);
     }
@@ -108,7 +108,7 @@ public class Lobby : MonoBehaviour
 
     private void FixedUpdate()
     {
-		// Handle all messages directed to FixedUpdate.
+        // Handle all messages directed to FixedUpdate.
         ReceiveMessages(Channel.Physics);
     }
 
@@ -147,12 +147,12 @@ public class Lobby : MonoBehaviour
         {
             if (kvp.Key != Id)
                 if (Mathf.Approximately(kvp.Value.MovementSpeed, PlayerBehaviour.DEFAULT_MOVEMENT_SPEED))
-				{
-					print("aaaa");
+                {
+                    print("aaaa");
                     SendMessageToUser(kvp.Key, Bytes.ToBytes("move_timer"), Channel.Physics);
-					SendMessageToUser(kvp.Key, Bytes.ToBytes("move_timer"), Channel.Console);
-				}
-		}
+                    SendMessageToUser(kvp.Key, Bytes.ToBytes("move_timer"), Channel.Console);
+                }
+        }
 
         // Call our own player's movement loop if it has default movement speed
         if (Mathf.Approximately(Player.MovementSpeed, PlayerBehaviour.DEFAULT_MOVEMENT_SPEED))
@@ -171,8 +171,8 @@ public class Lobby : MonoBehaviour
         if (mover == Id)
             if (Player.MovementSpeed != PlayerBehaviour.DEFAULT_MOVEMENT_SPEED)
                 OnMoveTimerReceived();
-        else
-            SendMessageToUser(mover, Bytes.ToBytes("move_timer"), Channel.Physics);
+            else
+                SendMessageToUser(mover, Bytes.ToBytes("move_timer"), Channel.Physics);
     }
 
 

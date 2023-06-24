@@ -237,7 +237,7 @@ GameObject:
   - component: {fileID: 851218084}
   - component: {fileID: 851218083}
   m_Layer: 5
-  m_Name: LobbyName
+  m_Name: LobbyNameLabel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -635,7 +635,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b5f091d50ab36684b9d3d663bf43da03, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _playerListItemTemplate: {fileID: 0}
+  lobbyNameLabel: {fileID: 851218083}
+  playerListViewContent: {fileID: 5207022036219901643}
+  playerListItemPrefab: {fileID: 613060240348592102, guid: ae4a77ec2b0f79c40af539ba95d237ce, type: 3}
+  localPlayerObject: {fileID: 0}
+  lobbyID: 0
+  playerItemCreated: 0
+  localPlayerController: {fileID: 0}
 --- !u!1 &2110421890
 GameObject:
   m_ObjectHideFlags: 0
@@ -1685,7 +1691,6 @@ GameObject:
   m_Component:
   - component: {fileID: 5207022037383926673}
   - component: {fileID: 5207022037383926675}
-  - component: {fileID: 6027210656712403449}
   m_Layer: 5
   m_Name: LobbyPanel
   m_TagString: Untagged
@@ -1781,8 +1786,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 114.89269, y: -280}
-  m_SizeDelta: {x: 229.7854, y: 430.17}
+  m_AnchoredPosition: {x: 423.1858, y: -280}
+  m_SizeDelta: {x: 846.3716, y: 430.17}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &5207022037424217655
 GameObject:
@@ -1803,20 +1808,3 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &6027210656712403449
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5207022037383926678}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5d19ec10f9d7c6743b9fb71ce5663edd, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _lobby: {fileID: 0}
-  _player: {fileID: 0}
-  _contentOutput: {fileID: 5207022036219901643}
-  _statusBlock: {fileID: 0}
-  _debugTextField: {fileID: 1620728988649047122, guid: 679ca06b9e7750b4abebbfdf736a4309, type: 3}

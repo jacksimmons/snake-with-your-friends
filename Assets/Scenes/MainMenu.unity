@@ -881,16 +881,17 @@ MonoBehaviour:
   autoStartServerBuild: 1
   autoConnectClientBuild: 0
   sendRate: 30
-  offlineScene: 
-  onlineScene: 
+  offlineScene: Assets/Scenes/MainMenu.unity
+  onlineScene: Assets/Scenes/LobbyMenu.unity
   transport: {fileID: 7083315451620448121}
   networkAddress: localhost
   maxConnections: 100
   authenticator: {fileID: 0}
-  playerPrefab: {fileID: 0}
-  autoCreatePlayer: 0
+  playerPrefab: {fileID: 9103070792587131126, guid: 0a14f23727928f14fb4e6254238b905c, type: 3}
+  autoCreatePlayer: 1
   playerSpawnMethod: 0
-  spawnPrefabs: []
+  spawnPrefabs:
+  - {fileID: 3315957918798202727, guid: f10477f5b0dea214e9da6295d82dbfd9, type: 3}
   snapshotSettings:
     bufferTimeMultiplier: 2
     catchupNegativeThreshold: -1
@@ -902,6 +903,7 @@ MonoBehaviour:
     dynamicAdjustmentTolerance: 1
     deliveryTimeEmaDuration: 2
   timeInterpolationGui: 0
+  _playerPrefab: {fileID: 5691343852970272198, guid: f10477f5b0dea214e9da6295d82dbfd9, type: 3}
 --- !u!1 &2220711510020301171
 GameObject:
   m_ObjectHideFlags: 0
@@ -1050,11 +1052,6 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 1b0273b19bf2e8545a39951da787dc63, type: 3}
---- !u!1 &3868020593186306679 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 3868020592265161056, guid: 1b0273b19bf2e8545a39951da787dc63, type: 3}
-  m_PrefabInstance: {fileID: 3868020593186306678}
-  m_PrefabAsset: {fileID: 0}
 --- !u!4 &4937268077825794492
 Transform:
   m_ObjectHideFlags: 0
@@ -1143,7 +1140,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4ae313fa8003fbb4e82694b269221e9b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _hostButton: {fileID: 3868020593186306679}
   _lobbyNameText: {fileID: 0}
 --- !u!114 &7083315451620448121
 MonoBehaviour:
