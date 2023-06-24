@@ -96,7 +96,9 @@ public class SteamLobby : MonoBehaviour
             return;
         }
 
-        bool success = SteamMatchmaking.SetLobbyData(new CSteamID(result.m_ulSteamIDLobby), "name", SteamFriends.GetPersonaName() + "'s lobby");
+
+        bool success = SteamMatchmaking.SetLobbyData(new CSteamID(result.m_ulSteamIDLobby), "name", SteamFriends.GetPersonaName() + "'s lobby")
+                    && SteamMatchmaking.SetLobbyData(new CSteamID(result.m_ulSteamIDLobby), HOST_ADDRESS_KEY, SteamUser.GetSteamID().ToString());
         LobbyID = result.m_ulSteamIDLobby;
 
         if (success)
