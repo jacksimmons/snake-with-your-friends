@@ -1,10 +1,11 @@
 using Extensions;
+using Mirror;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
-public class GameBehaviour : MonoBehaviour
+public class GameBehaviour : NetworkBehaviour
 {
     [SerializeField]
     private Tile _lightTile;
@@ -13,12 +14,13 @@ public class GameBehaviour : MonoBehaviour
     [SerializeField]
     private Tile _wallTile;
 
-    private bool[] _objects;
-
     [SerializeField]
     private GameObject[] _foodTemplates;
     [SerializeField]
     private GameObject _menuSelectTemplate;
+
+    private Tilemap _groundTilemap;
+    private Tilemap _wallTilemap;
 
     [SerializeField]
     private Vector2 _spawnPoint;
@@ -31,8 +33,9 @@ public class GameBehaviour : MonoBehaviour
         Large = 60,
         Massive = 80
     }
+
     [SerializeField]
-    private EWorldSize groundSize = EWorldSize.Lobby;
+    private static EWorldSize groundSize = EWorldSize.Lobby;
 
     public enum EWorldMode : int
     {
@@ -41,7 +44,9 @@ public class GameBehaviour : MonoBehaviour
         Offline,
         Online
     }
-    public EWorldMode WorldMode = EWorldMode.Online;
+
+    [SerializeField]
+    private EWorldMode WorldMode = EWorldMode.Online;
 
     Vector2Int bl = Vector2Int.zero;
 
@@ -60,33 +65,61 @@ public class GameBehaviour : MonoBehaviour
         }
     }
 
+    // An array of child indices for objects (all objects in this go under the Objects game object parent)
+    private readonly SyncList<int> _objects = new(new int[(int)groundSize * (int)groundSize]);
+
 
     void Start()
     {
         SetGameOverScreenActivity(false);
 
-        // Defaults every value to false.
-        _objects = new bool[(int)groundSize * (int)groundSize];
+        // Sets every value to -1.
+        for (int i = 0; i < _objects.Count; i++) { _objects[i] = -1; }
 
-        SetupGame();
-        GenerateStartingFood();
-    }
-
-
-    private void GenerateStartingFood()
-    {
-        for (int i = 0; i < Manager.players.Count; i++)
+        if (isServer)
         {
-            AddAndInstantiateObjectToGrid(Random.Range(0, _objects.Length), _foodTemplates[Random.Range(0, _foodTemplates.Length)]);
+            SetupGame();
+            GenerateStartingFood();
         }
     }
 
+    public void GenerateStartingFood()
+    {
+        for (int i = 0; i < Manager.players.Count; i++)
+        {
+            GenerateFood();
+        }
+    }
 
     public void GenerateFood()
     {
-        AddAndInstantiateObjectToGrid(Random.Range(0, _objects.Length), _foodTemplates[Random.Range(0, _foodTemplates.Length)]);
+        int objectPos = Random.Range(0, _objects.Count);
+
+        // Overwrite _objects[objectPos] with -1 (if there are any vacancies)
+        // And redefine the updated objectPos.
+        // This effectively acts as a test to see if there are any vacancies,
+        // which also happens to locate the vacancy, while leaving its value
+        // as -1.
+        objectPos = AddToGrid(objectPos, -1);
+        if (objectPos == -1)
+        {
+            // No vacancies.
+            return;
+        }
+
+        int foodIndex = Random.Range(0, _foodTemplates.Length);
+        Vector2 foodPos = new((objectPos % (int)groundSize) + (bl.x + 1.5f), (objectPos / (int)groundSize) + (bl.y + 1.5f));
+        ClientCreateObject(objectPos, position: foodPos, rotation_z: 0, foodIndex);
     }
 
+    [ClientRpc]
+    public void ClientCreateObject(int objectPos, Vector2 position, float rotation_z, int foodIndex)
+    {
+        print("hi");
+        GameObject obj = _foodTemplates[foodIndex];
+        Instantiate(obj, position, Quaternion.Euler(Vector3.forward * rotation_z), GameObject.Find("Objects").transform);
+        obj.transform.SetSiblingIndex(objectPos);
+    }
 
     public void SetupGame()
     {
@@ -94,14 +127,16 @@ public class GameBehaviour : MonoBehaviour
         GameObject cam = GameObject.FindWithTag("MainCamera");
         cam.GetComponent<CamBehaviour>().SetupCamera(player);
 
-        Tilemap gameGT = CreateAndReturnTilemap(gridName: "Ground", hasCollider: false);
-        Tilemap gameWT = CreateAndReturnTilemap(gridName: "Wall", hasCollider: true);
+        _groundTilemap = CreateAndReturnTilemap(gridName: "Ground", hasCollider: false);
+        _wallTilemap = CreateAndReturnTilemap(gridName: "Wall", hasCollider: true);
 
-        CreateGroundTilemap(gameGT, bl);
-        CreateWallTilemap(gameWT, bl);
+        CreateGroundTilemap(_groundTilemap, bl);
+        CreateWallTilemap(_wallTilemap, bl);
 
-        if (WorldMode == EWorldMode.Online || WorldMode == EWorldMode.Offline)
-            PlacePlayers(depth: 1, Manager.players, gameGT, bl);
+        if (WorldMode == EWorldMode.Online)
+        {
+            PlacePlayers(depth: 1, playersStartIndex: 0, bl);
+        }
     }
 
     Tilemap CreateAndReturnTilemap(string gridName, bool hasCollider)
@@ -188,40 +223,47 @@ public class GameBehaviour : MonoBehaviour
         wallTilemap.SetTilesBlock(bounds, tiles);
     }
 
-
-    void PlacePlayers(int depth, List<PlayerObjectController> remainingPlayers, Tilemap groundTilemap, Vector2Int bl)
+    public void PlacePlayers(int depth, int playersStartIndex, Vector2Int bl)
     {
         // Outer snakes (along the walls)
         // Calculate the maximum distance between snakes.
         // If this distance is too small, spawn inner snakes.
 
+        int playersCount = 0;
+        if (Manager.players.Count - playersStartIndex > 0)
+        {
+            playersCount = Manager.players.Count - playersStartIndex;
+        }
+        List<PlayerObjectController> players = Manager.players.GetRange(playersStartIndex, playersCount);
+
         float minDist = (int)groundSize * SOFT_MIN_DIST_WORLD_SIZE_RATIO;
         if (minDist < HARD_MIN_DIST)
             minDist = HARD_MIN_DIST;
 
-        Vector3 BL = groundTilemap.CellToWorld((Vector3Int)(bl + (depth + 1) * Vector2Int.one));
-        Vector3 BR = groundTilemap.CellToWorld((Vector3Int)(bl + new Vector2Int((int)groundSize - depth + 1, depth + 1)));
-        Vector3 TL = groundTilemap.CellToWorld((Vector3Int)(bl + new Vector2Int(depth + 1, (int)groundSize - depth + 1)));
-        Vector3 TR = groundTilemap.CellToWorld((Vector3Int)(bl + ((int)groundSize - depth + 1) * Vector2Int.one));
+        Vector3 BL = _groundTilemap.CellToWorld((Vector3Int)(bl + (depth + 1) * Vector2Int.one));
+        Vector3 BR = _groundTilemap.CellToWorld((Vector3Int)(bl + new Vector2Int((int)groundSize - depth + 1, depth + 1)));
+        Vector3 TL = _groundTilemap.CellToWorld((Vector3Int)(bl + new Vector2Int(depth + 1, (int)groundSize - depth + 1)));
+        Vector3 TR = _groundTilemap.CellToWorld((Vector3Int)(bl + ((int)groundSize - depth + 1) * Vector2Int.one));
 
         Vector3[] corners = { BL, BR, TL, TR };
+        Vector2[] directions = { Vector2.one, new Vector2(-1, 1), new Vector2(1, -1), -Vector2.one };
 
-        for (int i = 0; i < remainingPlayers.Count; i++)
+        for (int i = 0; i < players.Count; i++)
         {
-            Manager.players[i].transform.position = corners[i % 4] + (Vector3)(Vector2.one * groundTilemap.cellSize / 2);
+            players[i].transform.position = corners[i % 4]
+                + (Vector3)(Vector2.one * directions[i % 4] * _groundTilemap.cellSize / 2);
 
             // If i were 0 then it might enter this, causing -4 as length to be provided (in the PlacePlayers line).
-            if (i != 0 && i % 4 == 0 && i < remainingPlayers.Count - 1)
+            if (i != 0 && i % 4 == 0 && i < players.Count - 1)
             {
                 int newDepth = depth + (int)Mathf.Floor(minDist);
-                print(newDepth);
                 if (newDepth >= (int)groundSize / 2)
                 {
                     throw new System.Exception("The players do not fit in the map provided.");
                 }
                 else
                 {
-                    PlacePlayers(newDepth, remainingPlayers.GetRange(4, remainingPlayers.Count - 4), groundTilemap, bl);
+                    PlacePlayers(newDepth, playersStartIndex + 4, bl);
                 }
             }
         }
@@ -229,71 +271,70 @@ public class GameBehaviour : MonoBehaviour
 
 
     /// <summary>
-    /// Checks if index `objectPos` is true in objects, if so it recursively
+    /// Checks if index `objectPos` is not -1 in _objects, if so it recursively
     /// searches for a valid index.
     /// </summary>
-    /// <param name="objectPos"></param>
-    /// <returns>The final position of the object.</returns>
-    public int AddToGrid(int objectPos)
+    /// <returns>The final position of the object, or -1 if no vacancies in _objects.</returns>
+    public int AddToGrid(int objectPos, int siblingIndex)
     {
-        if (_objects[objectPos])
+        if (_objects[objectPos] != -1)
         {
             // If there already is an object at given pos, try to put
             // the object on the first different free slot in the array.
-            for (int i = 0; (i < _objects.Length) && (i != objectPos); i++)
+            for (int i = 0; (i < _objects.Count) && (i != objectPos); i++)
             {
                 // Won't cause an infinite recursion due to the check
                 // which ensures this block won't be entered again.
-                if (!_objects[i])
+                if (_objects[i] != -1)
                 {
-                    return AddToGrid(i);
+                    return AddToGrid(i, siblingIndex);
                 }
             }
 
             Debug.LogError("Grid filled with objects!");
             return -1;
         }
-        _objects[objectPos] = true;
+        _objects[objectPos] = siblingIndex;
         return objectPos;
     }
 
-
-    GameObject AddAndInstantiateObjectToGrid(int objectPos, GameObject obj)
+    /// <summary>
+    /// First gets every client to delete the object, THEN removes it from
+    /// the objects array. Because the array is a SyncVar, clients would lose
+    /// reference to it otherwise.
+    /// </summary>
+    [Command]
+    public void CmdRemoveObjectFromGrid(int objectPos)
     {
-        // Overwrite objectPos with the selected objectPos
-        objectPos = AddToGrid(objectPos);
-        if (objectPos == -1)
-            return null;
-        else
-        {
-            Vector2 vectorPos = new Vector2((objectPos % (int)groundSize) + (bl.x + 1.5f), (objectPos / (int)groundSize) + (bl.y + 1.5f));
-            Instantiate(obj, (Vector3)vectorPos, obj.transform.rotation);
-            obj.GetComponent<FoodBehaviour>().gridPos = objectPos;
-            _objects[objectPos] = true;
-            return obj;
-        }
+        ClientDestroyObjectAtGridPos(objectPos);
+        _objects[objectPos] = -1;
     }
 
-
-    public void RemoveFromGrid(int objectPos)
+    /// <summary>
+    /// Uses the property of _objects that it stores the sibling index of each
+    /// object, to delete the object at the given position in _objects.
+    /// _objects[i] is the sibling index of the object at position i.
+    /// </summary>
+    [ClientRpc]
+    public void ClientDestroyObjectAtGridPos(int objectPos)
     {
-        _objects[objectPos] = false;
+        if (_objects[objectPos] == -1) return;
+        Destroy(GameObject.Find("Objects").transform.GetChild(_objects[objectPos]).gameObject);
     }
 
+    //void CreateTeleportingMenuPair(
+    //    string text1, string text2,
+    //    Vector3 from, Vector3 to)
+    //{
+    //    GameObject menuSelect = Instantiate(_menuSelectTemplate);
 
-    void CreateTeleportingMenuPair(
-        string text1, string text2,
-        Vector3 from, Vector3 to)
-    {
-        GameObject menuSelect = Instantiate(_menuSelectTemplate);
+    //    Teleporter teleporter = menuSelect.GetComponentInChildren<Teleporter>();
 
-        Teleporter teleporter = menuSelect.GetComponentInChildren<Teleporter>();
-
-        teleporter.A.transform.position = from;
-        teleporter.A.GetComponentInChildren<TextMeshProUGUI>().text = text1;
-        teleporter.B.transform.position = to;
-        teleporter.B.GetComponentInChildren<TextMeshProUGUI>().text = text2;
-    }
+    //    teleporter.A.transform.position = from;
+    //    teleporter.A.GetComponentInChildren<TextMeshProUGUI>().text = text1;
+    //    teleporter.B.transform.position = to;
+    //    teleporter.B.GetComponentInChildren<TextMeshProUGUI>().text = text2;
+    //}
 
 
     private void SetGameOverScreenActivity(bool active)

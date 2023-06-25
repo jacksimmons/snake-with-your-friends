@@ -45,7 +45,6 @@ public class MainMenu : MonoBehaviour
         GameBehaviour gameBehaviour = GameObject.FindWithTag("GameHandler").GetComponent<GameBehaviour>();
         // Create Snake from template, under the Players object (which has tag PlayerParent)
         GameObject snake = Instantiate(_snakeTemplate, GameObject.FindWithTag("PlayerParent").transform);
-        gameBehaviour.WorldMode = GameBehaviour.EWorldMode.Offline;
         PlayerMovementController player = snake.GetComponentInChildren<PlayerMovementController>();
         //gameBehaviour.SetupGame();
 

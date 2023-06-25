@@ -1,3 +1,4 @@
+using Mirror;
 using UnityEngine;
 
 public class FoodBehaviour : MonoBehaviour
@@ -21,9 +22,7 @@ public class FoodBehaviour : MonoBehaviour
                 GameObject.FindWithTag("AudioHandler").GetComponent<AudioHandler>().eatAudioSource.Play();
             }
 
-            game.RemoveFromGrid(gridPos);
-            game.GenerateFood();
-            Destroy(gameObject);
+            game.CmdRemoveObjectFromGrid(gridPos);
         }
     }
 }

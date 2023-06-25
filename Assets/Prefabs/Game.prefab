@@ -280,6 +280,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4165052997217412292}
   - component: {fileID: 3422690775116552766}
+  - component: {fileID: 3062770074370965030}
   m_Layer: 0
   m_Name: Game
   m_TagString: GameHandler
@@ -320,6 +321,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 43177ceb1eddc2f469df828261a999a5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
   _lightTile: {fileID: 11400000, guid: 044c243fd2a30a348a78044e5f4906a5, type: 2}
   _darkTile: {fileID: 11400000, guid: 07b747c9dcfc66f4db45e88c86928a9c, type: 2}
   _wallTile: {fileID: 11400000, guid: 2a1c06836de000d4bb5cdb4ca8f49847, type: 2}
@@ -332,6 +336,23 @@ MonoBehaviour:
   _spawnPoint: {x: 0, y: 0}
   groundSize: 10
   WorldMode: 3
+--- !u!114 &3062770074370965030
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3422690775116552752}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9b91ecbcc199f4492b9a91e820070131, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  sceneId: 0
+  _assetId: 3117129663
+  serverOnly: 1
+  visible: 0
+  hasSpawned: 0
 --- !u!1 &8785202101479087751
 GameObject:
   m_ObjectHideFlags: 0
