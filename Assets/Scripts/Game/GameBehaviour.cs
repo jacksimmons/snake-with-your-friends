@@ -209,7 +209,9 @@ public class GameBehaviour : MonoBehaviour
         for (int i = 0; i < remainingPlayers.Count; i++)
         {
             Manager.players[i].transform.position = corners[i % 4] + (Vector3)(Vector2.one * groundTilemap.cellSize / 2);
-            if (i % 4 == 0 && i < remainingPlayers.Count - 1)
+
+            // If i were 0 then it might enter this, causing -4 as length to be provided (in the PlacePlayers line).
+            if (i != 0 && i % 4 == 0 && i < remainingPlayers.Count - 1)
             {
                 int newDepth = depth + (int)Mathf.Floor(minDist);
                 print(newDepth);
