@@ -1,4 +1,5 @@
 using Extensions;
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Tilemaps;
@@ -12,9 +13,6 @@ public class GameBehaviour : MonoBehaviour
     [SerializeField]
     private Tile _wallTile;
 
-    private PlayerMovementController _player;
-    [SerializeField]
-    private GameObject[] _players;
     private bool[] _objects;
 
     [SerializeField]
@@ -43,7 +41,7 @@ public class GameBehaviour : MonoBehaviour
         Offline,
         Online
     }
-    public EWorldMode WorldMode;
+    public EWorldMode WorldMode = EWorldMode.Online;
 
     Vector2Int bl = Vector2Int.zero;
 
@@ -51,6 +49,16 @@ public class GameBehaviour : MonoBehaviour
     // The minimum ratio between the distance between two snakes, and the WORLD_SIZE, before an inner square must be established.
     private const float SOFT_MIN_DIST_WORLD_SIZE_RATIO = 0.2f;
     private const float HARD_MIN_DIST = 10f;
+
+    private CustomNetworkManager _manager;
+    private CustomNetworkManager Manager
+    {
+        get
+        {
+            if (_manager != null) { return _manager; }
+            return _manager = CustomNetworkManager.singleton as CustomNetworkManager;
+        }
+    }
 
 
     void Start()
@@ -60,13 +68,14 @@ public class GameBehaviour : MonoBehaviour
         // Defaults every value to false.
         _objects = new bool[(int)groundSize * (int)groundSize];
 
+        SetupGame();
         GenerateStartingFood();
     }
 
 
     private void GenerateStartingFood()
     {
-        for (int i = 0; i < _players.Length; i++)
+        for (int i = 0; i < Manager.players.Count; i++)
         {
             AddAndInstantiateObjectToGrid(Random.Range(0, _objects.Length), _foodTemplates[Random.Range(0, _foodTemplates.Length)]);
         }
@@ -79,13 +88,9 @@ public class GameBehaviour : MonoBehaviour
     }
 
 
-    public void SetupGame(PlayerMovementController player, GameObject[] players = null)
+    public void SetupGame()
     {
-        _player = player;
-        if (players == null)
-            players = new GameObject[] { player.gameObject };
-
-        _players = players;
+        PlayerMovementController player = GameObject.Find("LocalGamePlayer").GetComponent<PlayerMovementController>();
         GameObject cam = GameObject.FindWithTag("MainCamera");
         cam.GetComponent<CamBehaviour>().SetupCamera(player);
 
@@ -96,11 +101,8 @@ public class GameBehaviour : MonoBehaviour
         CreateWallTilemap(gameWT, bl);
 
         if (WorldMode == EWorldMode.Online || WorldMode == EWorldMode.Offline)
-            PlacePlayers(depth: 1, _players, gameGT, bl);
-        else
-            SpawnPlayer();
+            PlacePlayers(depth: 1, Manager.players, gameGT, bl);
     }
-
 
     Tilemap CreateAndReturnTilemap(string gridName, bool hasCollider)
     {
@@ -187,11 +189,13 @@ public class GameBehaviour : MonoBehaviour
     }
 
 
-    void PlacePlayers(int depth, GameObject[] remainingPlayers, Tilemap groundTilemap, Vector2Int bl)
+    void PlacePlayers(int depth, List<PlayerObjectController> remainingPlayers, Tilemap groundTilemap, Vector2Int bl)
     {
         // Outer snakes (along the walls)
         // Calculate the maximum distance between snakes.
         // If this distance is too small, spawn inner snakes.
+
+        print("hi");
 
         float minDist = (int)groundSize * SOFT_MIN_DIST_WORLD_SIZE_RATIO;
         if (minDist < HARD_MIN_DIST)
@@ -204,10 +208,10 @@ public class GameBehaviour : MonoBehaviour
 
         Vector3[] corners = { BL, BR, TL, TR };
 
-        for (int i = 0; i < remainingPlayers.Length; i++)
+        for (int i = 0; i < remainingPlayers.Count; i++)
         {
-            _players[i].transform.position = corners[i % 4] + (Vector3)(Vector2.one * groundTilemap.cellSize / 2);
-            if (i % 4 == 0 && i < remainingPlayers.Length - 1)
+            Manager.players[i].transform.position = corners[i % 4] + (Vector3)(Vector2.one * groundTilemap.cellSize / 2);
+            if (i % 4 == 0 && i < remainingPlayers.Count - 1)
             {
                 int newDepth = depth + (int)Mathf.Floor(minDist);
                 print(newDepth);
@@ -217,19 +221,10 @@ public class GameBehaviour : MonoBehaviour
                 }
                 else
                 {
-                    PlacePlayers(newDepth, Arrays.SubArray(remainingPlayers, 4), groundTilemap, bl);
+                    PlacePlayers(newDepth, remainingPlayers.GetRange(4, remainingPlayers.Count - 4), groundTilemap, bl);
                 }
             }
         }
-    }
-
-
-    public void SpawnPlayer()
-    {
-        _player.Reset();
-        _player.transform.position = (Vector3)_spawnPoint;
-        SetGameOverScreenActivity(false);
-        _player.SetDead(false);
     }
 
 

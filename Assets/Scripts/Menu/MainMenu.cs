@@ -47,7 +47,7 @@ public class MainMenu : MonoBehaviour
         GameObject snake = Instantiate(_snakeTemplate, GameObject.FindWithTag("PlayerParent").transform);
         gameBehaviour.WorldMode = GameBehaviour.EWorldMode.Offline;
         PlayerMovementController player = snake.GetComponentInChildren<PlayerMovementController>();
-        gameBehaviour.SetupGame(player, new GameObject[] { snake });
+        //gameBehaviour.SetupGame();
 
         // Cleanup
         Destroy(gameObject);

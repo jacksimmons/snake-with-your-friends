@@ -131,7 +131,6 @@ public class PlayerObjectController : NetworkBehaviour
     // In-Game Methods
     public void TryUpdateBodyParts(List<BodyPart> bodyParts)
     {
-        print("hi");
         if (isOwned)
         {
             List<BodyPartData> bodyPartDatas = new();
@@ -152,7 +151,6 @@ public class PlayerObjectController : NetworkBehaviour
     [ClientRpc]
     public void OnBodyPartUpdate(List<BodyPartData> bodyPartDatas, ulong victimPlayerSteamID)
     {
-        print(playerSteamID);
         if (playerSteamID == victimPlayerSteamID)
         {
             PlayerMovementController playerMovementController = GetComponent<PlayerMovementController>();
