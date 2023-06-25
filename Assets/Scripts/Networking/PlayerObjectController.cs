@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Mirror;
 using Steamworks;
+using UnityEditor;
 
 public class PlayerObjectController : NetworkBehaviour
 {
@@ -29,6 +30,8 @@ public class PlayerObjectController : NetworkBehaviour
         DontDestroyOnLoad(this.gameObject);
     }
 
+
+    // Lobby Methods
 
     /// <summary>
     /// Called when starting as a host.
@@ -84,7 +87,7 @@ public class PlayerObjectController : NetworkBehaviour
         this.OnPlayerReadyUpdate(this.ready, !this.ready);
     }
 
-    public void ChangeReady()
+    public void TryToggleReady()
     {
         if (isOwned)
         {
@@ -104,17 +107,63 @@ public class PlayerObjectController : NetworkBehaviour
         }
     }
 
-    public void CanStartGame(string sceneName)
+    /// <summary>
+    /// Starts the game, if our client has authority over this object.
+    /// This check is in place, because this function is called even for objects
+    /// we don't have authority over.
+    /// </summary>
+    /// <param name="sceneName">The name of the scene (of a game) to load.</param>
+    public void TryStartGame(string sceneName)
     {
         if (isOwned)
         {
-            CmdCanStartGame(sceneName);
+            CmdStartGame(sceneName);
         }
     }
 
     [Command]
-    public void CmdCanStartGame(string sceneName)
+    public void CmdStartGame(string sceneName)
     {
         Manager.StartGame(sceneName);
+    }
+
+
+    // In-Game Methods
+    public void TryUpdateBodyParts(List<BodyPart> bodyParts)
+    {
+        print("hi");
+        if (isOwned)
+        {
+            List<BodyPartData> bodyPartDatas = new();
+            foreach (BodyPart part in bodyParts)
+            {
+                bodyPartDatas.Add(BodyPart.ToData(part));
+            }
+            CmdUpdateBodyParts(bodyPartDatas, playerSteamID);
+        }
+    }
+
+    [Command]
+    public void CmdUpdateBodyParts(List<BodyPartData> bodyPartDatas, ulong victimPlayerSteamID)
+    {
+        this.OnBodyPartUpdate(bodyPartDatas, victimPlayerSteamID);
+    }
+
+    public void OnBodyPartUpdate(List<BodyPartData> bodyPartDatas, ulong victimPlayerSteamID)
+    {
+        if (playerSteamID == victimPlayerSteamID)
+        {
+            PlayerMovementController playerMovementController = GetComponent<PlayerMovementController>();
+            playerMovementController.BodyParts.Clear();
+            for (int i = 0; i < bodyPartDatas.Count; i++)
+            {
+                playerMovementController.BodyParts.Add(
+                    BodyPart.FromData(
+                        bodyPartDatas[i],
+                        playerMovementController.bodyPartContainer.transform.GetChild(i)
+                    )
+                );
+            }
+        }
     }
 }

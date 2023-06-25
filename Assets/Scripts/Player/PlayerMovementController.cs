@@ -27,7 +27,7 @@ public class PlayerMovementController : NetworkBehaviour
 
     // Corner pieces
     [SerializeField]
-    private Sprite[] _spriteSheet; // Must match with length of BodyPartSprite
+    public Sprite[] spriteSheet; // Must match with length of BodyPartSprite
 
     // Directions and movement
     private Vector2 _startingDirection = Vector2.up;
@@ -87,13 +87,6 @@ public class PlayerMovementController : NetworkBehaviour
     {
     }
 
-    /// <summary>
-    /// Initialise data structures and objects.
-    /// </summary>
-    private void Awake()
-    {
-    }
-
     private void Start()
     {
         bodyPartContainer.SetActive(false);
@@ -117,16 +110,16 @@ public class PlayerMovementController : NetworkBehaviour
                 else
                     _sprite = BodyPartSprite.Straight;
 
-                bp = new BodyPart(_transform, _startingDirection, _sprite, _spriteSheet);
+                bp = new BodyPart(_transform, _startingDirection, _sprite);
                 if (i == 0)
                     head = bp;
                 print(head.Transform.name);
             }
 
-            // Tail
+            // Tail - the BodyPart script handles these differently.
             else
             {
-                bp = new BodyPart(_transform, _startingDirection, BodyPartSprite.None, null);
+                bp = new BodyPart(_transform, _startingDirection, BodyPartSprite.Tail);
                 tail = bp;
             }
             BodyParts.Add(bp);
@@ -275,6 +268,9 @@ public class PlayerMovementController : NetworkBehaviour
                     BodyParts[i].HandleMovement(dir, next);
                 }
             }
+
+            // Update to server
+            GetComponent<PlayerObjectController>().TryUpdateBodyParts(BodyParts);
         }
     }
 
@@ -308,7 +304,6 @@ public class PlayerMovementController : NetworkBehaviour
 
         // Update the (previously) tail into a normal body part
         tail.DefaultSprite = BodyPartSprite.Straight;
-        tail.SpriteSheet = _spriteSheet;
         tail.Sprite = BodyPartSprite.Straight;
 
         // Instantiate the new body part
@@ -318,8 +313,7 @@ public class PlayerMovementController : NetworkBehaviour
         BodyPart newBodyPart = new BodyPart(tail, newBodyPartObj.transform)
         {
             DefaultSprite = BodyPartSprite.Tail,
-            Sprite = BodyPartSprite.Tail,
-            SpriteSheet = null
+            Sprite = BodyPartSprite.Tail
         };
 
         // The snake will end with ~- (~ is the new tail), as expected

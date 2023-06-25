@@ -166,9 +166,9 @@ public class LobbyController : MonoBehaviour
         }
     }
 
-    public void ReadyPlayer()
+    public void TogglePlayerReady()
     {
-        localPlayerController.ChangeReady();
+        localPlayerController.TryToggleReady();
     }
 
     public void UpdateButton()
@@ -205,6 +205,6 @@ public class LobbyController : MonoBehaviour
 
     public void StartGame(string sceneName)
     {
-        localPlayerController.CanStartGame(sceneName);
+        localPlayerController.TryStartGame(sceneName);
     }
 }

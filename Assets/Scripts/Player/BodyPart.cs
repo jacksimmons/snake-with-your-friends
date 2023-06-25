@@ -13,8 +13,21 @@ public struct BodyPartData
     public Vector2 position;
     public Vector2 direction;
     public float rotation_z;
-    public BodyPartSprite bodyPartSprite;
-    public Sprite[] spriteSheet;
+    public BodyPartSprite currentSprite;
+    public BodyPartSprite defaultSprite;
+    public int teleportCounter;
+    public bool isCorner;
+    public BodyPartData(Vector2 position, Vector2 direction, float rotation_z, BodyPartSprite currentSprite,
+    BodyPartSprite defaultSprite, int teleportCounter, bool isCorner)
+    {
+        this.position = position;
+        this.direction = direction;
+        this.rotation_z = rotation_z;
+        this.currentSprite = currentSprite;
+        this.defaultSprite = defaultSprite;
+        this.teleportCounter = teleportCounter;
+        this.isCorner = isCorner;
+    }
 }
 
 /// <summary>
@@ -40,6 +53,8 @@ public enum BodyPartSprite
 public class BodyPart
 {
     public Transform Transform { get; private set; }
+
+    // Get transform properties
     public Vector3 Position
     {
         get { return Transform.position; }
@@ -50,6 +65,17 @@ public class BodyPart
         get { return Transform.rotation; }
         set { Transform.rotation = value; }
     }
+
+    // Get components
+    private PlayerMovementController Player
+    {
+        get { return Transform.parent.GetComponentInParent<PlayerMovementController>(); }
+    }
+    private SpriteRenderer SpriteRen
+    {
+        get { return Transform.GetComponent<SpriteRenderer>(); }
+    }
+
     private BodyPartSprite _sprite;
     public BodyPartSprite Sprite
     {
@@ -59,28 +85,21 @@ public class BodyPart
             if (value == BodyPartSprite.None)
                 return;
 
-            if (SpriteSheet != null)
+            if (Player.spriteSheet != null)
             {
                 _sprite = value;
-                Transform.gameObject.GetComponent<SpriteRenderer>().sprite = SpriteSheet[(int)_sprite];
+                SpriteRen.sprite = Player.spriteSheet[(int)_sprite];
             }
             else
             {
-                Debug.LogError("Cannot allocate sprite when there is no sprite sheet.");
+                Debug.LogError("No sprite sheet provided in PlayerMovementController!");
             }
         }
     }
     public BodyPartSprite DefaultSprite { get; set; }
-    public Sprite[] SpriteSheet { get; set; }
     public Vector2 Direction { get; set; }
-    public int TeleportCounter { get; set; }
-
-    // Read-only outside of this class
-    private bool _isCorner;
-    public bool IsCorner
-    {
-        get { return _isCorner; }
-    }
+    public int TeleportCounter { get; set; } = 0;
+    public bool IsCorner { get; set; } = false;
 
     // Rotation before it became a corner, useful only to parts after this one
     public Quaternion prevRot = Quaternion.identity;
@@ -95,9 +114,8 @@ public class BodyPart
     {
         Transform = transform;
         Direction = old.Direction;
-        SpriteSheet = old.SpriteSheet;
         DefaultSprite = old.DefaultSprite;
-        _isCorner = old.IsCorner;
+        IsCorner = old.IsCorner;
         // Will not affect teleporting UNLESS necessary
         TeleportCounter = old.TeleportCounter + 1;
         prevRot = old.prevRot;
@@ -110,16 +128,11 @@ public class BodyPart
     /// <param name="direction"></param>
     /// <param name="defaultSprite"></param>
     /// <param name="cornerSprites"></param>
-    public BodyPart(Transform transform, Vector2 direction, BodyPartSprite defaultSprite,
-        Sprite[] spriteSheet)
+    public BodyPart(Transform transform, Vector2 direction, BodyPartSprite defaultSprite)
     {
         Transform = transform;
         Direction = direction;
         DefaultSprite = defaultSprite;
-        SpriteSheet = spriteSheet;
-
-        _isCorner = false;
-        TeleportCounter = 0;
 
         Sprite = DefaultSprite;
     }
@@ -132,7 +145,7 @@ public class BodyPart
     /// <param name="prevDir">The direction of the previous body part.</param>
     public void MakeCorner(Vector2 prevDir)
     {
-        _isCorner = true;
+        IsCorner = true;
         Rotation = Quaternion.identity;
 
         if (Direction == Vector2.up)
@@ -186,7 +199,7 @@ public class BodyPart
     /// a rotation of Quat.Identity after becoming corners.</param>
     public void MakeNotCorner(Quaternion rotation)
     {
-        _isCorner = false;
+        IsCorner = false;
         Rotation = rotation;
         Sprite = DefaultSprite;
     }
@@ -228,7 +241,7 @@ public class BodyPart
         {
             // If the next part isn't a tail, and is an angled body part,
             // make it a corner.
-            if (next.SpriteSheet != null)
+            if (next.DefaultSprite != BodyPartSprite.Tail)
             {
                 if (angle != 0)
                 {
@@ -265,9 +278,14 @@ public class BodyPart
     /// <param name="transform">The transform of the physical body part.</param>
     public static BodyPart FromData(BodyPartData data, Transform transform)
     {
-        BodyPart bp = new(transform, data.direction, data.bodyPartSprite, data.spriteSheet);
-        bp.Rotation = Quaternion.Euler(Vector3.forward * data.rotation_z);
-        bp.Position = data.position;
+        BodyPart bp = new(transform, data.direction, data.defaultSprite)
+        {
+            Position = data.position,
+            Rotation = Quaternion.Euler(Vector3.forward * data.rotation_z),
+            Sprite = data.currentSprite,
+            TeleportCounter = data.teleportCounter,
+            IsCorner = data.isCorner,
+        };
         return bp;
     }
 
@@ -277,14 +295,8 @@ public class BodyPart
     /// <returns>The exported struct.</returns>
     public static BodyPartData ToData(BodyPart bp)
     {
-        BodyPartData data = new()
-        {
-            position = bp.Position,
-            direction = bp.Direction,
-            rotation_z = bp.Rotation.eulerAngles.z,
-            bodyPartSprite = bp.Sprite,
-            spriteSheet = bp.SpriteSheet,
-        };
+        BodyPartData data = new(bp.Position, bp.Direction, bp.Rotation.eulerAngles.z, bp.Sprite, bp.DefaultSprite,
+            bp.TeleportCounter, bp.IsCorner);
         return data;
     }
 }
