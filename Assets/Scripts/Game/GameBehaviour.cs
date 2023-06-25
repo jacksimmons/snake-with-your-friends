@@ -75,10 +75,10 @@ public class GameBehaviour : NetworkBehaviour
         SetGameOverScreenActivity(false);
 
         // Sets every value to -1.
-        for (int i = 0; i < _objects.Count; i++) { _objects[i] = -1; }
 
         if (isServer)
         {
+            for (int i = 0; i < _objects.Count; i++) { _objects[i] = -1; }
             SetupGame();
             GenerateStartingFood();
         }
@@ -141,8 +141,8 @@ public class GameBehaviour : NetworkBehaviour
             List<float> rotation_zs = new(Manager.players.Count);
             for(int i = 0; i < Manager.players.Count; i++)
             {
-                positions[i] = Manager.players[i].transform.position;
-                rotation_zs[i] = Manager.players[i].transform.rotation.eulerAngles.z;
+                positions.Add(Manager.players[i].transform.position);
+                rotation_zs.Add(Manager.players[i].transform.rotation.eulerAngles.z);
             }
             ClientPlacePlayers(positions, rotation_zs);
         }
