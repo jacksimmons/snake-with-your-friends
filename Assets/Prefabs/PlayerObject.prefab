@@ -363,7 +363,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8ff3ba0becae47b8b9381191598957c8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  syncDirection: 0
+  syncDirection: 1
   syncMode: 0
   syncInterval: 0
   target: {fileID: 1031334908893584214}
@@ -376,8 +376,8 @@ MonoBehaviour:
   interpolateScale: 1
   sendIntervalMultiplier: 1
   timelineOffset: 0
-  showGizmos: 0
-  showOverlay: 0
+  showGizmos: 1
+  showOverlay: 1
   overlayColor: {r: 0, g: 0, b: 0, a: 0.5}
   onlySyncOnChange: 1
   onlySyncOnChangeCorrectionMultiplier: 2
@@ -509,7 +509,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8ff3ba0becae47b8b9381191598957c8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  syncDirection: 0
+  syncDirection: 1
   syncMode: 0
   syncInterval: 0
   target: {fileID: 1031334908205586145}
@@ -522,8 +522,8 @@ MonoBehaviour:
   interpolateScale: 1
   sendIntervalMultiplier: 1
   timelineOffset: 0
-  showGizmos: 0
-  showOverlay: 0
+  showGizmos: 1
+  showOverlay: 1
   overlayColor: {r: 0, g: 0, b: 0, a: 0.5}
   onlySyncOnChange: 1
   onlySyncOnChangeCorrectionMultiplier: 2
