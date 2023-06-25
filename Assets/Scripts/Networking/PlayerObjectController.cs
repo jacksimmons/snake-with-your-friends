@@ -131,7 +131,6 @@ public class PlayerObjectController : NetworkBehaviour
     // In-Game Methods
     public void TryUpdateBodyParts(List<BodyPart> bodyParts)
     {
-        print("hi");
         if (isOwned)
         {
             List<BodyPartData> bodyPartDatas = new();
