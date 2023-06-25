@@ -2,6 +2,7 @@ using Extensions;
 using Mirror;
 using System.Collections.Generic;
 using TMPro;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
@@ -136,6 +137,14 @@ public class GameBehaviour : NetworkBehaviour
         if (WorldMode == EWorldMode.Online)
         {
             PlacePlayers(depth: 1, playersStartIndex: 0, bl);
+            List<Vector2> positions = new(Manager.players.Count);
+            List<float> rotation_zs = new(Manager.players.Count);
+            for(int i = 0; i < Manager.players.Count; i++)
+            {
+                positions[i] = Manager.players[i].transform.position;
+                rotation_zs[i] = Manager.players[i].transform.rotation.eulerAngles.z;
+            }
+            ClientPlacePlayers(positions, rotation_zs);
         }
     }
 
@@ -269,6 +278,22 @@ public class GameBehaviour : NetworkBehaviour
         }
     }
 
+    [ClientRpc]
+    public void ClientPlacePlayers(List<Vector2> positions, List<float> rotation_zs)
+    {
+        if (positions.Count != rotation_zs.Count)
+        {
+            Debug.LogError("Positions and rotations have mismatching lengths!");
+            return;
+        }
+
+        for (int i = 0; i < positions.Count; i++)
+        {
+            PlayerObjectController player = Manager.players[i];
+            player.transform.position = positions[i];
+            player.transform.rotation = Quaternion.Euler(Vector3.forward * rotation_zs[i]);
+        }
+    }
 
     /// <summary>
     /// Checks if index `objectPos` is not -1 in _objects, if so it recursively

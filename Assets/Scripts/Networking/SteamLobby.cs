@@ -114,10 +114,38 @@ public class SteamLobby : MonoBehaviour
     /// </summary>
     private void OnLobbyEnter(LobbyEnter_t result, bool bIOFailure)
     {
-        if (bIOFailure || result.m_EChatRoomEnterResponse != (uint)EChatRoomEnterResponse.k_EChatRoomEnterResponseSuccess)
+        if (bIOFailure)
         {
-            print("Failed to enter lobby.");
+            print("IO failure.");
             return;
+        }
+
+        switch ((EChatRoomEnterResponse)result.m_EChatRoomEnterResponse)
+        {
+            case EChatRoomEnterResponse.k_EChatRoomEnterResponseSuccess:
+                print("Successfully entered lobby.");
+                break;
+            case EChatRoomEnterResponse.k_EChatRoomEnterResponseError:
+                print("Unable to enter lobby [error].");
+                return;
+            case EChatRoomEnterResponse.k_EChatRoomEnterResponseFull:
+                print("Unable to enter lobby [full].");
+                return;
+            case EChatRoomEnterResponse.k_EChatRoomEnterResponseBanned:
+                print("Unable to enter lobby [banned].");
+                return;
+            case EChatRoomEnterResponse.k_EChatRoomEnterResponseClanDisabled:
+                print("Unable to enter lobby [clan_disabled].");
+                return;
+            case EChatRoomEnterResponse.k_EChatRoomEnterResponseCommunityBan:
+                print("Unable to enter lobby [community_ban].");
+                return;
+            case EChatRoomEnterResponse.k_EChatRoomEnterResponseDoesntExist:
+                print("Unable to enter lobby [doesn't exist].");
+                return;
+            default:
+                print("Enter lobby: default case.");
+                break;
         }
 
         // LobbyID should only be set if we aren't the owner.
