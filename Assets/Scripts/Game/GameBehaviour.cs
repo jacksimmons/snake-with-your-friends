@@ -48,7 +48,7 @@ public class GameBehaviour : MonoBehaviour
     // Soft limit is preferred, but if it is too small, the hard limit is used (1 tile).
     // The minimum ratio between the distance between two snakes, and the WORLD_SIZE, before an inner square must be established.
     private const float SOFT_MIN_DIST_WORLD_SIZE_RATIO = 0.2f;
-    private const float HARD_MIN_DIST = 10f;
+    private const float HARD_MIN_DIST = 2f;
 
     private CustomNetworkManager _manager;
     private CustomNetworkManager Manager
@@ -194,8 +194,6 @@ public class GameBehaviour : MonoBehaviour
         // Outer snakes (along the walls)
         // Calculate the maximum distance between snakes.
         // If this distance is too small, spawn inner snakes.
-
-        print("hi");
 
         float minDist = (int)groundSize * SOFT_MIN_DIST_WORLD_SIZE_RATIO;
         if (minDist < HARD_MIN_DIST)
