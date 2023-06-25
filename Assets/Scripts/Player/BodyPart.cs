@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Specialized;
 using System.Runtime.InteropServices;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 /// <summary>
 /// Struct to represent data of a BodyPart needed for networking.
@@ -8,9 +10,11 @@ using UnityEngine;
 [StructLayout(LayoutKind.Sequential)]
 public struct BodyPartData
 {
-    public float pos_x, pos_y;
-    public float rotation;
-    public int e_bodyPartSprite;
+    public Vector2 position;
+    public Vector2 direction;
+    public float rotation_z;
+    public BodyPartSprite bodyPartSprite;
+    public Sprite[] spriteSheet;
 }
 
 /// <summary>
@@ -80,6 +84,7 @@ public class BodyPart
 
     // Rotation before it became a corner, useful only to parts after this one
     public Quaternion prevRot = Quaternion.identity;
+
 
     /// <summary>
     /// Copy body part constructor.
@@ -254,27 +259,32 @@ public class BodyPart
     }
 
     /// <summary>
-    /// Updates object data by a given BodyPartData struct.
+    /// Returns a BodyPart from a transform and a BodyPartData struct.
     /// </summary>
     /// <param name="data">The struct with updated data.</param>
-    public void FromData(BodyPartData data)
+    /// <param name="transform">The transform of the physical body part.</param>
+    public static BodyPart FromData(BodyPartData data, Transform transform)
     {
-        Position = new Vector2(data.pos_x, data.pos_y);
-        Rotation = Quaternion.Euler(Vector3.forward * data.rotation);
-        Sprite = (BodyPartSprite)data.e_bodyPartSprite;
+        BodyPart bp = new(transform, data.direction, data.bodyPartSprite, data.spriteSheet);
+        bp.Rotation = Quaternion.Euler(Vector3.forward * data.rotation_z);
+        bp.Position = data.position;
+        return bp;
     }
 
     /// <summary>
-    /// Exports the object as a BodyPartData struct, ready for marshalling.
+    /// Exports an object as a BodyPartData struct.
     /// </summary>
     /// <returns>The exported struct.</returns>
-    public BodyPartData ToData()
+    public static BodyPartData ToData(BodyPart bp)
     {
-        BodyPartData data;
-        data.pos_x = Position.x;
-        data.pos_y = Position.y;
-        data.rotation = Rotation.eulerAngles.z;
-        data.e_bodyPartSprite = (int)Sprite;
+        BodyPartData data = new()
+        {
+            position = bp.Position,
+            direction = bp.Direction,
+            rotation_z = bp.Rotation.eulerAngles.z,
+            bodyPartSprite = bp.Sprite,
+            spriteSheet = bp.SpriteSheet,
+        };
         return data;
     }
 }

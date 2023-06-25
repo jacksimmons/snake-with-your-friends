@@ -13,10 +13,7 @@ public class PlayerMovementController : NetworkBehaviour
     public StatusBehaviour status;
 
     [SerializeField]
-    private NetworkTransformReliable _networkTransform;
-
-    [SerializeField]
-    private GameObject _bodyPartContainer;
+    public GameObject bodyPartContainer;
 
     // Templates and sprites
     [SerializeField]
@@ -77,7 +74,7 @@ public class PlayerMovementController : NetworkBehaviour
     // Body Parts
     public BodyPart head;
     public BodyPart tail;
-    public List<BodyPart> BodyParts { get; private set; }
+    public List<BodyPart> BodyParts { get; set; }
 
     // All actions are executed after the next movement frame
     private List<Action> _queuedActions;
@@ -99,11 +96,11 @@ public class PlayerMovementController : NetworkBehaviour
 
     private void Start()
     {
-        _bodyPartContainer.SetActive(false);
+        bodyPartContainer.SetActive(false);
 
         // Data structures
         BodyParts = new List<BodyPart>();
-        Transform containerTransform = _bodyPartContainer.transform;
+        Transform containerTransform = bodyPartContainer.transform;
         for (int i = 0; i < containerTransform.childCount; i++)
         {
             Transform _transform = containerTransform.GetChild(i);
@@ -166,9 +163,9 @@ public class PlayerMovementController : NetworkBehaviour
     {
         if (SceneManager.GetActiveScene().name == "Game")
         {
-            if (!_bodyPartContainer.activeSelf)
+            if (!bodyPartContainer.activeSelf)
             {
-                _bodyPartContainer.SetActive(true);
+                bodyPartContainer.SetActive(true);
             }
 
             // So that we only move a player if we have authority over it
