@@ -69,7 +69,7 @@ public class PlayerMovementController : NetworkBehaviour
             else { _counterMax = value; }
         }
     }
-    public int Counter { get; private set; } = 0;
+    [SyncVar] public int counter = 0;
 
     // Body Parts
     public BodyPart head;
@@ -236,10 +236,10 @@ public class PlayerMovementController : NetworkBehaviour
     public void HandleMovementLoop()
     {
         // Counter logic
-        Counter++;
-        if (Counter <= CounterMax)
+        counter++;
+        if (counter <= CounterMax)
             return;
-        Counter = 0;
+        counter = 0;
 
         // Queued actions happen every move frame, before movement occurs.
         // Handle queued actions (other than any that

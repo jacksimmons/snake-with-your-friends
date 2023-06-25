@@ -12,7 +12,6 @@ public class PlayerObjectController : NetworkBehaviour
     [SyncVar] public ulong playerSteamID;
     [SyncVar(hook = nameof(OnPlayerNameUpdate))] public string playerName;
     [SyncVar(hook = nameof(OnPlayerReadyUpdate))] public bool ready;
-    [SyncVar(hook = nameof(OnBodyPartUpdate))] public List<BodyPartData> bodyParts;
 
     private CustomNetworkManager _manager;
     private CustomNetworkManager Manager
@@ -117,15 +116,5 @@ public class PlayerObjectController : NetworkBehaviour
     public void CmdCanStartGame(string sceneName)
     {
         Manager.StartGame(sceneName);
-    }
-
-    public void OnBodyPartUpdate(List<BodyPartData> oldValue, List<BodyPartData> newValue)
-    {
-        PlayerMovementController mov = GetComponent<PlayerMovementController>();
-        mov.BodyParts.Clear();
-        for (int i = 0; i < newValue.Count; i++)
-        {
-            mov.BodyParts.Add(BodyPart.FromData(newValue[i], mov.bodyPartContainer.transform.GetChild(i)));
-        }
     }
 }
