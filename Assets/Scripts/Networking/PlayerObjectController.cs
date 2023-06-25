@@ -81,18 +81,18 @@ public class PlayerObjectController : NetworkBehaviour
         }
     }
 
-    [Command]
-    private void CmdSetPlayerReady()
-    {
-        this.OnPlayerReadyUpdate(this.ready, !this.ready);
-    }
-
     public void TryToggleReady()
     {
         if (isOwned)
         {
             CmdSetPlayerReady();
         }
+    }
+
+    [Command]
+    private void CmdSetPlayerReady()
+    {
+        this.OnPlayerReadyUpdate(this.ready, !this.ready);
     }
 
     public void OnPlayerReadyUpdate(bool oldValue, bool newValue)
@@ -146,11 +146,13 @@ public class PlayerObjectController : NetworkBehaviour
     [Command]
     public void CmdUpdateBodyParts(List<BodyPartData> bodyPartDatas, ulong victimPlayerSteamID)
     {
-        this.OnBodyPartUpdate(bodyPartDatas, victimPlayerSteamID);
+        OnBodyPartUpdate(bodyPartDatas, victimPlayerSteamID);
     }
 
+    [ClientRpc]
     public void OnBodyPartUpdate(List<BodyPartData> bodyPartDatas, ulong victimPlayerSteamID)
     {
+        print(playerSteamID);
         if (playerSteamID == victimPlayerSteamID)
         {
             PlayerMovementController playerMovementController = GetComponent<PlayerMovementController>();
