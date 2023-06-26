@@ -67,7 +67,7 @@ public class GameBehaviour : NetworkBehaviour
     }
 
     // An array of child indices for objects (all objects in this go under the Objects game object parent)
-    private readonly SyncList<int> _objects = new(new int[(int)groundSize * (int)groundSize]);
+    private List<int> _objects;
 
 
     void Start()
@@ -78,6 +78,7 @@ public class GameBehaviour : NetworkBehaviour
 
         if (isServer)
         {
+            _objects = new((int)groundSize * (int)groundSize);
             for (int i = 0; i < _objects.Count; i++) { _objects[i] = -1; }
             SetupGame();
             GenerateStartingFood();
@@ -97,7 +98,6 @@ public class GameBehaviour : NetworkBehaviour
         int objectPos = Random.Range(0, _objects.Count);
 
         // Overwrite _objects[objectPos] with -1 (if there are any vacancies)
-        // And redefine the updated objectPos.
         // This effectively acts as a test to see if there are any vacancies,
         // which also happens to locate the vacancy, while leaving its value
         // as -1.
@@ -110,16 +110,15 @@ public class GameBehaviour : NetworkBehaviour
 
         int foodIndex = Random.Range(0, _foodTemplates.Length);
         Vector2 foodPos = new((objectPos % (int)groundSize) + (bl.x + 1.5f), (objectPos / (int)groundSize) + (bl.y + 1.5f));
-        ClientCreateObject(objectPos, position: foodPos, rotation_z: 0, foodIndex);
+        ClientCreateObject(_objects[objectPos], position: foodPos, rotation_z: 0, foodIndex);
     }
 
     [ClientRpc]
-    public void ClientCreateObject(int objectPos, Vector2 position, float rotation_z, int foodIndex)
+    public void ClientCreateObject(int siblingIndex, Vector2 position, float rotation_z, int foodIndex)
     {
-        print("hi");
         GameObject obj = _foodTemplates[foodIndex];
         Instantiate(obj, position, Quaternion.Euler(Vector3.forward * rotation_z), GameObject.Find("Objects").transform);
-        obj.transform.SetSiblingIndex(objectPos);
+        obj.transform.SetSiblingIndex(siblingIndex);
     }
 
     public void SetupGame()
@@ -331,20 +330,29 @@ public class GameBehaviour : NetworkBehaviour
     [Command]
     public void CmdRemoveObjectFromGrid(int objectPos)
     {
-        ClientDestroyObjectAtGridPos(objectPos);
+        int siblingIndex = _objects[objectPos];
+        if (siblingIndex == -1)
+        {
+            Debug.LogError("Sibling index == -1!");
+            return;
+        }
+        ClientDestroyObjectAtGridPos(siblingIndex);
         _objects[objectPos] = -1;
     }
 
     /// <summary>
-    /// Uses the property of _objects that it stores the sibling index of each
-    /// object, to delete the object at the given position in _objects.
-    /// _objects[i] is the sibling index of the object at position i.
+    /// Deletes an object at a given sibling index, if possible.
     /// </summary>
     [ClientRpc]
-    public void ClientDestroyObjectAtGridPos(int objectPos)
+    public void ClientDestroyObjectAtGridPos(int siblingIndex)
     {
-        if (_objects[objectPos] == -1) return;
-        Destroy(GameObject.Find("Objects").transform.GetChild(_objects[objectPos]).gameObject);
+        GameObject objects = GameObject.Find("Objects");
+        if (siblingIndex >= objects.transform.childCount)
+        {
+            Debug.LogError("Sibling index higher than Objects count!");
+            return;
+        }
+        Destroy(objects.transform.GetChild(siblingIndex).gameObject);
     }
 
     //void CreateTeleportingMenuPair(
