@@ -74,7 +74,10 @@ public class GameBehaviour : NetworkBehaviour
     void Start()
     {
         SetGameOverScreenActivity(false);
-        CmdReadyToLoadGame();
+        if (isOwned)
+        {
+            CmdReadyToLoadGame();
+        }
     }
 
     [Command]
@@ -83,6 +86,7 @@ public class GameBehaviour : NetworkBehaviour
         _readyPlayers++;
         if (_readyPlayers >= Manager.players.Count)
         {
+            print("Hi");
             ClientLoadGame();
         }
     }
