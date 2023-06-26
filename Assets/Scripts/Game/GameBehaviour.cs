@@ -74,13 +74,13 @@ public class GameBehaviour : NetworkBehaviour
     {
         SetGameOverScreenActivity(false);
 
-        // Sets every value to -1.
+        SetupGame();
 
         if (isServer)
         {
             _objects = new((int)groundSize * (int)groundSize);
+            // Sets every value to -1.
             for (int i = 0; i < _objects.Count; i++) { _objects[i] = -1; }
-            SetupGame();
             GenerateStartingFood();
         }
     }
@@ -133,7 +133,7 @@ public class GameBehaviour : NetworkBehaviour
         CreateGroundTilemap(_groundTilemap, bl);
         CreateWallTilemap(_wallTilemap, bl);
 
-        if (WorldMode == EWorldMode.Online)
+        if (WorldMode == EWorldMode.Online && isServer)
         {
             PlacePlayers(depth: 1, playersStartIndex: 0, bl);
             List<Vector2> positions = new(Manager.players.Count);
