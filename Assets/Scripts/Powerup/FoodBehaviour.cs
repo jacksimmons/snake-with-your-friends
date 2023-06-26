@@ -10,14 +10,19 @@ public class FoodBehaviour : MonoBehaviour
     private void OnTriggerEnter2D(Collider2D collision)
     {
         GameObject obj = collision.gameObject;
-        if (obj.transform.parent != null && obj.transform.parent.CompareTag("Player"))
+        Transform player = obj.transform.parent.parent;
+        if (player != null && player.CompareTag("Player"))
         {
-            GameBehaviour game = GameObject.FindWithTag("GameHandler").GetComponent<GameBehaviour>();
-            PlayerMovementController player = obj.transform.GetComponentInParent<PlayerMovementController>();
-            if (player != null)
+            GameBehaviour game = obj.transform.parent.parent.GetComponentInChildren<GameBehaviour>();
+            PlayerMovementController playerMovementController = obj.transform.GetComponentInParent<PlayerMovementController>();
+
+            // Not our collision to handle -> return.
+            if (!playerMovementController.isOwned) return;
+
+            if (playerMovementController != null)
             {
-                player.QAddBodyPart();
-                player.status.Eat(food);
+                playerMovementController.QAddBodyPart();
+                playerMovementController.status.Eat(food);
 
                 GameObject.FindWithTag("AudioHandler").GetComponent<AudioHandler>().eatAudioSource.Play();
             }

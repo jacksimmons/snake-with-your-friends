@@ -1,10 +1,13 @@
 using Extensions;
 using Mirror;
+using Mirror.SimpleWeb;
 using System.Collections.Generic;
 using TMPro;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.Tilemaps;
+using UnityEngine.Events;
 
 public class GameBehaviour : NetworkBehaviour
 {
@@ -66,52 +69,57 @@ public class GameBehaviour : NetworkBehaviour
         }
     }
 
+    private bool _alreadyReady = false;
     private int _numPlayersReadyToLoad = 0;
     // An array of child indices for objects (all objects in this go under the Objects game object parent)
     private List<int> _objects;
 
 
-    void Start()
+    public void OnServerChangeScene(string name)
     {
-        SetGameOverScreenActivity(false);
-        OnPlayerReady();
+        if (name == "Game" && !_alreadyReady && isOwned)
+        {
+            SetGameOverScreenActivity(false);
+            OnPlayerReady();
+            _alreadyReady = true;
+        }
     }
 
-    [ClientRpc]
     public void OnPlayerReady()
     {
-        print("Hi");
-        if (isServer)
+        _numPlayersReadyToLoad++;
+        if (_numPlayersReadyToLoad >= Manager.players.Count)
         {
-            _numPlayersReadyToLoad++;
-            if (_numPlayersReadyToLoad >= Manager.players.Count)
-            {
-                print("hi");
-                ClientLoadGame();
-            }
+            CmdLoadGame();
         }
+    }
+
+    [Command]
+    private void CmdLoadGame()
+    {
+        ClientLoadGame();
     }
 
     [ClientRpc]
     public void ClientLoadGame()
     {
-        SetupGame();
+        ClientSetupGame();
         if (isServer)
         {
             int size = (int)groundSize * (int)groundSize;
             _objects = new(size);
             // Sets every value to -1.
             for (int i = 0; i < size; i++) { _objects.Add(-1); }
-            GenerateStartingFood();
+            CmdGenerateStartingFood();
         }
     }
 
-
-    public void GenerateStartingFood()
+    [Command]
+    public void CmdGenerateStartingFood()
     {
         for (int i = 0; i < Manager.players.Count; i++)
         {
-            GenerateFood();
+            this.GenerateFood();
         }
     }
 
@@ -143,7 +151,8 @@ public class GameBehaviour : NetworkBehaviour
         obj.transform.SetSiblingIndex(siblingIndex);
     }
 
-    public void SetupGame()
+    [ClientRpc]
+    public void ClientSetupGame()
     {
         PlayerMovementController player = GameObject.Find("LocalGamePlayer").GetComponent<PlayerMovementController>();
         GameObject cam = GameObject.FindWithTag("MainCamera");
@@ -160,7 +169,7 @@ public class GameBehaviour : NetworkBehaviour
             PlacePlayers(depth: 1, playersStartIndex: 0, bl);
             List<Vector2> positions = new(Manager.players.Count);
             List<float> rotation_zs = new(Manager.players.Count);
-            for(int i = 0; i < Manager.players.Count; i++)
+            for (int i = 0; i < Manager.players.Count; i++)
             {
                 positions.Add(Manager.players[i].transform.position);
                 rotation_zs.Add(Manager.players[i].transform.rotation.eulerAngles.z);
@@ -394,7 +403,7 @@ public class GameBehaviour : NetworkBehaviour
 
     private void SetGameOverScreenActivity(bool active)
     {
-        transform.Find("GameOver").gameObject.SetActive(active);
+        GameObject.Find("GameOver").SetActive(active);
     }
 
 

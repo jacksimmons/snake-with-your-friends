@@ -151,7 +151,6 @@ public class PlayerObjectController : NetworkBehaviour
     [ClientRpc]
     public void OnBodyPartUpdate(List<BodyPartData> bodyPartDatas, ulong victimPlayerSteamID)
     {
-        print(playerSteamID);
         if (playerSteamID == victimPlayerSteamID)
         {
             PlayerMovementController playerMovementController = GetComponent<PlayerMovementController>();

@@ -113,7 +113,6 @@ public class PlayerMovementController : NetworkBehaviour
                 bp = new BodyPart(_transform, _startingDirection, _sprite);
                 if (i == 0)
                     head = bp;
-                print(head.Transform.name);
             }
 
             // Tail - the BodyPart script handles these differently.
