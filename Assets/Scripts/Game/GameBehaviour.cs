@@ -66,7 +66,7 @@ public class GameBehaviour : NetworkBehaviour
         }
     }
 
-    private int _readyPlayers = 0;
+    private int _numPlayersReadyToLoad = 0;
     // An array of child indices for objects (all objects in this go under the Objects game object parent)
     private List<int> _objects;
 
@@ -74,20 +74,33 @@ public class GameBehaviour : NetworkBehaviour
     void Start()
     {
         SetGameOverScreenActivity(false);
-        if (isOwned)
+        if (isClientOnly)
         {
             CmdReadyToLoadGame();
+        }
+        else if (isServer)
+        {
+            OnPlayerReady();
         }
     }
 
     [Command]
-    private void CmdReadyToLoadGame()
+    public void CmdReadyToLoadGame()
     {
-        _readyPlayers++;
-        if (_readyPlayers >= Manager.players.Count)
+        this.OnPlayerReady();
+    }
+
+    [ClientRpc]
+    public void OnPlayerReady()
+    {
+        _numPlayersReadyToLoad++;
+        if (isServer)
         {
-            print("Hi");
-            ClientLoadGame();
+            if (_numPlayersReadyToLoad >= Manager.players.Count)
+            {
+                print("hi");
+                ClientLoadGame();
+            }
         }
     }
 

@@ -86,7 +86,6 @@ public class LobbyController : MonoBehaviour
         newPlayerListItemScript.ready = player.ready;
         newPlayerListItemScript.SetPlayerValues();
 
-        print(playerListViewContent.name);
         newPlayerItem.transform.SetParent(playerListViewContent.transform);
         newPlayerItem.transform.localScale = Vector3.one;
 
