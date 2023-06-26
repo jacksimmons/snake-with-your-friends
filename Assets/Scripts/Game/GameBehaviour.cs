@@ -74,28 +74,16 @@ public class GameBehaviour : NetworkBehaviour
     void Start()
     {
         SetGameOverScreenActivity(false);
-        if (isClientOnly)
-        {
-            CmdReadyToLoadGame();
-        }
-        else if (isServer)
-        {
-            OnPlayerReady();
-        }
-    }
-
-    [Command]
-    public void CmdReadyToLoadGame()
-    {
-        this.OnPlayerReady();
+        OnPlayerReady();
     }
 
     [ClientRpc]
     public void OnPlayerReady()
     {
-        _numPlayersReadyToLoad++;
+        print("Hi");
         if (isServer)
         {
+            _numPlayersReadyToLoad++;
             if (_numPlayersReadyToLoad >= Manager.players.Count)
             {
                 print("hi");
