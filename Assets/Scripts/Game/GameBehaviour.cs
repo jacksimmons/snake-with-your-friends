@@ -92,7 +92,7 @@ public class GameBehaviour : NetworkBehaviour
     }
 
     [ClientRpc]
-    private void ClientLoadGame()
+    public void ClientLoadGame()
     {
         SetupGame();
         if (isServer)
