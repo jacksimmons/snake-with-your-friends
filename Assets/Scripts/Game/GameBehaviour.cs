@@ -66,6 +66,7 @@ public class GameBehaviour : NetworkBehaviour
         }
     }
 
+    private int _readyPlayers = 0;
     // An array of child indices for objects (all objects in this go under the Objects game object parent)
     private List<int> _objects;
 
@@ -73,17 +74,33 @@ public class GameBehaviour : NetworkBehaviour
     void Start()
     {
         SetGameOverScreenActivity(false);
+        CmdReadyToLoadGame();
+    }
 
+    [Command]
+    private void CmdReadyToLoadGame()
+    {
+        _readyPlayers++;
+        if (_readyPlayers >= Manager.players.Count)
+        {
+            ClientLoadGame();
+        }
+    }
+
+    [ClientRpc]
+    private void ClientLoadGame()
+    {
         SetupGame();
-
         if (isServer)
         {
-            _objects = new((int)groundSize * (int)groundSize);
+            int size = (int)groundSize * (int)groundSize;
+            _objects = new(size);
             // Sets every value to -1.
-            for (int i = 0; i < _objects.Count; i++) { _objects[i] = -1; }
+            for (int i = 0; i < size; i++) { _objects.Add(-1); }
             GenerateStartingFood();
         }
     }
+
 
     public void GenerateStartingFood()
     {
