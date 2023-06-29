@@ -378,7 +378,11 @@ public class GameBehaviour : NetworkBehaviour
 
     private void SetGameOverScreenActivity(bool active)
     {
-        GameObject.Find("GameOver").SetActive(active);
+        WaitForLoad.WaitForObject(
+            () => GameObject.Find("GameOver"),
+            (GameObject obj) => GameObject.Find("GameOver").SetActive(active),
+            new WaitForSeconds(0.1f)
+        );
     }
 
     public void OnGameOver(int score)

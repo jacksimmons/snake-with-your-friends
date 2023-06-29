@@ -900,6 +900,7 @@ MonoBehaviour:
     dynamicAdjustmentTolerance: 1
     deliveryTimeEmaDuration: 2
   timeInterpolationGui: 0
+  _gamePrefab: {fileID: 3422690775116552752, guid: 2c4bb62db1ac2db4e9a9c448d731f0f0, type: 3}
   _playerPrefab: {fileID: 5691343852970272198, guid: f10477f5b0dea214e9da6295d82dbfd9, type: 3}
 --- !u!1 &2220711510020301171
 GameObject:

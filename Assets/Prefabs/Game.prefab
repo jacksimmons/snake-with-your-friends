@@ -63,7 +63,6 @@ MonoBehaviour:
   - {fileID: 3540720362809897522, guid: 53751b131fb05bb4cb78371e89654a70, type: 3}
   _menuSelectTemplate: {fileID: 0}
   _spawnPoint: {x: 0, y: 0}
-  WorldMode: 3
 --- !u!114 &3062770074370965030
 MonoBehaviour:
   m_ObjectHideFlags: 0
