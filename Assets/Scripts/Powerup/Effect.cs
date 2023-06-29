@@ -1,6 +1,6 @@
 using UnityEditorInternal;
 
-public enum e_Food
+public enum EFoodType
 {
     Coffee,
     Booze,

@@ -1,9 +1,6 @@
-public class GridObject
-{
-    public int gridPos;
+using UnityEngine;
 
-    public GridObject(int gridPos)
-    {
-        this.gridPos = gridPos;
-    }
+public class GridObject : MonoBehaviour
+{
+    public SetOnce<int> gridPos = new();
 }

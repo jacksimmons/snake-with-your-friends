@@ -59,5 +59,13 @@ PrefabInstance:
       propertyPath: food
       value: 2
       objectReference: {fileID: 0}
+    - target: {fileID: 7747178195583985449, guid: 0d5ef4a463256884f8d08d92b9189471, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: 0e2a9133a1e406b49a184e3541e8c928, type: 3}
+    - target: {fileID: 7747178195583985449, guid: 0d5ef4a463256884f8d08d92b9189471, type: 3}
+      propertyPath: m_WasSpriteAssigned
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 0d5ef4a463256884f8d08d92b9189471, type: 3}

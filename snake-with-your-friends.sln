@@ -1,15 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "com.rlabrecque.steamworks.net", "com.rlabrecque.steamworks.net.csproj", "{449E99BB-54C6-9A8B-B06A-6B37DCD9AF9B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Assembly-CSharp", "Assembly-CSharp.csproj", "{02A1D8AB-7066-746D-0152-080D65C02CC8}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mirror.Transports", "Mirror.Transports.csproj", "{30E59ADB-210B-86FC-F06E-059AD6511B06}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "com.rlabrecque.steamworks.net", "com.rlabrecque.steamworks.net.csproj", "{449E99BB-54C6-9A8B-B06A-6B37DCD9AF9B}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mirror", "Mirror.csproj", "{F12AE101-4061-A1F3-3349-648784272680}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mirror.Components", "Mirror.Components.csproj", "{FA1B8717-0A45-EA22-8192-70CA06B493F6}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Assembly-CSharp", "Assembly-CSharp.csproj", "{02A1D8AB-7066-746D-0152-080D65C02CC8}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleWebTransport", "SimpleWebTransport.csproj", "{17061400-D344-5D1E-3508-618BDEA931CE}"
 EndProject
@@ -35,14 +35,18 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{449E99BB-54C6-9A8B-B06A-6B37DCD9AF9B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{449E99BB-54C6-9A8B-B06A-6B37DCD9AF9B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{449E99BB-54C6-9A8B-B06A-6B37DCD9AF9B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{449E99BB-54C6-9A8B-B06A-6B37DCD9AF9B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{02A1D8AB-7066-746D-0152-080D65C02CC8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{02A1D8AB-7066-746D-0152-080D65C02CC8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{02A1D8AB-7066-746D-0152-080D65C02CC8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{02A1D8AB-7066-746D-0152-080D65C02CC8}.Release|Any CPU.Build.0 = Release|Any CPU
 		{30E59ADB-210B-86FC-F06E-059AD6511B06}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{30E59ADB-210B-86FC-F06E-059AD6511B06}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{30E59ADB-210B-86FC-F06E-059AD6511B06}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{30E59ADB-210B-86FC-F06E-059AD6511B06}.Release|Any CPU.Build.0 = Release|Any CPU
+		{449E99BB-54C6-9A8B-B06A-6B37DCD9AF9B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{449E99BB-54C6-9A8B-B06A-6B37DCD9AF9B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{449E99BB-54C6-9A8B-B06A-6B37DCD9AF9B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{449E99BB-54C6-9A8B-B06A-6B37DCD9AF9B}.Release|Any CPU.Build.0 = Release|Any CPU
 		{F12AE101-4061-A1F3-3349-648784272680}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{F12AE101-4061-A1F3-3349-648784272680}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F12AE101-4061-A1F3-3349-648784272680}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -51,10 +55,6 @@ Global
 		{FA1B8717-0A45-EA22-8192-70CA06B493F6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FA1B8717-0A45-EA22-8192-70CA06B493F6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FA1B8717-0A45-EA22-8192-70CA06B493F6}.Release|Any CPU.Build.0 = Release|Any CPU
-		{02A1D8AB-7066-746D-0152-080D65C02CC8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{02A1D8AB-7066-746D-0152-080D65C02CC8}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{02A1D8AB-7066-746D-0152-080D65C02CC8}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{02A1D8AB-7066-746D-0152-080D65C02CC8}.Release|Any CPU.Build.0 = Release|Any CPU
 		{17061400-D344-5D1E-3508-618BDEA931CE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{17061400-D344-5D1E-3508-618BDEA931CE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{17061400-D344-5D1E-3508-618BDEA931CE}.Release|Any CPU.ActiveCfg = Release|Any CPU

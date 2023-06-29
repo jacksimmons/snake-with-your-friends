@@ -204,7 +204,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3868020592265161056, guid: 1b0273b19bf2e8545a39951da787dc63, type: 3}
       propertyPath: m_Name
-      value: JoinServerButton
+      value: JoinLobbyButton
       objectReference: {fileID: 0}
     - target: {fileID: 3868020592265161057, guid: 1b0273b19bf2e8545a39951da787dc63, type: 3}
       propertyPath: m_Pivot.x
@@ -308,7 +308,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3868020592265161070, guid: 1b0273b19bf2e8545a39951da787dc63, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[1].m_MethodName
-      value: OnJoinServerButtonPressed
+      value: OnJoinLobbyButtonPressed
       objectReference: {fileID: 0}
     - target: {fileID: 3868020592265161070, guid: 1b0273b19bf2e8545a39951da787dc63, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[1].m_TargetAssemblyTypeName
@@ -435,7 +435,7 @@ PrefabInstance:
     - target: {fileID: 3868020592265161070, guid: 1b0273b19bf2e8545a39951da787dc63, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[1].m_Target
       value: 
-      objectReference: {fileID: 983553305}
+      objectReference: {fileID: 2220711510020301171}
     - target: {fileID: 3868020592265161070, guid: 1b0273b19bf2e8545a39951da787dc63, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[1].m_CallState
       value: 2
@@ -446,7 +446,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3868020592265161070, guid: 1b0273b19bf2e8545a39951da787dc63, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[1].m_MethodName
-      value: OnNoFriendsButtonPressed
+      value: 
       objectReference: {fileID: 0}
     - target: {fileID: 3868020592265161070, guid: 1b0273b19bf2e8545a39951da787dc63, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[1].m_TargetAssemblyTypeName
@@ -558,7 +558,7 @@ GameObject:
   - component: {fileID: 983553304}
   - component: {fileID: 983553305}
   m_Layer: 0
-  m_Name: MenuHandler
+  m_Name: MainMenuController
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -591,9 +591,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bb4aa8f7340a23c4080a774c1300c2f3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _snakeTemplate: {fileID: 4165315088379130911, guid: 4634c72776595a24fba608f81388cc39, type: 3}
-  _counterTemplate: {fileID: 5148222703367215955, guid: 1d37eb311e796354c88138caf76afd9c, type: 3}
-  _lobbyTemplate: {fileID: 3081178988538383437, guid: 035d7d1d5d9a8b6449c8423e0e7b014f, type: 3}
 --- !u!1001 &1094220808
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -936,7 +933,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3868020592265161056, guid: 1b0273b19bf2e8545a39951da787dc63, type: 3}
       propertyPath: m_Name
-      value: CreateServerButton
+      value: CreateLobbyButton
       objectReference: {fileID: 0}
     - target: {fileID: 3868020592265161057, guid: 1b0273b19bf2e8545a39951da787dc63, type: 3}
       propertyPath: m_Pivot.x
@@ -1140,7 +1137,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4ae313fa8003fbb4e82694b269221e9b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _lobbyNameText: {fileID: 0}
 --- !u!114 &7083315451620448121
 MonoBehaviour:
   m_ObjectHideFlags: 0

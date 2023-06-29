@@ -9,6 +9,8 @@ using System;
 
 public class PlayerMovementController : NetworkBehaviour
 {
+    private GameBehaviour _gameBehaviour;
+
     [SerializeField]
     public StatusBehaviour status;
 
@@ -89,6 +91,7 @@ public class PlayerMovementController : NetworkBehaviour
 
     private void Start()
     {
+        _gameBehaviour = GetComponentInChildren<GameBehaviour>();
         bodyPartContainer.SetActive(false);
 
         // Data structures
@@ -139,11 +142,6 @@ public class PlayerMovementController : NetworkBehaviour
         //    _moveTime = Mathf.CeilToInt(_moveTime / _freeMovementSpeedMod);
     }
 
-    private void Update()
-    {
-
-    }
-
     private void FixedUpdate()
     {
         if (SceneManager.GetActiveScene().name == "Game")
@@ -154,7 +152,7 @@ public class PlayerMovementController : NetworkBehaviour
             }
 
             // So that we only move a player if we have authority over it
-            if (isOwned)
+            if (isOwned || _gameBehaviour.ClientMode == GameBehaviour.EClientMode.Offline)
             {
                 HandleInput();
                 HandleMovementLoop();
@@ -297,35 +295,31 @@ public class PlayerMovementController : NetworkBehaviour
     /// Adds a new body part onto the end of the snake, then makes it the new tail.
     /// Then turns the tail into a regular straight piece.
     /// </summary>
-    private void AddBodyPart()
+    public void AddBodyPart()
     {
-        Vector2 position = tail.Position - (Vector3)tail.Direction;
+        GameObject newBodyPartObj = Instantiate(
+            _bodyPartTemplate,
+            tail.Position - (Vector3)tail.Direction,
+            tail.Rotation,
+            bodyPartContainer.transform
+        );
 
-        // Update the (previously) tail into a normal body part
+        BodyPart newBodyPart = new(tail, newBodyPartObj.transform);
+
         tail.DefaultSprite = BodyPartSprite.Straight;
         tail.Sprite = BodyPartSprite.Straight;
 
-        // Instantiate the new body part
-        GameObject newBodyPartObj = Instantiate(_bodyPartTemplate, position, tail.Rotation, transform);
-
-        // Create the new BodyPart object, and turn it into the tail
-        BodyPart newBodyPart = new BodyPart(tail, newBodyPartObj.transform)
-        {
-            DefaultSprite = BodyPartSprite.Tail,
-            Sprite = BodyPartSprite.Tail
-        };
-
-        // The snake will end with ~- (~ is the new tail), as expected
-        float angle = Vector2.SignedAngle(tail.Direction, BodyParts[^2].Direction);
-        if (angle != 0)
+        if (!Mathf.Approximately(Vector2.SignedAngle(BodyParts[^2].Direction, tail.Direction), 0))
         {
             newBodyPart.Rotation = tail.prevRot;
             tail.MakeCorner(BodyParts[^2].Direction);
         }
         BodyParts.Add(newBodyPart);
 
-        // Set the tail to the new tail
+        // Set the tail to the new tail and update names
+        tail.Transform.name = "BodyPart(" + tail.Transform.GetSiblingIndex() + ")";
         tail = newBodyPart;
+        tail.Transform.name = "Tail";
     }
 
 

@@ -1,9 +1,10 @@
+using Mirror;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class StatusBehaviour : MonoBehaviour
+public class StatusBehaviour : NetworkBehaviour
 {
     [SerializeField]
     private Sprite _spriteCoffee;
@@ -301,59 +302,60 @@ public class StatusBehaviour : MonoBehaviour
         return statuses;
     }
 
-    public void Eat(e_Food food)
+    public void Eat(EFoodType food)
     {
         Image powerupImg = GameObject.FindWithTag("PowerupUI").GetComponent<Image>();
+
         switch (food)
         {
-            case e_Food.Coffee:
+            case EFoodType.Coffee:
                 DrinkCoffee();
                 break;
-            case e_Food.Booze:
+            case EFoodType.Booze:
                 DrinkBooze();
                 break;
-            case e_Food.Apple:
+            case EFoodType.Apple:
                 EatApple();
                 break;
-            case e_Food.Orange:
+            case EFoodType.Orange:
                 EatOrange();
                 break;
-            case e_Food.Banana:
+            case EFoodType.Banana:
                 EatBanana();
                 break;
-            case e_Food.Dragonfruit:
+            case EFoodType.Dragonfruit:
                 powerupImg.color = Color.white;
                 powerupImg.sprite = _spriteDragonfruit;
                 EatDragonfruit();
                 break;
-            case e_Food.Drumstick:
+            case EFoodType.Drumstick:
                 EatDrumstick();
                 break;
-            case e_Food.Bone:
+            case EFoodType.Bone:
                 EatBone();
                 break;
-            case e_Food.Cheese:
+            case EFoodType.Cheese:
                 EatCheese();
                 break;
-            case e_Food.Pizza:
+            case EFoodType.Pizza:
                 EatPizza();
                 break;
-            case e_Food.Pineapple:
+            case EFoodType.Pineapple:
                 EatPineapple();
                 break;
-            case e_Food.PineapplePizza:
+            case EFoodType.PineapplePizza:
                 EatPineapplePizza();
                 break;
-            case e_Food.IceCream:
+            case EFoodType.IceCream:
                 EatIceCream();
                 break;
-            case e_Food.CrapALot:
+            case EFoodType.CrapALot:
                 EatCrapALot();
                 break;
-            case e_Food.Balti:
+            case EFoodType.Balti:
                 EatBalti();
                 break;
-            case e_Food.Brownie:
+            case EFoodType.Brownie:
                 EatBrownie();
                 break;
         }

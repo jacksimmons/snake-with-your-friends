@@ -54,23 +54,18 @@ public class SteamLobby : MonoBehaviour
         _lobbyCreated = CallResult<LobbyCreated_t>.Create(OnLobbyCreated);
     }
 
-
     public void HostLobby()
     {
+        if (!SteamUser.BLoggedOn())
+        {
+            print("Not online!");
+            return;
+        }
+
         SteamAPICall_t handle = SteamMatchmaking.CreateLobby(ELobbyType.k_ELobbyTypePublic, _manager.maxConnections);
         _lobbyCreated.Set(handle);
         _lobbyEnter.Set(handle);
-
-        //foreach (GameObject go in GameObject.FindGameObjectsWithTag("PlayerInput"))
-        //{
-        //    if (go.name == "SpeedSlider")
-        //    {
-        //        Slider slider = go.GetComponent<Slider>();
-        //        _counter.thresholdSeconds = slider.value;
-        //    }
-        //}
     }
-
 
     // Callbacks
     /// <summary>

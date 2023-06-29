@@ -56,7 +56,9 @@
     <Analyzer Include="C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\Extensions\Microsoft\Visual Studio Tools for Unity\Analyzers\Microsoft.Unity.Analyzers.dll" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assets\Scripts\SetOnce.cs" />
     <Compile Include="Assets\Scripts\Powerup\Projectile.cs" />
+    <Compile Include="Assets\Scripts\Object\FoodObject.cs" />
     <Compile Include="Assets\Scripts\Game\BackButton.cs" />
     <Compile Include="Assets\Scripts\Powerup\TooManyPints.cs" />
     <Compile Include="Assets\Scripts\Object\Teleporter.cs" />
@@ -72,16 +74,16 @@
     <Compile Include="Assets\Scripts\Game\WallTilemap.cs" />
     <Compile Include="Assets\Scripts\Networking\CustomNetworkManager.cs" />
     <Compile Include="Assets\Scripts\UI\DebugBehaviour.cs" />
+    <Compile Include="Assets\Scripts\Object\ObjectController.cs" />
     <Compile Include="Assets\Scripts\Menu\CreateMenu.cs" />
     <Compile Include="Assets\Scripts\Audio\AudioHandler.cs" />
     <Compile Include="Assets\Scripts\Object\ForegroundObject.cs" />
     <Compile Include="Assets\Scripts\Object\ForegroundBehaviour.cs" />
     <Compile Include="Assets\Scripts\Unused\FollowPlayer.cs" />
-    <Compile Include="Assets\Scripts\Extensions.cs" />
+    <Compile Include="Assets\Scripts\Arrays.cs" />
     <Compile Include="Assets\Scripts\Object\GridObject.cs" />
     <Compile Include="Assets\Scripts\Steamworks.NET\SteamManager.cs" />
     <Compile Include="Assets\Scripts\Player\PlayerMovementController.cs" />
-    <Compile Include="Assets\Scripts\Powerup\FoodBehaviour.cs" />
     <Compile Include="Assets\Scripts\Networking\LobbyController.cs" />
     <Compile Include="Assets\Scripts\Object\ColliderToggleTilemap.cs" />
     <Compile Include="Assets\Scripts\Player\BodyPart.cs" />

@@ -7,6 +7,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1617564155881034721, guid: 0d5ef4a463256884f8d08d92b9189471, type: 3}
+      propertyPath: food
+      value: 5
+      objectReference: {fileID: 0}
     - target: {fileID: 2414048229727916978, guid: 0d5ef4a463256884f8d08d92b9189471, type: 3}
       propertyPath: m_Name
       value: Dragonfruit

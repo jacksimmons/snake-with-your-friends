@@ -69,11 +69,7 @@ public class BodyPart
     // Get components
     private PlayerMovementController Player
     {
-        get { return Transform.parent.GetComponentInParent<PlayerMovementController>(); }
-    }
-    private SpriteRenderer SpriteRen
-    {
-        get { return Transform.GetComponent<SpriteRenderer>(); }
+        get { return Transform.parent.parent.GetComponent<PlayerMovementController>(); }
     }
 
     private BodyPartSprite _sprite;
@@ -83,12 +79,15 @@ public class BodyPart
         set
         {
             if (value == BodyPartSprite.None)
+            {
+                Debug.Log("No body part sprite provided.");
                 return;
+            }
 
             if (Player.spriteSheet != null)
             {
                 _sprite = value;
-                SpriteRen.sprite = Player.spriteSheet[(int)_sprite];
+                Transform.GetComponent<SpriteRenderer>().sprite = Player.spriteSheet[(int)_sprite];
             }
             else
             {
@@ -115,6 +114,7 @@ public class BodyPart
         Transform = transform;
         Direction = old.Direction;
         DefaultSprite = old.DefaultSprite;
+        Sprite = old.Sprite;
         IsCorner = old.IsCorner;
         // Will not affect teleporting UNLESS necessary
         TeleportCounter = old.TeleportCounter + 1;
@@ -124,16 +124,11 @@ public class BodyPart
     /// <summary>
     /// Standard body part constructor.
     /// </summary>
-    /// <param name="transform"></param>
-    /// <param name="direction"></param>
-    /// <param name="defaultSprite"></param>
-    /// <param name="cornerSprites"></param>
     public BodyPart(Transform transform, Vector2 direction, BodyPartSprite defaultSprite)
     {
         Transform = transform;
         Direction = direction;
         DefaultSprite = defaultSprite;
-
         Sprite = DefaultSprite;
     }
 

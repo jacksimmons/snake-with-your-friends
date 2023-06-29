@@ -151,7 +151,7 @@ public class PlayerObjectController : NetworkBehaviour
     [ClientRpc]
     public void OnBodyPartUpdate(List<BodyPartData> bodyPartDatas, ulong victimPlayerSteamID)
     {
-        if (playerSteamID == victimPlayerSteamID)
+        if (playerSteamID == victimPlayerSteamID && !isOwned)
         {
             PlayerMovementController playerMovementController = GetComponent<PlayerMovementController>();
             playerMovementController.BodyParts.Clear();
