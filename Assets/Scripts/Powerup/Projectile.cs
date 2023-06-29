@@ -1,44 +1,38 @@
 using UnityEngine;
 
-public interface IProjectile
+public class Projectile
 {
-    Vector2 Direction { get; }
-    float Speed { get; }
-}
+    public float Lifetime { get; private set; }
+    public Vector2 Direction { get; private set; }
+    public Quaternion Rotation { get; private set; }
 
-public class Projectile : MonoBehaviour, IProjectile
-{
-    private Vector2 _direction;
-    public Vector2 Direction { get { return _direction; } }
-
-    private float _speed;
-    public float Speed { get { return _speed; } }
-
-    private bool _has_started = false;
-    private Rigidbody2D _rb = null;
-
+    // Uses a Counter approach despite moving continuously,
+    // making it easier for it to move with a similar speed
+    // to the player.
+    public const int LOWEST_COUNTER_MAX = 1;
+    public const int DEFAULT_COUNTER_MAX = 20;
+    private int _counterMax = DEFAULT_COUNTER_MAX;
+    public int CounterMax
+    {
+        get
+        {
+            return _counterMax;
+        }
+        set
+        {
+            if (value < LOWEST_COUNTER_MAX) { _counterMax = LOWEST_COUNTER_MAX; }
+            else { _counterMax = value; }
+        }
+    }
     public GameObject immune = null;
 
-    // Must be called after this object has a rigidbody
-    public void Create(float lifetime, Vector2 direction, Quaternion rotation, float speed, GameObject immune = null)
+    public Projectile(float lifetime, Vector2 direction, Quaternion rotation, int counterMax, GameObject immune = null)
     {
-        _direction = direction;
-        _speed = speed;
-        _has_started = true;
-
-        transform.rotation = rotation;
-        _rb = gameObject.GetComponent<Rigidbody2D>();
+        Lifetime = lifetime;
+        Direction = direction;
+        CounterMax = counterMax;
+        Rotation = rotation;
 
         this.immune = immune;
-
-        Destroy(gameObject, lifetime);
-    }
-
-    private void FixedUpdate()
-    {
-        if (_has_started)
-        {
-            _rb.MovePosition(_rb.position + (_direction * _speed));
-        }
     }
 }

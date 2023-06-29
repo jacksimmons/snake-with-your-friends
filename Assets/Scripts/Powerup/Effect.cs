@@ -26,16 +26,19 @@ public enum e_Effect
 
     BreathingFire,
     Pissing,
-    RocketShitting,
 
     NoSpeedBoost,
-    MajorSpeedBoost,
     MinorSpeedBoost,
+    MajorSpeedBoost,
+    CriticalSpeedBoost,
+
+    RocketShitting,
+    Laxative,
+
     SoberUp,
     Hallucination,
     Unicorn,
     BrainFreeze,
-    Laxative,
     Buff
 }
 
@@ -49,7 +52,7 @@ public class Effect
     // The max value of the Cooldown, set once it gets used to restart the cooldown.
     public float CooldownMax { get; private set; } = 0f;
     public Effect[] Causes { get; private set; } = null;
-    public bool BCausesInputEffect { get; private set; } = false;
+    public bool IsInputEffect { get; private set; } = false;
     public bool IsOneOff { get; set; } = false;
 
     // An effect which lasts for one frame, i.e. an action
@@ -60,23 +63,24 @@ public class Effect
     }
 
     // An effect which causes no other effects
-    public Effect(e_Effect effectName, float lifetime, float cooldown=0f)
+    public Effect(e_Effect effectName, float lifetime, float cooldown=0f, bool isInputEffect=false)
     {
         EffectName = effectName;
         Lifetime = lifetime;
         TimeRemaining = Lifetime;
         Cooldown = cooldown;
         CooldownMax = cooldown;
+        IsInputEffect = isInputEffect;
     }
 
     // An effect which may cause another effect.
-    public Effect(e_Effect effectName, float lifetime, Effect[] causes, bool causesInputEffect, float cooldown=0f)
+    public Effect(e_Effect effectName, float lifetime, Effect[] causes, float cooldown=0f, bool isInputEffect=false)
     {
         EffectName = effectName;
         Lifetime = lifetime;
         Causes = causes;
         TimeRemaining = Lifetime;
-        BCausesInputEffect = causesInputEffect;
+        IsInputEffect = isInputEffect;
         Cooldown = cooldown;
         CooldownMax = cooldown;
     }

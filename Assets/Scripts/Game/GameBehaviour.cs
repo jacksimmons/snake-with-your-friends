@@ -12,6 +12,7 @@ using System.Runtime.CompilerServices;
 using System;
 using Random = UnityEngine.Random;
 using UnityEngine.UIElements;
+using UnityEngine.SocialPlatforms.Impl;
 
 public class GameBehaviour : NetworkBehaviour
 {
@@ -21,6 +22,10 @@ public class GameBehaviour : NetworkBehaviour
     private Tile _darkTile;
     [SerializeField]
     private Tile _wallTile;
+
+    [SerializeField]
+    private GameObject _gameOverTemplate;
+    private GameObject _gameOverObject;
 
     [SerializeField]
     private GameObject[] _foodTemplates;
@@ -71,14 +76,6 @@ public class GameBehaviour : NetworkBehaviour
     private int _numPlayersReadyToLoad = 0;
     // An array of child indices for objects (all objects in this go under the Objects game object parent)
     private GameObject[] _objects;
-
-    /// <summary>
-    /// Sets up the _objects array with the appropriate dimensions.
-    /// </summary>
-    private void SetupObjects()
-    {
-        _objects = new GameObject[(int)GroundSize * (int)GroundSize];
-    }
 
     private Tilemap CreateAndReturnTilemap(string gridName, bool hasCollider)
     {
@@ -212,7 +209,6 @@ public class GameBehaviour : NetworkBehaviour
     {
         if (name == "Game" && !_alreadyReady && isOwned)
         {
-            SetGameOverScreenActivity(false);
             OnPlayerReady();
             _alreadyReady = true;
         }
@@ -260,6 +256,24 @@ public class GameBehaviour : NetworkBehaviour
             }
             ClientPlacePlayers(positions, rotation_zs);
         }
+    }
+
+
+    /// <summary>
+    /// Sets up the _objects array with the appropriate dimensions.
+    /// </summary>
+    private void SetupObjects()
+    {
+        _objects = new GameObject[(int)GroundSize * (int)GroundSize];
+        StartCoroutine(WaitForLoad.WaitForObject(
+            () => GameObject.Find("Canvas"),
+            (GameObject obj) =>
+            {
+                _gameOverObject = Instantiate(_gameOverTemplate, obj.transform);
+                SetGameOverScreenActivity(false);
+            },
+            new WaitForEndOfFrame()
+        ));
     }
 
     [Command]
@@ -376,22 +390,21 @@ public class GameBehaviour : NetworkBehaviour
     //    teleporter.B.GetComponentInChildren<TextMeshProUGUI>().text = text2;
     //}
 
-    private void SetGameOverScreenActivity(bool active)
+    private void SetGameOverScreenActivity(bool active, int score = 0)
     {
-        WaitForLoad.WaitForObject(
-            () => GameObject.Find("GameOver"),
-            (GameObject obj) => GameObject.Find("GameOver").SetActive(active),
-            new WaitForSeconds(0.1f)
-        );
+        _gameOverObject.SetActive(active);
+
+        if (active)
+        {
+            _gameOverObject.transform.Find("Online").gameObject.SetActive(ClientMode == EClientMode.Online);
+            _gameOverObject.transform.Find("Offline").gameObject.SetActive(ClientMode == EClientMode.Offline);
+            _gameOverObject.transform.Find("Score").GetComponent<TextMeshProUGUI>().text = "Score: " + score.ToString();
+        }
     }
 
     public void OnGameOver(int score)
     {
-        SetGameOverScreenActivity(true);
-        Transform gameOver = transform.Find("GameOver");
-        gameOver.Find("Online").gameObject.SetActive(ClientMode == EClientMode.Online);
-        gameOver.Find("Offline").gameObject.SetActive(ClientMode == EClientMode.Offline);
-        gameOver.Find("Score").GetComponent<TextMeshProUGUI>().text = "Score: " + score.ToString();
+        SetGameOverScreenActivity(true, score);
     }
 
     public void OnGameOverDecision()

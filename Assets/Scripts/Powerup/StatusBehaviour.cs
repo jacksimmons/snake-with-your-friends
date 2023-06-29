@@ -4,8 +4,19 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+using Random = UnityEngine.Random;
+
 public class StatusBehaviour : NetworkBehaviour
 {
+    // Constants
+    private const float CRITICAL_MULT = 4f; // 400%
+    private const float MAJOR_MULT = 2f; // 200%
+    private const float MINOR_MULT = 1.5f; // 150%
+    [Range(0f, 360f)]
+    // An angle either side of the player defining the random range of RocketShitting.
+    // Recommended range: 0-90. Past 90 will give very shitty results.
+    private const float SHIT_EXPLOSIVENESS = 45;
+
     [SerializeField]
     private Sprite _spriteCoffee;
     [SerializeField]
@@ -54,14 +65,6 @@ public class StatusBehaviour : NetworkBehaviour
     private float _passiveEffectCooldownMax = 0f;
     private float _passiveEffectCooldown = 0f;
 
-    private float _criticalSpeedDebuff = 1.9f; // +90% counter time
-    private float _majorSpeedDebuff = 1.5f; // +50% counter time
-    private float _minorSpeedDebuff = 1.1f; // +10% counter time
-
-    private float _criticalSpeedBuff = 1 / 1.9f; // +90% movement speed
-    private float _majorSpeedBuff = 1 / 1.5f; // +50% movement speed
-    private float _minorSpeedBuff = 1 / 1.1f; // +10% movement speed
-
     // Counters
     private int _numPints = 0;
     public int NumPints
@@ -80,6 +83,64 @@ public class StatusBehaviour : NetworkBehaviour
     }
     public float SpeedIncrease { get; private set; } = 0f;
     public int PotassiumLevels { get; private set; } = 0;
+
+    /// <summary>
+    /// Handles spawning of projectiles, determined by the effect enum passed.
+    /// Some objects are synced with the server, some just have synced spawn times.
+    /// </summary>
+    /// <param name="effect">The projectile is based on the effect.</param>
+    [Command]
+    private void CmdSpawn(e_Effect effect)
+    {
+        ProjectileBehaviour proj;
+        switch (effect)
+        {
+            case e_Effect.RocketShitting:
+                ClientSpawnUnsynced(effect);
+                break;
+            case e_Effect.BreathingFire:
+                GameObject fireball = Instantiate(_fireball, GameObject.Find("Projectiles").transform);
+                fireball.transform.position = _player.head.Position + (Vector3)_player.head.Direction;
+                proj = fireball.GetComponent<ProjectileBehaviour>();
+                proj.Proj = new Projectile(
+                    lifetime: 5,
+                    direction: _player.head.Direction,
+                    rotation: _player.head.Rotation,
+                    counterMax: Mathf.CeilToInt(_player.CounterMax / CRITICAL_MULT),
+                    immune: _player.head.Transform.gameObject
+                );
+                NetworkServer.Spawn(fireball);
+                break;
+        }
+    }
+
+    /// <summary>
+    /// Spawns an unsynced object, at a synced time (as every client does the same
+    /// thing).
+    /// </summary>
+    /// <param name="effect">The projectile is based on the effect.</param>
+    [ClientRpc]
+    private void ClientSpawnUnsynced(e_Effect effect)
+    {
+        ProjectileBehaviour proj;
+        switch (effect)
+        {
+            case e_Effect.RocketShitting:
+                float randomRotation = Random.Range(-SHIT_EXPLOSIVENESS, SHIT_EXPLOSIVENESS);
+                GameObject shit = Instantiate(_staticShit, GameObject.Find("Projectiles").transform);
+                shit.transform.position = _player.tail.Position - (Vector3)_player.tail.Direction;
+                proj = shit.GetComponent<ProjectileBehaviour>();
+                proj.Proj = new Projectile(
+                    lifetime: 5,
+                    direction: Vectors.Rotate(-_player.tail.Direction, randomRotation),
+                    rotation: _player.tail.Rotation,
+                    counterMax: Mathf.CeilToInt(_player.CounterMax / MAJOR_MULT),
+                    immune: _player.head.Transform.gameObject
+                );
+                shit.transform.Rotate(Vector3.forward * randomRotation);
+                break;
+        }
+    }
 
     private void Update()
     {
@@ -135,14 +196,10 @@ public class StatusBehaviour : NetworkBehaviour
         if (effect.Cooldown <= 0)
         {
             effect.ResetCooldown();
-            Projectile proj;
             switch (effect.EffectName)
             {
                 case e_Effect.BreathingFire:
-                    GameObject fireball = Instantiate(_fireball, GameObject.Find("Projectiles").transform);
-                    fireball.transform.position = _player.head.Position + (Vector3)_player.head.Direction;
-                    proj = fireball.GetComponent<Projectile>();
-                    proj.Create(5, _player.head.Direction, _player.head.Rotation, PlayerMovementController.DEFAULT_COUNTER_MAX * _majorSpeedDebuff, _player.head.Transform.gameObject);
+                    CmdSpawn(e_Effect.BreathingFire);
                     break;
             }
             // Execute a OneOff effect only once its cooldown (which it typically won't have) reaches 0.
@@ -166,16 +223,16 @@ public class StatusBehaviour : NetworkBehaviour
                         _player.CounterMax = PlayerMovementController.DEFAULT_COUNTER_MAX;
                         break;
                     case e_Effect.MinorSpeedBoost:
-                        _player.CounterMax = Mathf.CeilToInt(PlayerMovementController.DEFAULT_COUNTER_MAX * _minorSpeedBuff);
+                        _player.CounterMax = Mathf.CeilToInt(PlayerMovementController.DEFAULT_COUNTER_MAX / MINOR_MULT);
                         break;
                     case e_Effect.MajorSpeedBoost:
-                        _player.CounterMax = Mathf.CeilToInt(PlayerMovementController.DEFAULT_COUNTER_MAX * _minorSpeedBuff);
+                        _player.CounterMax = Mathf.CeilToInt(PlayerMovementController.DEFAULT_COUNTER_MAX / MAJOR_MULT);
+                        break;
+                    case e_Effect.CriticalSpeedBoost:
+                        _player.CounterMax = Mathf.CeilToInt(PlayerMovementController.DEFAULT_COUNTER_MAX / CRITICAL_MULT);
                         break;
                     case e_Effect.RocketShitting:
-                        GameObject shit = Instantiate(_staticShit, GameObject.Find("Projectiles").transform);
-                        shit.transform.position = _player.tail.Position - (Vector3)_player.tail.Direction;
-                        proj = shit.GetComponent<Projectile>();
-                        proj.Create(5, -_player.tail.Direction, _player.tail.Rotation, PlayerMovementController.DEFAULT_COUNTER_MAX * _majorSpeedDebuff);
+                        CmdSpawn(e_Effect.RocketShitting);
                         break;
                     case e_Effect.SoberUp:
                         NumPints--;
@@ -189,20 +246,22 @@ public class StatusBehaviour : NetworkBehaviour
         }
     }
 
-    public void AddInputEffect(Effect effect)
+    public void AddEffect(Effect effect)
     {
-        // Clear the old effect for the new one
-        _player.CounterMax = PlayerMovementController.DEFAULT_COUNTER_MAX;
-        if (ActiveInputEffects.Count > 0)
-            ClearInputEffects();
-        ActiveInputEffects.Add(effect);
-    }
-
-    public void AddPassiveEffect(Effect effect)
-    {
-        ActivePassiveEffects.Add(effect);
-        _passiveEffectCooldown = 0;
-        _passiveEffectCooldownMax = 0;
+        if (effect.IsInputEffect)
+        {
+            // Clear the old effect for the new one
+            _player.CounterMax = PlayerMovementController.DEFAULT_COUNTER_MAX;
+            if (ActiveInputEffects.Count > 0)
+                ClearInputEffects();
+            ActiveInputEffects.Add(effect);
+        }
+        else
+        {
+            ActivePassiveEffects.Add(effect);
+            _passiveEffectCooldown = 0;
+            _passiveEffectCooldownMax = 0;
+        }
     }
 
     private void AddCausedEffect(Effect effect)
@@ -213,10 +272,7 @@ public class StatusBehaviour : NetworkBehaviour
             {
                 if (cause != null)
                 {
-                    if (effect.BCausesInputEffect)
-                        AddInputEffect(cause);
-                    else
-                        AddPassiveEffect(cause);
+                    AddEffect(cause);
                 }
             }
         }
@@ -364,11 +420,11 @@ public class StatusBehaviour : NetworkBehaviour
     private void DrinkCoffee()
     {
         Effect noSpdBoost = new Effect(e_Effect.NoSpeedBoost);
-        Effect resetMovSpd = new Effect(e_Effect.None, lifetime: 10, new Effect[] { noSpdBoost }, false);
+        Effect resetMovSpd = new Effect(e_Effect.None, lifetime: 10, new Effect[] { noSpdBoost });
 
         Effect major = new Effect(e_Effect.MajorSpeedBoost);
-        AddPassiveEffect(resetMovSpd);
-        AddPassiveEffect(major);
+        AddEffect(resetMovSpd);
+        AddEffect(major);
     }
 
     private void DrinkBooze()
@@ -376,12 +432,12 @@ public class StatusBehaviour : NetworkBehaviour
         NumPints++;
 
         Effect soberUp = new Effect(e_Effect.SoberUp);
-        Effect drunkAPint = new Effect(e_Effect.None, lifetime: 20, new Effect[] { soberUp }, false);
+        Effect drunkAPint = new Effect(e_Effect.None, lifetime: 20, new Effect[] { soberUp });
 
-        Effect pissing = new Effect(e_Effect.Pissing, lifetime:5, cooldown:0.1f);
-        Effect needToPee = new Effect(e_Effect.None, lifetime:10, new Effect[] { pissing }, true);
-        AddPassiveEffect(needToPee);
-        AddPassiveEffect(drunkAPint);
+        Effect pissing = new Effect(e_Effect.Pissing, lifetime:5, cooldown:0.1f, isInputEffect:true);
+        Effect needToPee = new Effect(e_Effect.None, lifetime:10, new Effect[] { pissing });
+        AddEffect(needToPee);
+        AddEffect(drunkAPint);
     }
 
     private void EatApple()
@@ -410,14 +466,14 @@ public class StatusBehaviour : NetworkBehaviour
 
     private void EatDragonfruit()
     {
-        Effect fireBreath = new Effect(e_Effect.BreathingFire, lifetime:5f, cooldown:1f);
-        AddInputEffect(fireBreath);
+        Effect fireBreath = new Effect(e_Effect.BreathingFire, lifetime:5f, cooldown:1f, isInputEffect:true);
+        AddEffect(fireBreath);
     }
 
     private void EatDrumstick()
     {
         Effect buff = new Effect(e_Effect.Buff, lifetime: 20);
-        AddPassiveEffect(buff);
+        AddEffect(buff);
         EatBone();
     }
 
@@ -449,27 +505,42 @@ public class StatusBehaviour : NetworkBehaviour
     private void EatIceCream()
     {
         Effect brainFreeze = new Effect(e_Effect.BrainFreeze, 3);
-        Effect unicorn = new Effect(e_Effect.Unicorn, 3, new Effect[] { brainFreeze }, false, 0);
-        AddPassiveEffect(unicorn);
+        Effect unicorn = new Effect(e_Effect.Unicorn, 3, new Effect[] { brainFreeze });
+        AddEffect(unicorn);
     }
 
     private void EatCrapALot()
     {
         Effect laxative = new Effect(e_Effect.Laxative, 20, 1);
-        AddInputEffect(laxative);
+        AddEffect(laxative);
     }
 
+    /// <summary>
+    /// Waits 2 seconds, then simultaneously starts RocketShitting, and a progressively increasing
+    /// speed boost for 10 seconds.
+    /// After the 10 seconds, the RocketShitting and the speed boosts both stop.
+    /// </summary>
     private void EatBalti()
     {
         Effect rocketShit = new Effect(e_Effect.RocketShitting, lifetime: 10, cooldown: 0.05f);
 
         Effect noSpdBoost = new Effect(e_Effect.NoSpeedBoost);
-        Effect resetMovSpd = new Effect(e_Effect.None, lifetime: 10, new Effect[] { noSpdBoost }, false);
+        Effect noDelay = new Effect(e_Effect.None, lifetime: 5.5f, new Effect[] { noSpdBoost });
+
+        Effect criticalSpdBoost = new Effect(e_Effect.CriticalSpeedBoost);
+        Effect criticalDelay = new Effect(e_Effect.None, lifetime: 1, new Effect[] { criticalSpdBoost, noDelay });
+
         Effect majorSpdBoost = new Effect(e_Effect.MajorSpeedBoost);
+        Effect majorDelay = new Effect(e_Effect.None, lifetime: 1.5f, new Effect[] { majorSpdBoost, criticalDelay });
 
-        Effect balti = new Effect(e_Effect.None, lifetime: 2, new Effect[] { rocketShit, resetMovSpd, majorSpdBoost }, false, cooldown: 0.05f);
+        Effect minorSpdBoost = new Effect(e_Effect.MinorSpeedBoost);
+        Effect minorDelay = new Effect(e_Effect.None, lifetime: 2, new Effect[] { minorSpdBoost, majorDelay });
 
-        AddPassiveEffect(balti);
+        Effect[] afterEffects = new Effect[] { rocketShit, minorDelay };
+
+        Effect balti = new Effect(e_Effect.None, lifetime: 2, afterEffects);
+
+        AddEffect(balti);
     }
 
     private void EatBrownie()

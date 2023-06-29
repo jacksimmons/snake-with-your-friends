@@ -5,7 +5,6 @@ using UnityEngine;
 
 public class DebugBehaviour : MonoBehaviour
 {
-    [SerializeField]
     private PlayerMovementController _player;
 
     [SerializeField]
@@ -25,6 +24,11 @@ public class DebugBehaviour : MonoBehaviour
     private e_Display Display { get; set; }
 
 
+    private void Start()
+    {
+        _player = GameObject.Find("LocalGamePlayer").GetComponent<PlayerMovementController>();
+    }
+
     private void Update()
     {
         if (Input.GetKey(KeyCode.LeftShift))
@@ -40,18 +44,12 @@ public class DebugBehaviour : MonoBehaviour
         switch (Display)
         {
             case e_Display.Status:
-                if (_player)
-                {
-                    Dictionary<string, string> stringStatuses = _player.status.GetStatusDebug();
-                    UpdateDisplay(stringStatuses);
-                }
+                Dictionary<string, string> stringStatuses = _player.status.GetStatusDebug();
+                UpdateDisplay(stringStatuses);
                 break;
             case e_Display.Player:
-                if (_player)
-                {
-                    Dictionary<string, string> stringPlayerValues = _player.GetPlayerDebug();
-                    UpdateDisplay(stringPlayerValues);
-                }
+                Dictionary<string, string> stringPlayerValues = _player.GetPlayerDebug();
+                UpdateDisplay(stringPlayerValues);
                 break;
             default:
                 break;
