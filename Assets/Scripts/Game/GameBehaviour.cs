@@ -13,8 +13,9 @@ using System;
 using Random = UnityEngine.Random;
 using UnityEngine.UIElements;
 using UnityEngine.SocialPlatforms.Impl;
+using UnityEngine.Pool;
 
-public class GameBehaviour : NetworkBehaviour
+public class GameBehaviour : MonoBehaviour
 {
     [SerializeField]
     private Tile _lightTile;
@@ -62,22 +63,20 @@ public class GameBehaviour : NetworkBehaviour
     private const float SOFT_MIN_DIST_WORLD_SIZE_RATIO = 0.2f;
     private const float HARD_MIN_DIST = 2f;
 
-    private CustomNetworkManager _manager;
-    private CustomNetworkManager Manager
-    {
-        get
-        {
-            if (_manager != null) { return _manager; }
-            return _manager = CustomNetworkManager.singleton as CustomNetworkManager;
-        }
-    }
-
-    private bool _alreadyReady = false;
-    private int _numPlayersReadyToLoad = 0;
     // An array of child indices for objects (all objects in this go under the Objects game object parent)
     private GameObject[] _objects;
+    public GameObject[] Objects { get; private set; }
 
-    private Tilemap CreateAndReturnTilemap(string gridName, bool hasCollider)
+    public void CreateTilemaps()
+    {
+        _groundTilemap = CreateAndReturnTilemap(gridName: "Ground", hasCollider: false);
+        _wallTilemap = CreateAndReturnTilemap(gridName: "Wall", hasCollider: true);
+
+        CreateGroundTilemap(_groundTilemap, bl);
+        CreateWallTilemap(_wallTilemap, bl);
+    }
+
+    public Tilemap CreateAndReturnTilemap(string gridName, bool hasCollider)
     {
         GameObject gridObject = new GameObject(gridName);
         gridObject.AddComponent<Grid>();
@@ -100,7 +99,7 @@ public class GameBehaviour : NetworkBehaviour
         return tilemap;
     }
 
-    private void CreateGroundTilemap(Tilemap groundTilemap, Vector2Int bl)
+    public void CreateGroundTilemap(Tilemap groundTilemap, Vector2Int bl)
     {
         // Bounds are an inner square of the 51x51 wall bounds starting at 0,0
         BoundsInt bounds = new(
@@ -132,7 +131,7 @@ public class GameBehaviour : NetworkBehaviour
         groundTilemap.SetTilesBlock(bounds, tiles);
     }
 
-    private void CreateWallTilemap(Tilemap wallTilemap, Vector2Int bl)
+    public void CreateWallTilemap(Tilemap wallTilemap, Vector2Int bl)
     {
         // This square is (int)GroundSize + 2 squared, since it is one bigger on each side of the x and y edges of the inner square
         BoundsInt bounds = new(
@@ -159,19 +158,11 @@ public class GameBehaviour : NetworkBehaviour
         wallTilemap.SetTilesBlock(bounds, tiles);
     }
 
-    public void PlacePlayers(int depth, int playersStartIndex, Vector2Int bl)
+    public void PlacePlayers(int depth, int playersStartIndex, List<GameObject> players)
     {
         // Outer snakes (along the walls)
         // Calculate the maximum distance between snakes.
         // If this distance is too small, spawn inner snakes.
-
-        int playersCount = 0;
-        if (Manager.players.Count - playersStartIndex > 0)
-        {
-            playersCount = Manager.players.Count - playersStartIndex;
-        }
-        List<PlayerObjectController> players = Manager.players.GetRange(playersStartIndex, playersCount);
-
         float minDist = (int)GroundSize * SOFT_MIN_DIST_WORLD_SIZE_RATIO;
         if (minDist < HARD_MIN_DIST)
             minDist = HARD_MIN_DIST;
@@ -199,70 +190,16 @@ public class GameBehaviour : NetworkBehaviour
                 }
                 else
                 {
-                    PlacePlayers(newDepth, playersStartIndex + 4, bl);
+                    PlacePlayers(newDepth, playersStartIndex + 4, players);
                 }
             }
         }
     }
 
-    public void OnServerChangeScene(string name)
-    {
-        if (name == "Game" && !_alreadyReady && isOwned)
-        {
-            OnPlayerReady();
-            _alreadyReady = true;
-        }
-    }
-
-    public void OnPlayerReady()
-    {
-        _numPlayersReadyToLoad++;
-        if (_numPlayersReadyToLoad >= Manager.players.Count)
-        {
-            CmdLoadGame();
-        }
-    }
-
-    [Command]
-    private void CmdLoadGame()
-    {
-        ClientLoadGame();
-        SetupObjects();
-        CmdGenerateStartingFood();
-    }
-
-    [ClientRpc]
-    private void ClientLoadGame()
-    {
-        PlayerMovementController player = GameObject.Find("LocalGamePlayer").GetComponent<PlayerMovementController>();
-        GameObject cam = GameObject.FindWithTag("MainCamera");
-        cam.GetComponent<CamBehaviour>().Player = player;
-
-        _groundTilemap = CreateAndReturnTilemap(gridName: "Ground", hasCollider: false);
-        _wallTilemap = CreateAndReturnTilemap(gridName: "Wall", hasCollider: true);
-
-        CreateGroundTilemap(_groundTilemap, bl);
-        CreateWallTilemap(_wallTilemap, bl);
-
-        if (isServer)
-        {
-            PlacePlayers(depth: 1, playersStartIndex: 0, bl);
-            List<Vector2> positions = new(Manager.players.Count);
-            List<float> rotation_zs = new(Manager.players.Count);
-            for (int i = 0; i < Manager.players.Count; i++)
-            {
-                positions.Add(Manager.players[i].transform.position);
-                rotation_zs.Add(Manager.players[i].transform.rotation.eulerAngles.z);
-            }
-            ClientPlacePlayers(positions, rotation_zs);
-        }
-    }
-
-
     /// <summary>
     /// Sets up the _objects array with the appropriate dimensions.
     /// </summary>
-    private void SetupObjects()
+    public void SetupObjects()
     {
         _objects = new GameObject[(int)GroundSize * (int)GroundSize];
         StartCoroutine(WaitForLoad.WaitForObject(
@@ -276,20 +213,8 @@ public class GameBehaviour : NetworkBehaviour
         ));
     }
 
-    [Command]
-    private void CmdGenerateStartingFood()
+    public GameObject GenerateFood(int objectPos)
     {
-        for (int i = 0; i < Manager.players.Count; i++)
-        {
-            this.CmdGenerateFood();
-        }
-    }
-
-    [Command]
-    private void CmdGenerateFood()
-    {
-        int objectPos = Random.Range(0, _objects.Length);
-
         // Overwrite _objects[objectPos] with -1 (if there are any vacancies)
         // This effectively acts as a test to see if there are any vacancies,
         // which also happens to locate the vacancy, while leaving its value
@@ -298,32 +223,17 @@ public class GameBehaviour : NetworkBehaviour
         if (objectPos == -1)
         {
             // No vacancies.
-            return;
+            return null;
         }
 
         int foodIndex = Random.Range(0, _foodTemplates.Length);
         Vector2 foodPos = new((objectPos % (int)GroundSize) + (bl.x + 1.5f), (objectPos / (int)GroundSize) + (bl.y + 1.5f));
+        
         GameObject obj = Instantiate(_foodTemplates[foodIndex], foodPos, Quaternion.Euler(Vector3.forward * 0), GameObject.Find("Objects").transform);
         obj.GetComponent<GridObject>().gridPos.Value = objectPos;
-        NetworkServer.Spawn(obj);
-
         AddObjectToGrid(objectPos, obj);
-    }
-
-    [ClientRpc]
-    public void ClientPlacePlayers(List<Vector2> positions, List<float> rotation_zs)
-    {
-        if (positions.Count != rotation_zs.Count)
-        {
-            Debug.LogError("Positions and rotations have mismatching lengths!");
-            return;
-        }
-
-        for (int i = 0; i < positions.Count; i++)
-        {
-            PlayerObjectController player = Manager.players[i];
-            player.transform.SetPositionAndRotation(positions[i], Quaternion.Euler(Vector3.forward * rotation_zs[i]));
-        }
+        
+        return obj;
     }
 
     /// <summary>
@@ -353,27 +263,16 @@ public class GameBehaviour : NetworkBehaviour
         return objectPos;
     }
 
-    /// <summary>
-    /// First gets every client to delete the object, THEN removes it from
-    /// the objects array. Because the array is a SyncVar, clients would lose
-    /// reference to it otherwise.
-    /// </summary>
-    [Command]
-    public void CmdRemoveObjectFromGrid(int objectPos)
+    public bool RemoveObjectFromGrid(int objectPos)
     {
-        GameObject go = _objects[objectPos];
-
-        if (go == null)
+        if (_objects[objectPos] == null)
         {
-            Debug.LogError("GameObject was null!");
-            return;
+            Debug.LogWarning("Tried to remove an object from _objects, but it was already null.");
+            return false;
         }
 
-        NetworkServer.UnSpawn(go);
-        NetworkServer.Destroy(go);
         _objects[objectPos] = null;
-
-        CmdGenerateFood();
+        return true;
     }
 
     //void CreateTeleportingMenuPair(

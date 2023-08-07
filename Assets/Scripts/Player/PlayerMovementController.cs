@@ -290,6 +290,15 @@ public class PlayerMovementController : NetworkBehaviour
         return false;
     }
 
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        ProjectileBehaviour proj;
+        if (collision.gameObject.TryGetComponent(out proj))
+        {
+            RemoveBodyPart(collision.otherCollider.transform.GetSiblingIndex());
+        }
+    }
+
 
     /// <summary>
     /// Adds a new body part onto the end of the snake, then makes it the new tail.
