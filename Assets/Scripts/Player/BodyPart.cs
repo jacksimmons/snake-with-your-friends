@@ -4,52 +4,153 @@ using System.Runtime.InteropServices;
 using UnityEngine;
 using UnityEngine.UIElements;
 
+public enum EBodyPartType
+{
+    Straight,
+    Head,
+    Tail,
+    Corner
+}
+
 /// <summary>
 /// Struct to represent data of a BodyPart needed for networking.
 /// </summary>
-[StructLayout(LayoutKind.Sequential)]
 public struct BodyPartData
 {
     public Vector2 position;
     public Vector2 direction;
-    public float rotation_z;
-    public BodyPartSprite currentSprite;
-    public BodyPartSprite defaultSprite;
+    public BodyPartRotationData bpRotationData;
+    public Sprite currentSprite;
+    public Sprite defaultSprite;
     public int teleportCounter;
-    public bool isCorner;
-    public BodyPartData(Vector2 position, Vector2 direction, float rotation_z, BodyPartSprite currentSprite,
-    BodyPartSprite defaultSprite, int teleportCounter, bool isCorner)
+    public BodyPartTypeData bpTypeData;
+    public BodyPartData(Vector2 position, Vector2 direction, BodyPartRotationData bpRotationData, Sprite currentSprite,
+    Sprite defaultSprite, int teleportCounter, BodyPartTypeData bpTypeData)
     {
         this.position = position;
         this.direction = direction;
-        this.rotation_z = rotation_z;
+        this.bpRotationData = bpRotationData;
         this.currentSprite = currentSprite;
         this.defaultSprite = defaultSprite;
         this.teleportCounter = teleportCounter;
-        this.isCorner = isCorner;
+        this.bpTypeData = bpTypeData;
+    }
+}
+
+public struct BodyPartRotationData
+{
+    public float CornerAngle;
+    public float RegularAngle;
+
+    public BodyPartRotationData(float cornerAngle, float regularAngle)
+    {
+        CornerAngle = cornerAngle;
+        RegularAngle = regularAngle;
+    }
+}
+
+public class BodyPartRotation
+{
+    private Transform m_transform { get; set; }
+
+    private float _corAngle;
+    public float CornerAngle
+    {
+        get { return _corAngle; }
+        set
+        {
+            if (value != _corAngle)
+                m_transform.rotation = Quaternion.Euler(Vector3.forward * (value + RegularAngle));
+            _corAngle = value;
+        }
+    }
+
+    private float _regAngle;
+    public float RegularAngle
+    {
+        get { return _regAngle; }
+        set
+        {
+            if (value != _regAngle)
+                m_transform.rotation = Quaternion.Euler(Vector3.forward * (value + CornerAngle));
+            _regAngle = value;
+        }
+    }
+
+    public BodyPartRotation(Transform transform)
+    {
+        m_transform = transform;
+        _corAngle = 0;
+        _regAngle = transform.rotation.eulerAngles.z;
+    }
+
+    public BodyPartRotation(Transform transform, int cornerAngle, int regularAngle)
+    {
+        m_transform = transform;
+        _corAngle = cornerAngle;
+        _regAngle = regularAngle;
+    }
+
+    public BodyPartRotation(Transform transform, BodyPartRotationData data)
+    {
+        m_transform = transform;
+        FromData(data);
+    }
+
+    public void FromData(BodyPartRotationData data)
+    {
+        _corAngle = data.CornerAngle;
+        _regAngle = data.RegularAngle;
+    }
+
+    public BodyPartRotationData ToData()
+    {
+        BodyPartRotationData data = new(_corAngle, _regAngle);
+        return data;
+    }
+}
+
+public struct BodyPartTypeData
+{
+    public EBodyPartType DefaultType { get; private set; }
+    public EBodyPartType CurrentType { get; private set; }
+
+    public BodyPartTypeData(EBodyPartType defaultType, EBodyPartType currentType)
+    {
+        DefaultType = defaultType;
+        CurrentType = currentType;
+    }
+}
+
+public class BodyPartType
+{
+    public EBodyPartType DefaultType { get; private set; }
+    public EBodyPartType CurrentType { get; set; }
+
+    public BodyPartType(EBodyPartType defaultType, EBodyPartType currentType)
+    {
+        DefaultType = defaultType;
+        CurrentType = currentType;
+    }
+
+    public BodyPartType(BodyPartTypeData data)
+    {
+        FromData(data);
+    }
+
+    public void FromData(BodyPartTypeData data)
+    {
+        DefaultType = data.DefaultType;
+        CurrentType = data.CurrentType;
+    }
+
+    public BodyPartTypeData ToData()
+    {
+        return new BodyPartTypeData(DefaultType, CurrentType);
     }
 }
 
 /// <summary>
-/// Enum used to represent which sprite is being used.
-/// Passed as a message to the other users.
-/// For other users, every body part has their full sprite sheet,
-/// and sprites are selected by these messages.
-/// For local user, only body parts with changing sprites need the
-/// full sprite sheet, or a BodyPartSprite property at all.
-/// </summary>
-public enum BodyPartSprite
-{
-    Head,
-    Tail,
-    Straight,
-    CornerTopLeft, // r
-    CornerTopRight, // 7
-    CornerBottomLeft, // l
-    CornerBottomRight, // _|
-    None
-}
-
 public class BodyPart
 {
     public Transform Transform { get; private set; }
@@ -60,11 +161,8 @@ public class BodyPart
         get { return Transform.position; }
         set { Transform.position = value; }
     }
-    public Quaternion Rotation
-    {
-        get { return Transform.rotation; }
-        set { Transform.rotation = value; }
-    }
+
+    public BodyPartRotation Rotation { get; private set; }
 
     // Get components
     private PlayerMovementController Player
@@ -72,64 +170,69 @@ public class BodyPart
         get { return Transform.parent.parent.GetComponent<PlayerMovementController>(); }
     }
 
-    private BodyPartSprite _sprite;
-    public BodyPartSprite Sprite
-    {
-        get { return _sprite; }
-        set
-        {
-            if (value == BodyPartSprite.None)
-            {
-                Debug.Log("No body part sprite provided.");
-                return;
-            }
-
-            if (Player.spriteSheet != null)
-            {
-                _sprite = value;
-                Transform.GetComponent<SpriteRenderer>().sprite = Player.spriteSheet[(int)_sprite];
-            }
-            else
-            {
-                Debug.LogError("No sprite sheet provided in PlayerMovementController!");
-            }
-        }
-    }
-    public BodyPartSprite DefaultSprite { get; set; }
+    public Sprite DefaultSprite { get; set; }
     public Vector2 Direction { get; set; }
-    public int TeleportCounter { get; set; } = 0;
-    public bool IsCorner { get; set; } = false;
-
-    // Rotation before it became a corner, useful only to parts after this one
-    public Quaternion prevRot = Quaternion.identity;
-
+    public int TeleportCounter { get; set; }
+    public BodyPartType BodyPartType { get; set; }
 
     /// <summary>
     /// Copy body part constructor.
     /// </summary>
-    /// <param name="old"></param>
-    /// <param name="transform"></param>
-    public BodyPart(BodyPart old, Transform transform)
+    public BodyPart(BodyPart old, Transform transform, BodyPartType type)
     {
         Transform = transform;
+        BodyPartType = type;
+
         Direction = old.Direction;
         DefaultSprite = old.DefaultSprite;
-        Sprite = old.Sprite;
-        IsCorner = old.IsCorner;
+        SetSprite(old.GetSprite());
+        Rotation = new BodyPartRotation(transform);
+        Rotation.RegularAngle = old.Rotation.RegularAngle;
+
         // Will not affect teleporting UNLESS necessary
         TeleportCounter = old.TeleportCounter + 1;
-        prevRot = old.prevRot;
     }
 
     /// <summary>
     /// Standard body part constructor.
     /// </summary>
-    public BodyPart(Transform transform, Vector2 direction, BodyPartSprite defaultSprite)
+    public BodyPart(Transform transform, Vector2 direction, Sprite defaultSprite,
+        EBodyPartType type)
     {
         Transform = transform;
         Direction = direction;
         DefaultSprite = defaultSprite;
-        Sprite = DefaultSprite;
+        SetSprite(defaultSprite);
+        Rotation = new(transform);
+        BodyPartType = new(type, type);
+        TeleportCounter = 0;
+    }
+
+    /// <summary>
+    /// Complete body part constructor.
+    /// </summary>
+    public BodyPart(Transform transform, Vector2 position, BodyPartRotation rotation,
+        Sprite defaultSprite, Sprite currentSprite, Vector2 direction, int teleportCounter,
+        BodyPartType bodyPartType)
+    {
+        Transform = transform;
+        Position = position;
+        Rotation = rotation;
+        DefaultSprite = defaultSprite;
+        SetSprite(currentSprite);
+        Direction = direction;
+        TeleportCounter = teleportCounter;
+        BodyPartType = bodyPartType;
+    }
+
+    private void SetSprite(Sprite sprite)
+    {
+        Transform.GetComponent<SpriteRenderer>().sprite = sprite;
+    }
+
+    private Sprite GetSprite()
+    {
+        return Transform.GetComponent<SpriteRenderer>().sprite;
     }
 
     /// <summary>
@@ -140,63 +243,66 @@ public class BodyPart
     /// <param name="prevDir">The direction of the previous body part.</param>
     public void MakeCorner(Vector2 prevDir)
     {
-        IsCorner = true;
-        Rotation = Quaternion.identity;
+        if (BodyPartType.DefaultType == EBodyPartType.Tail
+            || BodyPartType.DefaultType == EBodyPartType.Head)
+            return;
+
+        BodyPartType.CurrentType = EBodyPartType.Corner;
+
+        int cornerRot = 0;
 
         if (Direction == Vector2.up)
         {
             if (prevDir == Vector2.left)
-                Sprite = BodyPartSprite.CornerTopRight;
+                cornerRot = 180;
             //Sprite = CornerSprites[3]; // -R
             else if (prevDir == Vector2.right)
-                Sprite = BodyPartSprite.CornerTopLeft;
+                cornerRot = 90;
             //Sprite = CornerSprites[2]; // R
         }
 
         else if (Direction == Vector2.left)
         {
             if (prevDir == Vector2.up)
-                Sprite = BodyPartSprite.CornerBottomLeft;
+                cornerRot = 0;
             //Sprite = CornerSprites[0]; // L
             else if (prevDir == Vector2.down)
-                Sprite = BodyPartSprite.CornerTopLeft;
+                cornerRot = 90;
             //Sprite = CornerSprites[2]; // R
         }
 
         else if (Direction == Vector2.down)
         {
             if (prevDir == Vector2.left)
-                Sprite = BodyPartSprite.CornerBottomRight;
+                cornerRot = 270;
             //Sprite = CornerSprites[1]; // -L
             else if (prevDir == Vector2.right)
-                Sprite = BodyPartSprite.CornerBottomLeft;
-
+                cornerRot = 0;
             //Sprite = CornerSprites[0]; // L
         }
 
         else if (Direction == Vector2.right)
         {
             if (prevDir == Vector2.up)
-                Sprite = BodyPartSprite.CornerBottomRight;
-
+                cornerRot = 270;
             //Sprite = CornerSprites[1]; // -L
             else if (prevDir == Vector2.down)
-                Sprite = BodyPartSprite.CornerTopRight;
-
+                cornerRot = 180;
             //Sprite = CornerSprites[3]; // -R
         }
+
+        Rotation.CornerAngle = cornerRot;
+        SetSprite(Player.m_bpCornerL);
     }
 
     /// <summary>
     /// Reverts a body part into its default form.
     /// </summary>
-    /// <param name="rotation">The rotation to assign it, as pieces obtain
-    /// a rotation of Quat.Identity after becoming corners.</param>
-    public void MakeNotCorner(Quaternion rotation)
+    public void MakeNotCorner()
     {
-        IsCorner = false;
-        Rotation = rotation;
-        Sprite = DefaultSprite;
+        BodyPartType.CurrentType = BodyPartType.DefaultType;
+        Rotation.CornerAngle = 0;
+        SetSprite(DefaultSprite);
     }
 
     /// <summary>
@@ -229,40 +335,32 @@ public class BodyPart
 
         // Rotate the body part
         float angle = Vector2.SignedAngle(prevDirection, Direction);
-        Transform.Rotate(Vector3.forward, angle);
+        Rotation.RegularAngle += angle;
 
-        // If the body part is a corner piece
         if (next != null)
         {
             // If the next part isn't a tail, and is an angled body part,
             // make it a corner.
-            if (next.DefaultSprite != BodyPartSprite.Tail)
+            if (!(next.BodyPartType.CurrentType == EBodyPartType.Tail))
             {
                 if (angle != 0)
                 {
-                    if (!next.IsCorner)
-                        next.prevRot = next.Rotation;
                     next.MakeCorner(newDirection);
                 }
                 else
                 {
-                    // When making `next` not a corner, set its rotation
-                    // to our prevRot (if this is a corner), or our rotation
-                    // (if this isn't a corner)
-                    Quaternion rot = Rotation;
-                    if (IsCorner)
-                        rot = prevRot;
-                    next.MakeNotCorner(rot);
+                    next.MakeNotCorner();
                 }
             }
             // If it is a tail, rotate alongside this body part
             else
             {
-                // Store the tail's previous rotation in prevRot
-                // This is needed in some situations in HandleAddBodyPart
-                next.prevRot = next.Rotation;
-                next.Transform.Rotate(Vector3.forward, angle);
+                next.Rotation.RegularAngle += angle;
             }
+        }
+        else
+        {
+            Debug.LogWarning("Next body part is null!");
         }
     }
 
@@ -273,14 +371,9 @@ public class BodyPart
     /// <param name="transform">The transform of the physical body part.</param>
     public static BodyPart FromData(BodyPartData data, Transform transform)
     {
-        BodyPart bp = new(transform, data.direction, data.defaultSprite)
-        {
-            Position = data.position,
-            Rotation = Quaternion.Euler(Vector3.forward * data.rotation_z),
-            Sprite = data.currentSprite,
-            TeleportCounter = data.teleportCounter,
-            IsCorner = data.isCorner,
-        };
+        BodyPart bp = new(transform, data.direction, new(transform, data.bpRotationData),
+            data.defaultSprite, data.currentSprite, data.direction, data.teleportCounter,
+            new(data.bpTypeData));
         return bp;
     }
 
@@ -290,8 +383,8 @@ public class BodyPart
     /// <returns>The exported struct.</returns>
     public static BodyPartData ToData(BodyPart bp)
     {
-        BodyPartData data = new(bp.Position, bp.Direction, bp.Rotation.eulerAngles.z, bp.Sprite, bp.DefaultSprite,
-            bp.TeleportCounter, bp.IsCorner);
+        BodyPartData data = new(bp.Position, bp.Direction, bp.Rotation.ToData(), bp.GetSprite(),
+            bp.DefaultSprite, bp.TeleportCounter, bp.BodyPartType.ToData());
         return data;
     }
 }

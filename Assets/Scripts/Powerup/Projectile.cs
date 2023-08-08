@@ -26,12 +26,12 @@ public class Projectile
     }
     public GameObject immune = null;
 
-    public Projectile(float lifetime, Vector2 direction, Quaternion rotation, int counterMax, GameObject immune = null)
+    public Projectile(float lifetime, Vector2 direction, BodyPartRotation bpRotation, int counterMax, GameObject immune = null)
     {
         Lifetime = lifetime;
         Direction = direction;
         CounterMax = counterMax;
-        Rotation = rotation;
+        Rotation = Quaternion.Euler(Vector3.forward * bpRotation.RegularAngle);
 
         this.immune = immune;
     }

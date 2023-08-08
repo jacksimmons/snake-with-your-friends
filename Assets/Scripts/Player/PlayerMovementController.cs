@@ -9,6 +9,7 @@ using System;
 
 public class PlayerMovementController : NetworkBehaviour
 {
+    [SerializeField]
     private GameBehaviour _gameBehaviour;
 
     [SerializeField]
@@ -20,16 +21,15 @@ public class PlayerMovementController : NetworkBehaviour
     // Templates and sprites
     [SerializeField]
     private GameObject _bodyPartTemplate;
-    [SerializeField]
-    private Sprite _headPiece;
-    [SerializeField]
-    private Sprite _tailPiece;
-    [SerializeField]
-    private Sprite _straightPiece;
 
-    // Corner pieces
     [SerializeField]
-    public Sprite[] spriteSheet; // Must match with length of BodyPartSprite
+    private Sprite m_bpHead;
+    [SerializeField]
+    private Sprite m_bpTail;
+    [SerializeField]
+    private Sprite m_bpStraight;
+    [SerializeField]
+    public Sprite m_bpCornerL;
 
     // Directions and movement
     private Vector2 _startingDirection = Vector2.up;
@@ -84,14 +84,8 @@ public class PlayerMovementController : NetworkBehaviour
     // Components
     private Rigidbody2D _rb;
 
-
-    public void Reset()
-    {
-    }
-
     private void Start()
     {
-        _gameBehaviour = GetComponentInChildren<GameBehaviour>();
         bodyPartContainer.SetActive(false);
 
         // Data structures
@@ -105,15 +99,22 @@ public class PlayerMovementController : NetworkBehaviour
             // Head and body
             if (i < containerTransform.childCount - 1)
             {
-                BodyPartSprite _sprite;
+                Sprite _sprite;
+                EBodyPartType _bodyPartType;
 
                 // Calculate sprites for head and straights
                 if (i == 0)
-                    _sprite = BodyPartSprite.Head;
+                {
+                    _bodyPartType = EBodyPartType.Head;
+                    _sprite = m_bpHead;
+                }
                 else
-                    _sprite = BodyPartSprite.Straight;
+                {
+                    _bodyPartType = EBodyPartType.Straight;
+                    _sprite = m_bpStraight;
+                }
 
-                bp = new BodyPart(_transform, _startingDirection, _sprite);
+                bp = new BodyPart(_transform, _startingDirection, _sprite, _bodyPartType);
                 if (i == 0)
                     head = bp;
             }
@@ -121,7 +122,7 @@ public class PlayerMovementController : NetworkBehaviour
             // Tail - the BodyPart script handles these differently.
             else
             {
-                bp = new BodyPart(_transform, _startingDirection, BodyPartSprite.Tail);
+                bp = new BodyPart(_transform, _startingDirection, m_bpTail, EBodyPartType.Tail);
                 tail = bp;
             }
             BodyParts.Add(bp);
@@ -300,18 +301,19 @@ public class PlayerMovementController : NetworkBehaviour
         GameObject newBodyPartObj = Instantiate(
             _bodyPartTemplate,
             tail.Position - (Vector3)tail.Direction,
-            tail.Rotation,
+            tail.Transform.rotation,
             bodyPartContainer.transform
         );
 
-        BodyPart newBodyPart = new(tail, newBodyPartObj.transform);
+        BodyPart newBodyPart = new(tail, newBodyPartObj.transform, new(EBodyPartType.Tail,
+            EBodyPartType.Tail));
 
-        tail.DefaultSprite = BodyPartSprite.Straight;
-        tail.Sprite = BodyPartSprite.Straight;
+        tail.DefaultSprite = m_bpStraight;
+        tail.BodyPartType = new(EBodyPartType.Straight, EBodyPartType.Straight);
 
         if (!Mathf.Approximately(Vector2.SignedAngle(BodyParts[^2].Direction, tail.Direction), 0))
         {
-            newBodyPart.Rotation = tail.prevRot;
+            newBodyPart.Rotation.RegularAngle = tail.Rotation.RegularAngle;
             tail.MakeCorner(BodyParts[^2].Direction);
         }
         BodyParts.Add(newBodyPart);

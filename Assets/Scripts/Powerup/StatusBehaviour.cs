@@ -105,7 +105,7 @@ public class StatusBehaviour : NetworkBehaviour
                 proj.Proj = new Projectile(
                     lifetime: 5,
                     direction: _player.head.Direction,
-                    rotation: _player.head.Rotation,
+                    bpRotation: _player.head.Rotation,
                     counterMax: Mathf.CeilToInt(_player.CounterMax / CRITICAL_MULT),
                     immune: _player.head.Transform.gameObject
                 );
@@ -133,7 +133,7 @@ public class StatusBehaviour : NetworkBehaviour
                 proj.Proj = new Projectile(
                     lifetime: 5,
                     direction: Vectors.Rotate(-_player.tail.Direction, randomRotation),
-                    rotation: _player.tail.Rotation,
+                    bpRotation: _player.tail.Rotation,
                     counterMax: Mathf.CeilToInt(_player.CounterMax / MAJOR_MULT),
                     immune: _player.head.Transform.gameObject
                 );
