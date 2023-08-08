@@ -7,17 +7,24 @@ using UnityEngine.UI;
 public class MainMenu : MonoBehaviour
 {
     [SerializeField]
-    private Button m_offlineButton;
+    private Button m_noFriendsButton;
     [SerializeField]
     private Button m_createButton;
     [SerializeField]
     private Button m_joinButton;
     [SerializeField]
     private Button m_refreshButton;
+    [SerializeField]
+    private GameObject m_networkManager;
 
     public void Start()
     {
         TestSteamConnection();
+        if (!GameObject.Find("NetworkManager"))
+        {
+            GameObject go = Instantiate(m_networkManager);
+            go.name = "NetworkManager";
+        }
     }
 
     public void Restart()
@@ -42,6 +49,28 @@ public class MainMenu : MonoBehaviour
             m_joinButton.interactable = true;
             m_refreshButton.gameObject.SetActive(false);
         }
+    }
+
+    public void OnNoFriendsButtonPressed()
+    {
+        GameObject go = GameObject.Find("NetworkManager");
+
+        if (go != null)
+            go.GetComponent<SteamLobby>().HostLobby();
+    }
+
+    public void OnCreateLobbyButtonPressed()
+    {
+        if (!SteamUser.BLoggedOn())
+        {
+            print("Not online!");
+            return;
+        }
+
+        GameObject go = GameObject.Find("NetworkManager");
+
+        if (go != null)
+            go.GetComponent<SteamLobby>().HostLobby();
     }
 
     public void OnJoinLobbyButtonPressed()

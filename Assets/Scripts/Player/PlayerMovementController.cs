@@ -57,7 +57,7 @@ public class PlayerMovementController : NetworkBehaviour
     public bool frozen = false;
 
     public const int LOWEST_COUNTER_MAX = 1;
-    public const int DEFAULT_COUNTER_MAX = 20;
+    public const int DEFAULT_COUNTER_MAX = 30;
     private int _counterMax = DEFAULT_COUNTER_MAX;
     public int CounterMax
     { 
@@ -263,7 +263,11 @@ public class PlayerMovementController : NetworkBehaviour
                     }
                     if (i + 1 < BodyParts.Count)
                         next = BodyParts[i + 1];
+                    print("Before: Index: " + (i + 1) + "Regular: " + BodyParts[i + 1].Rotation.RegularAngle
+                        + "Corner: " + BodyParts[i + 1].Rotation.CornerAngle + "Absolute: " + BodyParts[i+1].Transform.rotation.eulerAngles.z);
                     BodyParts[i].HandleMovement(dir, next);
+                    print("After: Index: " + (i + 1) + "Regular: " + BodyParts[i + 1].Rotation.RegularAngle
+    + "Corner: " + BodyParts[i + 1].Rotation.CornerAngle + "Absolute: " + BodyParts[i + 1].Transform.rotation.eulerAngles.z);
                 }
             }
 
@@ -298,23 +302,25 @@ public class PlayerMovementController : NetworkBehaviour
     /// </summary>
     public void AddBodyPart()
     {
-        GameObject newBodyPartObj = Instantiate(
-            _bodyPartTemplate,
-            tail.Position - (Vector3)tail.Direction,
-            tail.Transform.rotation,
-            bodyPartContainer.transform
-        );
+        GameObject newBodyPartObj = Instantiate(_bodyPartTemplate);
+        newBodyPartObj.transform.parent = bodyPartContainer.transform;
 
         BodyPart newBodyPart = new(tail, newBodyPartObj.transform, new(EBodyPartType.Tail,
-            EBodyPartType.Tail));
+            EBodyPartType.Tail))
+        {
+            Position = tail.Position - (Vector3)tail.Direction
+        };
 
         tail.DefaultSprite = m_bpStraight;
         tail.BodyPartType = new(EBodyPartType.Straight, EBodyPartType.Straight);
 
-        if (!Mathf.Approximately(Vector2.SignedAngle(BodyParts[^2].Direction, tail.Direction), 0))
+        if (BodyParts[^2].BodyPartType.CurrentType == EBodyPartType.Corner)
         {
-            newBodyPart.Rotation.RegularAngle = tail.Rotation.RegularAngle;
             tail.MakeCorner(BodyParts[^2].Direction);
+        }
+        else
+        {
+            tail.MakeNotCorner();
         }
         BodyParts.Add(newBodyPart);
 

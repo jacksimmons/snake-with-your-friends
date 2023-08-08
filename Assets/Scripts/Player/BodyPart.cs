@@ -4,14 +4,6 @@ using System.Runtime.InteropServices;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-public enum EBodyPartType
-{
-    Straight,
-    Head,
-    Tail,
-    Corner
-}
-
 /// <summary>
 /// Struct to represent data of a BodyPart needed for networking.
 /// </summary>
@@ -37,120 +29,6 @@ public struct BodyPartData
     }
 }
 
-public struct BodyPartRotationData
-{
-    public float CornerAngle;
-    public float RegularAngle;
-
-    public BodyPartRotationData(float cornerAngle, float regularAngle)
-    {
-        CornerAngle = cornerAngle;
-        RegularAngle = regularAngle;
-    }
-}
-
-public class BodyPartRotation
-{
-    private Transform m_transform { get; set; }
-
-    private float _corAngle;
-    public float CornerAngle
-    {
-        get { return _corAngle; }
-        set
-        {
-            if (value != _corAngle)
-                m_transform.rotation = Quaternion.Euler(Vector3.forward * (value + RegularAngle));
-            _corAngle = value;
-        }
-    }
-
-    private float _regAngle;
-    public float RegularAngle
-    {
-        get { return _regAngle; }
-        set
-        {
-            if (value != _regAngle)
-                m_transform.rotation = Quaternion.Euler(Vector3.forward * (value + CornerAngle));
-            _regAngle = value;
-        }
-    }
-
-    public BodyPartRotation(Transform transform)
-    {
-        m_transform = transform;
-        _corAngle = 0;
-        _regAngle = transform.rotation.eulerAngles.z;
-    }
-
-    public BodyPartRotation(Transform transform, int cornerAngle, int regularAngle)
-    {
-        m_transform = transform;
-        _corAngle = cornerAngle;
-        _regAngle = regularAngle;
-    }
-
-    public BodyPartRotation(Transform transform, BodyPartRotationData data)
-    {
-        m_transform = transform;
-        FromData(data);
-    }
-
-    public void FromData(BodyPartRotationData data)
-    {
-        _corAngle = data.CornerAngle;
-        _regAngle = data.RegularAngle;
-    }
-
-    public BodyPartRotationData ToData()
-    {
-        BodyPartRotationData data = new(_corAngle, _regAngle);
-        return data;
-    }
-}
-
-public struct BodyPartTypeData
-{
-    public EBodyPartType DefaultType { get; private set; }
-    public EBodyPartType CurrentType { get; private set; }
-
-    public BodyPartTypeData(EBodyPartType defaultType, EBodyPartType currentType)
-    {
-        DefaultType = defaultType;
-        CurrentType = currentType;
-    }
-}
-
-public class BodyPartType
-{
-    public EBodyPartType DefaultType { get; private set; }
-    public EBodyPartType CurrentType { get; set; }
-
-    public BodyPartType(EBodyPartType defaultType, EBodyPartType currentType)
-    {
-        DefaultType = defaultType;
-        CurrentType = currentType;
-    }
-
-    public BodyPartType(BodyPartTypeData data)
-    {
-        FromData(data);
-    }
-
-    public void FromData(BodyPartTypeData data)
-    {
-        DefaultType = data.DefaultType;
-        CurrentType = data.CurrentType;
-    }
-
-    public BodyPartTypeData ToData()
-    {
-        return new BodyPartTypeData(DefaultType, CurrentType);
-    }
-}
-
-/// <summary>
 public class BodyPart
 {
     public Transform Transform { get; private set; }
@@ -254,40 +132,40 @@ public class BodyPart
         if (Direction == Vector2.up)
         {
             if (prevDir == Vector2.left)
-                cornerRot = 180;
+                cornerRot = -180;
             //Sprite = CornerSprites[3]; // -R
             else if (prevDir == Vector2.right)
-                cornerRot = 90;
+                cornerRot = -90;
             //Sprite = CornerSprites[2]; // R
         }
 
         else if (Direction == Vector2.left)
         {
             if (prevDir == Vector2.up)
-                cornerRot = 0;
+                cornerRot = -0;
             //Sprite = CornerSprites[0]; // L
             else if (prevDir == Vector2.down)
-                cornerRot = 90;
+                cornerRot = -90;
             //Sprite = CornerSprites[2]; // R
         }
 
         else if (Direction == Vector2.down)
         {
             if (prevDir == Vector2.left)
-                cornerRot = 270;
+                cornerRot = -270;
             //Sprite = CornerSprites[1]; // -L
             else if (prevDir == Vector2.right)
-                cornerRot = 0;
+                cornerRot = -0;
             //Sprite = CornerSprites[0]; // L
         }
 
         else if (Direction == Vector2.right)
         {
             if (prevDir == Vector2.up)
-                cornerRot = 270;
+                cornerRot = -270;
             //Sprite = CornerSprites[1]; // -L
             else if (prevDir == Vector2.down)
-                cornerRot = 180;
+                cornerRot = -180;
             //Sprite = CornerSprites[3]; // -R
         }
 
@@ -301,7 +179,8 @@ public class BodyPart
     public void MakeNotCorner()
     {
         BodyPartType.CurrentType = BodyPartType.DefaultType;
-        Rotation.CornerAngle = 0;
+
+        Rotation.RegularAngle = Rotation.RegularAngle; // => transform.rotation = Rotation.RegularAngle
         SetSprite(DefaultSprite);
     }
 
@@ -343,7 +222,7 @@ public class BodyPart
             // make it a corner.
             if (!(next.BodyPartType.CurrentType == EBodyPartType.Tail))
             {
-                if (angle != 0)
+                if (!Mathf.Approximately(angle, 0))
                 {
                     next.MakeCorner(newDirection);
                 }
@@ -355,6 +234,7 @@ public class BodyPart
             // If it is a tail, rotate alongside this body part
             else
             {
+                next.Direction = Direction;
                 next.Rotation.RegularAngle += angle;
             }
         }
