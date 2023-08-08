@@ -263,11 +263,7 @@ public class PlayerMovementController : NetworkBehaviour
                     }
                     if (i + 1 < BodyParts.Count)
                         next = BodyParts[i + 1];
-                    print("Before: Index: " + (i + 1) + "Regular: " + BodyParts[i + 1].Rotation.RegularAngle
-                        + "Corner: " + BodyParts[i + 1].Rotation.CornerAngle + "Absolute: " + BodyParts[i+1].Transform.rotation.eulerAngles.z);
                     BodyParts[i].HandleMovement(dir, next);
-                    print("After: Index: " + (i + 1) + "Regular: " + BodyParts[i + 1].Rotation.RegularAngle
-    + "Corner: " + BodyParts[i + 1].Rotation.CornerAngle + "Absolute: " + BodyParts[i + 1].Transform.rotation.eulerAngles.z);
                 }
             }
 
@@ -293,6 +289,11 @@ public class PlayerMovementController : NetworkBehaviour
             }
         }
         return false;
+    }
+
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        
     }
 
 

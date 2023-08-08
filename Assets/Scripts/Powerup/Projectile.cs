@@ -1,5 +1,11 @@
 using UnityEngine;
 
+public enum EProjectileType
+{
+    None,
+    Shit,
+}
+
 public class Projectile
 {
     public float Lifetime { get; private set; }

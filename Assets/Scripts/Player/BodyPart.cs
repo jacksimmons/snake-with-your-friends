@@ -231,7 +231,7 @@ public class BodyPart
                     next.MakeNotCorner();
                 }
             }
-            // If it is a tail, rotate alongside this body part
+            // If it is a tail, move in the same way as this body part
             else
             {
                 next.Direction = Direction;

@@ -135,7 +135,7 @@ public class StatusBehaviour : NetworkBehaviour
                     direction: Vectors.Rotate(-_player.tail.Direction, randomRotation),
                     bpRotation: _player.tail.Rotation,
                     counterMax: Mathf.CeilToInt(_player.CounterMax / MAJOR_MULT),
-                    immune: _player.head.Transform.gameObject
+                    immune: _player.tail.Transform.gameObject
                 );
                 shit.transform.Rotate(Vector3.forward * randomRotation);
                 break;
