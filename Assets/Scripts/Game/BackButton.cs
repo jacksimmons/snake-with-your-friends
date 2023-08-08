@@ -13,7 +13,6 @@ public class BackButton : MonoBehaviour
         try
         {
             Destroy(GameObject.FindWithTag("Lobby"));
-            Destroy(GameObject.FindWithTag("Player"));
         }
         catch { }
         SceneManager.LoadScene("MainMenu");
