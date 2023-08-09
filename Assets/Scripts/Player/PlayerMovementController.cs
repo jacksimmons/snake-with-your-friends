@@ -6,6 +6,7 @@ using UnityEngine.SceneManagement;
 using UnityEditor;
 using Steamworks;
 using System;
+using UnityEditor.Experimental.GraphView;
 
 public class PlayerMovementController : NetworkBehaviour
 {
@@ -23,11 +24,11 @@ public class PlayerMovementController : NetworkBehaviour
     private GameObject _bodyPartTemplate;
 
     [SerializeField]
-    private Sprite m_bpHead;
+    public Sprite m_bpHead;
     [SerializeField]
-    private Sprite m_bpTail;
+    public Sprite m_bpTail;
     [SerializeField]
-    private Sprite m_bpStraight;
+    public Sprite m_bpStraight;
     [SerializeField]
     public Sprite m_bpCornerL;
 
@@ -57,7 +58,7 @@ public class PlayerMovementController : NetworkBehaviour
     public bool frozen = false;
 
     public const int LOWEST_COUNTER_MAX = 1;
-    public const int DEFAULT_COUNTER_MAX = 30;
+    public const int DEFAULT_COUNTER_MAX = 20;
     private int _counterMax = DEFAULT_COUNTER_MAX;
     public int CounterMax
     { 
@@ -71,7 +72,7 @@ public class PlayerMovementController : NetworkBehaviour
             else { _counterMax = value; }
         }
     }
-    [SyncVar] public int counter = 0;
+    public int counter = 0;
 
     // Body Parts
     public BodyPart head;
@@ -114,7 +115,7 @@ public class PlayerMovementController : NetworkBehaviour
                     _sprite = m_bpStraight;
                 }
 
-                bp = new BodyPart(_transform, _startingDirection, _sprite, _bodyPartType);
+                bp = new BodyPart(_transform, _startingDirection, _bodyPartType);
                 if (i == 0)
                     head = bp;
             }
@@ -122,7 +123,7 @@ public class PlayerMovementController : NetworkBehaviour
             // Tail - the BodyPart script handles these differently.
             else
             {
-                bp = new BodyPart(_transform, _startingDirection, m_bpTail, EBodyPartType.Tail);
+                bp = new BodyPart(_transform, _startingDirection, EBodyPartType.Tail);
                 tail = bp;
             }
             BodyParts.Add(bp);
@@ -160,7 +161,6 @@ public class PlayerMovementController : NetworkBehaviour
             }
         }
     }
-
 
     private void HandleInput()
     {
@@ -211,7 +211,6 @@ public class PlayerMovementController : NetworkBehaviour
             Time.timeScale = Mathf.Abs(Time.timeScale - 1f);
         }
     }
-
 
     /// <summary>
     /// Handles movement for all body parts, and the frequency of movement ticks.
@@ -291,17 +290,11 @@ public class PlayerMovementController : NetworkBehaviour
         return false;
     }
 
-    private void OnCollisionEnter2D(Collision2D collision)
-    {
-        
-    }
-
-
     /// <summary>
     /// Adds a new body part onto the end of the snake, then makes it the new tail.
     /// Then turns the tail into a regular straight piece.
     /// </summary>
-    public void AddBodyPart()
+    private void AddBodyPart()
     {
         GameObject newBodyPartObj = Instantiate(_bodyPartTemplate);
         newBodyPartObj.transform.parent = bodyPartContainer.transform;
@@ -312,10 +305,9 @@ public class PlayerMovementController : NetworkBehaviour
             Position = tail.Position - (Vector3)tail.Direction
         };
 
-        tail.DefaultSprite = m_bpStraight;
-        tail.BodyPartType = new(EBodyPartType.Straight, EBodyPartType.Straight);
+        tail.BPType = new(EBodyPartType.Straight, EBodyPartType.Straight);
 
-        if (BodyParts[^2].BodyPartType.CurrentType == EBodyPartType.Corner)
+        if (BodyParts[^2].BPType.CurrentType == EBodyPartType.Corner)
         {
             tail.MakeCorner(BodyParts[^2].Direction);
         }
@@ -331,45 +323,44 @@ public class PlayerMovementController : NetworkBehaviour
         tail.Transform.name = "Tail";
     }
 
-
     /// <summary>
-    /// Removes the i-1th body part from the snake.
-    /// ! This needs testing.
+    /// Bisects the snake at the body part which is removed.
     /// </summary>
-    /// <returns>
-    /// A boolean, `true` meaning the body part was removed and the snake is
-    /// still alive.
-    /// `false` meaning the body part was not removed, as there is only a head
-    /// and a tail left; so the snake should die.
-    /// </returns>
-    private bool RemoveBodyPart(int index)
+    /// <param name="bp">The removed body part.</param>
+    /// <returns>`true` if the player survives (bp != head), `false` otherwise</returns>
+    private bool RemoveBodyPart(BodyPart bp)
     {
-        if (index == 0)
+        if (bp == head)
         {
             HandleDeath();
             return false;
         }
-
-        if (index < BodyParts.Count && BodyParts.Count > 2)
-        {
-            // Remove and destroy body part at index
-            BodyParts.RemoveAt(index);
-            Destroy(transform.GetChild(index).gameObject);
-            return true;
-        }
         else
         {
-            return false;
-        }
+            int deadIndex = BodyParts.IndexOf(bp);
+            while (deadIndex < BodyParts.Count)
+            {
+                SetBodyPartDead(BodyParts[deadIndex], true);
+                BodyParts.RemoveAt(deadIndex);
+                continue;
+            }
+
+            BodyParts[^1].BPType = new(EBodyPartType.Tail, EBodyPartType.Tail);
+        }   
+        return true;
     }
 
+    private void SetBodyPartDead(BodyPart bp, bool dead)
+    {
+        bp.Transform.gameObject.GetComponent<SpriteRenderer>().color = dead ? Color.gray : Color.white;
+    }
 
     public void SetDead(bool dead)
     {
         _rb.simulated = !dead;
         frozen = dead;
         foreach (BodyPart part in BodyParts)
-            part.Transform.gameObject.GetComponent<SpriteRenderer>().color = dead ? Color.gray : Color.white;
+            SetBodyPartDead(part, dead);
         status.gameObject.SetActive(!dead);
     }
 
@@ -416,7 +407,6 @@ public class PlayerMovementController : NetworkBehaviour
         _queuedActions.Add(action);
     }
 
-
     /// <summary>
     /// Queues an AddBodyPart action.
     /// </summary>
@@ -425,6 +415,14 @@ public class PlayerMovementController : NetworkBehaviour
         _queuedActions.Add(new Action(AddBodyPart));
     }
 
+    public void QRemoveBodyPart(BodyPart bp)
+    {
+        _queuedActions.Add(() => RemoveBodyPart(bp));
+    }
+    public void QRemoveBodyPart(int index)
+    {
+        QRemoveBodyPart(BodyParts[index]);
+    }
 
     /// <summary>
     /// Queues the beginning of forced movement.

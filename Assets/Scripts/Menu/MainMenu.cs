@@ -16,6 +16,8 @@ public class MainMenu : MonoBehaviour
     private Button m_refreshButton;
     [SerializeField]
     private GameObject m_networkManager;
+    [SerializeField]
+    private GameObject m_sacrificialLamb;
 
     public void Start()
     {
@@ -25,19 +27,23 @@ public class MainMenu : MonoBehaviour
             GameObject go = Instantiate(m_networkManager);
             go.name = "NetworkManager";
         }
+        if (!GameObject.Find("SacrificialLamb"))
+        {
+            GameObject lamb = Instantiate(m_sacrificialLamb);
+            lamb.name = "SacrificialLamb";
+            DontDestroyOnLoad(lamb);
+        }
     }
 
     public void Restart()
     {
-        GameObject sm = GameObject.Find("SteamManager");
-        if (sm != null) Destroy(sm);
-
+        GameObject.Find("SacrificialLamb").GetComponent<Lamb>().ClearDontDestroyOnLoad();
         SceneManager.LoadScene("MainMenu");
     }
 
     public void TestSteamConnection()
     {
-        if (!SteamManager.Initialized)
+        if (!SteamManager.Initialized || !SteamUser.BLoggedOn())
         {
             m_createButton.interactable = false;
             m_joinButton.interactable = false;
@@ -56,7 +62,7 @@ public class MainMenu : MonoBehaviour
         GameObject go = GameObject.Find("NetworkManager");
 
         if (go != null)
-            go.GetComponent<SteamLobby>().HostLobby();
+            go.GetComponent<SteamLobby>().HostLobby(singleplayer: true);
     }
 
     public void OnCreateLobbyButtonPressed()
@@ -70,7 +76,7 @@ public class MainMenu : MonoBehaviour
         GameObject go = GameObject.Find("NetworkManager");
 
         if (go != null)
-            go.GetComponent<SteamLobby>().HostLobby();
+            go.GetComponent<SteamLobby>().HostLobby(singleplayer: false);
     }
 
     public void OnJoinLobbyButtonPressed()

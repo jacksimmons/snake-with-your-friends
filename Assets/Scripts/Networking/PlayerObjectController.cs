@@ -35,17 +35,19 @@ public class PlayerObjectController : NetworkBehaviour
 
     /// <summary>
     /// Called when starting as a host.
+    /// Used in SinglePlayer or MultiPlayer mode.
     /// </summary>
     public override void OnStartAuthority()
     {
         CmdSetPlayerName(SteamFriends.GetPersonaName());
-        gameObject.name = "LocalGamePlayer";
+        gameObject.name = "LocalPlayerObject";
         LobbyController.instance.FindLocalPlayer();
         LobbyController.instance.UpdateLobbyName();
     }
 
     /// <summary>
     /// Called when starting as a client.
+    /// Used in MultiPlayer mode.
     /// </summary>
     public override void OnStartClient()
     {
@@ -56,6 +58,7 @@ public class PlayerObjectController : NetworkBehaviour
 
     /// <summary>
     /// Called when stopping as a client.
+    /// Used in MultiPlayer mode.
     /// </summary>
     public override void OnStopClient()
     {

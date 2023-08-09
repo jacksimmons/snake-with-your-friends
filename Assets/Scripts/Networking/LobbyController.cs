@@ -69,7 +69,7 @@ public class LobbyController : MonoBehaviour
 
     public void FindLocalPlayer()
     {
-        localPlayerObject = GameObject.Find("LocalGamePlayer");
+        localPlayerObject = GameObject.Find("LocalPlayerObject");
         localPlayerController = localPlayerObject.GetComponent<PlayerObjectController>();
     }
 

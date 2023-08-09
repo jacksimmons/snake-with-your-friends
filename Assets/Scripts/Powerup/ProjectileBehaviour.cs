@@ -44,10 +44,15 @@ public class ProjectileBehaviour : MonoBehaviour
         Transform player = obj.transform.parent.parent;
         if (player != null && player.CompareTag("Player"))
         {
-            if (m_type == EProjectileType.Shit)
+            switch (m_type)
             {
-                GameObject.FindWithTag("Foreground").GetComponent<ForegroundBehaviour>().AddToForeground(GetComponent<SpriteRenderer>().sprite);
-                Destroy(gameObject);
+                case EProjectileType.Blooper:
+                    GameObject.FindWithTag("Foreground").GetComponent<ForegroundBehaviour>().AddToForeground(GetComponent<SpriteRenderer>().sprite);
+                    Destroy(gameObject);
+                    break;
+                case EProjectileType.HurtOnce:
+                    player.GetComponent<PlayerMovementController>().QRemoveBodyPart(obj.transform.GetSiblingIndex());
+                    break;
             }
         }
     }

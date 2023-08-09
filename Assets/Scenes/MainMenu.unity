@@ -756,6 +756,7 @@ MonoBehaviour:
   m_joinButton: {fileID: 921749954}
   m_refreshButton: {fileID: 1007540784}
   m_networkManager: {fileID: 3351587991732139357, guid: 674cc9cb8709d20468ae4dec306b5c43, type: 3}
+  m_sacrificialLamb: {fileID: 5129511492815513752, guid: d0b841f162de1c644963debc6d964996, type: 3}
 --- !u!114 &1007540784 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 3868020592265161070, guid: 1b0273b19bf2e8545a39951da787dc63, type: 3}

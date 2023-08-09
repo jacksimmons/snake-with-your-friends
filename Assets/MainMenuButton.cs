@@ -7,6 +7,7 @@ public class MainMenuButton : MonoBehaviour
 {
     public void OnMainMenuButtonPressed()
     {
+        GameObject.Find("NetworkManager").GetComponent<CustomNetworkManager>().StopClient();
         SceneManager.LoadScene("MainMenu");
     }
 }

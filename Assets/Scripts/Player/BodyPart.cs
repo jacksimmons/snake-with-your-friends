@@ -12,18 +12,14 @@ public struct BodyPartData
     public Vector2 position;
     public Vector2 direction;
     public BodyPartRotationData bpRotationData;
-    public Sprite currentSprite;
-    public Sprite defaultSprite;
     public int teleportCounter;
     public BodyPartTypeData bpTypeData;
-    public BodyPartData(Vector2 position, Vector2 direction, BodyPartRotationData bpRotationData, Sprite currentSprite,
-    Sprite defaultSprite, int teleportCounter, BodyPartTypeData bpTypeData)
+    public BodyPartData(Vector2 position, Vector2 direction, BodyPartRotationData bpRotationData,
+        int teleportCounter, BodyPartTypeData bpTypeData)
     {
         this.position = position;
         this.direction = direction;
         this.bpRotationData = bpRotationData;
-        this.currentSprite = currentSprite;
-        this.defaultSprite = defaultSprite;
         this.teleportCounter = teleportCounter;
         this.bpTypeData = bpTypeData;
     }
@@ -42,16 +38,34 @@ public class BodyPart
 
     public BodyPartRotation Rotation { get; private set; }
 
-    // Get components
-    private PlayerMovementController Player
-    {
-        get { return Transform.parent.parent.GetComponent<PlayerMovementController>(); }
-    }
+    private PlayerMovementController Player;
 
-    public Sprite DefaultSprite { get; set; }
     public Vector2 Direction { get; set; }
     public int TeleportCounter { get; set; }
-    public BodyPartType BodyPartType { get; set; }
+
+    private BodyPartType _bpType = null;
+    public BodyPartType BPType
+    {
+        get { return _bpType; }
+        set
+        {
+            if (_bpType != null)
+            {
+                if (value.DefaultType != EBodyPartType.None && value.DefaultType != _bpType.DefaultType)
+                    DefaultSprite = BodyPartType.TypeToPlayerSprite(value.DefaultType, Player);
+                if (value.CurrentType != EBodyPartType.None && value.CurrentType != _bpType.CurrentType)
+                    SetSprite(BodyPartType.TypeToPlayerSprite(value.CurrentType, Player));
+            }
+            else if (value != null)
+            {
+                DefaultSprite = BodyPartType.TypeToPlayerSprite(value.DefaultType, Player);
+                SetSprite(BodyPartType.TypeToPlayerSprite(value.CurrentType, Player));
+            }
+            _bpType = value;
+        }
+    }
+
+    public Sprite DefaultSprite { get; private set; }
 
     /// <summary>
     /// Copy body part constructor.
@@ -59,11 +73,11 @@ public class BodyPart
     public BodyPart(BodyPart old, Transform transform, BodyPartType type)
     {
         Transform = transform;
-        BodyPartType = type;
+        Init();
+
+        BPType = type;
 
         Direction = old.Direction;
-        DefaultSprite = old.DefaultSprite;
-        SetSprite(old.GetSprite());
         Rotation = new BodyPartRotation(transform);
         Rotation.RegularAngle = old.Rotation.RegularAngle;
 
@@ -74,33 +88,38 @@ public class BodyPart
     /// <summary>
     /// Standard body part constructor.
     /// </summary>
-    public BodyPart(Transform transform, Vector2 direction, Sprite defaultSprite,
-        EBodyPartType type)
+    public BodyPart(Transform transform, Vector2 direction, EBodyPartType type)
     {
         Transform = transform;
+        Init();
+
         Direction = direction;
-        DefaultSprite = defaultSprite;
-        SetSprite(defaultSprite);
         Rotation = new(transform);
-        BodyPartType = new(type, type);
+        BPType = new(type, type);
         TeleportCounter = 0;
+
     }
 
     /// <summary>
     /// Complete body part constructor.
     /// </summary>
     public BodyPart(Transform transform, Vector2 position, BodyPartRotation rotation,
-        Sprite defaultSprite, Sprite currentSprite, Vector2 direction, int teleportCounter,
-        BodyPartType bodyPartType)
+        Vector2 direction, int teleportCounter, BodyPartType type)
     {
         Transform = transform;
+        Init();
+
         Position = position;
         Rotation = rotation;
-        DefaultSprite = defaultSprite;
-        SetSprite(currentSprite);
         Direction = direction;
         TeleportCounter = teleportCounter;
-        BodyPartType = bodyPartType;
+        BPType = type;
+
+    }
+
+    private void Init()
+    {
+        Player = Transform.parent.parent.GetComponent<PlayerMovementController>();
     }
 
     private void SetSprite(Sprite sprite)
@@ -121,11 +140,11 @@ public class BodyPart
     /// <param name="prevDir">The direction of the previous body part.</param>
     public void MakeCorner(Vector2 prevDir)
     {
-        if (BodyPartType.DefaultType == EBodyPartType.Tail
-            || BodyPartType.DefaultType == EBodyPartType.Head)
+        if (BPType.DefaultType == EBodyPartType.Tail
+            || BPType.DefaultType == EBodyPartType.Head)
             return;
 
-        BodyPartType.CurrentType = EBodyPartType.Corner;
+        BPType.CurrentType = EBodyPartType.Corner;
 
         int cornerRot = 0;
 
@@ -178,7 +197,7 @@ public class BodyPart
     /// </summary>
     public void MakeNotCorner()
     {
-        BodyPartType.CurrentType = BodyPartType.DefaultType;
+        BPType.CurrentType = BPType.DefaultType;
 
         Rotation.RegularAngle = Rotation.RegularAngle; // => transform.rotation = Rotation.RegularAngle
         SetSprite(DefaultSprite);
@@ -220,7 +239,7 @@ public class BodyPart
         {
             // If the next part isn't a tail, and is an angled body part,
             // make it a corner.
-            if (!(next.BodyPartType.CurrentType == EBodyPartType.Tail))
+            if (!(next.BPType.CurrentType == EBodyPartType.Tail))
             {
                 if (!Mathf.Approximately(angle, 0))
                 {
@@ -252,7 +271,7 @@ public class BodyPart
     public static BodyPart FromData(BodyPartData data, Transform transform)
     {
         BodyPart bp = new(transform, data.direction, new(transform, data.bpRotationData),
-            data.defaultSprite, data.currentSprite, data.direction, data.teleportCounter,
+            data.direction, data.teleportCounter,
             new(data.bpTypeData));
         return bp;
     }
@@ -263,8 +282,8 @@ public class BodyPart
     /// <returns>The exported struct.</returns>
     public static BodyPartData ToData(BodyPart bp)
     {
-        BodyPartData data = new(bp.Position, bp.Direction, bp.Rotation.ToData(), bp.GetSprite(),
-            bp.DefaultSprite, bp.TeleportCounter, bp.BodyPartType.ToData());
+        BodyPartData data = new(bp.Position, bp.Direction, bp.Rotation.ToData(), bp.TeleportCounter
+            , bp.BPType.ToData());
         return data;
     }
 }

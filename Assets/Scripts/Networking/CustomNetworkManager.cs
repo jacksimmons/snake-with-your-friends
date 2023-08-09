@@ -8,7 +8,6 @@ using Mirror;
 using UnityEditor.Build.Content;
 using System.Linq;
 using System;
-using UnityEditor.SearchService;
 
 public class CustomNetworkManager : NetworkManager
 {
@@ -18,12 +17,22 @@ public class CustomNetworkManager : NetworkManager
 
     public override void OnServerAddPlayer(NetworkConnectionToClient conn)
     {
-        if (SceneManager.GetActiveScene().name == "LobbyMenu")
+        Scene scene = SceneManager.GetActiveScene();
+        if (scene.name == "LobbyMenu")
         {
             PlayerObjectController playerInstance = Instantiate(_playerPrefab);
             playerInstance.connectionID = conn.connectionId;
             playerInstance.playerNo = players.Count + 1;
             playerInstance.playerSteamID = (ulong)SteamMatchmaking.GetLobbyMemberByIndex(new CSteamID(SteamLobby.instance.LobbyID), players.Count);
+
+            NetworkServer.AddPlayerForConnection(conn, playerInstance.gameObject);
+        }
+        else if (scene.name == "OfflineGame")
+        {
+            PlayerObjectController playerInstance = Instantiate(_playerPrefab);
+            playerInstance.connectionID = conn.connectionId;
+            playerInstance.playerNo = players.Count + 1;
+            playerInstance.playerSteamID = 0;
 
             NetworkServer.AddPlayerForConnection(conn, playerInstance.gameObject);
         }
@@ -36,7 +45,7 @@ public class CustomNetworkManager : NetworkManager
 
     public override void OnClientChangeScene(string newSceneName, SceneOperation sceneOperation, bool customHandling)
     {
-        StartCoroutine(WaitForLoad.WaitForObject(() => GameObject.Find("LocalGamePlayer"),
+        StartCoroutine(WaitForLoad.WaitForObject(() => GameObject.Find("LocalPlayerObject"),
             (GameObject obj) => obj.GetComponentInChildren<GameBehaviour>().OnServerChangeScene(newSceneName),
             new WaitForSeconds(0.1f))
         );

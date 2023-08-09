@@ -73,13 +73,13 @@
     <Compile Include="Assets\Scripts\Menu\SettingsMenu.cs" />
     <Compile Include="Assets\Scripts\Menu\JoinMenu.cs" />
     <Compile Include="Assets\Scripts\Powerup\StatusBehaviour.cs" />
-    <Compile Include="Assets\Scripts\Game\WallTilemap.cs" />
     <Compile Include="Assets\Scripts\Networking\CustomNetworkManager.cs" />
     <Compile Include="Assets\Scripts\UI\DebugBehaviour.cs" />
     <Compile Include="Assets\Scripts\Object\ObjectController.cs" />
     <Compile Include="Assets\Scripts\Menu\CreateMenu.cs" />
     <Compile Include="Assets\Scripts\Audio\AudioHandler.cs" />
     <Compile Include="Assets\Scripts\Object\ForegroundObject.cs" />
+    <Compile Include="Assets\GameLoader.cs" />
     <Compile Include="Assets\Scripts\Object\ForegroundBehaviour.cs" />
     <Compile Include="Assets\Scripts\Unused\FollowPlayer.cs" />
     <Compile Include="Assets\Scripts\Arrays.cs" />
@@ -91,9 +91,11 @@
     <Compile Include="Assets\Scripts\Networking\LobbyController.cs" />
     <Compile Include="Assets\Scripts\Object\ColliderToggleTilemap.cs" />
     <Compile Include="Assets\Scripts\Player\BodyPart.cs" />
+    <Compile Include="Assets\Scripts\Object\DeathTrigger.cs" />
     <Compile Include="Assets\Scripts\CamBehaviour.cs" />
     <Compile Include="Assets\Scripts\Menu\MainMenu.cs" />
     <Compile Include="Assets\Scripts\Powerup\BodyPartStatus.cs" />
+    <Compile Include="Assets\Scripts\Misc\Lamb.cs" />
     <Compile Include="Assets\Scripts\Player\BodyPartRotation.cs" />
     <Compile Include="Assets\Scripts\Networking\SteamLobby.cs" />
     <Compile Include="Assets\Scripts\Networking\PlayerObjectController.cs" />

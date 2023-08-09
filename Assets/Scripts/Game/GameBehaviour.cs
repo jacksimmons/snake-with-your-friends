@@ -90,7 +90,7 @@ public class GameBehaviour : NetworkBehaviour
         {
             tilemapObject.AddComponent<TilemapCollider2D>();
             tilemapObject.GetComponent<TilemapCollider2D>().isTrigger = true;
-            tilemapObject.AddComponent<WallTilemap>();
+            tilemapObject.AddComponent<DeathTrigger>();
         }
 
         tilemapObject.transform.parent = gridObject.transform;
@@ -217,6 +217,7 @@ public class GameBehaviour : NetworkBehaviour
     public void OnPlayerReady()
     {
         _numPlayersReadyToLoad++;
+
         if (_numPlayersReadyToLoad >= Manager.players.Count)
         {
             CmdLoadGame();
@@ -234,7 +235,7 @@ public class GameBehaviour : NetworkBehaviour
     [ClientRpc]
     private void ClientLoadGame()
     {
-        PlayerMovementController player = GameObject.Find("LocalGamePlayer").GetComponent<PlayerMovementController>();
+        PlayerMovementController player = GameObject.Find("LocalPlayerObject").GetComponent<PlayerMovementController>();
         GameObject cam = GameObject.FindWithTag("MainCamera");
         cam.GetComponent<CamBehaviour>().Player = player;
 

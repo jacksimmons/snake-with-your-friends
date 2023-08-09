@@ -26,7 +26,7 @@ public class DebugBehaviour : MonoBehaviour
 
     private void Start()
     {
-        _player = GameObject.Find("LocalGamePlayer").GetComponent<PlayerMovementController>();
+        _player = GameObject.Find("LocalPlayerObject").GetComponent<PlayerMovementController>();
     }
 
     private void Update()

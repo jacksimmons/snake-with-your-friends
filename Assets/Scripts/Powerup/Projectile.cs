@@ -3,7 +3,8 @@ using UnityEngine;
 public enum EProjectileType
 {
     None,
-    Shit,
+    Blooper,
+    HurtOnce
 }
 
 public class Projectile

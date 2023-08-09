@@ -54,14 +54,14 @@ public class SteamLobby : MonoBehaviour
         _lobbyCreated = CallResult<LobbyCreated_t>.Create(OnLobbyCreated);
     }
 
-    public void HostLobby()
+    // Check connectivity before this function
+    public void HostLobby(bool singleplayer)
     {
-        if (!SteamUser.BLoggedOn())
+        if (singleplayer)
         {
-            print("Not online!");
+            _manager.StartHost();
             return;
         }
-
         SteamAPICall_t handle = SteamMatchmaking.CreateLobby(ELobbyType.k_ELobbyTypePublic, _manager.maxConnections);
         _lobbyCreated.Set(handle);
         _lobbyEnter.Set(handle);
@@ -90,7 +90,6 @@ public class SteamLobby : MonoBehaviour
             Debug.LogError("Failed to create lobby.");
             return;
         }
-
 
         bool success = SteamMatchmaking.SetLobbyData(new CSteamID(result.m_ulSteamIDLobby), "name", SteamFriends.GetPersonaName() + "'s lobby")
                     && SteamMatchmaking.SetLobbyData(new CSteamID(result.m_ulSteamIDLobby), HOST_ADDRESS_KEY, SteamUser.GetSteamID().ToString());
