@@ -330,23 +330,22 @@ public class PlayerMovementController : NetworkBehaviour
     /// <returns>`true` if the player survives (bp != head), `false` otherwise</returns>
     private bool RemoveBodyPart(BodyPart bp)
     {
-        if (bp == head)
+        int deadIndex = BodyParts.IndexOf(bp);
+        if (deadIndex == 0)
         {
             HandleDeath();
             return false;
         }
-        else
-        {
-            int deadIndex = BodyParts.IndexOf(bp);
-            while (deadIndex < BodyParts.Count)
-            {
-                SetBodyPartDead(BodyParts[deadIndex], true);
-                BodyParts.RemoveAt(deadIndex);
-                continue;
-            }
 
-            BodyParts[^1].BPType = new(EBodyPartType.Tail, EBodyPartType.Tail);
-        }   
+        while (true)
+        {
+            if (deadIndex >= BodyParts.Count) break;
+            SetBodyPartDead(BodyParts[deadIndex], true);
+            BodyParts.RemoveAt(deadIndex);
+            continue;
+        }
+
+        BodyParts[^1].BPType = new(EBodyPartType.Tail, EBodyPartType.Tail);
         return true;
     }
 

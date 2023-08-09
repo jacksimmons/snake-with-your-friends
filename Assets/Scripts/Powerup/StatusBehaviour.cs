@@ -107,7 +107,7 @@ public class StatusBehaviour : NetworkBehaviour
                     direction: _player.head.Direction,
                     bpRotation: _player.head.Rotation,
                     counterMax: Mathf.CeilToInt(_player.CounterMax / CRITICAL_MULT),
-                    immune: _player.head.Transform.gameObject
+                    immunityDuration: 0.5f
                 );
                 NetworkServer.Spawn(fireball);
                 break;
@@ -135,7 +135,7 @@ public class StatusBehaviour : NetworkBehaviour
                     direction: Vectors.Rotate(-_player.tail.Direction, randomRotation),
                     bpRotation: _player.tail.Rotation,
                     counterMax: Mathf.CeilToInt(_player.CounterMax / MAJOR_MULT),
-                    immune: _player.tail.Transform.gameObject
+                    immunityDuration: 1f
                 );
                 shit.transform.Rotate(Vector3.forward * randomRotation);
                 break;

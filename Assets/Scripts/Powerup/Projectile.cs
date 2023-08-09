@@ -7,7 +7,7 @@ public enum EProjectileType
     HurtOnce
 }
 
-public class Projectile
+public struct Projectile
 {
     public float Lifetime { get; private set; }
     public Vector2 Direction { get; private set; }
@@ -18,7 +18,7 @@ public class Projectile
     // to the player.
     public const int LOWEST_COUNTER_MAX = 1;
     public const int DEFAULT_COUNTER_MAX = 20;
-    private int _counterMax = DEFAULT_COUNTER_MAX;
+    private int _counterMax;
     public int CounterMax
     {
         get
@@ -31,15 +31,15 @@ public class Projectile
             else { _counterMax = value; }
         }
     }
-    public GameObject immune = null;
+    public float immunityDuration;
 
-    public Projectile(float lifetime, Vector2 direction, BodyPartRotation bpRotation, int counterMax, GameObject immune = null)
+    public Projectile(float lifetime, Vector2 direction, BodyPartRotation bpRotation, int counterMax, float immunityDuration = 0)
     {
         Lifetime = lifetime;
         Direction = direction;
-        CounterMax = counterMax;
+        _counterMax = counterMax;
         Rotation = Quaternion.Euler(Vector3.forward * bpRotation.RegularAngle);
 
-        this.immune = immune;
+        this.immunityDuration = immunityDuration;
     }
 }

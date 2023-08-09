@@ -7,9 +7,17 @@ public class DeathTrigger : MonoBehaviour
         GameObject obj = collider.gameObject;        
 
         GameObject maybeProjectile = obj;
-        if (maybeProjectile && maybeProjectile.TryGetComponent(out ProjectileBehaviour _))
+        if (maybeProjectile && maybeProjectile.TryGetComponent(out ProjectileBehaviour pb))
         {
-            Destroy(maybeProjectile);
+            switch (pb.GetProjectileType())
+            {
+                case EProjectileType.Blooper:
+                    pb.HandleCollision(EProjectileCollisionType.Splat, true);
+                    break;
+                case EProjectileType.HurtOnce:
+                    pb.HandleCollision(EProjectileCollisionType.Bounce, true);
+                    break;
+            }
             return;
         }
 
