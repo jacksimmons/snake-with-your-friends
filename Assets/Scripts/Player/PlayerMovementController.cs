@@ -75,8 +75,6 @@ public class PlayerMovementController : NetworkBehaviour
     public int counter = 0;
 
     // Body Parts
-    public BodyPart head;
-    public BodyPart tail;
     public List<BodyPart> BodyParts { get; set; }
 
     // All actions are executed after the next movement frame
@@ -116,15 +114,12 @@ public class PlayerMovementController : NetworkBehaviour
                 }
 
                 bp = new BodyPart(_transform, _startingDirection, _bodyPartType);
-                if (i == 0)
-                    head = bp;
             }
 
             // Tail - the BodyPart script handles these differently.
             else
             {
                 bp = new BodyPart(_transform, _startingDirection, EBodyPartType.Tail);
-                tail = bp;
             }
             BodyParts.Add(bp);
         }
@@ -245,25 +240,23 @@ public class PlayerMovementController : NetworkBehaviour
             // Iterate backwards through the body parts, from tail to head
             // The reason for doing this is so every part inherits its next
             // direction from the part before it.
-            if (BodyParts.Count > 1)
-            {
-                // Tail first
-                BodyPart tailPrev = BodyParts[^2];
-                BodyParts[^1].Move(tailPrev.Direction);
+            
+            // Tail first
+            BodyPart tailPrev = BodyParts[^2];
+            BodyParts[^1].Move(tailPrev.Direction);
 
-                // Then the rest of the body, tail - 1 to head
-                for (int i = BodyParts.Count - 2; i >= 0; i--)
+            // Then the rest of the body, tail - 1 to head
+            for (int i = BodyParts.Count - 2; i >= 0; i--)
+            {
+                BodyPart next = null;
+                Vector2 dir = movement;
+                if (i > 0)
                 {
-                    BodyPart next = null;
-                    Vector2 dir = movement;
-                    if (i > 0)
-                    {
-                        dir = BodyParts[i - 1].Direction;
-                    }
-                    if (i + 1 < BodyParts.Count)
-                        next = BodyParts[i + 1];
-                    BodyParts[i].HandleMovement(dir, next);
+                    dir = BodyParts[i - 1].Direction;
                 }
+                if (i + 1 < BodyParts.Count)
+                    next = BodyParts[i + 1];
+                BodyParts[i].HandleMovement(dir, next);
             }
 
             // Update to server
@@ -277,7 +270,7 @@ public class PlayerMovementController : NetworkBehaviour
     /// </summary>
     private bool CheckForInternalCollisions()
     {
-        BoxCollider2D bcHead = head.Transform.GetComponent<BoxCollider2D>();
+        BoxCollider2D bcHead = BodyParts[0].Transform.GetComponent<BoxCollider2D>();
         Collider2D[] result = new Collider2D[1];
         if (bcHead.OverlapCollider(new ContactFilter2D(), result) > 0)
         {
@@ -299,6 +292,7 @@ public class PlayerMovementController : NetworkBehaviour
         GameObject newBodyPartObj = Instantiate(_bodyPartTemplate);
         newBodyPartObj.transform.parent = bodyPartContainer.transform;
 
+        BodyPart tail = BodyParts[^1];
         BodyPart newBodyPart = new(tail, newBodyPartObj.transform, new(EBodyPartType.Tail,
             EBodyPartType.Tail))
         {
@@ -342,16 +336,28 @@ public class PlayerMovementController : NetworkBehaviour
             if (deadIndex >= BodyParts.Count) break;
             SetBodyPartDead(BodyParts[deadIndex], true);
             BodyParts.RemoveAt(deadIndex);
+
+            // Remove the body part from the container
+            bodyPartContainer.transform.GetChild(deadIndex).parent = GameObject.Find("Objects").transform;
             continue;
         }
 
-        BodyParts[^1].BPType = new(EBodyPartType.Tail, EBodyPartType.Tail);
+        if (BodyParts.Count > 1)
+            BodyParts[^1].BPType = new(EBodyPartType.Tail, EBodyPartType.Tail);
+        else
+        {
+            // Snake must have >1 body part left.
+            SetDead(true);
+            return false;
+        }
         return true;
     }
 
     private void SetBodyPartDead(BodyPart bp, bool dead)
     {
         bp.Transform.gameObject.GetComponent<SpriteRenderer>().color = dead ? Color.gray : Color.white;
+        // Destroy the body part
+        Destroy(bp.Transform.gameObject, 5);
     }
 
     public void SetDead(bool dead)
@@ -363,7 +369,6 @@ public class PlayerMovementController : NetworkBehaviour
         status.gameObject.SetActive(!dead);
     }
 
-
     /// <summary>
     /// Handles death.
     /// </summary>
@@ -373,7 +378,6 @@ public class PlayerMovementController : NetworkBehaviour
         GameBehaviour game = GameObject.FindWithTag("GameHandler").GetComponent<GameBehaviour>();
         game.OnGameOver(score: BodyParts.Count);
     }
-
 
     /// <summary>
     /// Outputs debug values for this object.

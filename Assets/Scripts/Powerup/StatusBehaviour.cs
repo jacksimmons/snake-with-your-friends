@@ -99,13 +99,15 @@ public class StatusBehaviour : NetworkBehaviour
                 ClientSpawnUnsynced(effect);
                 break;
             case e_Effect.BreathingFire:
+                BodyPart head = _player.BodyParts[0];
+
                 GameObject fireball = Instantiate(_fireball, GameObject.Find("Projectiles").transform);
-                fireball.transform.position = _player.head.Position + (Vector3)_player.head.Direction;
+                fireball.transform.position = head.Position + (Vector3)head.Direction;
                 proj = fireball.GetComponent<ProjectileBehaviour>();
                 proj.Proj = new Projectile(
                     lifetime: 5,
-                    direction: _player.head.Direction,
-                    bpRotation: _player.head.Rotation,
+                    direction: head.Direction,
+                    bpRotation: head.Rotation,
                     counterMax: Mathf.CeilToInt(_player.CounterMax / CRITICAL_MULT),
                     immunityDuration: 0.5f
                 );
@@ -122,22 +124,24 @@ public class StatusBehaviour : NetworkBehaviour
     [ClientRpc]
     private void ClientSpawnUnsynced(e_Effect effect)
     {
-        ProjectileBehaviour proj;
         switch (effect)
         {
             case e_Effect.RocketShitting:
                 float randomRotation = Random.Range(-SHIT_EXPLOSIVENESS, SHIT_EXPLOSIVENESS);
+                
                 GameObject shit = Instantiate(_staticShit, GameObject.Find("Projectiles").transform);
-                shit.transform.position = _player.tail.Position - (Vector3)_player.tail.Direction;
+                shit.transform.position = _player.BodyParts[^1].Position - (Vector3)_player.BodyParts[^1].Direction;
+                shit.transform.Rotate(Vector3.forward * randomRotation);
+
+                ProjectileBehaviour proj;
                 proj = shit.GetComponent<ProjectileBehaviour>();
                 proj.Proj = new Projectile(
                     lifetime: 5,
-                    direction: Vectors.Rotate(-_player.tail.Direction, randomRotation),
-                    bpRotation: _player.tail.Rotation,
+                    direction: Vectors.Rotate(-_player.BodyParts[^1].Direction, randomRotation),
+                    bpRotation: _player.BodyParts[^1].Rotation,
                     counterMax: Mathf.CeilToInt(_player.CounterMax / MAJOR_MULT),
                     immunityDuration: 1f
                 );
-                shit.transform.Rotate(Vector3.forward * randomRotation);
                 break;
         }
     }
@@ -216,7 +220,6 @@ public class StatusBehaviour : NetworkBehaviour
             if (effect.Cooldown <= 0)
             {
                 effect.ResetCooldown();
-                Projectile proj;
                 switch (effect.EffectName)
                 {
                     case e_Effect.NoSpeedBoost:

@@ -16,7 +16,7 @@ public class CamBehaviour : MonoBehaviour
 
             transform.position = Vector3.Lerp(
             transform.position,
-            Player.head.Position + Vector3.back,
+            Player.BodyParts[0].Position + Vector3.back,
             blend);
         }
     }
