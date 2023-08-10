@@ -17,27 +17,23 @@ public class MainMenu : MonoBehaviour
     [SerializeField]
     private GameObject m_networkManager;
     [SerializeField]
-    private GameObject m_sacrificialLamb;
+    private GameObject m_chungus;
 
     public void Start()
     {
+        DontDestroyOnLoad(m_chungus);
+
         TestSteamConnection();
         if (!GameObject.Find("NetworkManager"))
         {
             GameObject go = Instantiate(m_networkManager);
             go.name = "NetworkManager";
         }
-        if (!GameObject.Find("SacrificialLamb"))
-        {
-            GameObject lamb = Instantiate(m_sacrificialLamb);
-            lamb.name = "SacrificialLamb";
-            DontDestroyOnLoad(lamb);
-        }
     }
 
     public void Restart()
     {
-        GameObject.Find("SacrificialLamb").GetComponent<Lamb>().ClearDontDestroyOnLoad();
+        GameObject.Find("SacrificialLamb").GetComponent<Chungus>().ClearDontDestroyOnLoad();
         SceneManager.LoadScene("MainMenu");
     }
 

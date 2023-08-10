@@ -87,7 +87,7 @@
     <Compile Include="Assets\Scripts\Object\GridObject.cs" />
     <Compile Include="Assets\Scripts\Steamworks.NET\SteamManager.cs" />
     <Compile Include="Assets\Scripts\Player\BodyPartType.cs" />
-    <Compile Include="Assets\Scripts\WaitForLoad.cs" />
+    <Compile Include="Assets\Scripts\Wait.cs" />
     <Compile Include="Assets\Scripts\Networking\LobbyController.cs" />
     <Compile Include="Assets\Scripts\Object\ColliderToggleTilemap.cs" />
     <Compile Include="Assets\Scripts\Player\BodyPart.cs" />
@@ -95,10 +95,11 @@
     <Compile Include="Assets\Scripts\CamBehaviour.cs" />
     <Compile Include="Assets\Scripts\Menu\MainMenu.cs" />
     <Compile Include="Assets\Scripts\Powerup\BodyPartStatus.cs" />
-    <Compile Include="Assets\Scripts\Misc\Lamb.cs" />
+    <Compile Include="Assets\Scripts\Misc\Chungus.cs" />
     <Compile Include="Assets\Scripts\Player\BodyPartRotation.cs" />
     <Compile Include="Assets\Scripts\Networking\SteamLobby.cs" />
     <Compile Include="Assets\Scripts\Networking\PlayerObjectController.cs" />
+    <Compile Include="Assets\Scripts\Misc\Settings.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Mirror\Plugins\Mono.Cecil\Mono.CecilX.dll" />

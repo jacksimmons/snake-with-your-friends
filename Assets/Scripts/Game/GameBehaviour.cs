@@ -257,7 +257,7 @@ public class GameBehaviour : NetworkBehaviour
     private void SetupObjects()
     {
         _objects = new GameObject[(int)GroundSize * (int)GroundSize];
-        StartCoroutine(WaitForLoad.WaitForObject(
+        StartCoroutine(Wait.WaitForObject(
             () => GameObject.Find("Canvas"),
             (GameObject obj) =>
             {

@@ -40,7 +40,7 @@ public class CustomNetworkManager : NetworkManager
 
     public override void OnClientChangeScene(string newSceneName, SceneOperation sceneOperation, bool customHandling)
     {
-        StartCoroutine(WaitForLoad.WaitForObject(() => GameObject.Find("LocalPlayerObject"),
+        StartCoroutine(Wait.WaitForObject(() => GameObject.Find("LocalPlayerObject"),
             (GameObject obj) => obj.GetComponentInChildren<GameBehaviour>().OnServerChangeScene(newSceneName),
             new WaitForSeconds(0.1f))
         );

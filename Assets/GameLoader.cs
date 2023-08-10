@@ -13,7 +13,7 @@ public class GameLoader : MonoBehaviour
         GameObject go = Instantiate(m_playerObject);
         go.name = "LocalPlayerObject";
         SceneManager.LoadScene("Game");
-        StartCoroutine(WaitForLoad.WaitForObject(() => GameObject.FindWithTag("MainCamera"),
+        StartCoroutine(Wait.WaitForObject(() => GameObject.FindWithTag("MainCamera"),
             (GameObject obj) => { go.GetComponentInChildren<GameBehaviour>().OnPlayerReady(); },
             new WaitForEndOfFrame()));
     }

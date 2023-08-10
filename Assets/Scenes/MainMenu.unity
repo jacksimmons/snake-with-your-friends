@@ -756,7 +756,7 @@ MonoBehaviour:
   m_joinButton: {fileID: 921749954}
   m_refreshButton: {fileID: 1007540784}
   m_networkManager: {fileID: 3351587991732139357, guid: 674cc9cb8709d20468ae4dec306b5c43, type: 3}
-  m_sacrificialLamb: {fileID: 5129511492815513752, guid: d0b841f162de1c644963debc6d964996, type: 3}
+  m_chungus: {fileID: 1996276339}
 --- !u!114 &1007540784 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 3868020592265161070, guid: 1b0273b19bf2e8545a39951da787dc63, type: 3}
@@ -918,6 +918,57 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!1 &1996276339
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1996276340}
+  - component: {fileID: 1996276341}
+  m_Layer: 0
+  m_Name: Chungus
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1996276340
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1996276339}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 480.60468, y: 222.24501, z: -2.648796}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 5
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1996276341
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1996276339}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e467e50f0226bae4bacd5ac0a1cc92c3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_settings:
+    menuVolume: 0
+    sfxVolume: 0
+    resX: 0
+    resY: 0
+    resHz: 0
+    fullscreen: 0
 --- !u!1 &2108366583
 GameObject:
   m_ObjectHideFlags: 0

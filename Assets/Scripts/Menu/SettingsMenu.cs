@@ -1,5 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
+using System.Runtime.Serialization.Formatters.Binary;
 using TMPro;
 using UnityEditor;
 using UnityEngine;
@@ -10,6 +12,15 @@ public class SettingsMenu : MonoBehaviour
 {
     private GameObject audioHandler;
 
+    // Back/save buttons
+    [SerializeField]
+    private Button backButton;
+    [SerializeField]
+    private Button saveButton;
+    [SerializeField]
+    private Button noSaveButton;
+
+    // Settings sliders
     [SerializeField]
     private TextMeshProUGUI menuVolumeLabel;
     [SerializeField]
@@ -29,10 +40,10 @@ public class SettingsMenu : MonoBehaviour
     [SerializeField]
     private Toggle fullscreenToggle;
 
-    [SerializeField]
-    private TextMeshProUGUI brightnessLabel;
-    [SerializeField]
-    private Slider brightnessSlider;
+    //[SerializeField]
+    //private TextMeshProUGUI brightnessLabel;
+    //[SerializeField]
+    //private Slider brightnessSlider;
 
     private void Start()
     {
@@ -48,23 +59,29 @@ public class SettingsMenu : MonoBehaviour
         sfxVolumeSlider.value = audioHandler.transform.Find("EatHandler").GetComponent<AudioSource>().volume * 100;
 
         resolutions = Screen.resolutions;
-        resDropdown.onValueChanged.AddListener(SetResolution);
         for (int i = 0; i < resolutions.Length; i++)
         {
             var res = resolutions[i];
             resDropdown.options.Add(new TMP_Dropdown.OptionData(res.ToString()));
-            if (ResolutionEquals(res, Screen.currentResolution))
+
+            Resolution currentRes = new Resolution();
+            currentRes.width = Screen.width;
+            currentRes.height = Screen.height;
+            currentRes.refreshRate = Screen.currentResolution.refreshRate;
+            if (ResolutionEquals(res, currentRes))
             {
                 resDropdown.itemText.text = res.ToString();
                 resDropdown.value = i;
             }
         }
+        // Dropdown value can be changed in the above for-if statement - add listener after so res doesn't get changed
+        resDropdown.onValueChanged.AddListener(SetResolution);
 
         fullscreenToggle.onValueChanged.AddListener(SetFullscreen);
         fullscreenToggle.isOn = Screen.fullScreen;
 
-        brightnessSlider.onValueChanged.AddListener(SetBrightness);
-        brightnessSlider.value = Screen.brightness * 100;
+        //brightnessSlider.onValueChanged.AddListener(SetBrightness);
+        //brightnessSlider.value = Screen.brightness * 100;
     }
 
     private bool ResolutionEquals(Resolution res1, Resolution res2)
@@ -102,8 +119,9 @@ public class SettingsMenu : MonoBehaviour
 
     private void SetResolution(int index)
     {
-        Resolution res = resolutions[index];
-        Screen.SetResolution(res.width, res.height, Screen.fullScreen, res.refreshRate);
+        print("HI");
+        Resolution resolution = resolutions[index];
+        Screen.SetResolution(resolution.width, resolution.height, Screen.fullScreen, resolution.refreshRate);
     }
 
     private void SetFullscreen(bool fullscreen)
@@ -115,9 +133,57 @@ public class SettingsMenu : MonoBehaviour
     {
     }
 
-    public void SaveAndQuit()
+    // Toggles which buttons are visible (Back, or the two save buttons)
+    private void ToggleExitButtons(bool toggle)
     {
-        // Update all non-testing sounds
-        audioHandler.transform.Find("ClickHandler").GetComponent<AudioSource>().volume = menuVolumeValue;
+        saveButton.gameObject.SetActive(toggle);
+        noSaveButton.gameObject.SetActive(toggle);
+        backButton.gameObject.SetActive(!toggle);
     }
+
+    public void OnBackButtonPressed()
+    {
+        ToggleExitButtons(true);
+        StartCoroutine(
+            Wait.WaitForSecondsThen(1,
+            () =>
+            {
+                noSaveButton.interactable = true;
+                StartCoroutine(
+                    Wait.WaitForSecondsThen(3,
+                    () =>
+                    {
+                        ToggleExitButtons(false);
+                        noSaveButton.interactable = false;
+                    })
+                );
+            })
+        );
+    }
+
+    public void Quit()
+    {
+        SceneManager.LoadScene("MainMenu");
+    }
+
+    private void Save()
+    {
+        string dest = Application.persistentDataPath + "/settings.dat";
+        FileStream fs;
+
+        if (File.Exists(dest)) fs = File.OpenWrite(dest);
+        else fs = File.Create(dest);
+
+        Settings settings = new Settings(
+            menuVolumeValue / 100,
+            sfxVolumeValue / 100,
+            Screen.width, Screen.height, Screen.currentResolution.refreshRate,
+            Screen.fullScreen
+        );
+        BinaryFormatter bf = new BinaryFormatter();
+        bf.Serialize(fs, settings);
+        fs.Close();
+    }
+
+    public void SaveAndQuit() { Save(); Quit(); }
 }
