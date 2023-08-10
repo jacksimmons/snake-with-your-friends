@@ -1,13 +1,8 @@
 using Steamworks;
-using System.Collections;
 using System.Collections.Generic;
-using System.Globalization;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Mirror;
-using UnityEditor.Build.Content;
-using System.Linq;
-using System;
 
 public class CustomNetworkManager : NetworkManager
 {

@@ -1,12 +1,8 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Mirror;
 using UnityEngine.SceneManagement;
-using UnityEditor;
-using Steamworks;
 using System;
-using UnityEditor.Experimental.GraphView;
 
 public class PlayerMovementController : NetworkBehaviour
 {
@@ -321,14 +317,12 @@ public class PlayerMovementController : NetworkBehaviour
     /// Bisects the snake at the body part which is removed.
     /// </summary>
     /// <param name="bp">The removed body part.</param>
-    /// <returns>`true` if the player survives (bp != head), `false` otherwise</returns>
-    private bool RemoveBodyPart(BodyPart bp)
+    private void RemoveBodyPart(BodyPart bp)
     {
         int deadIndex = BodyParts.IndexOf(bp);
         if (deadIndex == 0)
         {
             HandleDeath();
-            return false;
         }
 
         while (true)
@@ -348,9 +342,7 @@ public class PlayerMovementController : NetworkBehaviour
         {
             // Snake must have >1 body part left.
             SetDead(true);
-            return false;
         }
-        return true;
     }
 
     private void SetBodyPartDead(BodyPart bp, bool dead)

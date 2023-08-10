@@ -1,12 +1,7 @@
 using Mirror;
 using Steamworks;
-using System.Collections;
 using System.Collections.Generic;
-using System.Globalization;
-using TMPro;
-using UnityEditor.Experimental.RestService;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 public class SteamLobby : MonoBehaviour
 {
@@ -57,11 +52,15 @@ public class SteamLobby : MonoBehaviour
     // Check connectivity before this function
     public void HostLobby(bool singleplayer)
     {
+        if (!SteamManager.Initialized)
+            return;
+
         if (singleplayer)
         {
             _manager.StartHost();
             return;
         }
+
         SteamAPICall_t handle = SteamMatchmaking.CreateLobby(ELobbyType.k_ELobbyTypePublic, _manager.maxConnections);
         _lobbyCreated.Set(handle);
         _lobbyEnter.Set(handle);

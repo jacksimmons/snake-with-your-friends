@@ -1,18 +1,9 @@
 using Mirror;
-using Mirror.SimpleWeb;
 using System.Collections.Generic;
 using TMPro;
-using UnityEditor.Experimental.GraphView;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using UnityEngine.Tilemaps;
-using UnityEngine.Events;
-using Steamworks;
-using System.Runtime.CompilerServices;
-using System;
 using Random = UnityEngine.Random;
-using UnityEngine.UIElements;
-using UnityEngine.SocialPlatforms.Impl;
 
 public class GameBehaviour : NetworkBehaviour
 {

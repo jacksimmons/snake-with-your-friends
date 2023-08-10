@@ -1,5 +1,3 @@
-using UnityEditorInternal;
-
 public enum EFoodType
 {
     Coffee,
