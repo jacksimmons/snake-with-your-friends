@@ -294,6 +294,11 @@ public class GameBehaviour : NetworkBehaviour
             poc.transform.SetPositionAndRotation(positions[i], Quaternion.Euler(Vector3.forward * rotation_zs[i]));
         }
 
+        ActivateLocalPlayer();
+    }
+
+    private void ActivateLocalPlayer()
+    {
         PlayerMovementController pmc = GameObject.Find("LocalPlayerObject").GetComponent<PlayerMovementController>();
         pmc.bodyPartContainer.SetActive(true);
     }
@@ -364,6 +369,9 @@ public class GameBehaviour : NetworkBehaviour
 
     private void SetGameOverScreenActivity(bool active, int score = 0)
     {
+        if (!isOwned)
+            return;
+
         GameObject gameOver = GameObject.Find("Canvas").transform.Find("GameOver").gameObject;
         gameOver.SetActive(active);
 
