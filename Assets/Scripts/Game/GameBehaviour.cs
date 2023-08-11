@@ -364,7 +364,7 @@ public class GameBehaviour : NetworkBehaviour
 
     private void SetGameOverScreenActivity(bool active, int score = 0)
     {
-        GameObject gameOver = GameObject.Find("GameOver");
+        GameObject gameOver = GameObject.Find("Canvas").transform.Find("GameOver").gameObject;
         gameOver.SetActive(active);
 
         if (active)
