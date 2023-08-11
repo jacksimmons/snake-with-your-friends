@@ -374,7 +374,7 @@ public class PlayerMovementController : NetworkBehaviour
     public void HandleDeath()
     {
         SetDead(true);
-        GameBehaviour game = GameObject.FindWithTag("GameHandler").GetComponent<GameBehaviour>();
+        GameBehaviour game = GetComponentInChildren<GameBehaviour>();
         game.OnGameOver(score: BodyParts.Count);
     }
 
