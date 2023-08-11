@@ -249,6 +249,10 @@ public class GameBehaviour : NetworkBehaviour
             }
             ClientPlacePlayers(positions, rotation_zs);
         }
+        else
+        {
+            player.transform.parent.Find("HostSignifier").gameObject.SetActive(false);
+        }
 
         StartCoroutine(Wait.WaitForObjectThen(
             () => GameObject.Find("Canvas"),
