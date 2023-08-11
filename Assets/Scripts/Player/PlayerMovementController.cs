@@ -347,9 +347,16 @@ public class PlayerMovementController : NetworkBehaviour
 
     private void SetBodyPartDead(BodyPart bp, bool dead)
     {
+        float timeToDestroy = 5;
         bp.Transform.gameObject.GetComponent<SpriteRenderer>().color = dead ? Color.gray : Color.white;
-        // Destroy the body part
-        Destroy(bp.Transform.gameObject, 5);
+
+        if (BodyParts.IndexOf(bp) == 0)
+        {
+            CamBehaviour cb = GameObject.FindWithTag("MainCamera").GetComponent<CamBehaviour>();
+            cb.Player = null;
+        }
+
+        Destroy(bp.Transform.gameObject, timeToDestroy);
     }
 
     public void SetDead(bool dead)

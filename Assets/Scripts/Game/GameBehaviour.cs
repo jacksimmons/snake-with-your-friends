@@ -1,4 +1,5 @@
 using Mirror;
+using Steamworks;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -389,8 +390,9 @@ public class GameBehaviour : NetworkBehaviour
 
         if (active)
         {
-            _gameOverObject.transform.Find("Online").gameObject.SetActive(ClientMode == EClientMode.Online);
-            _gameOverObject.transform.Find("Offline").gameObject.SetActive(ClientMode == EClientMode.Offline);
+            bool online = SteamUser.BLoggedOn();
+            _gameOverObject.transform.Find("OnlineButton").gameObject.SetActive(online);
+            _gameOverObject.transform.Find("OfflineButton").gameObject.SetActive(!online);
             _gameOverObject.transform.Find("Score").GetComponent<TextMeshProUGUI>().text = "Score: " + score.ToString();
         }
     }
