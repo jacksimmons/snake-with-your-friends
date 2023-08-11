@@ -16,13 +16,11 @@ public class MainMenu : MonoBehaviour
     private Button m_refreshButton;
     [SerializeField]
     private GameObject m_networkManager;
-    [SerializeField]
-    private Chungus m_chungus;
 
-    public void Start()
+    private void Start()
     {
-        m_chungus.ShowLoadingSymbol(false);
-        DontDestroyOnLoad(m_chungus);
+        // Ensures Chungus instance
+        Chungus.LoadSettings();
 
         TestSteamConnection();
         if (!GameObject.Find("NetworkManager"))
@@ -34,14 +32,13 @@ public class MainMenu : MonoBehaviour
 
     public void Restart()
     {
-        m_chungus.ShowLoadingSymbol(true);
-        GameObject.Find("Chungus").GetComponent<Chungus>().ClearDontDestroyOnLoad();
-        SceneManager.LoadScene("MainMenu");
+        Chungus.ClearDontDestroyOnLoad();
+        Chungus.LoadSceneWithLoadingSymbol("MainMenu");
     }
 
     public void Quit()
     {
-        m_chungus.ShowLoadingSymbol(true);
+        Chungus.ShowLoadingSymbolUntil(() => false);
         Application.Quit();
     }
 
@@ -86,6 +83,8 @@ public class MainMenu : MonoBehaviour
             return;
         }
 
+        Chungus.ShowLoadingSymbolUntil(() => SceneManager.GetActiveScene().name == "LobbyMenu");
+
         GameObject go = GameObject.Find("NetworkManager");
 
         if (go != null)
@@ -100,11 +99,11 @@ public class MainMenu : MonoBehaviour
             return;
         }
 
-        SceneManager.LoadScene("JoinMenu");
+        Chungus.LoadSceneWithLoadingSymbol("JoinMenu");
     }
 
     public void OnSettingsButtonPressed()
     {
-        SceneManager.LoadScene("SettingsMenu");
+        Chungus.LoadSceneWithLoadingSymbol("SettingsMenu");
     }
 }

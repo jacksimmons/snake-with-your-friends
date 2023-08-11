@@ -118,7 +118,6 @@ public class SettingsMenu : MonoBehaviour
 
     private void SetResolution(int index)
     {
-        print("HI");
         Resolution resolution = resolutions[index];
         Screen.SetResolution(resolution.width, resolution.height, Screen.fullScreen, resolution.refreshRate);
     }
@@ -126,10 +125,6 @@ public class SettingsMenu : MonoBehaviour
     private void SetFullscreen(bool fullscreen)
     {
         Screen.fullScreen = fullscreen;
-    }
-
-    private void SetBrightness(float brightness)
-    {
     }
 
     // Toggles which buttons are visible (Back, or the two save buttons)
@@ -162,7 +157,7 @@ public class SettingsMenu : MonoBehaviour
 
     public void SaveSettingsToFile()
     {
-        GameObject.Find("Chungus").GetComponent<Chungus>().ShowLoadingSymbol(true);
+        Chungus.ShowLoadingSymbolUntil(() => SceneManager.GetActiveScene().name == "MainMenu");
 
         string dest = Application.persistentDataPath + "/settings.dat";
         FileStream fs;

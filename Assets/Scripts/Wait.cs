@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class Wait
 {
@@ -12,7 +13,7 @@ public class Wait
 
     public static IEnumerator WaitForConditionThen(Func<bool> getCondition, Action then, YieldInstruction waitTime)
     {
-        while (getCondition() == false)
+        while (!getCondition())
         {
             yield return waitTime;
         }
@@ -32,6 +33,17 @@ public class Wait
             yield return waitTime;
         }
         then(obj);
+        yield return null;
+    }
+
+    public static IEnumerator WaitForLoadSceneThen(string sceneName, Action then, YieldInstruction waitTime)
+    {
+        AsyncOperation load = SceneManager.LoadSceneAsync(sceneName);
+        while (load.isDone)
+        {
+            yield return waitTime;
+        }
+        then();
         yield return null;
     }
 }

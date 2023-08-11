@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -5,30 +6,65 @@ using System.Runtime.Serialization.Formatters.Binary;
 using UnityEngine;
 
 // Chungus always persists. Nobody like chungus.
+// A singleton class which contains always-available (global) methods.
+
+// Provides assurance (*) that the singleton is always defined after Awake.
 public class Chungus : MonoBehaviour
 {
-    [SerializeField]
-    private GameObject m_loadingObj;
+    // Fields
+    public Settings settings = null;
+    public GameObject LoadingObj { get; private set; } = null;
 
-    public Settings m_settings = null;
-
-    private void Start()
+    // Singleton
+    private static Chungus _instance;
+    public static Chungus Instance
     {
-        // There can only be one
-        name = "Blungus";
-        if (GameObject.Find("Chungus"))
-            Destroy(gameObject);
-        name = "Chungus";
+        get
+        {
+            if (!_instance)
+            {
+                _instance = new GameObject().AddComponent<Chungus>();
+                _instance.name = "Chungus";
+                _instance.LoadingObj = GameObject.Find("Loading");
+                _instance.LoadingObj.SetActive(false);
+                DontDestroyOnLoad(_instance.gameObject);
+                DontDestroyOnLoad(_instance.LoadingObj);
+            }
+            return _instance;
+        }
+    }
 
-        // Ensure only one loading thing exists
-        m_loadingObj.name = "Deloading";
-        GameObject loading = GameObject.Find("Loading");
-        if (loading)
-            Destroy(loading);
-        m_loadingObj.name = "Loading";
+    private static void ToggleLoadingSymbol(bool show)
+    {
+        Instance.LoadingObj.SetActive(show);
+    }
 
-        DontDestroyOnLoad(m_loadingObj);
+    public static void ShowLoadingSymbolUntil(Func<bool> check)
+    {
+        ToggleLoadingSymbol(true);
+        Instance.StartCoroutine(
+            Wait.WaitForConditionThen(
+                check,
+                () => ToggleLoadingSymbol(false),
+                new WaitForEndOfFrame()
+            )
+        );
+    }
 
+    public static void LoadSceneWithLoadingSymbol(string sceneName)
+    {
+        ToggleLoadingSymbol(true);
+        Instance.StartCoroutine(
+            Wait.WaitForLoadSceneThen(
+                sceneName,
+                () => ToggleLoadingSymbol(false),
+                new WaitForEndOfFrame()
+            )
+        );
+    }
+
+    public static void LoadSettings()
+    {
         string dest = Application.persistentDataPath + "/settings.dat";
         FileStream fs;
 
@@ -36,37 +72,28 @@ public class Chungus : MonoBehaviour
         {
             fs = File.OpenRead(dest);
             BinaryFormatter bf = new BinaryFormatter();
-            m_settings = (Settings)bf.Deserialize(fs);
-            LoadSettings();
+            Instance.settings = (Settings)bf.Deserialize(fs);
         }
         else fs = File.Create(dest);
         fs.Close();
-    }
 
-    public void ShowLoadingSymbol(bool show)
-    {
-        m_loadingObj.SetActive(show);
-    }
-
-    public void LoadSettings()
-    {
         GameObject audioParent = GameObject.FindWithTag("AudioHandler");
-        audioParent.transform.Find("ClickHandler").GetComponent<AudioSource>().volume = m_settings.menuVolume;
-        audioParent.transform.Find("ButtonPressHandler").GetComponent<AudioSource>().volume = m_settings.menuVolume;
-        audioParent.transform.Find("EatHandler").GetComponent<AudioSource>().volume = m_settings.sfxVolume;
+        audioParent.transform.Find("ClickHandler").GetComponent<AudioSource>().volume = Instance.settings.menuVolume;
+        audioParent.transform.Find("ButtonPressHandler").GetComponent<AudioSource>().volume = Instance.settings.menuVolume;
+        audioParent.transform.Find("EatHandler").GetComponent<AudioSource>().volume = Instance.settings.sfxVolume;
 
-        Screen.SetResolution(m_settings.resX, m_settings.resY, m_settings.fullscreen, m_settings.resHz);
+        Screen.SetResolution(Instance.settings.resX, Instance.settings.resY, Instance.settings.fullscreen, Instance.settings.resHz);
 
-        print($"Resolution: {m_settings.resX}x{m_settings.resY}@{m_settings.resHz}");
-        print($"Fullscreen: {m_settings.fullscreen}");
-        print($"Volume: MENU[{m_settings.menuVolume}], SFX[{m_settings.sfxVolume}]");
+        print($"Resolution: {Instance.settings.resX}x{Instance.settings.resY}@{Instance.settings.resHz}");
+        print($"Fullscreen: {Instance.settings.fullscreen}");
+        print($"Volume: MENU[{Instance.settings.menuVolume}], SFX[{Instance.settings.sfxVolume}]");
     }
 
-    public void ClearDontDestroyOnLoad()
+    public static void ClearDontDestroyOnLoad()
     {
-        foreach (var root in gameObject.scene.GetRootGameObjects())
+        foreach (var root in Instance.gameObject.scene.GetRootGameObjects())
         {
-            if (root != gameObject && root.name != "SteamManager")
+            if (root != Instance.gameObject && root.name != "SteamManager")
                 Destroy(root);
         }
     }

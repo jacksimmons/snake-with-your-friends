@@ -98,6 +98,7 @@
     <Compile Include="Assets\Scripts\Player\BodyPartRotation.cs" />
     <Compile Include="Assets\Scripts\Networking\SteamLobby.cs" />
     <Compile Include="Assets\Scripts\Networking\PlayerObjectController.cs" />
+    <Compile Include="Assets\LoadingIcon.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Mirror\Plugins\Mono.Cecil\Mono.CecilX.dll" />
