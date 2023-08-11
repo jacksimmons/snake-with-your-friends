@@ -249,15 +249,12 @@ public class GameBehaviour : NetworkBehaviour
             }
             ClientPlacePlayers(positions, rotation_zs);
         }
-        else
-        {
-            player.transform.Find("HostSignifier").gameObject.SetActive(false);
-        }
 
         StartCoroutine(Wait.WaitForObjectThen(
             () => GameObject.Find("Canvas"),
             (GameObject obj) =>
             {
+                print("hi");
                 _gameOverObject = Instantiate(_gameOverTemplate, obj.transform);
                 SetGameOverScreenActivity(false);
             },
