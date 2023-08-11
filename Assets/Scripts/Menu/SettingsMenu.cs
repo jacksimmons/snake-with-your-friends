@@ -144,12 +144,12 @@ public class SettingsMenu : MonoBehaviour
     {
         ToggleExitButtons(true);
         StartCoroutine(
-            Wait.WaitForSecondsThen(1,
+            Wait.WaitThen(1,
             () =>
             {
                 noSaveButton.interactable = true;
                 StartCoroutine(
-                    Wait.WaitForSecondsThen(3,
+                    Wait.WaitThen(3,
                     () =>
                     {
                         ToggleExitButtons(false);

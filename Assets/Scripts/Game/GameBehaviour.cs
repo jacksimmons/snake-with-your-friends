@@ -67,7 +67,7 @@ public class GameBehaviour : NetworkBehaviour
     private bool _alreadyReady = false;
 
     [SyncVar]
-    private int m_numPlayersInGame = 0;
+    public int m_numPlayersInGame;
 
     // An array of child indices for objects (all objects in this go under the Objects game object parent)
     private GameObject[] _objects;
@@ -202,11 +202,19 @@ public class GameBehaviour : NetworkBehaviour
 
     public void OnServerChangeScene(string name)
     {
-        if (name == "Game" && !_alreadyReady && isOwned)
-        {
-            CmdOnPlayerReady();
-            _alreadyReady = true;
-        }
+        if (name != "Game")
+            return;
+
+        StartCoroutine(
+            Wait.WaitForConditionThen(
+            () =>
+            {
+                CustomNetworkManager cnm = GameObject.FindWithTag("NetworkManager").GetComponent<CustomNetworkManager>();
+                return cnm.numPlayersInGame >= Manager.players.Count;
+            },
+            () => CmdOnPlayerReady(),
+            new WaitForSeconds(0.1f)
+        ));
     }
 
     [Command]
@@ -255,7 +263,7 @@ public class GameBehaviour : NetworkBehaviour
             ClientPlacePlayers(positions, rotation_zs);
         }
 
-        StartCoroutine(Wait.WaitForObject(
+        StartCoroutine(Wait.WaitForObjectThen(
             () => GameObject.Find("Canvas"),
             (GameObject obj) =>
             {
