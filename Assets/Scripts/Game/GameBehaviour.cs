@@ -201,13 +201,13 @@ public class GameBehaviour : NetworkBehaviour
     {
         if (name == "Game" && !_alreadyReady && isOwned)
         {
-            print("Hi");
-            OnPlayerReady();
+            CmdOnPlayerReady();
             _alreadyReady = true;
         }
     }
 
-    public void OnPlayerReady()
+    [Command]
+    public void CmdOnPlayerReady()
     {
         _numPlayersReadyToLoad++;
 
@@ -220,6 +220,7 @@ public class GameBehaviour : NetworkBehaviour
     [Command]
     private void CmdLoadGame()
     {
+        print("hello");
         ClientLoadGame();
         SetupObjects();
         CmdGenerateStartingFood();
