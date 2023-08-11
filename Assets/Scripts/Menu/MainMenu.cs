@@ -33,20 +33,29 @@ public class MainMenu : MonoBehaviour
 
     public void Restart()
     {
-        GameObject.Find("SacrificialLamb").GetComponent<Chungus>().ClearDontDestroyOnLoad();
+        GameObject.Find("Chungus").GetComponent<Chungus>().ClearDontDestroyOnLoad();
         SceneManager.LoadScene("MainMenu");
     }
 
     public void TestSteamConnection()
     {
-        if (!SteamManager.Initialized || !SteamUser.BLoggedOn())
+        if (!SteamManager.Initialized)
         {
+            m_noFriendsButton.interactable = false;
+            m_createButton.interactable = false;
+            m_joinButton.interactable = false;
+            m_refreshButton.gameObject.SetActive(true);
+        }
+        else if (!SteamUser.BLoggedOn())
+        {
+            m_noFriendsButton.interactable = true;
             m_createButton.interactable = false;
             m_joinButton.interactable = false;
             m_refreshButton.gameObject.SetActive(true);
         }
         else
         {
+            m_noFriendsButton.interactable = true;
             m_createButton.interactable = true;
             m_joinButton.interactable = true;
             m_refreshButton.gameObject.SetActive(false);

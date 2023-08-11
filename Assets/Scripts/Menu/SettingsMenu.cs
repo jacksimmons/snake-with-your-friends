@@ -49,9 +49,6 @@ public class SettingsMenu : MonoBehaviour
     {
         audioHandler = GameObject.FindWithTag("AudioHandler");
 
-        // Disable clicking sound for testing purposes
-        audioHandler.transform.Find("ClickHandler").GetComponent<AudioSource>().volume = 0;
-
         menuVolumeSlider.onValueChanged.AddListener(SetMenuVolume);
         menuVolumeSlider.value = audioHandler.transform.Find("ButtonPressHandler").GetComponent<AudioSource>().volume * 100;
 
@@ -98,7 +95,9 @@ public class SettingsMenu : MonoBehaviour
         menuVolumeLabel.text = "Menu Volume: " + volume;
 
         // Testing sound
+        AudioSource clickTest = audioHandler.transform.Find("ClickHandler").GetComponent<AudioSource>();
         AudioSource buttonTest = audioHandler.transform.Find("ButtonPressHandler").GetComponent<AudioSource>();
+        clickTest.volume = volume / 100;
         buttonTest.volume = volume / 100;
         buttonTest.Play();
 
@@ -161,12 +160,7 @@ public class SettingsMenu : MonoBehaviour
         );
     }
 
-    public void Quit()
-    {
-        SceneManager.LoadScene("MainMenu");
-    }
-
-    private void Save()
+    public void SaveSettingsToFile()
     {
         string dest = Application.persistentDataPath + "/settings.dat";
         FileStream fs;
@@ -184,6 +178,4 @@ public class SettingsMenu : MonoBehaviour
         bf.Serialize(fs, settings);
         fs.Close();
     }
-
-    public void SaveAndQuit() { Save(); Quit(); }
 }

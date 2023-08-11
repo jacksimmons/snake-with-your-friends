@@ -132,7 +132,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1298045073224995130, guid: 93cc3662b7715fb4bb7a8b8e9a609033, type: 3}
       propertyPath: m_Name
-      value: ButtonBackToMain
+      value: MainMenuButton
       objectReference: {fileID: 0}
     - target: {fileID: 1298045073224995131, guid: 93cc3662b7715fb4bb7a8b8e9a609033, type: 3}
       propertyPath: m_Pivot.x

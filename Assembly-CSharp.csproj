@@ -60,7 +60,6 @@
     <Compile Include="Assets\Scripts\Powerup\Projectile.cs" />
     <Compile Include="Assets\Scripts\Powerup\ProjectileBehaviour.cs" />
     <Compile Include="Assets\Scripts\Object\FoodObject.cs" />
-    <Compile Include="Assets\Scripts\Game\BackButton.cs" />
     <Compile Include="Assets\Scripts\Powerup\TooManyPints.cs" />
     <Compile Include="Assets\Scripts\Object\Teleporter.cs" />
     <Compile Include="Assets\Scripts\Game\GameBehaviour.cs" />
@@ -83,12 +82,13 @@
     <Compile Include="Assets\Scripts\Object\ForegroundBehaviour.cs" />
     <Compile Include="Assets\Scripts\Unused\FollowPlayer.cs" />
     <Compile Include="Assets\Scripts\Arrays.cs" />
-    <Compile Include="Assets\MainMenuButton.cs" />
+    <Compile Include="Assets\Scripts\UI\MainMenuButton.cs" />
     <Compile Include="Assets\Scripts\Object\GridObject.cs" />
     <Compile Include="Assets\Scripts\Steamworks.NET\SteamManager.cs" />
     <Compile Include="Assets\Scripts\Player\BodyPartType.cs" />
     <Compile Include="Assets\Scripts\Wait.cs" />
     <Compile Include="Assets\Scripts\Networking\LobbyController.cs" />
+    <Compile Include="Assets\Scripts\Misc\Settings.cs" />
     <Compile Include="Assets\Scripts\Object\ColliderToggleTilemap.cs" />
     <Compile Include="Assets\Scripts\Player\BodyPart.cs" />
     <Compile Include="Assets\Scripts\Object\DeathTrigger.cs" />
@@ -99,7 +99,6 @@
     <Compile Include="Assets\Scripts\Player\BodyPartRotation.cs" />
     <Compile Include="Assets\Scripts\Networking\SteamLobby.cs" />
     <Compile Include="Assets\Scripts\Networking\PlayerObjectController.cs" />
-    <Compile Include="Assets\Scripts\Misc\Settings.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Mirror\Plugins\Mono.Cecil\Mono.CecilX.dll" />
