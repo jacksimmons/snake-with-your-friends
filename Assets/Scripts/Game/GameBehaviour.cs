@@ -67,14 +67,9 @@ public class GameBehaviour : NetworkBehaviour
         }
     }
 
-    private PlayerObjectController PlayerOC { get; set; }
-
-    // Host Variables
-    private int m_numPlayersLoaded;
-
     private void Start()
     {
-        PlayerOC = transform.parent.GetComponent<PlayerObjectController>();
+        _gameOverObject = GameObject.Find("GameOver");
     }
 
     private Tilemap CreateAndReturnTilemap(string gridName, bool hasCollider)
@@ -217,8 +212,6 @@ public class GameBehaviour : NetworkBehaviour
     private void CmdLoadGame()
     {
         ClientLoadGame();
-        ClientActivatePlayer();
-
         SetupObjects();
         CmdGenerateStartingFood();
     }
@@ -250,23 +243,7 @@ public class GameBehaviour : NetworkBehaviour
             ClientPlacePlayers(positions, rotation_zs);
         }
 
-        StartCoroutine(Wait.WaitForObjectThen(
-            () => GameObject.Find("Canvas"),
-            (GameObject obj) =>
-            {
-                print("hi");
-                _gameOverObject = Instantiate(_gameOverTemplate, obj.transform);
-                SetGameOverScreenActivity(false);
-            },
-            new WaitForEndOfFrame()
-        ));
-    }
-
-    [ClientRpc]
-    private void ClientActivatePlayer()
-    {
-        PlayerMovementController player = GameObject.Find("LocalPlayerObject").GetComponent<PlayerMovementController>();
-        player.bodyPartContainer.SetActive(true);
+        SetGameOverScreenActivity(false);
     }
 
     /// <summary>
@@ -321,9 +298,12 @@ public class GameBehaviour : NetworkBehaviour
 
         for (int i = 0; i < positions.Count; i++)
         {
-            PlayerObjectController player = Manager.Players[i];
-            player.transform.SetPositionAndRotation(positions[i], Quaternion.Euler(Vector3.forward * rotation_zs[i]));
+            PlayerObjectController poc = Manager.Players[i];
+            poc.transform.SetPositionAndRotation(positions[i], Quaternion.Euler(Vector3.forward * rotation_zs[i]));
         }
+
+        PlayerMovementController pmc = GameObject.Find("LocalPlayerObject").GetComponent<PlayerMovementController>();
+        pmc.bodyPartContainer.SetActive(true);
     }
 
     /// <summary>
