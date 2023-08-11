@@ -37,9 +37,15 @@ public class CustomNetworkManager : NetworkManager
     {
         base.OnClientSceneChanged();
 
+        string sceneName = SceneManager.GetActiveScene().name;
+        if (sceneName != "Game")
+        {
+            return;
+        }
+
         GameObject lpo = GameObject.Find("LocalPlayerObject");
         GameBehaviour gb = lpo.GetComponentInChildren<GameBehaviour>();
 
-        gb.OnGameSceneLoaded(SceneManager.GetActiveScene().name);
+        gb.OnGameSceneLoaded("Game");
     }
 }
