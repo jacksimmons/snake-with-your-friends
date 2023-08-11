@@ -205,28 +205,7 @@ public class GameBehaviour : NetworkBehaviour
         if (name != "Game")
             return;
 
-        StartCoroutine(
-            Wait.WaitForConditionThen(
-            () =>
-            {
-                CustomNetworkManager cnm = GameObject.FindWithTag("NetworkManager").GetComponent<CustomNetworkManager>();
-                return cnm.numPlayersInGame >= Manager.players.Count;
-            },
-            () => CmdOnPlayerReady(),
-            new WaitForSeconds(0.1f)
-        ));
-    }
-
-    [Command]
-    public void CmdOnPlayerReady()
-    {
-        m_numPlayersInGame++;
-        print("Ready: " + m_numPlayersInGame);
-
-        if (m_numPlayersInGame >= Manager.players.Count)
-        {
-            CmdLoadGame();
-        }
+        CmdLoadGame();
     }
 
     [Command]

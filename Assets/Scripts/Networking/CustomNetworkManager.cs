@@ -10,9 +10,6 @@ public class CustomNetworkManager : NetworkManager
     private PlayerObjectController _playerPrefab;
     public List<PlayerObjectController> players { get; } = new List<PlayerObjectController>();
 
-    [SyncVar]
-    public int numPlayersInGame = 0;
-
     public override void OnServerAddPlayer(NetworkConnectionToClient conn)
     {
         Scene scene = SceneManager.GetActiveScene();
@@ -39,7 +36,6 @@ public class CustomNetworkManager : NetworkManager
             {
                 GameBehaviour gb = obj.GetComponentInChildren<GameBehaviour>();
                 gb.OnServerChangeScene(newSceneName);
-                numPlayersInGame++;
             },
             new WaitForSeconds(0.1f))
         );
