@@ -248,15 +248,7 @@ public class GameBehaviour : NetworkBehaviour
             }
             ClientPlacePlayers(positions, rotation_zs);
         }
-    }
 
-
-    /// <summary>
-    /// Sets up the _objects array with the appropriate dimensions.
-    /// </summary>
-    private void SetupObjects()
-    {
-        _objects = new GameObject[(int)GroundSize * (int)GroundSize];
         StartCoroutine(Wait.WaitForObject(
             () => GameObject.Find("Canvas"),
             (GameObject obj) =>
@@ -266,6 +258,15 @@ public class GameBehaviour : NetworkBehaviour
             },
             new WaitForEndOfFrame()
         ));
+    }
+
+
+    /// <summary>
+    /// Sets up the _objects array with the appropriate dimensions.
+    /// </summary>
+    private void SetupObjects()
+    {
+        _objects = new GameObject[(int)GroundSize * (int)GroundSize];
     }
 
     [Command]
