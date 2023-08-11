@@ -57,7 +57,7 @@ public class SteamLobby : MonoBehaviour
 
         if (singleplayer)
         {
-            _manager.StartHost();
+            _manager.StartWithNoFriends();
             return;
         }
 

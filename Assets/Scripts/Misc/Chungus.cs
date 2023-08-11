@@ -7,15 +7,27 @@ using UnityEngine;
 // Chungus always persists. Nobody like chungus.
 public class Chungus : MonoBehaviour
 {
+    [SerializeField]
+    private GameObject m_loadingObj;
+
     public Settings m_settings = null;
 
     private void Start()
     {
         // There can only be one
         name = "Blungus";
-        if (GameObject.Find("Chungus") != null)
+        if (GameObject.Find("Chungus"))
             Destroy(gameObject);
         name = "Chungus";
+
+        // Ensure only one loading thing exists
+        m_loadingObj.name = "Deloading";
+        GameObject loading = GameObject.Find("Loading");
+        if (loading)
+            Destroy(loading);
+        m_loadingObj.name = "Loading";
+
+        DontDestroyOnLoad(m_loadingObj);
 
         string dest = Application.persistentDataPath + "/settings.dat";
         FileStream fs;
@@ -29,6 +41,11 @@ public class Chungus : MonoBehaviour
         }
         else fs = File.Create(dest);
         fs.Close();
+    }
+
+    public void ShowLoadingSymbol(bool show)
+    {
+        m_loadingObj.SetActive(show);
     }
 
     public void LoadSettings()

@@ -17,10 +17,11 @@ public class MainMenu : MonoBehaviour
     [SerializeField]
     private GameObject m_networkManager;
     [SerializeField]
-    private GameObject m_chungus;
+    private Chungus m_chungus;
 
     public void Start()
     {
+        m_chungus.ShowLoadingSymbol(false);
         DontDestroyOnLoad(m_chungus);
 
         TestSteamConnection();
@@ -33,8 +34,15 @@ public class MainMenu : MonoBehaviour
 
     public void Restart()
     {
+        m_chungus.ShowLoadingSymbol(true);
         GameObject.Find("Chungus").GetComponent<Chungus>().ClearDontDestroyOnLoad();
         SceneManager.LoadScene("MainMenu");
+    }
+
+    public void Quit()
+    {
+        m_chungus.ShowLoadingSymbol(true);
+        Application.Quit();
     }
 
     public void TestSteamConnection()

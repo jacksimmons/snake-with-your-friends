@@ -13,6 +13,9 @@ public class CustomNetworkManager : NetworkManager
     // Players
     public List<PlayerObjectController> Players { get; private set; } = new List<PlayerObjectController>();
 
+    public bool singleplayer = false;
+
+
     public override void OnServerAddPlayer(NetworkConnectionToClient conn)
     {
         Scene scene = SceneManager.GetActiveScene();
@@ -47,5 +50,11 @@ public class CustomNetworkManager : NetworkManager
         GameBehaviour gb = lpo.GetComponentInChildren<GameBehaviour>();
 
         gb.OnGameSceneLoaded("Game");
+    }
+
+    public void StartWithNoFriends()
+    {
+        singleplayer = true;
+        StartHost();
     }
 }

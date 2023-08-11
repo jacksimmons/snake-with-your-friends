@@ -162,6 +162,8 @@ public class SettingsMenu : MonoBehaviour
 
     public void SaveSettingsToFile()
     {
+        GameObject.Find("Chungus").GetComponent<Chungus>().ShowLoadingSymbol(true);
+
         string dest = Application.persistentDataPath + "/settings.dat";
         FileStream fs;
 

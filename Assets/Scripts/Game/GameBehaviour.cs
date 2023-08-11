@@ -377,7 +377,7 @@ public class GameBehaviour : NetworkBehaviour
 
         if (active)
         {
-            bool online = SteamUser.BLoggedOn();
+            bool online = !Manager.singleplayer;
             gameOver.transform.Find("OnlineButton").gameObject.SetActive(online);
             gameOver.transform.Find("OfflineButton").gameObject.SetActive(!online);
             gameOver.transform.Find("Score").GetComponent<TextMeshProUGUI>().text = "Score: " + score.ToString();

@@ -198,8 +198,13 @@ public class LobbyController : MonoBehaviour
 
         // If everyone is ready and we are the host...
         if (allReady)
+        {
             if (localPlayerController && localPlayerController.playerNo == 1)
-                startGameButton.interactable = true;
+            {
+                if (Manager.Players.Count > 1 || Manager.singleplayer)
+                    startGameButton.interactable = true;
+            }
+        }
     }
 
     public void StartGame(string sceneName)
