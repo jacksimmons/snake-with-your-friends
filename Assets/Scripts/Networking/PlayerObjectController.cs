@@ -24,12 +24,12 @@ public class PlayerObjectController : NetworkBehaviour
         }
     }
 
+    private PlayerMovementController m_pmc;
 
     private void Start()
     {
         DontDestroyOnLoad(this.gameObject);
     }
-
 
     // Lobby Methods
 
@@ -84,16 +84,8 @@ public class PlayerObjectController : NetworkBehaviour
         }
     }
 
-    public void TryToggleReady()
-    {
-        if (isOwned)
-        {
-            CmdSetPlayerReady();
-        }
-    }
-
     [Command]
-    private void CmdSetPlayerReady()
+    public void CmdSetPlayerReady()
     {
         this.OnPlayerReadyUpdate(this.ready, !this.ready);
     }
@@ -110,26 +102,11 @@ public class PlayerObjectController : NetworkBehaviour
         }
     }
 
-    /// <summary>
-    /// Starts the game, if our client has authority over this object.
-    /// This check is in place, because this function is called even for objects
-    /// we don't have authority over.
-    /// </summary>
-    /// <param name="sceneName">The name of the scene (of a game) to load.</param>
-    public void TryStartGame(string sceneName)
-    {
-        if (isOwned)
-        {
-            CmdStartGame(sceneName);
-        }
-    }
-
     [Command]
     public void CmdStartGame(string sceneName)
     {
         Manager.StartGame(sceneName);
     }
-
 
     // In-Game Methods
     public void TryUpdateBodyParts(List<BodyPart> bodyParts)
@@ -148,11 +125,11 @@ public class PlayerObjectController : NetworkBehaviour
     [Command]
     public void CmdUpdateBodyParts(List<BodyPartData> bodyPartDatas, ulong victimPlayerSteamID)
     {
-        OnBodyPartUpdate(bodyPartDatas, victimPlayerSteamID);
+        OnBodyPartsUpdate(bodyPartDatas, victimPlayerSteamID);
     }
 
     [ClientRpc]
-    public void OnBodyPartUpdate(List<BodyPartData> bodyPartDatas, ulong victimPlayerSteamID)
+    public void OnBodyPartsUpdate(List<BodyPartData> bodyPartDatas, ulong victimPlayerSteamID)
     {
         if (playerSteamID == victimPlayerSteamID && !isOwned)
         {

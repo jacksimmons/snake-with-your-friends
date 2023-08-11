@@ -65,7 +65,10 @@ public class GameBehaviour : NetworkBehaviour
     }
 
     private bool _alreadyReady = false;
-    private int _numPlayersReadyToLoad = 0;
+
+    [SyncVar]
+    private int m_numPlayersInGame = 0;
+
     // An array of child indices for objects (all objects in this go under the Objects game object parent)
     private GameObject[] _objects;
 
@@ -209,9 +212,10 @@ public class GameBehaviour : NetworkBehaviour
     [Command]
     public void CmdOnPlayerReady()
     {
-        _numPlayersReadyToLoad++;
+        m_numPlayersInGame++;
+        print("Ready: " + m_numPlayersInGame);
 
-        if (_numPlayersReadyToLoad >= Manager.players.Count)
+        if (m_numPlayersInGame >= Manager.players.Count)
         {
             CmdLoadGame();
         }
@@ -220,7 +224,6 @@ public class GameBehaviour : NetworkBehaviour
     [Command]
     private void CmdLoadGame()
     {
-        print("hello");
         ClientLoadGame();
         SetupObjects();
         CmdGenerateStartingFood();

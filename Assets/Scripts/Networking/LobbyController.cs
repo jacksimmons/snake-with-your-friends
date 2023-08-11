@@ -75,7 +75,7 @@ public class LobbyController : MonoBehaviour
 
     public void CreatePlayerItem(PlayerObjectController player)
     {
-        print("members: " + SteamMatchmaking.GetNumLobbyMembers(new CSteamID(lobbyID)));
+        print("Members: " + SteamMatchmaking.GetNumLobbyMembers(new CSteamID(lobbyID)));
 
         GameObject newPlayerItem = Instantiate(playerListItemPrefab);
         PlayerListItem newPlayerListItemScript = newPlayerItem.GetComponent<PlayerListItem>();
@@ -167,7 +167,7 @@ public class LobbyController : MonoBehaviour
 
     public void TogglePlayerReady()
     {
-        localPlayerController.TryToggleReady();
+        localPlayerController.CmdSetPlayerReady();
     }
 
     public void UpdateButton()
@@ -204,6 +204,6 @@ public class LobbyController : MonoBehaviour
 
     public void StartGame(string sceneName)
     {
-        localPlayerController.TryStartGame(sceneName);
+        localPlayerController.CmdStartGame(sceneName);
     }
 }
