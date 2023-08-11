@@ -78,7 +78,6 @@
     <Compile Include="Assets\Scripts\Menu\CreateMenu.cs" />
     <Compile Include="Assets\Scripts\Audio\AudioHandler.cs" />
     <Compile Include="Assets\Scripts\Object\ForegroundObject.cs" />
-    <Compile Include="Assets\GameLoader.cs" />
     <Compile Include="Assets\Scripts\Object\ForegroundBehaviour.cs" />
     <Compile Include="Assets\Scripts\Unused\FollowPlayer.cs" />
     <Compile Include="Assets\Scripts\Arrays.cs" />
