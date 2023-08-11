@@ -13,9 +13,6 @@ public class CustomNetworkManager : NetworkManager
     // Players
     public List<PlayerObjectController> Players { get; private set; } = new List<PlayerObjectController>();
 
-    // Scene data
-    private string m_sceneServerIsLoading = null;
-
     public override void OnServerAddPlayer(NetworkConnectionToClient conn)
     {
         Scene scene = SceneManager.GetActiveScene();
@@ -33,7 +30,6 @@ public class CustomNetworkManager : NetworkManager
     public void StartGame(string sceneName)
     {
         ServerChangeScene(sceneName);
-        m_sceneServerIsLoading = sceneName;
     }
 
     // Called once a scene is fully loaded by our client, after being requested to by the server.
@@ -41,16 +37,9 @@ public class CustomNetworkManager : NetworkManager
     {
         base.OnClientSceneChanged();
 
-        if (m_sceneServerIsLoading == null)
-        {
-            Debug.LogError("Scene name couldn't be resolved!");
-            return;
-        }
-
         GameObject lpo = GameObject.Find("LocalPlayerObject");
         GameBehaviour gb = lpo.GetComponentInChildren<GameBehaviour>();
 
-        gb.OnGameSceneLoaded(m_sceneServerIsLoading);
-        m_sceneServerIsLoading = null;
+        gb.OnGameSceneLoaded(SceneManager.GetActiveScene().name);
     }
 }
