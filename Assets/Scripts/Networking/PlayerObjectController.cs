@@ -51,7 +51,7 @@ public class PlayerObjectController : NetworkBehaviour
     /// </summary>
     public override void OnStartClient()
     {
-        Manager.players.Add(this);
+        Manager.Players.Add(this);
         LobbyController.instance.UpdateLobbyName();
         LobbyController.instance.UpdatePlayerList();
     }
@@ -62,7 +62,7 @@ public class PlayerObjectController : NetworkBehaviour
     /// </summary>
     public override void OnStopClient()
     {
-        Manager.players.Remove(this);
+        Manager.Players.Remove(this);
         LobbyController.instance.UpdatePlayerList();
     }
 

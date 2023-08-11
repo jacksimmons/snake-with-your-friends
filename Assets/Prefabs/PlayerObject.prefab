@@ -421,6 +421,7 @@ MonoBehaviour:
   - {fileID: 3540720362809897522, guid: 53751b131fb05bb4cb78371e89654a70, type: 3}
   _menuSelectTemplate: {fileID: 0}
   _spawnPoint: {x: 0, y: 0}
+  m_numPlayersInGame: 0
 --- !u!1 &6366460689727907375
 GameObject:
   m_ObjectHideFlags: 0
@@ -436,7 +437,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1047568325840457048
 Transform:
   m_ObjectHideFlags: 0

@@ -60,11 +60,11 @@ public class LobbyController : MonoBehaviour
         // Host
         if (!playerItemCreated) { CreateHostPlayerItem(); }
 
-        if (_playerListItems.Count < Manager.players.Count) { CreateClientPlayerItem(); }
+        if (_playerListItems.Count < Manager.Players.Count) { CreateClientPlayerItem(); }
 
-        if (_playerListItems.Count > Manager.players.Count) { RemovePlayerItem(); }
+        if (_playerListItems.Count > Manager.Players.Count) { RemovePlayerItem(); }
 
-        if (_playerListItems.Count == Manager.players.Count) { UpdatePlayerItem(); }
+        if (_playerListItems.Count == Manager.Players.Count) { UpdatePlayerItem(); }
     }
 
     public void FindLocalPlayer()
@@ -94,7 +94,7 @@ public class LobbyController : MonoBehaviour
 
     public void CreateHostPlayerItem()
     {
-        foreach (PlayerObjectController player in Manager.players)
+        foreach (PlayerObjectController player in Manager.Players)
         {
             CreatePlayerItem(player);
         }
@@ -104,7 +104,7 @@ public class LobbyController : MonoBehaviour
 
     public void CreateClientPlayerItem()
     {
-        foreach (PlayerObjectController player in Manager.players)
+        foreach (PlayerObjectController player in Manager.Players)
         {
             // If any items in the list have the same connection ID
             if (!_playerListItems.Any(b => b.connectionID == player.connectionID))
@@ -119,7 +119,7 @@ public class LobbyController : MonoBehaviour
     /// </summary>
     public void UpdatePlayerItem()
     {
-        foreach (PlayerObjectController player in Manager.players)
+        foreach (PlayerObjectController player in Manager.Players)
         {
             foreach (PlayerListItem playerListItemScript in _playerListItems)
             {
@@ -147,7 +147,7 @@ public class LobbyController : MonoBehaviour
 
         foreach (PlayerListItem playerListItem in _playerListItems)
         {
-            if (!Manager.players.Any(b => b.connectionID == playerListItem.connectionID))
+            if (!Manager.Players.Any(b => b.connectionID == playerListItem.connectionID))
             {
                 playerListItemsToRemove.Add(playerListItem);
             }
@@ -185,7 +185,7 @@ public class LobbyController : MonoBehaviour
     public void CheckIfAllReady()
     {
         bool allReady = true;
-        foreach (PlayerObjectController player in Manager.players)
+        foreach (PlayerObjectController player in Manager.Players)
         {
             if (!player.ready)
             {

@@ -3,12 +3,18 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Mirror;
+using static GameBehaviour;
 
 public class CustomNetworkManager : NetworkManager
 {
     [SerializeField]
     private PlayerObjectController _playerPrefab;
-    public List<PlayerObjectController> players { get; } = new List<PlayerObjectController>();
+
+    // Players
+    public List<PlayerObjectController> Players { get; private set; } = new List<PlayerObjectController>();
+
+    // Scene data
+    private string m_sceneServerIsLoading = null;
 
     public override void OnServerAddPlayer(NetworkConnectionToClient conn)
     {
@@ -17,8 +23,8 @@ public class CustomNetworkManager : NetworkManager
         {
             PlayerObjectController playerInstance = Instantiate(_playerPrefab);
             playerInstance.connectionID = conn.connectionId;
-            playerInstance.playerNo = players.Count + 1;
-            playerInstance.playerSteamID = (ulong)SteamMatchmaking.GetLobbyMemberByIndex(new CSteamID(SteamLobby.instance.LobbyID), players.Count);
+            playerInstance.playerNo = Players.Count + 1;
+            playerInstance.playerSteamID = (ulong)SteamMatchmaking.GetLobbyMemberByIndex(new CSteamID(SteamLobby.instance.LobbyID), Players.Count);
 
             NetworkServer.AddPlayerForConnection(conn, playerInstance.gameObject);
         }
@@ -27,17 +33,24 @@ public class CustomNetworkManager : NetworkManager
     public void StartGame(string sceneName)
     {
         ServerChangeScene(sceneName);
+        m_sceneServerIsLoading = sceneName;
     }
 
-    public override void OnClientChangeScene(string newSceneName, SceneOperation sceneOperation, bool customHandling)
+    // Called once a scene is fully loaded by our client, after being requested to by the server.
+    public override void OnClientSceneChanged()
     {
-        StartCoroutine(Wait.WaitForObjectThen(() => GameObject.Find("LocalPlayerObject"),
-            (GameObject obj) =>
-            {
-                GameBehaviour gb = obj.GetComponentInChildren<GameBehaviour>();
-                gb.OnServerChangeScene(newSceneName);
-            },
-            new WaitForSeconds(0.1f))
-        );
+        base.OnClientSceneChanged();
+
+        if (m_sceneServerIsLoading == null)
+        {
+            Debug.LogError("Scene name couldn't be resolved!");
+            return;
+        }
+
+        GameObject lpo = GameObject.Find("LocalPlayerObject");
+        GameBehaviour gb = lpo.GetComponentInChildren<GameBehaviour>();
+
+        gb.OnGameSceneLoaded(m_sceneServerIsLoading);
+        m_sceneServerIsLoading = null;
     }
 }

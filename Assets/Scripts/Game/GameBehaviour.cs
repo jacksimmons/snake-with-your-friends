@@ -47,6 +47,9 @@ public class GameBehaviour : NetworkBehaviour
     }
     public EClientMode ClientMode { get; private set; } = EClientMode.Online;
 
+    // An array of child indices for objects (all objects in this go under the Objects game object parent)
+    public GameObject[] Objects { get; private set; }
+
     Vector2Int bl = Vector2Int.zero;
 
     // Soft limit is preferred, but if it is too small, the hard limit is used (1 tile).
@@ -64,13 +67,15 @@ public class GameBehaviour : NetworkBehaviour
         }
     }
 
-    private bool _alreadyReady = false;
+    private PlayerObjectController PlayerOC { get; set; }
 
-    [SyncVar]
-    public int m_numPlayersInGame;
+    // Host Variables
+    private int m_numPlayersLoaded;
 
-    // An array of child indices for objects (all objects in this go under the Objects game object parent)
-    private GameObject[] _objects;
+    private void Start()
+    {
+        PlayerOC = transform.parent.GetComponent<PlayerObjectController>();
+    }
 
     private Tilemap CreateAndReturnTilemap(string gridName, bool hasCollider)
     {
@@ -161,11 +166,11 @@ public class GameBehaviour : NetworkBehaviour
         // If this distance is too small, spawn inner snakes.
 
         int playersCount = 0;
-        if (Manager.players.Count - playersStartIndex > 0)
+        if (Manager.Players.Count - playersStartIndex > 0)
         {
-            playersCount = Manager.players.Count - playersStartIndex;
+            playersCount = Manager.Players.Count - playersStartIndex;
         }
-        List<PlayerObjectController> players = Manager.players.GetRange(playersStartIndex, playersCount);
+        List<PlayerObjectController> players = Manager.Players.GetRange(playersStartIndex, playersCount);
 
         float minDist = (int)GroundSize * SOFT_MIN_DIST_WORLD_SIZE_RATIO;
         if (minDist < HARD_MIN_DIST)
@@ -200,7 +205,7 @@ public class GameBehaviour : NetworkBehaviour
         }
     }
 
-    public void OnServerChangeScene(string name)
+    public void OnGameSceneLoaded(string name)
     {
         if (name != "Game")
             return;
@@ -212,6 +217,8 @@ public class GameBehaviour : NetworkBehaviour
     private void CmdLoadGame()
     {
         ClientLoadGame();
+        ClientActivatePlayer();
+
         SetupObjects();
         CmdGenerateStartingFood();
     }
@@ -220,6 +227,7 @@ public class GameBehaviour : NetworkBehaviour
     private void ClientLoadGame()
     {
         PlayerMovementController player = GameObject.Find("LocalPlayerObject").GetComponent<PlayerMovementController>();
+
         GameObject cam = GameObject.FindWithTag("MainCamera");
         cam.GetComponent<CamBehaviour>().Player = player;
 
@@ -232,12 +240,12 @@ public class GameBehaviour : NetworkBehaviour
         if (isServer)
         {
             PlacePlayers(depth: 1, playersStartIndex: 0, bl);
-            List<Vector2> positions = new(Manager.players.Count);
-            List<float> rotation_zs = new(Manager.players.Count);
-            for (int i = 0; i < Manager.players.Count; i++)
+            List<Vector2> positions = new(Manager.Players.Count);
+            List<float> rotation_zs = new(Manager.Players.Count);
+            for (int i = 0; i < Manager.Players.Count; i++)
             {
-                positions.Add(Manager.players[i].transform.position);
-                rotation_zs.Add(Manager.players[i].transform.rotation.eulerAngles.z);
+                positions.Add(Manager.Players[i].transform.position);
+                rotation_zs.Add(Manager.Players[i].transform.rotation.eulerAngles.z);
             }
             ClientPlacePlayers(positions, rotation_zs);
         }
@@ -253,30 +261,35 @@ public class GameBehaviour : NetworkBehaviour
         ));
     }
 
+    [ClientRpc]
+    private void ClientActivatePlayer()
+    {
+        PlayerMovementController player = GameObject.Find("LocalPlayerObject").GetComponent<PlayerMovementController>();
+        player.bodyPartContainer.SetActive(true);
+    }
 
     /// <summary>
-    /// Sets up the _objects array with the appropriate dimensions.
+    /// Sets up the Objects array with the appropriate dimensions.
     /// </summary>
     private void SetupObjects()
     {
-        _objects = new GameObject[(int)GroundSize * (int)GroundSize];
+        Objects = new GameObject[(int)GroundSize * (int)GroundSize];
     }
 
     [Command]
     private void CmdGenerateStartingFood()
     {
-        for (int i = 0; i < Manager.players.Count; i++)
+        for (int i = 0; i < Manager.Players.Count; i++)
         {
-            this.CmdGenerateFood();
+            this.GenerateFood();
         }
     }
 
-    [Command]
-    private void CmdGenerateFood()
+    private void GenerateFood()
     {
-        int objectPos = Random.Range(0, _objects.Length);
+        int objectPos = Random.Range(0, Objects.Length);
 
-        // Overwrite _objects[objectPos] with -1 (if there are any vacancies)
+        // Overwrite Objects[objectPos] with -1 (if there are any vacancies)
         // This effectively acts as a test to see if there are any vacancies,
         // which also happens to locate the vacancy, while leaving its value
         // as -1.
@@ -307,27 +320,27 @@ public class GameBehaviour : NetworkBehaviour
 
         for (int i = 0; i < positions.Count; i++)
         {
-            PlayerObjectController player = Manager.players[i];
+            PlayerObjectController player = Manager.Players[i];
             player.transform.SetPositionAndRotation(positions[i], Quaternion.Euler(Vector3.forward * rotation_zs[i]));
         }
     }
 
     /// <summary>
-    /// Checks if index `objectPos` is not -1 in _objects, if so it recursively
+    /// Checks if index `objectPos` is not -1 in Objects, if so it recursively
     /// searches for a valid index.
     /// </summary>
-    /// <returns>The final position of the object, or -1 if no vacancies in _objects.</returns>
+    /// <returns>The final position of the object, or -1 if no vacancies in Objects.</returns>
     public int AddObjectToGrid(int objectPos, GameObject obj)
     {
-        if (_objects[objectPos] != null)
+        if (Objects[objectPos] != null)
         {
             // If there already is an object at given pos, try to put
             // the object on the first different free slot in the array.
-            for (int i = 0; (i < _objects.Length) && (i != objectPos); i++)
+            for (int i = 0; (i < Objects.Length) && (i != objectPos); i++)
             {
-                if (_objects[i] == null)
+                if (Objects[i] == null)
                 {
-                    _objects[i] = obj;
+                    Objects[i] = obj;
                     return i;
                 }
             }
@@ -335,7 +348,7 @@ public class GameBehaviour : NetworkBehaviour
             Debug.LogError("Grid filled with objects!");
             return -1;
         }
-        _objects[objectPos] = obj;
+        Objects[objectPos] = obj;
         return objectPos;
     }
 
@@ -347,7 +360,7 @@ public class GameBehaviour : NetworkBehaviour
     [Command]
     public void CmdRemoveObjectFromGrid(int objectPos)
     {
-        GameObject go = _objects[objectPos];
+        GameObject go = Objects[objectPos];
 
         if (go == null)
         {
@@ -357,9 +370,9 @@ public class GameBehaviour : NetworkBehaviour
 
         NetworkServer.UnSpawn(go);
         NetworkServer.Destroy(go);
-        _objects[objectPos] = null;
+        Objects[objectPos] = null;
 
-        CmdGenerateFood();
+        GenerateFood();
     }
 
     //void CreateTeleportingMenuPair(
@@ -391,11 +404,17 @@ public class GameBehaviour : NetworkBehaviour
 
     public void OnGameOver(int score)
     {
+        if (!isOwned)
+            return;
+
         SetGameOverScreenActivity(true, score);
     }
 
     public void OnGameOverDecision()
     {
+        if (!isOwned)
+            return;
+
         SetGameOverScreenActivity(false);
     }
 }
