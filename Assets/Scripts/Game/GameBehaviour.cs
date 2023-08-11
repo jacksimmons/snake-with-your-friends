@@ -251,7 +251,7 @@ public class GameBehaviour : NetworkBehaviour
         }
         else
         {
-            player.transform.parent.Find("HostSignifier").gameObject.SetActive(false);
+            player.transform.Find("HostSignifier").gameObject.SetActive(false);
         }
 
         StartCoroutine(Wait.WaitForObjectThen(
