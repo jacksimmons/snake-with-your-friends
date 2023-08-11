@@ -17,7 +17,6 @@ public class GameBehaviour : NetworkBehaviour
 
     [SerializeField]
     private GameObject _gameOverTemplate;
-    private GameObject _gameOverObject;
 
     [SerializeField]
     private GameObject[] _foodTemplates;
@@ -65,11 +64,6 @@ public class GameBehaviour : NetworkBehaviour
             if (_manager != null) { return _manager; }
             return _manager = CustomNetworkManager.singleton as CustomNetworkManager;
         }
-    }
-
-    private void Start()
-    {
-        _gameOverObject = GameObject.Find("GameOver");
     }
 
     private Tilemap CreateAndReturnTilemap(string gridName, bool hasCollider)
@@ -242,8 +236,6 @@ public class GameBehaviour : NetworkBehaviour
             }
             ClientPlacePlayers(positions, rotation_zs);
         }
-
-        SetGameOverScreenActivity(false);
     }
 
     /// <summary>
@@ -372,14 +364,15 @@ public class GameBehaviour : NetworkBehaviour
 
     private void SetGameOverScreenActivity(bool active, int score = 0)
     {
-        _gameOverObject.SetActive(active);
+        GameObject gameOver = GameObject.Find("GameOver");
+        gameOver.SetActive(active);
 
         if (active)
         {
             bool online = SteamUser.BLoggedOn();
-            _gameOverObject.transform.Find("OnlineButton").gameObject.SetActive(online);
-            _gameOverObject.transform.Find("OfflineButton").gameObject.SetActive(!online);
-            _gameOverObject.transform.Find("Score").GetComponent<TextMeshProUGUI>().text = "Score: " + score.ToString();
+            gameOver.transform.Find("OnlineButton").gameObject.SetActive(online);
+            gameOver.transform.Find("OfflineButton").gameObject.SetActive(!online);
+            gameOver.transform.Find("Score").GetComponent<TextMeshProUGUI>().text = "Score: " + score.ToString();
         }
     }
 
