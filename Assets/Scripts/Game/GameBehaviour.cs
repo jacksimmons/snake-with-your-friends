@@ -92,7 +92,7 @@ public class GameBehaviour : NetworkBehaviour
         return tilemap;
     }
 
-    private void CreateGroundTilemap(Tilemap groundTilemap, Vector2Int bl)
+    private void CreateGroundTilemap(ref Tilemap groundTilemap, Vector2Int bl)
     {
         // Bounds are an inner square of the 51x51 wall bounds starting at 0,0
         BoundsInt bounds = new(
@@ -124,7 +124,7 @@ public class GameBehaviour : NetworkBehaviour
         groundTilemap.SetTilesBlock(bounds, tiles);
     }
 
-    private void CreateWallTilemap(Tilemap wallTilemap, Vector2Int bl)
+    private void CreateWallTilemap(ref Tilemap wallTilemap, Vector2Int bl)
     {
         // This square is (int)GroundSize + 2 squared, since it is one bigger on each side of the x and y edges of the inner square
         BoundsInt bounds = new(
@@ -201,6 +201,7 @@ public class GameBehaviour : NetworkBehaviour
     {
         if (name == "Game" && !_alreadyReady && isOwned)
         {
+            print("Hi");
             OnPlayerReady();
             _alreadyReady = true;
         }
@@ -234,8 +235,8 @@ public class GameBehaviour : NetworkBehaviour
         _groundTilemap = CreateAndReturnTilemap(gridName: "Ground", hasCollider: false);
         _wallTilemap = CreateAndReturnTilemap(gridName: "Wall", hasCollider: true);
 
-        CreateGroundTilemap(_groundTilemap, bl);
-        CreateWallTilemap(_wallTilemap, bl);
+        CreateGroundTilemap(ref _groundTilemap, bl);
+        CreateWallTilemap(ref _wallTilemap, bl);
 
         if (isServer)
         {

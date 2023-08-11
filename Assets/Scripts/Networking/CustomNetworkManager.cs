@@ -22,15 +22,6 @@ public class CustomNetworkManager : NetworkManager
 
             NetworkServer.AddPlayerForConnection(conn, playerInstance.gameObject);
         }
-        else if (scene.name == "OfflineGame")
-        {
-            PlayerObjectController playerInstance = Instantiate(_playerPrefab);
-            playerInstance.connectionID = conn.connectionId;
-            playerInstance.playerNo = players.Count + 1;
-            playerInstance.playerSteamID = 0;
-
-            NetworkServer.AddPlayerForConnection(conn, playerInstance.gameObject);
-        }
     }
 
     public void StartGame(string sceneName)
