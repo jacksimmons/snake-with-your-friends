@@ -125,11 +125,11 @@ public class PlayerObjectController : NetworkBehaviour
     [Command]
     public void CmdUpdateBodyParts(List<BodyPartData> bodyPartDatas, ulong victimPlayerSteamID)
     {
-        OnBodyPartsUpdate(bodyPartDatas, victimPlayerSteamID);
+        ClientBodyPartsUpdate(bodyPartDatas, victimPlayerSteamID);
     }
 
     [ClientRpc]
-    public void OnBodyPartsUpdate(List<BodyPartData> bodyPartDatas, ulong victimPlayerSteamID)
+    public void ClientBodyPartsUpdate(List<BodyPartData> bodyPartDatas, ulong victimPlayerSteamID)
     {
         if (playerSteamID == victimPlayerSteamID && !isOwned)
         {
