@@ -62,7 +62,6 @@ public class BodyPart
             _regAngle = value % 360;
             if (BPType?.CurrentType != EBodyPartType.Corner)
             {
-                Debug.Log("2");
                 Transform.rotation = Quaternion.Euler(Vector3.forward * _regAngle);
             }
         }
@@ -158,7 +157,6 @@ public class BodyPart
     private void Init()
     {
         Player = Transform.parent.parent.GetComponent<PlayerMovementController>();
-        Debug.Log("1");
     }
 
     private void SetSprite(Sprite sprite)

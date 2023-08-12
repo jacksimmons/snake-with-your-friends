@@ -66,6 +66,9 @@ public class GameBehaviour : NetworkBehaviour
         }
     }
 
+    private int m_numPlayersReady = 0;
+
+    [Client]
     private Tilemap CreateAndReturnTilemap(string gridName, bool hasCollider)
     {
         GameObject gridObject = new GameObject(gridName);
@@ -89,6 +92,7 @@ public class GameBehaviour : NetworkBehaviour
         return tilemap;
     }
 
+    [Client]
     private void CreateGroundTilemap(ref Tilemap groundTilemap, Vector2Int bl)
     {
         // Bounds are an inner square of the 51x51 wall bounds starting at 0,0
@@ -121,6 +125,7 @@ public class GameBehaviour : NetworkBehaviour
         groundTilemap.SetTilesBlock(bounds, tiles);
     }
 
+    [Client]
     private void CreateWallTilemap(ref Tilemap wallTilemap, Vector2Int bl)
     {
         // This square is (int)GroundSize + 2 squared, since it is one bigger on each side of the x and y edges of the inner square
@@ -148,6 +153,7 @@ public class GameBehaviour : NetworkBehaviour
         wallTilemap.SetTilesBlock(bounds, tiles);
     }
 
+    [Client]
     public void PlacePlayers(int depth, int playersStartIndex, Vector2Int bl)
     {
         // Outer snakes (along the walls)
@@ -194,25 +200,21 @@ public class GameBehaviour : NetworkBehaviour
         }
     }
 
+    [Client]
     public void OnGameSceneLoaded(string name)
     {
         if (name != "Game")
             return;
 
         if (isOwned)
-            CmdLoadGame();
+        {
+            LoadGame();
+            CmdReady();
+        }
     }
 
-    [Command]
-    private void CmdLoadGame()
-    {
-        ClientLoadGame();
-        SetupObjects();
-        GenerateStartingFood();
-    }
-
-    [ClientRpc]
-    private void ClientLoadGame()
+    [Client]
+    private void LoadGame()
     {
         PlayerMovementController player = GameObject.Find("LocalPlayerObject").GetComponent<PlayerMovementController>();
 
@@ -224,29 +226,31 @@ public class GameBehaviour : NetworkBehaviour
 
         CreateGroundTilemap(ref _groundTilemap, bl);
         CreateWallTilemap(ref _wallTilemap, bl);
+    }
 
-        if (isServer)
+    [Command]
+    private void CmdReady()
+    {
+        m_numPlayersReady++;
+        if (m_numPlayersReady == Manager.Players.Count)
         {
             PlacePlayers(depth: 1, playersStartIndex: 0, bl);
-            List<Vector2> positions = new(Manager.Players.Count);
-            List<float> rotation_zs = new(Manager.Players.Count);
-            for (int i = 0; i < Manager.Players.Count; i++)
-            {
-                positions.Add(Manager.Players[i].transform.position);
-                rotation_zs.Add(Manager.Players[i].transform.rotation.eulerAngles.z);
-            }
-            ClientPlacePlayers(positions, rotation_zs);
+
+            ActivateLocalPlayerClientRpc();
+
+            Objects = new GameObject[(int)GroundSize * (int)GroundSize];
+            GenerateStartingFood();
         }
     }
 
-    /// <summary>
-    /// Sets up the Objects array with the appropriate dimensions.
-    /// </summary>
-    private void SetupObjects()
+    [ClientRpc]
+    private void ActivateLocalPlayerClientRpc()
     {
-        Objects = new GameObject[(int)GroundSize * (int)GroundSize];
+        PlayerMovementController pmc = GameObject.Find("LocalPlayerObject").GetComponent<PlayerMovementController>();
+        pmc.bodyPartContainer.SetActive(true);
     }
 
+    [Server]
     private void GenerateStartingFood()
     {
         for (int i = 0; i < Manager.Players.Count; i++)
@@ -255,6 +259,7 @@ public class GameBehaviour : NetworkBehaviour
         }
     }
 
+    [Server]
     private void GenerateFood()
     {
         int objectPos = Random.Range(0, Objects.Length);
@@ -272,6 +277,7 @@ public class GameBehaviour : NetworkBehaviour
 
         int foodIndex = Random.Range(0, _foodTemplates.Length);
         Vector2 foodPos = new((objectPos % (int)GroundSize) + (bl.x + 1.5f), (objectPos / (int)GroundSize) + (bl.y + 1.5f));
+        
         GameObject obj = Instantiate(_foodTemplates[foodIndex], foodPos, Quaternion.Euler(Vector3.forward * 0), GameObject.Find("Objects").transform);
         obj.GetComponent<GridObject>().gridPos.Value = objectPos;
         NetworkServer.Spawn(obj);
@@ -279,35 +285,12 @@ public class GameBehaviour : NetworkBehaviour
         AddObjectToGrid(objectPos, obj);
     }
 
-    [ClientRpc]
-    public void ClientPlacePlayers(List<Vector2> positions, List<float> rotation_zs)
-    {
-        if (positions.Count != rotation_zs.Count)
-        {
-            Debug.LogError("Positions and rotations have mismatching lengths!");
-            return;
-        }
-
-        for (int i = 0; i < positions.Count; i++)
-        {
-            PlayerObjectController poc = Manager.Players[i];
-            poc.transform.SetPositionAndRotation(positions[i], Quaternion.Euler(Vector3.forward * rotation_zs[i]));
-        }
-
-        ActivateLocalPlayer();
-    }
-
-    private void ActivateLocalPlayer()
-    {
-        PlayerMovementController pmc = GameObject.Find("LocalPlayerObject").GetComponent<PlayerMovementController>();
-        pmc.bodyPartContainer.SetActive(true);
-    }
-
     /// <summary>
     /// Checks if index `objectPos` is not -1 in Objects, if so it recursively
     /// searches for a valid index.
     /// </summary>
     /// <returns>The final position of the object, or -1 if no vacancies in Objects.</returns>
+    [Server]
     public int AddObjectToGrid(int objectPos, GameObject obj)
     {
         if (Objects[objectPos] != null)
