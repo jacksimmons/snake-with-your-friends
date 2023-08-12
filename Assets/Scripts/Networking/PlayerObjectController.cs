@@ -138,6 +138,11 @@ public class PlayerObjectController : NetworkBehaviour
             m_playerMovementController.BodyParts.Clear();
             for (int i = 0; i < bodyPartDatas.Count; i++)
             {
+                BodyPartData data = bodyPartDatas[i];
+                print($"Body Part {i}: \n Position: {data.position} \n Direction: {data.direction}");
+                print($"Corner Rot: {data.bpRotationData.CornerAngle} \n Rot: {data.bpRotationData.RegularAngle}");
+                print($"Current Type: {data.bpTypeData.CurrentType} \n Default Type: {data.bpTypeData.DefaultType}");
+
                 Transform bodyPartParent = m_playerMovementController.bodyPartContainer.transform;
                 int diff = bodyPartDatas.Count - bodyPartParent.childCount;
                 while (diff > 0)
