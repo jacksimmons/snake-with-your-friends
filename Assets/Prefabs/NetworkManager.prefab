@@ -66,6 +66,7 @@ MonoBehaviour:
   - {fileID: 282451142020418660, guid: 0275836c03688364b84c9c8124927bf3, type: 3}
   - {fileID: 8457383420197702784, guid: 56b349ba582b06f488f8aee4394c72fa, type: 3}
   - {fileID: 3540720362809897522, guid: 53751b131fb05bb4cb78371e89654a70, type: 3}
+  - {fileID: 454872681040166018, guid: 42f111e0042b8da47bacd4f388020667, type: 3}
   snapshotSettings:
     bufferTimeMultiplier: 2
     catchupNegativeThreshold: -1
@@ -78,6 +79,7 @@ MonoBehaviour:
     deliveryTimeEmaDuration: 2
   timeInterpolationGui: 0
   _playerPrefab: {fileID: 5691343852970272198, guid: f10477f5b0dea214e9da6295d82dbfd9, type: 3}
+  singleplayer: 0
 --- !u!114 &5917249426234426199
 MonoBehaviour:
   m_ObjectHideFlags: 0
