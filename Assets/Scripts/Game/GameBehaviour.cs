@@ -46,9 +46,6 @@ public class GameBehaviour : NetworkBehaviour
     }
     public EClientMode ClientMode { get; private set; } = EClientMode.Online;
 
-    // An array of child indices for objects (all objects in this go under the Objects game object parent)
-    public GameObject[] Objects { get; private set; }
-
     Vector2Int bl = Vector2Int.zero;
 
     // Soft limit is preferred, but if it is too small, the hard limit is used (1 tile).
@@ -66,7 +63,12 @@ public class GameBehaviour : NetworkBehaviour
         }
     }
 
+    // Server Variables
+    // Note that these are static - if they weren't, [Command] functions cannot use them.
+
     private static int s_numPlayersReady = 0;
+    // An array of child indices for objects (all objects in this go under the s_objects game object parent)
+    public static GameObject[] s_objects { get; private set; }
 
     [Client]
     public void OnGameSceneLoaded(string name)
@@ -209,7 +211,7 @@ public class GameBehaviour : NetworkBehaviour
         PlacePlayersClientRpc(positions, rotation_zs);
         ActivateLocalPlayerClientRpc();
 
-        Objects = new GameObject[(int)GroundSize * (int)GroundSize];
+        s_objects = new GameObject[(int)GroundSize * (int)GroundSize];
         GenerateStartingFood();
     }
 
@@ -295,9 +297,9 @@ public class GameBehaviour : NetworkBehaviour
     [Server]
     private void GenerateFood()
     {
-        int objectPos = Random.Range(0, Objects.Length);
+        int objectPos = Random.Range(0, s_objects.Length);
 
-        // Overwrite Objects[objectPos] with -1 (if there are any vacancies)
+        // Overwrite s_objects[objectPos] with -1 (if there are any vacancies)
         // This effectively acts as a test to see if there are any vacancies,
         // which also happens to locate the vacancy, while leaving its value
         // as -1.
@@ -321,22 +323,22 @@ public class GameBehaviour : NetworkBehaviour
     }
 
     /// <summary>
-    /// Checks if index `objectPos` is not -1 in Objects, if so it recursively
+    /// Checks if index `objectPos` is not -1 in s_objects, if so it recursively
     /// searches for a valid index.
     /// </summary>
-    /// <returns>The final position of the object, or -1 if no vacancies in Objects.</returns>
+    /// <returns>The final position of the object, or -1 if no vacancies in s_objects.</returns>
     [Server]
     public int AddObjectToGrid(int objectPos, GameObject obj)
     {
-        if (Objects[objectPos] != null)
+        if (s_objects[objectPos] != null)
         {
             // If there already is an object at given pos, try to put
             // the object on the first different free slot in the array.
-            for (int i = 0; (i < Objects.Length) && (i != objectPos); i++)
+            for (int i = 0; (i < s_objects.Length) && (i != objectPos); i++)
             {
-                if (Objects[i] == null)
+                if (s_objects[i] == null)
                 {
-                    Objects[i] = obj;
+                    s_objects[i] = obj;
                     return i;
                 }
             }
@@ -344,7 +346,7 @@ public class GameBehaviour : NetworkBehaviour
             Debug.LogError("Grid filled with objects!");
             return -1;
         }
-        Objects[objectPos] = obj;
+        s_objects[objectPos] = obj;
         return objectPos;
     }
 
@@ -356,7 +358,7 @@ public class GameBehaviour : NetworkBehaviour
     [Command]
     public void CmdRemoveObjectFromGrid(int objectPos)
     {
-        GameObject go = Objects[objectPos];
+        GameObject go = s_objects[objectPos];
 
         if (go == null)
         {
@@ -366,7 +368,7 @@ public class GameBehaviour : NetworkBehaviour
 
         NetworkServer.UnSpawn(go);
         NetworkServer.Destroy(go);
-        Objects[objectPos] = null;
+        s_objects[objectPos] = null;
 
         GenerateFood();
     }
