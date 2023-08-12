@@ -48,7 +48,7 @@ public class BodyPart
         {
             // Assign corner angle to transform (implicit state change)
             _corAngle = value % 360;
-            if (BPType?.CurrentType != EBodyPartType.Corner) Transform.rotation = Quaternion.Euler(Vector3.forward * _corAngle);
+            if (BPType?.CurrentType == EBodyPartType.Corner) Transform.rotation = Quaternion.Euler(Vector3.forward * _corAngle);
         }
     }
 
@@ -60,7 +60,11 @@ public class BodyPart
         {
             // Assign regular angle to transform (implicit state change)
             _regAngle = value % 360;
-            if (BPType?.CurrentType != EBodyPartType.Corner) Transform.rotation = Quaternion.Euler(Vector3.forward * _regAngle);
+            if (BPType?.CurrentType != EBodyPartType.Corner)
+            {
+                Debug.Log("2");
+                Transform.rotation = Quaternion.Euler(Vector3.forward * _regAngle);
+            }
         }
     }
 
@@ -154,6 +158,7 @@ public class BodyPart
     private void Init()
     {
         Player = Transform.parent.parent.GetComponent<PlayerMovementController>();
+        Debug.Log("1");
     }
 
     private void SetSprite(Sprite sprite)
