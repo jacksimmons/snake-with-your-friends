@@ -166,6 +166,9 @@ public class PlayerObjectController : NetworkBehaviour
 
     public void HandleBodyPartDeath(BodyPart bp, bool dead)
     {
+        if (!isOwned)
+            return;
+
         int ocIndex = Manager.Players.IndexOf(this);
         if (ocIndex == -1)
         {
@@ -184,14 +187,15 @@ public class PlayerObjectController : NetworkBehaviour
     [Command]
     private void CmdHandleBodyPartDeath(int ocIndex, int bpIndex, bool dead)
     {
-        if (!isOwned)
-            return;
         PlayerObjectController poc = Manager.Players[ocIndex];
         poc.m_pmc.SetBodyPartDeadClientRpc(bpIndex, dead);
     }
 
     public void HandleDeath(bool dead)
     {
+        if (!isOwned)
+            return;
+
         int index = Manager.Players.IndexOf(this);
         if (index == -1)
         {
@@ -204,8 +208,6 @@ public class PlayerObjectController : NetworkBehaviour
     [Command]
     private void CmdHandleDeath(int index, bool dead)
     {
-        if (!isOwned)
-            return;
         PlayerObjectController poc = Manager.Players[index];
         poc.m_pmc.SetDeadClientRpc(dead);
     }
