@@ -82,6 +82,14 @@ public class PlayerMovementController : NetworkBehaviour
     // Components
     private Rigidbody2D _rb;
 
+    public bool HasMoved
+    {
+        get
+        {
+            return (movement != Vector2.zero);
+        }
+    }
+
     private void Start()
     {
         bodyPartContainer.SetActive(false);
@@ -228,7 +236,7 @@ public class PlayerMovementController : NetworkBehaviour
         }
 
         // Ensures the first movement has been made
-        if (movement != Vector2.zero)
+        if (HasMoved)
         {
             // Prevents an extra move occurring before death
             if (CheckForInternalCollisions()) return;
@@ -285,9 +293,13 @@ public class PlayerMovementController : NetworkBehaviour
     /// <summary>
     /// Adds a new body part onto the end of the snake, then makes it the new tail.
     /// Then turns the tail into a regular straight piece.
+    /// Not having moved yet grants immunity.
     /// </summary>
     private void AddBodyPart()
     {
+        if (!HasMoved)
+            return;
+
         GameObject newBodyPartObj = Instantiate(_bodyPartTemplate);
         newBodyPartObj.transform.parent = bodyPartContainer.transform;
 
@@ -318,10 +330,14 @@ public class PlayerMovementController : NetworkBehaviour
 
     /// <summary>
     /// Bisects the snake at the body part which is removed.
+    /// Not having moved yet grants immunity.
     /// </summary>
     /// <param name="bp">The removed body part.</param>
     private void RemoveBodyPart(BodyPart bp)
     {
+        if (!HasMoved)
+            return;
+
         int deadIndex = BodyParts.IndexOf(bp);
         if (deadIndex == 0)
         {
@@ -372,10 +388,13 @@ public class PlayerMovementController : NetworkBehaviour
     }
 
     /// <summary>
-    /// Handles death.
+    /// Not having moved yet grants immunity.
     /// </summary>
     public void HandleDeath()
     {
+        if (!HasMoved)
+            return;
+
         SetDead(true);
         GameBehaviour game = GetComponentInChildren<GameBehaviour>();
         game.OnGameOver(score: BodyParts.Count);
