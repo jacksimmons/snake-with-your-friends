@@ -280,7 +280,7 @@ public class BodyPart
     public static BodyPartData ToData(BodyPart bp)
     {
         BodyPartData data = new(bp.Position, bp.Direction, bp.Rotation.ToData(),
-            bp.TeleportCounter, bp.BPType.ToData());
+            bp.TeleportCounter, BodyPartType.ToData(bp.BPType));
         return data;
     }
 }

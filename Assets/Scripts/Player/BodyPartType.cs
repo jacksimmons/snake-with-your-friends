@@ -37,15 +37,14 @@ public class BodyPartType
         FromData(data);
     }
 
-    public void FromData(BodyPartTypeData data)
+    public static BodyPartType FromData(BodyPartTypeData data)
     {
-        DefaultType = data.DefaultType;
-        CurrentType = data.CurrentType;
+        return new BodyPartType(data.DefaultType, data.CurrentType);
     }
 
-    public BodyPartTypeData ToData()
+    public static BodyPartTypeData ToData(BodyPartType type)
     {
-        return new BodyPartTypeData(DefaultType, CurrentType);
+        return new BodyPartTypeData(type.DefaultType, type.CurrentType);
     }
 
     public static Sprite TypeToPlayerSprite(EBodyPartType type, PlayerMovementController player)
