@@ -25,7 +25,7 @@ public class FoodObject : GridObject
                 GameObject.FindWithTag("AudioHandler").GetComponent<AudioHandler>().eatAudioSource.Play();
             }
 
-            game.CmdRemoveObjectFromGrid(GridPos);
+            game.CmdRemoveObjectFromGrid(gridPos);
         }
     }
 }
