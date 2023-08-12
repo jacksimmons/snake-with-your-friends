@@ -259,7 +259,7 @@ public class PlayerMovementController : NetworkBehaviour
             }
 
             // Update to server
-            m_playerObjectController.UpdateBodyParts(BodyParts);
+            m_playerObjectController.UpdateBodyParts();
         }
     }
 
