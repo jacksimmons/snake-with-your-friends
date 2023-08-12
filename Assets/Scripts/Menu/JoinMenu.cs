@@ -59,17 +59,13 @@ public class JoinMenu : MonoBehaviour
         m_LobbyMatchList.Set(handle);
     }
 
-    //public void OnLobbyJoinPressed(TextMeshProUGUI idField)
-    //{
-    //    ulong id;
-    //    ulong.TryParse(idField.text, out id);
+    public void OnLobbyJoinPressed(TextMeshProUGUI idField)
+    {
+        ulong id;
+        ulong.TryParse(idField.text, out id);
 
-    //    Lobby lobby = GameObject.FindWithTag("Lobby").GetComponent<Lobby>();
-    //    if (SteamUser.BLoggedOn())
-    //        lobby.JoinLobby((CSteamID)id);
-    //    else
-    //        Debug.LogWarning("You must be online to join a lobby.");
-    //}
+        SteamMatchmaking.JoinLobby((CSteamID)id);
+    }
 
     public void OnDistanceDropdownUpdated(int distance)
     {

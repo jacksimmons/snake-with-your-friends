@@ -40,7 +40,7 @@ public class Chungus : MonoBehaviour
         }
     }
 
-    private static void ToggleLoadingSymbol(bool show)
+    public static void ToggleLoadingSymbol(bool show)
     {
         Instance.LoadingObj.SetActive(show);
     }

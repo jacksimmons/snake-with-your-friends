@@ -32,7 +32,11 @@ public class MainMenu : MonoBehaviour
 
     public void Restart()
     {
+        // Will enable the loading symbol
+        Chungus.ToggleLoadingSymbol(true);
         Chungus.ClearDontDestroyOnLoad();
+
+        // Will enable then disable the loading symbol
         Chungus.LoadSceneWithLoadingSymbol("MainMenu");
     }
 
