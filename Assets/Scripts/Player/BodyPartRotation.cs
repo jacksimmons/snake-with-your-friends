@@ -1,17 +1,5 @@
 using UnityEngine;
 
-public struct BodyPartRotationData
-{
-    public float CornerAngle;
-    public float RegularAngle;
-
-    public BodyPartRotationData(float cornerAngle, float regularAngle)
-    {
-        CornerAngle = cornerAngle;
-        RegularAngle = regularAngle;
-    }
-}
-
 /// <summary>
 /// Class to represent the two states of rotation of a BodyPart.
 /// Assigning to either angle type changes to the respective state, by assigning
@@ -52,28 +40,10 @@ public class BodyPartRotation
         _regAngle = transform.rotation.eulerAngles.z;
     }
 
-    public BodyPartRotation(Transform transform, int cornerAngle, int regularAngle)
+    public BodyPartRotation(Transform transform, float cornerAngle, float regularAngle)
     {
         m_transform = transform;
         _corAngle = cornerAngle;
         _regAngle = regularAngle;
-    }
-
-    public BodyPartRotation(Transform transform, BodyPartRotationData data)
-    {
-        m_transform = transform;
-        FromData(data);
-    }
-
-    public void FromData(BodyPartRotationData data)
-    {
-        _corAngle = data.CornerAngle;
-        _regAngle = data.RegularAngle;
-    }
-
-    public BodyPartRotationData ToData()
-    {
-        BodyPartRotationData data = new(_corAngle, _regAngle);
-        return data;
     }
 }

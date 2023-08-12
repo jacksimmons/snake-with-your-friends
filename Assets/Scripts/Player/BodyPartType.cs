@@ -9,18 +9,6 @@ public enum EBodyPartType
     Corner
 }
 
-public struct BodyPartTypeData
-{
-    public EBodyPartType DefaultType { get; private set; }
-    public EBodyPartType CurrentType { get; private set; }
-
-    public BodyPartTypeData(EBodyPartType defaultType, EBodyPartType currentType)
-    {
-        DefaultType = defaultType;
-        CurrentType = currentType;
-    }
-}
-
 public class BodyPartType
 {
     public EBodyPartType DefaultType { get; private set; }
@@ -30,21 +18,6 @@ public class BodyPartType
     {
         DefaultType = defaultType;
         CurrentType = currentType;
-    }
-
-    public BodyPartType(BodyPartTypeData data)
-    {
-        FromData(data);
-    }
-
-    public static BodyPartType FromData(BodyPartTypeData data)
-    {
-        return new BodyPartType(data.DefaultType, data.CurrentType);
-    }
-
-    public static BodyPartTypeData ToData(BodyPartType type)
-    {
-        return new BodyPartTypeData(type.DefaultType, type.CurrentType);
     }
 
     public static Sprite TypeToPlayerSprite(EBodyPartType type, PlayerMovementController player)

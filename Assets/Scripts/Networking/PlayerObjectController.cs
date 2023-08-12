@@ -140,8 +140,8 @@ public class PlayerObjectController : NetworkBehaviour
             {
                 BodyPartData data = bodyPartDatas[i];
                 print($"Body Part {i}: \n Position: {data.position} \n Direction: {data.direction}");
-                print($"Corner Rot: {data.bpRotationData.CornerAngle} \n Rot: {data.bpRotationData.RegularAngle}");
-                print($"Current Type: {data.bpTypeData.CurrentType} \n Default Type: {data.bpTypeData.DefaultType}");
+                print($"Corner Rot: {data.CornerAngle} \n Rot: {data.RegularAngle}");
+                print($"Current Type: {data.CurrentType} \n Default Type: {data.DefaultType}");
 
                 Transform bodyPartParent = m_playerMovementController.bodyPartContainer.transform;
                 int diff = bodyPartDatas.Count - bodyPartParent.childCount;
@@ -160,8 +160,6 @@ public class PlayerObjectController : NetworkBehaviour
                     bodyPartDatas[i],
                     m_playerMovementController.bodyPartContainer.transform.GetChild(i)
                 );
-
-                print(newBP.BPType.CurrentType.ToString());
 
                 m_playerMovementController.BodyParts.Add(newBP);
             }

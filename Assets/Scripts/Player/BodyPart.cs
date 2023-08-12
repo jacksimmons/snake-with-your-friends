@@ -11,17 +11,21 @@ public struct BodyPartData
 {
     public Vector2 position;
     public Vector2 direction;
-    public BodyPartRotationData bpRotationData;
+    public float CornerAngle;
+    public float RegularAngle;
+    public EBodyPartType DefaultType;
+    public EBodyPartType CurrentType;
     public int teleportCounter;
-    public BodyPartTypeData bpTypeData;
-    public BodyPartData(Vector2 position, Vector2 direction, BodyPartRotationData bpRotationData,
-        int teleportCounter, BodyPartTypeData bpTypeData)
+    public BodyPartData(Vector2 position, Vector2 direction, float cornerAngle, float regularAngle,
+        EBodyPartType defaultType, EBodyPartType currentType, int teleportCounter)
     {
         this.position = position;
         this.direction = direction;
-        this.bpRotationData = bpRotationData;
+        this.CornerAngle = cornerAngle;
+        this.RegularAngle = regularAngle;
+        this.DefaultType = defaultType;
+        this.CurrentType = currentType;
         this.teleportCounter = teleportCounter;
-        this.bpTypeData = bpTypeData;
     }
 }
 
@@ -268,8 +272,8 @@ public class BodyPart
     /// <param name="transform">The transform of the physical body part.</param>
     public static BodyPart FromData(BodyPartData data, Transform transform)
     {
-        BodyPart bp = new(transform, data.position, new(transform, data.bpRotationData),
-            data.direction, data.teleportCounter, new(data.bpTypeData));
+        BodyPart bp = new(transform, data.position, new(transform, data.CornerAngle, data.RegularAngle),
+            data.direction, data.teleportCounter, new(data.DefaultType, data.CurrentType));
         return bp;
     }
 
@@ -279,8 +283,9 @@ public class BodyPart
     /// <returns>The exported struct.</returns>
     public static BodyPartData ToData(BodyPart bp)
     {
-        BodyPartData data = new(bp.Position, bp.Direction, bp.Rotation.ToData(),
-            bp.TeleportCounter, BodyPartType.ToData(bp.BPType));
+        BodyPartData data = new(bp.Position, bp.Direction, bp.Rotation.CornerAngle,
+            bp.Rotation.RegularAngle, bp.BPType.DefaultType, bp.BPType.CurrentType,
+            bp.TeleportCounter);
         return data;
     }
 }
