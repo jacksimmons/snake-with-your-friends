@@ -64,7 +64,6 @@ public class PlayerListItem : MonoBehaviour
     {
         int imageID = SteamFriends.GetLargeFriendAvatar(new CSteamID(steamID));
         // -1 => Yet to be loaded, 0 => Not set
-        print(imageID);
         if (imageID == -1 || imageID == 0) { return false; }
         icon.texture = GetSteamImageAsTexture(imageID);
         return true;
