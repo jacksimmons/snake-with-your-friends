@@ -31,8 +31,8 @@ public class DeathTrigger : MonoBehaviour
                 {
                     PlayerMovementController player = maybePlayer.GetComponent<PlayerMovementController>();
                     player.transform.position -= (Vector3)player.PrevMovement;
-                    //if (!player.canMoveFreely)
-                    //    player.HandleDeath();
+                    if (!player.canMoveFreely)
+                        player.HandleDeath();
                     return;
                 }
             }
