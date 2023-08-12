@@ -374,8 +374,8 @@ public class PlayerMovementController : NetworkBehaviour
 
         if (BodyParts.IndexOf(bp) == 0)
         {
-            CamBehaviour cb = GameObject.FindWithTag("MainCamera").GetComponent<CamBehaviour>();
-            cb.Player = null;
+            //CamBehaviour cb = GameObject.FindWithTag("MainCamera").GetComponent<CamBehaviour>();
+            //cb.Player = null;
         }
 
         Destroy(bp.Transform.gameObject, timeToDestroy);
