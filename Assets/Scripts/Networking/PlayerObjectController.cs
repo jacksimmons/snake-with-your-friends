@@ -139,16 +139,16 @@ public class PlayerObjectController : NetworkBehaviour
             for (int i = 0; i < bodyPartDatas.Count; i++)
             {
                 Transform bodyPartParent = m_playerMovementController.bodyPartContainer.transform;
-                int diff = i - bodyPartParent.childCount;
+                int diff = bodyPartDatas.Count - bodyPartParent.childCount;
                 while (diff > 0)
                 {
                     Instantiate(m_bodyPartTemplate, bodyPartParent);
-                    diff = i - bodyPartParent.childCount;
+                    diff = bodyPartDatas.Count - bodyPartParent.childCount;
                 }
                 while (diff < 0)
                 {
                     Destroy(bodyPartParent.GetChild(bodyPartParent.childCount).gameObject);
-                    diff = i - m_playerMovementController.bodyPartContainer.transform.childCount;
+                    diff = bodyPartDatas.Count - bodyPartParent.childCount;
                 }
 
                 m_playerMovementController.BodyParts.Add(
