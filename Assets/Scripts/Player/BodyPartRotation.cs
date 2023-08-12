@@ -2,8 +2,8 @@ using UnityEngine;
 
 /// <summary>
 /// Class to represent the two states of rotation of a BodyPart.
-/// Assigning to either angle type changes to the respective state, by assigning
-/// to transform's rotation.
+/// Assigning to either angle type changes to the respective state, by making the
+/// transform's rotation equal to the active angle.
 /// </summary>
 public class BodyPartRotation
 {
@@ -40,10 +40,20 @@ public class BodyPartRotation
         _regAngle = transform.rotation.eulerAngles.z;
     }
 
-    public BodyPartRotation(Transform transform, float cornerAngle, float regularAngle)
+    public BodyPartRotation(Transform transform, float regularAngle, float cornerAngle, bool isCorner)
     {
         m_transform = transform;
-        _corAngle = cornerAngle;
-        _regAngle = regularAngle;
+
+        // Do we activate the corner or the regular angle?
+        if (isCorner)
+        {
+            _regAngle = regularAngle;
+            CornerAngle = cornerAngle;
+        }
+        else
+        {
+            RegularAngle = regularAngle;
+            _corAngle = cornerAngle;
+        }
     }
 }
