@@ -347,7 +347,7 @@ public class PlayerMovementController : NetworkBehaviour
         while (true)
         {
             if (deadIndex >= BodyParts.Count) break;
-            SetBodyPartDead(BodyParts[deadIndex], true);
+            m_poc.HandleBodyPartDeath(BodyParts[deadIndex], true);
             BodyParts.RemoveAt(deadIndex);
 
             // Remove the body part from the container
@@ -367,15 +367,20 @@ public class PlayerMovementController : NetworkBehaviour
         }
     }
 
-    private void SetBodyPartDead(BodyPart bp, bool dead)
+    [ClientRpc]
+    public void SetBodyPartDeadClientRpc(int bpIndex, bool dead)
     {
+        BodyPart bp = BodyParts[bpIndex];
         float timeToDestroy = 5;
         bp.Transform.gameObject.GetComponent<SpriteRenderer>().color = dead ? Color.gray : Color.white;
 
         if (BodyParts.IndexOf(bp) == 0)
         {
-            //CamBehaviour cb = GameObject.FindWithTag("MainCamera").GetComponent<CamBehaviour>();
-            //cb.Player = null;
+            if (isOwned)
+            {
+                CamBehaviour cb = GameObject.FindWithTag("MainCamera").GetComponent<CamBehaviour>();
+                cb.Player = null;
+            }
         }
 
         Destroy(bp.Transform.gameObject, timeToDestroy);
@@ -400,7 +405,7 @@ public class PlayerMovementController : NetworkBehaviour
         _rb.simulated = !dead;
         frozen = dead;
         foreach (BodyPart part in BodyParts)
-            SetBodyPartDead(part, dead);
+            m_poc.HandleBodyPartDeath(part, dead);
         status.gameObject.SetActive(!dead);
     }
 

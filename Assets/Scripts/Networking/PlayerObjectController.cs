@@ -164,6 +164,30 @@ public class PlayerObjectController : NetworkBehaviour
         }
     }
 
+    public void HandleBodyPartDeath(BodyPart bp, bool dead)
+    {
+        int ocIndex = Manager.Players.IndexOf(this);
+        if (ocIndex == -1)
+        {
+            Debug.LogError("Couldn't find player in Manager.Players!");
+            return;
+        }
+        int bpIndex = m_pmc.BodyParts.IndexOf(bp);
+        if (bpIndex == -1)
+        {
+            Debug.LogError("Couldn't find BodyPart!");
+            return;
+        }
+        CmdHandleBodyPartDeath(ocIndex, bpIndex, dead);
+    }
+
+    [Command]
+    private void CmdHandleBodyPartDeath(int ocIndex, int bpIndex, bool dead)
+    {
+        PlayerObjectController poc = Manager.Players[ocIndex];
+        poc.m_pmc.SetBodyPartDeadClientRpc(bpIndex, dead);
+    }
+
     public void HandleDeath(bool dead)
     {
         int index = Manager.Players.IndexOf(this);
@@ -179,8 +203,6 @@ public class PlayerObjectController : NetworkBehaviour
     private void CmdHandleDeath(int index, bool dead)
     {
         PlayerObjectController poc = Manager.Players[index];
-        PlayerMovementController pmc = poc.m_pmc;
-
-        pmc.SetDeadClientRpc(dead);
+        poc.m_pmc.SetDeadClientRpc(dead);
     }
 }
