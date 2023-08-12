@@ -56,12 +56,7 @@ public class PlayerListItem : MonoBehaviour
         ChangeReadyStatus();
         if (!_avatarReceived)
         {
-            StartCoroutine(
-                Wait.WaitForConditionThen(
-                    () => GetPlayerIcon(),
-                    new WaitForSeconds(0.1f)
-                )
-            );
+            GetPlayerIcon();
         }
     }
 
