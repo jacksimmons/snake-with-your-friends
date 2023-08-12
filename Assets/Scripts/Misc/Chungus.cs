@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
 using UnityEngine;
 
@@ -12,6 +13,11 @@ using UnityEngine;
 public class Chungus : MonoBehaviour
 {
     // Fields
+    private string[] dontDestroyThese =
+    {
+        "Chungus",
+        "Loading"
+    };
     public Settings settings = null;
     public GameObject LoadingObj { get; private set; } = null;
 
@@ -93,7 +99,7 @@ public class Chungus : MonoBehaviour
     {
         foreach (var root in Instance.gameObject.scene.GetRootGameObjects())
         {
-            if (root != Instance.gameObject && root.name != "SteamManager")
+            if (!Instance.dontDestroyThese.Contains(root.name))
                 Destroy(root);
         }
     }
