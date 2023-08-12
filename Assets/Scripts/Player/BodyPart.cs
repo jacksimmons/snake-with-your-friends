@@ -97,7 +97,6 @@ public class BodyPart
         Rotation = new(transform);
         BPType = new(type, type);
         TeleportCounter = 0;
-
     }
 
     /// <summary>
@@ -114,7 +113,6 @@ public class BodyPart
         Direction = direction;
         TeleportCounter = teleportCounter;
         BPType = type;
-
     }
 
     private void Init()
@@ -270,9 +268,8 @@ public class BodyPart
     /// <param name="transform">The transform of the physical body part.</param>
     public static BodyPart FromData(BodyPartData data, Transform transform)
     {
-        BodyPart bp = new(transform, data.direction, new(transform, data.bpRotationData),
-            data.direction, data.teleportCounter,
-            new(data.bpTypeData));
+        BodyPart bp = new(transform, data.position, new(transform, data.bpRotationData),
+            data.direction, data.teleportCounter, new(data.bpTypeData));
         return bp;
     }
 
