@@ -11,15 +11,6 @@ public enum EBodyPartType
 
 public class BodyPartType
 {
-    public EBodyPartType DefaultType { get; private set; }
-    public EBodyPartType CurrentType { get; set; }
-
-    public BodyPartType(EBodyPartType defaultType, EBodyPartType currentType)
-    {
-        DefaultType = defaultType;
-        CurrentType = currentType;
-    }
-
     public static Sprite TypeToPlayerSprite(EBodyPartType type, PlayerMovementController player)
     {
         Sprite sprite = null;

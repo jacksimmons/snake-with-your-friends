@@ -13,7 +13,7 @@ public class PlayerMovementController : NetworkBehaviour
     public StatusBehaviour status;
 
     [SerializeField]
-    private PlayerObjectController m_playerObjectController;
+    private PlayerObjectController m_poc;
 
     [SerializeField]
     public GameObject bodyPartContainer;
@@ -267,7 +267,7 @@ public class PlayerMovementController : NetworkBehaviour
             }
 
             // Update to server
-            m_playerObjectController.UpdateBodyParts();
+            m_poc.UpdateBodyParts();
         }
     }
 
@@ -304,15 +304,15 @@ public class PlayerMovementController : NetworkBehaviour
         newBodyPartObj.transform.parent = bodyPartContainer.transform;
 
         BodyPart tail = BodyParts[^1];
-        BodyPart newBodyPart = new(tail, newBodyPartObj.transform, new(EBodyPartType.Tail,
-            EBodyPartType.Tail))
+        BodyPart newBodyPart = new(tail, newBodyPartObj.transform)
         {
             Position = tail.Position - (Vector3)tail.Direction
         };
 
-        tail.BPType = new(EBodyPartType.Straight, EBodyPartType.Straight);
+        tail.DefaultType = EBodyPartType.Straight;
+        tail.CurrentType = EBodyPartType.Straight;
 
-        if (BodyParts[^2].BPType.CurrentType == EBodyPartType.Corner)
+        if (BodyParts[^2].CurrentType == EBodyPartType.Corner)
         {
             tail.MakeCorner(BodyParts[^2].Direction);
         }
@@ -356,11 +356,14 @@ public class PlayerMovementController : NetworkBehaviour
         }
 
         if (BodyParts.Count > 1)
-            BodyParts[^1].BPType = new(EBodyPartType.Tail, EBodyPartType.Tail);
+        {
+            BodyParts[^1].DefaultType = EBodyPartType.Tail;
+            BodyParts[^1].CurrentType = EBodyPartType.Tail;
+        }
         else
         {
             // Snake must have >1 body part left.
-            SetDead(true);
+            m_poc.HandleDeath(true);
         }
     }
 
@@ -378,15 +381,6 @@ public class PlayerMovementController : NetworkBehaviour
         Destroy(bp.Transform.gameObject, timeToDestroy);
     }
 
-    public void SetDead(bool dead)
-    {
-        _rb.simulated = !dead;
-        frozen = dead;
-        foreach (BodyPart part in BodyParts)
-            SetBodyPartDead(part, dead);
-        status.gameObject.SetActive(!dead);
-    }
-
     /// <summary>
     /// Not having moved yet grants immunity.
     /// </summary>
@@ -395,9 +389,19 @@ public class PlayerMovementController : NetworkBehaviour
         if (!HasMoved)
             return;
 
-        SetDead(true);
         GameBehaviour game = GetComponentInChildren<GameBehaviour>();
         game.OnGameOver(score: BodyParts.Count);
+        m_poc.HandleDeath(true);
+    }
+
+    [ClientRpc]
+    public void SetDeadClientRpc(bool dead)
+    {
+        _rb.simulated = !dead;
+        frozen = dead;
+        foreach (BodyPart part in BodyParts)
+            SetBodyPartDead(part, dead);
+        status.gameObject.SetActive(!dead);
     }
 
     /// <summary>

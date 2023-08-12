@@ -8,7 +8,7 @@ using UnityEditor;
 public class PlayerObjectController : NetworkBehaviour
 {
     [SerializeField]
-    private PlayerMovementController m_playerMovementController;
+    private PlayerMovementController m_pmc;
     [SerializeField]
     private GameObject m_bodyPartTemplate;
 
@@ -28,8 +28,6 @@ public class PlayerObjectController : NetworkBehaviour
             return _manager = CustomNetworkManager.singleton as CustomNetworkManager;
         }
     }
-
-    private PlayerMovementController m_pmc;
 
     private void Start()
     {
@@ -117,7 +115,7 @@ public class PlayerObjectController : NetworkBehaviour
     public void UpdateBodyParts()
     {
         List<BodyPartData> bodyPartDatas = new();
-        foreach (BodyPart part in m_playerMovementController.BodyParts)
+        foreach (BodyPart part in m_pmc.BodyParts)
         {
             bodyPartDatas.Add(BodyPart.ToData(part));
         }
@@ -135,7 +133,7 @@ public class PlayerObjectController : NetworkBehaviour
     {
         if (playerSteamID == victimPlayerSteamID && !isOwned)
         {
-            m_playerMovementController.BodyParts.Clear();
+            m_pmc.BodyParts.Clear();
             for (int i = 0; i < bodyPartDatas.Count; i++)
             {
                 BodyPartData data = bodyPartDatas[i];
@@ -143,7 +141,7 @@ public class PlayerObjectController : NetworkBehaviour
                 print($"Corner Rot: {data.CornerAngle} \n Rot: {data.RegularAngle}");
                 print($"Current Type: {data.CurrentType} \n Default Type: {data.DefaultType}");
 
-                Transform bodyPartParent = m_playerMovementController.bodyPartContainer.transform;
+                Transform bodyPartParent = m_pmc.bodyPartContainer.transform;
                 int diff = bodyPartDatas.Count - bodyPartParent.childCount;
                 while (diff > 0)
                 {
@@ -158,11 +156,31 @@ public class PlayerObjectController : NetworkBehaviour
 
                 BodyPart newBP = BodyPart.FromData(
                     bodyPartDatas[i],
-                    m_playerMovementController.bodyPartContainer.transform.GetChild(i)
+                    m_pmc.bodyPartContainer.transform.GetChild(i)
                 );
 
-                m_playerMovementController.BodyParts.Add(newBP);
+                m_pmc.BodyParts.Add(newBP);
             }
         }
+    }
+
+    public void HandleDeath(bool dead)
+    {
+        int index = Manager.Players.IndexOf(this);
+        if (index == -1)
+        {
+            Debug.LogError("Couldn't find player in Manager.Players!");
+            return;
+        }
+        CmdHandleDeath(index, dead);
+    }
+
+    [Command]
+    private void CmdHandleDeath(int index, bool dead)
+    {
+        PlayerObjectController poc = Manager.Players[index];
+        PlayerMovementController pmc = poc.m_pmc;
+
+        pmc.SetDeadClientRpc(dead);
     }
 }

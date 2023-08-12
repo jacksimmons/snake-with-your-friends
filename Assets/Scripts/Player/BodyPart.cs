@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Specialized;
 using System.Runtime.InteropServices;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -48,7 +49,10 @@ public class BodyPart
         {
             // Assign corner angle to transform (implicit state change)
             _corAngle = value % 360;
-            if (BPType?.CurrentType == EBodyPartType.Corner) Transform.rotation = Quaternion.Euler(Vector3.forward * _corAngle);
+            if (CurrentType == EBodyPartType.Corner)
+            {
+                Transform.rotation = Quaternion.Euler(Vector3.forward * _corAngle);
+            }
         }
     }
 
@@ -60,7 +64,7 @@ public class BodyPart
         {
             // Assign regular angle to transform (implicit state change)
             _regAngle = value % 360;
-            if (BPType?.CurrentType != EBodyPartType.Corner)
+            if (CurrentType != EBodyPartType.Corner)
             {
                 Transform.rotation = Quaternion.Euler(Vector3.forward * _regAngle);
             }
@@ -72,25 +76,41 @@ public class BodyPart
     public Vector2 Direction { get; set; }
     public int TeleportCounter { get; set; }
 
-    private BodyPartType _bpType = null;
-    public BodyPartType BPType
+    private EBodyPartType _defType = EBodyPartType.None;
+    public EBodyPartType DefaultType
     {
-        get { return _bpType; }
+        get { return _defType; }
         set
         {
-            if (_bpType != null)
+            if (value == EBodyPartType.None)
+                Debug.LogWarning("Tried to assign None body part type to DefaultType.");
+            else
             {
-                if (value.DefaultType != EBodyPartType.None && value.DefaultType != _bpType.DefaultType)
-                    DefaultSprite = BodyPartType.TypeToPlayerSprite(value.DefaultType, Player);
-                if (value.CurrentType != EBodyPartType.None && value.CurrentType != _bpType.CurrentType)
-                    SetSprite(BodyPartType.TypeToPlayerSprite(value.CurrentType, Player));
+                if (value != _defType)
+                {
+                    DefaultSprite = BodyPartType.TypeToPlayerSprite(value, Player);
+                    _defType = value;
+                }
             }
-            else if (value != null)
+        }
+    }
+
+    private EBodyPartType _curType = EBodyPartType.None;
+    public EBodyPartType CurrentType
+    {
+        get { return _curType; }
+        set
+        {
+            if (value == EBodyPartType.None)
+                Debug.LogWarning("Tried to assign None body part type to CurrentType.");
+            else
             {
-                DefaultSprite = BodyPartType.TypeToPlayerSprite(value.DefaultType, Player);
-                SetSprite(BodyPartType.TypeToPlayerSprite(value.CurrentType, Player));
+                if (value != _curType)
+                {
+                    SetSprite(BodyPartType.TypeToPlayerSprite(value, Player));
+                    _curType = value;
+                }
             }
-            _bpType = value;
         }
     }
 
@@ -99,12 +119,13 @@ public class BodyPart
     /// <summary>
     /// Copy body part constructor.
     /// </summary>
-    public BodyPart(BodyPart old, Transform transform, BodyPartType type)
+    public BodyPart(BodyPart old, Transform transform)
     {
         Transform = transform;
         Init();
 
-        BPType = type;
+        DefaultType = old.DefaultType;
+        CurrentType = old.CurrentType;
 
         Direction = old.Direction;
         RegularAngle = old.RegularAngle;
@@ -126,7 +147,8 @@ public class BodyPart
         Transform = transform;
         Init();
 
-        BPType = new(type, type);
+        DefaultType = type;
+        CurrentType = type;
 
         Direction = direction;
         RegularAngle = 0;
@@ -139,12 +161,13 @@ public class BodyPart
     /// Complete body part constructor.
     /// </summary>
     public BodyPart(Transform transform, Vector2 position, Vector2 direction, float regAngle,
-        float corAngle, BodyPartType type, int teleportCounter)
+        float corAngle, EBodyPartType defType, EBodyPartType curType, int teleportCounter)
     {
         Transform = transform;
         Init();
 
-        BPType = type;
+        DefaultType = defType;
+        CurrentType = curType;
 
         Position = position;
         Direction = direction;
@@ -177,8 +200,7 @@ public class BodyPart
     /// <param name="prevDir">The direction of the previous body part.</param>
     public void MakeCorner(Vector2 prevDir)
     {
-        if (BPType.DefaultType == EBodyPartType.Tail
-            || BPType.DefaultType == EBodyPartType.Head)
+        if (DefaultType == EBodyPartType.Tail || DefaultType == EBodyPartType.Head)
             return;
 
         int cornerRot = 0;
@@ -223,7 +245,7 @@ public class BodyPart
             //Sprite = CornerSprites[3]; // -R
         }
 
-        BPType.CurrentType = EBodyPartType.Corner;
+        CurrentType = EBodyPartType.Corner;
         CornerAngle = cornerRot;
         SetSprite(Player.m_bpCornerL);
     }
@@ -233,8 +255,9 @@ public class BodyPart
     /// </summary>
     public void MakeNotCorner()
     {
-        BPType.CurrentType = BPType.DefaultType;
-        SetSprite(DefaultSprite);
+        CurrentType = DefaultType;
+        // Shorthand for assigning RegularAngle to transform.rotation
+        RegularAngle = RegularAngle;
     }
 
     /// <summary>
@@ -273,7 +296,7 @@ public class BodyPart
         {
             // If the next part isn't a tail, and is an angled body part,
             // make it a corner.
-            if (!(next.BPType.CurrentType == EBodyPartType.Tail))
+            if (!(next.CurrentType == EBodyPartType.Tail))
             {
                 if (!Mathf.Approximately(angle, 0))
                 {
@@ -305,7 +328,7 @@ public class BodyPart
     public static BodyPart FromData(BodyPartData data, Transform transform)
     {
         BodyPart bp = new(transform, data.position, data.direction, data.RegularAngle,
-            data.CornerAngle, new(data.DefaultType, data.CurrentType), data.teleportCounter);
+            data.CornerAngle, data.DefaultType, data.CurrentType, data.teleportCounter);
         return bp;
     }
 
@@ -316,7 +339,7 @@ public class BodyPart
     public static BodyPartData ToData(BodyPart bp)
     {
         BodyPartData data = new(bp.Position, bp.Direction, bp.CornerAngle, bp.RegularAngle,
-            bp.BPType.DefaultType, bp.BPType.CurrentType, bp.TeleportCounter);
+            bp.DefaultType, bp.CurrentType, bp.TeleportCounter);
         return data;
     }
 }
