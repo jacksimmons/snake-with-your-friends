@@ -101,15 +101,19 @@ public class BodyPart
         Transform = transform;
         Init();
 
+        BPType = type;
+
         Direction = old.Direction;
         RegularAngle = old.RegularAngle;
         CornerAngle = old.CornerAngle;
 
-        BPType = type;
-
         // Will not affect teleporting UNLESS necessary
         TeleportCounter = old.TeleportCounter + 1;
     }
+
+    // Constructor Notes:
+    // Transform MUST be initialised first due to dependency.
+    // BPType should be initialised before Regular/CornerAngle, due to dependency.
 
     /// <summary>
     /// Standard body part constructor.
@@ -119,11 +123,11 @@ public class BodyPart
         Transform = transform;
         Init();
 
+        BPType = new(type, type);
+
         Direction = direction;
         RegularAngle = 0;
         CornerAngle = 0;
-
-        BPType = new(type, type);
 
         TeleportCounter = 0;
     }
@@ -137,12 +141,12 @@ public class BodyPart
         Transform = transform;
         Init();
 
+        BPType = type;
+
         Position = position;
         Direction = direction;
         RegularAngle = regAngle;
         CornerAngle = corAngle;
-
-        BPType = type;
 
         TeleportCounter = teleportCounter;
     }
