@@ -13,6 +13,9 @@ public class PlayerMovementController : NetworkBehaviour
     public StatusBehaviour status;
 
     [SerializeField]
+    private PlayerObjectController m_playerObjectController;
+
+    [SerializeField]
     public GameObject bodyPartContainer;
 
     // Templates and sprites
@@ -256,7 +259,7 @@ public class PlayerMovementController : NetworkBehaviour
             }
 
             // Update to server
-            GetComponent<PlayerObjectController>().TryUpdateBodyParts(BodyParts);
+            m_playerObjectController.UpdateBodyParts(BodyParts);
         }
     }
 

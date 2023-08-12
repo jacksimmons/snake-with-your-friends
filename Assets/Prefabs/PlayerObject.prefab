@@ -327,6 +327,8 @@ MonoBehaviour:
   syncDirection: 0
   syncMode: 0
   syncInterval: 0.1
+  m_playerMovementController: {fileID: 4440790568858733751}
+  m_bodyPartTemplate: {fileID: 5018333784677603630, guid: 9908d17a7ea796245b69484d416bce59, type: 3}
   connectionID: 0
   playerNo: 0
   playerSteamID: 0
@@ -349,6 +351,7 @@ MonoBehaviour:
   syncInterval: 0
   _gameBehaviour: {fileID: 3727899065049902516}
   status: {fileID: 7297529085144571617}
+  m_playerObjectController: {fileID: 5691343852970272198}
   bodyPartContainer: {fileID: 6366460689727907375}
   _bodyPartTemplate: {fileID: 5018333784677603630, guid: 9908d17a7ea796245b69484d416bce59, type: 3}
   m_bpHead: {fileID: 21300000, guid: cab13cca9bd8fc74ab7f14aaeca14351, type: 3}

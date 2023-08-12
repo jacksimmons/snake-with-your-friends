@@ -7,6 +7,11 @@ using UnityEditor;
 
 public class PlayerObjectController : NetworkBehaviour
 {
+    [SerializeField]
+    private PlayerMovementController m_playerMovementController;
+    [SerializeField]
+    private GameObject m_bodyPartTemplate;
+
     // Player data
     [SyncVar] public int connectionID;
     [SyncVar] public int playerNo;
@@ -109,38 +114,47 @@ public class PlayerObjectController : NetworkBehaviour
     }
 
     // In-Game Methods
-    public void TryUpdateBodyParts(List<BodyPart> bodyParts)
+    public void UpdateBodyParts()
     {
-        if (isOwned)
+        List<BodyPartData> bodyPartDatas = new();
+        foreach (BodyPart part in m_playerMovementController.BodyParts)
         {
-            List<BodyPartData> bodyPartDatas = new();
-            foreach (BodyPart part in bodyParts)
-            {
-                bodyPartDatas.Add(BodyPart.ToData(part));
-            }
-            CmdUpdateBodyParts(bodyPartDatas, playerSteamID);
+            bodyPartDatas.Add(BodyPart.ToData(part));
         }
+        CmdUpdateBodyParts(bodyPartDatas, playerSteamID);
     }
 
     [Command]
     public void CmdUpdateBodyParts(List<BodyPartData> bodyPartDatas, ulong victimPlayerSteamID)
     {
-        ClientBodyPartsUpdate(bodyPartDatas, victimPlayerSteamID);
+        ClientUpdateBodyParts(bodyPartDatas, victimPlayerSteamID);
     }
 
     [ClientRpc]
-    public void ClientBodyPartsUpdate(List<BodyPartData> bodyPartDatas, ulong victimPlayerSteamID)
+    public void ClientUpdateBodyParts(List<BodyPartData> bodyPartDatas, ulong victimPlayerSteamID)
     {
         if (playerSteamID == victimPlayerSteamID && !isOwned)
         {
-            PlayerMovementController playerMovementController = GetComponent<PlayerMovementController>();
-            playerMovementController.BodyParts.Clear();
+            m_playerMovementController.BodyParts.Clear();
             for (int i = 0; i < bodyPartDatas.Count; i++)
             {
-                playerMovementController.BodyParts.Add(
+                Transform bodyPartParent = m_playerMovementController.bodyPartContainer.transform;
+                int diff = i - bodyPartParent.childCount;
+                while (diff > 0)
+                {
+                    Instantiate(m_bodyPartTemplate, bodyPartParent);
+                    diff = i - bodyPartParent.childCount;
+                }
+                while (diff < 0)
+                {
+                    Destroy(bodyPartParent.GetChild(bodyPartParent.childCount).gameObject);
+                    diff = i - m_playerMovementController.bodyPartContainer.transform.childCount;
+                }
+
+                m_playerMovementController.BodyParts.Add(
                     BodyPart.FromData(
                         bodyPartDatas[i],
-                        playerMovementController.bodyPartContainer.transform.GetChild(i)
+                        m_playerMovementController.bodyPartContainer.transform.GetChild(i)
                     )
                 );
             }
