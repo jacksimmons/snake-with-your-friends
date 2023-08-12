@@ -66,7 +66,35 @@ public class GameBehaviour : NetworkBehaviour
         }
     }
 
-    private static int m_numPlayersReady = 0;
+    private static int s_numPlayersReady = 0;
+
+    [Client]
+    public void OnGameSceneLoaded(string name)
+    {
+        if (name != "Game")
+            return;
+
+        if (isOwned)
+        {
+            LoadGame();
+            CmdReady();
+        }
+    }
+
+    [Client]
+    private void LoadGame()
+    {
+        PlayerMovementController player = GameObject.Find("LocalPlayerObject").GetComponent<PlayerMovementController>();
+
+        GameObject cam = GameObject.FindWithTag("MainCamera");
+        cam.GetComponent<CamBehaviour>().Player = player;
+
+        _groundTilemap = CreateAndReturnTilemap(gridName: "Ground", hasCollider: false);
+        _wallTilemap = CreateAndReturnTilemap(gridName: "Wall", hasCollider: true);
+
+        CreateGroundTilemap(ref _groundTilemap, bl);
+        CreateWallTilemap(ref _wallTilemap, bl);
+    }
 
     [Client]
     private Tilemap CreateAndReturnTilemap(string gridName, bool hasCollider)
@@ -153,7 +181,33 @@ public class GameBehaviour : NetworkBehaviour
         wallTilemap.SetTilesBlock(bounds, tiles);
     }
 
-    [Client]
+    [Command]
+    private void CmdReady()
+    {
+        // Needs to be static, as every GameBehaviour calling this command will have its OWN
+        // s_numPlayersReady incremented otherwise.
+        s_numPlayersReady++;
+
+        if (s_numPlayersReady == Manager.Players.Count)
+        {
+            PlacePlayers(depth: 1, playersStartIndex: 0, bl);
+
+            List<Vector2> positions = new(Manager.Players.Count);
+            List<float> rotation_zs = new(Manager.Players.Count);
+            for (int i = 0; i < Manager.Players.Count; i++)
+            {
+                positions.Add(Manager.Players[i].transform.position);
+                rotation_zs.Add(Manager.Players[i].transform.rotation.eulerAngles.z);
+            }
+            PlacePlayersClientRpc(positions, rotation_zs);
+            ActivateLocalPlayerClientRpc();
+
+            Objects = new GameObject[(int)GroundSize * (int)GroundSize];
+            GenerateStartingFood();
+        }
+    }
+
+    [Server]
     public void PlacePlayers(int depth, int playersStartIndex, Vector2Int bl)
     {
         // Outer snakes (along the walls)
@@ -200,47 +254,19 @@ public class GameBehaviour : NetworkBehaviour
         }
     }
 
-    [Client]
-    public void OnGameSceneLoaded(string name)
+    [ClientRpc]
+    public void PlacePlayersClientRpc(List<Vector2> positions, List<float> rotation_zs)
     {
-        if (name != "Game")
+        if (positions.Count != rotation_zs.Count)
+        {
+            Debug.LogError("Positions and rotations have mismatching lengths!");
             return;
-
-        if (isOwned)
-        {
-            LoadGame();
-            CmdReady();
         }
-    }
 
-    [Client]
-    private void LoadGame()
-    {
-        PlayerMovementController player = GameObject.Find("LocalPlayerObject").GetComponent<PlayerMovementController>();
-
-        GameObject cam = GameObject.FindWithTag("MainCamera");
-        cam.GetComponent<CamBehaviour>().Player = player;
-
-        _groundTilemap = CreateAndReturnTilemap(gridName: "Ground", hasCollider: false);
-        _wallTilemap = CreateAndReturnTilemap(gridName: "Wall", hasCollider: true);
-
-        CreateGroundTilemap(ref _groundTilemap, bl);
-        CreateWallTilemap(ref _wallTilemap, bl);
-    }
-
-    [Command]
-    private void CmdReady()
-    {
-        m_numPlayersReady++;
-        print(m_numPlayersReady);
-        if (m_numPlayersReady == Manager.Players.Count)
+        for (int i = 0; i < positions.Count; i++)
         {
-            PlacePlayers(depth: 1, playersStartIndex: 0, bl);
-
-            ActivateLocalPlayerClientRpc();
-
-            Objects = new GameObject[(int)GroundSize * (int)GroundSize];
-            GenerateStartingFood();
+            PlayerObjectController poc = Manager.Players[i];
+            poc.transform.SetPositionAndRotation(positions[i], Quaternion.Euler(Vector3.forward * rotation_zs[i]));
         }
     }
 
