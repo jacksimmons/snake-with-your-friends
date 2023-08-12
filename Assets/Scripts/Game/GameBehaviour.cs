@@ -23,8 +23,8 @@ public class GameBehaviour : NetworkBehaviour
     [SerializeField]
     private GameObject _menuSelectTemplate;
 
-    private Tilemap _groundTilemap;
-    private Tilemap _wallTilemap;
+    private static Tilemap s_groundTilemap;
+    private static Tilemap s_wallTilemap;
 
     [SerializeField]
     private Vector2 _spawnPoint;
@@ -46,9 +46,6 @@ public class GameBehaviour : NetworkBehaviour
     }
     public EClientMode ClientMode { get; private set; } = EClientMode.Online;
 
-    // An array of child indices for objects (all objects in this go under the Objects game object parent)
-    public GameObject[] Objects { get; private set; }
-
     Vector2Int bl = Vector2Int.zero;
 
     // Soft limit is preferred, but if it is too small, the hard limit is used (1 tile).
@@ -66,6 +63,42 @@ public class GameBehaviour : NetworkBehaviour
         }
     }
 
+    // Server Variables
+    // Note that these are static - if they weren't, [Command] functions cannot use them.
+
+    private static int s_numPlayersReady = 0;
+    // An array of child indices for objects (all objects in this go under the s_objects game object parent)
+    public static GameObject[] s_objects { get; private set; }
+
+    [Client]
+    public void OnGameSceneLoaded(string name)
+    {
+        if (name != "Game")
+            return;
+
+        if (isOwned)
+        {
+            ClientLoadGame();
+            CmdReady();
+        }
+    }
+
+    [Client]
+    private void ClientLoadGame()
+    {
+        s_groundTilemap = CreateAndReturnTilemap(gridName: "Ground", hasCollider: false);
+        s_wallTilemap = CreateAndReturnTilemap(gridName: "Wall", hasCollider: true);
+
+        CreateGroundTilemap(ref s_groundTilemap, bl);
+        CreateWallTilemap(ref s_wallTilemap, bl);
+
+        PlayerMovementController player = GameObject.Find("LocalPlayerObject").GetComponent<PlayerMovementController>();
+
+        GameObject cam = GameObject.FindWithTag("MainCamera");
+        cam.GetComponent<CamBehaviour>().Player = player;
+    }
+
+    [Client]
     private Tilemap CreateAndReturnTilemap(string gridName, bool hasCollider)
     {
         GameObject gridObject = new GameObject(gridName);
@@ -89,6 +122,7 @@ public class GameBehaviour : NetworkBehaviour
         return tilemap;
     }
 
+    [Client]
     private void CreateGroundTilemap(ref Tilemap groundTilemap, Vector2Int bl)
     {
         // Bounds are an inner square of the 51x51 wall bounds starting at 0,0
@@ -121,6 +155,7 @@ public class GameBehaviour : NetworkBehaviour
         groundTilemap.SetTilesBlock(bounds, tiles);
     }
 
+    [Client]
     private void CreateWallTilemap(ref Tilemap wallTilemap, Vector2Int bl)
     {
         // This square is (int)GroundSize + 2 squared, since it is one bigger on each side of the x and y edges of the inner square
@@ -148,6 +183,39 @@ public class GameBehaviour : NetworkBehaviour
         wallTilemap.SetTilesBlock(bounds, tiles);
     }
 
+    [Command]
+    private void CmdReady()
+    {
+        // Needs to be static, as every GameBehaviour calling this command will have its OWN
+        // s_numPlayersReady incremented otherwise.
+        s_numPlayersReady++;
+
+        if (s_numPlayersReady == Manager.Players.Count)
+        {
+            ServerLoadGame();
+        }
+    }
+
+    [Server]
+    private void ServerLoadGame()
+    {
+        PlacePlayers(depth: 1, playersStartIndex: 0, bl);
+
+        List<Vector2> positions = new(Manager.Players.Count);
+        List<float> rotation_zs = new(Manager.Players.Count);
+        for (int i = 0; i < Manager.Players.Count; i++)
+        {
+            positions.Add(Manager.Players[i].transform.position);
+            rotation_zs.Add(Manager.Players[i].transform.rotation.eulerAngles.z);
+        }
+        PlacePlayersClientRpc(positions, rotation_zs);
+        ActivateLocalPlayerClientRpc();
+
+        s_objects = new GameObject[(int)GroundSize * (int)GroundSize];
+        GenerateStartingFood();
+    }
+
+    [Server]
     public void PlacePlayers(int depth, int playersStartIndex, Vector2Int bl)
     {
         // Outer snakes (along the walls)
@@ -165,10 +233,10 @@ public class GameBehaviour : NetworkBehaviour
         if (minDist < HARD_MIN_DIST)
             minDist = HARD_MIN_DIST;
 
-        Vector3 BL = _groundTilemap.CellToWorld((Vector3Int)(bl + (depth + 1) * Vector2Int.one));
-        Vector3 BR = _groundTilemap.CellToWorld((Vector3Int)(bl + new Vector2Int((int)GroundSize - depth + 1, depth + 1)));
-        Vector3 TL = _groundTilemap.CellToWorld((Vector3Int)(bl + new Vector2Int(depth + 1, (int)GroundSize - depth + 1)));
-        Vector3 TR = _groundTilemap.CellToWorld((Vector3Int)(bl + ((int)GroundSize - depth + 1) * Vector2Int.one));
+        Vector3 BL = s_groundTilemap.CellToWorld((Vector3Int)(bl + (depth + 1) * Vector2Int.one));
+        Vector3 BR = s_groundTilemap.CellToWorld((Vector3Int)(bl + new Vector2Int((int)GroundSize - depth + 1, depth + 1)));
+        Vector3 TL = s_groundTilemap.CellToWorld((Vector3Int)(bl + new Vector2Int(depth + 1, (int)GroundSize - depth + 1)));
+        Vector3 TR = s_groundTilemap.CellToWorld((Vector3Int)(bl + ((int)GroundSize - depth + 1) * Vector2Int.one));
 
         Vector3[] corners = { BL, BR, TL, TR };
         Vector2[] directions = { Vector2.one, new Vector2(-1, 1), new Vector2(1, -1), -Vector2.one };
@@ -176,7 +244,7 @@ public class GameBehaviour : NetworkBehaviour
         for (int i = 0; i < players.Count; i++)
         {
             players[i].transform.position = corners[i % 4]
-                + (Vector3)(Vector2.one * directions[i % 4] * _groundTilemap.cellSize / 2);
+                + (Vector3)(Vector2.one * directions[i % 4] * s_groundTilemap.cellSize / 2);
 
             // If i were 0 then it might enter this, causing -4 as length to be provided (in the PlacePlayers line).
             if (i != 0 && i % 4 == 0 && i < players.Count - 1)
@@ -194,93 +262,8 @@ public class GameBehaviour : NetworkBehaviour
         }
     }
 
-    public void OnGameSceneLoaded(string name)
-    {
-        if (name != "Game")
-            return;
-
-        if (isOwned)
-            CmdLoadGame();
-    }
-
-    [Command]
-    private void CmdLoadGame()
-    {
-        ClientLoadGame();
-        SetupObjects();
-        GenerateStartingFood();
-    }
-
     [ClientRpc]
-    private void ClientLoadGame()
-    {
-        PlayerMovementController player = GameObject.Find("LocalPlayerObject").GetComponent<PlayerMovementController>();
-
-        GameObject cam = GameObject.FindWithTag("MainCamera");
-        cam.GetComponent<CamBehaviour>().Player = player;
-
-        _groundTilemap = CreateAndReturnTilemap(gridName: "Ground", hasCollider: false);
-        _wallTilemap = CreateAndReturnTilemap(gridName: "Wall", hasCollider: true);
-
-        CreateGroundTilemap(ref _groundTilemap, bl);
-        CreateWallTilemap(ref _wallTilemap, bl);
-
-        if (isServer)
-        {
-            PlacePlayers(depth: 1, playersStartIndex: 0, bl);
-            List<Vector2> positions = new(Manager.Players.Count);
-            List<float> rotation_zs = new(Manager.Players.Count);
-            for (int i = 0; i < Manager.Players.Count; i++)
-            {
-                positions.Add(Manager.Players[i].transform.position);
-                rotation_zs.Add(Manager.Players[i].transform.rotation.eulerAngles.z);
-            }
-            ClientPlacePlayers(positions, rotation_zs);
-        }
-    }
-
-    /// <summary>
-    /// Sets up the Objects array with the appropriate dimensions.
-    /// </summary>
-    private void SetupObjects()
-    {
-        Objects = new GameObject[(int)GroundSize * (int)GroundSize];
-    }
-
-    private void GenerateStartingFood()
-    {
-        for (int i = 0; i < Manager.Players.Count; i++)
-        {
-            GenerateFood();
-        }
-    }
-
-    private void GenerateFood()
-    {
-        int objectPos = Random.Range(0, Objects.Length);
-
-        // Overwrite Objects[objectPos] with -1 (if there are any vacancies)
-        // This effectively acts as a test to see if there are any vacancies,
-        // which also happens to locate the vacancy, while leaving its value
-        // as -1.
-        objectPos = AddObjectToGrid(objectPos, null);
-        if (objectPos == -1)
-        {
-            // No vacancies.
-            return;
-        }
-
-        int foodIndex = Random.Range(0, _foodTemplates.Length);
-        Vector2 foodPos = new((objectPos % (int)GroundSize) + (bl.x + 1.5f), (objectPos / (int)GroundSize) + (bl.y + 1.5f));
-        GameObject obj = Instantiate(_foodTemplates[foodIndex], foodPos, Quaternion.Euler(Vector3.forward * 0), GameObject.Find("Objects").transform);
-        obj.GetComponent<GridObject>().gridPos.Value = objectPos;
-        NetworkServer.Spawn(obj);
-
-        AddObjectToGrid(objectPos, obj);
-    }
-
-    [ClientRpc]
-    public void ClientPlacePlayers(List<Vector2> positions, List<float> rotation_zs)
+    public void PlacePlayersClientRpc(List<Vector2> positions, List<float> rotation_zs)
     {
         if (positions.Count != rotation_zs.Count)
         {
@@ -293,32 +276,69 @@ public class GameBehaviour : NetworkBehaviour
             PlayerObjectController poc = Manager.Players[i];
             poc.transform.SetPositionAndRotation(positions[i], Quaternion.Euler(Vector3.forward * rotation_zs[i]));
         }
-
-        ActivateLocalPlayer();
     }
 
-    private void ActivateLocalPlayer()
+    [ClientRpc]
+    private void ActivateLocalPlayerClientRpc()
     {
         PlayerMovementController pmc = GameObject.Find("LocalPlayerObject").GetComponent<PlayerMovementController>();
         pmc.bodyPartContainer.SetActive(true);
     }
 
+    [Server]
+    private void GenerateStartingFood()
+    {
+        for (int i = 0; i < Manager.Players.Count; i++)
+        {
+            GenerateFood();
+        }
+    }
+
+    [Server]
+    private void GenerateFood()
+    {
+        int objectPos = Random.Range(0, s_objects.Length);
+
+        // Overwrite s_objects[objectPos] with -1 (if there are any vacancies)
+        // This effectively acts as a test to see if there are any vacancies,
+        // which also happens to locate the vacancy, while leaving its value
+        // as -1.
+        objectPos = AddObjectToGrid(objectPos, null);
+        if (objectPos == -1)
+        {
+            // No vacancies.
+            return;
+        }
+
+        int foodIndex = Random.Range(0, _foodTemplates.Length);
+        Vector2 foodPos = new((objectPos % (int)GroundSize) + (bl.x + 1.5f), (objectPos / (int)GroundSize) + (bl.y + 1.5f));
+
+        GameObject obj = Instantiate(_foodTemplates[foodIndex], foodPos, Quaternion.Euler(Vector3.forward * 0));
+        obj.GetComponent<GridObject>().gridPos.Value = objectPos;
+
+        if (AddObjectToGrid(objectPos, obj) != -1)
+        {
+            NetworkServer.Spawn(obj);
+        }
+    }
+
     /// <summary>
-    /// Checks if index `objectPos` is not -1 in Objects, if so it recursively
+    /// Checks if index `objectPos` is not -1 in s_objects, if so it recursively
     /// searches for a valid index.
     /// </summary>
-    /// <returns>The final position of the object, or -1 if no vacancies in Objects.</returns>
+    /// <returns>The final position of the object, or -1 if no vacancies in s_objects.</returns>
+    [Server]
     public int AddObjectToGrid(int objectPos, GameObject obj)
     {
-        if (Objects[objectPos] != null)
+        if (s_objects[objectPos] != null)
         {
             // If there already is an object at given pos, try to put
             // the object on the first different free slot in the array.
-            for (int i = 0; (i < Objects.Length) && (i != objectPos); i++)
+            for (int i = 0; (i < s_objects.Length) && (i != objectPos); i++)
             {
-                if (Objects[i] == null)
+                if (s_objects[i] == null)
                 {
-                    Objects[i] = obj;
+                    s_objects[i] = obj;
                     return i;
                 }
             }
@@ -326,7 +346,7 @@ public class GameBehaviour : NetworkBehaviour
             Debug.LogError("Grid filled with objects!");
             return -1;
         }
-        Objects[objectPos] = obj;
+        s_objects[objectPos] = obj;
         return objectPos;
     }
 
@@ -338,7 +358,7 @@ public class GameBehaviour : NetworkBehaviour
     [Command]
     public void CmdRemoveObjectFromGrid(int objectPos)
     {
-        GameObject go = Objects[objectPos];
+        GameObject go = s_objects[objectPos];
 
         if (go == null)
         {
@@ -348,7 +368,7 @@ public class GameBehaviour : NetworkBehaviour
 
         NetworkServer.UnSpawn(go);
         NetworkServer.Destroy(go);
-        Objects[objectPos] = null;
+        s_objects[objectPos] = null;
 
         GenerateFood();
     }

@@ -33,12 +33,12 @@ public struct Projectile
     }
     public float immunityDuration;
 
-    public Projectile(float lifetime, Vector2 direction, BodyPartRotation bpRotation, int counterMax, float immunityDuration = 0)
+    public Projectile(float lifetime, Vector2 direction, float rotation, int counterMax, float immunityDuration = 0)
     {
         Lifetime = lifetime;
         Direction = direction;
         _counterMax = counterMax;
-        Rotation = Quaternion.Euler(Vector3.forward * bpRotation.RegularAngle);
+        Rotation = Quaternion.Euler(Vector3.forward * rotation);
 
         this.immunityDuration = immunityDuration;
     }

@@ -13,7 +13,7 @@ public class PlayerMovementController : NetworkBehaviour
     public StatusBehaviour status;
 
     [SerializeField]
-    private PlayerObjectController m_playerObjectController;
+    private PlayerObjectController m_poc;
 
     [SerializeField]
     public GameObject bodyPartContainer;
@@ -81,6 +81,14 @@ public class PlayerMovementController : NetworkBehaviour
 
     // Components
     private Rigidbody2D _rb;
+
+    public bool HasMoved
+    {
+        get
+        {
+            return (movement != Vector2.zero);
+        }
+    }
 
     private void Start()
     {
@@ -228,7 +236,7 @@ public class PlayerMovementController : NetworkBehaviour
         }
 
         // Ensures the first movement has been made
-        if (movement != Vector2.zero)
+        if (HasMoved)
         {
             // Prevents an extra move occurring before death
             if (CheckForInternalCollisions()) return;
@@ -259,7 +267,7 @@ public class PlayerMovementController : NetworkBehaviour
             }
 
             // Update to server
-            m_playerObjectController.UpdateBodyParts();
+            m_poc.UpdateBodyParts();
         }
     }
 
@@ -285,22 +293,26 @@ public class PlayerMovementController : NetworkBehaviour
     /// <summary>
     /// Adds a new body part onto the end of the snake, then makes it the new tail.
     /// Then turns the tail into a regular straight piece.
+    /// Not having moved yet grants immunity.
     /// </summary>
     private void AddBodyPart()
     {
+        if (!HasMoved)
+            return;
+
         GameObject newBodyPartObj = Instantiate(_bodyPartTemplate);
         newBodyPartObj.transform.parent = bodyPartContainer.transform;
 
         BodyPart tail = BodyParts[^1];
-        BodyPart newBodyPart = new(tail, newBodyPartObj.transform, new(EBodyPartType.Tail,
-            EBodyPartType.Tail))
+        BodyPart newBodyPart = new(tail, newBodyPartObj.transform)
         {
             Position = tail.Position - (Vector3)tail.Direction
         };
 
-        tail.BPType = new(EBodyPartType.Straight, EBodyPartType.Straight);
+        tail.DefaultType = EBodyPartType.Straight;
+        tail.CurrentType = EBodyPartType.Straight;
 
-        if (BodyParts[^2].BPType.CurrentType == EBodyPartType.Corner)
+        if (BodyParts[^2].CurrentType == EBodyPartType.Corner)
         {
             tail.MakeCorner(BodyParts[^2].Direction);
         }
@@ -318,10 +330,14 @@ public class PlayerMovementController : NetworkBehaviour
 
     /// <summary>
     /// Bisects the snake at the body part which is removed.
+    /// Not having moved yet grants immunity.
     /// </summary>
     /// <param name="bp">The removed body part.</param>
     private void RemoveBodyPart(BodyPart bp)
     {
+        if (!HasMoved)
+            return;
+
         int deadIndex = BodyParts.IndexOf(bp);
         if (deadIndex == 0)
         {
@@ -331,7 +347,7 @@ public class PlayerMovementController : NetworkBehaviour
         while (true)
         {
             if (deadIndex >= BodyParts.Count) break;
-            SetBodyPartDead(BodyParts[deadIndex], true);
+            m_poc.HandleBodyPartDeath(BodyParts[deadIndex], true);
             BodyParts.RemoveAt(deadIndex);
 
             // Remove the body part from the container
@@ -340,45 +356,57 @@ public class PlayerMovementController : NetworkBehaviour
         }
 
         if (BodyParts.Count > 1)
-            BodyParts[^1].BPType = new(EBodyPartType.Tail, EBodyPartType.Tail);
+        {
+            BodyParts[^1].DefaultType = EBodyPartType.Tail;
+            BodyParts[^1].CurrentType = EBodyPartType.Tail;
+        }
         else
         {
             // Snake must have >1 body part left.
-            SetDead(true);
+            m_poc.HandleDeath(true);
         }
     }
 
-    private void SetBodyPartDead(BodyPart bp, bool dead)
+    [ClientRpc]
+    public void SetBodyPartDeadClientRpc(int bpIndex, bool dead)
     {
+        BodyPart bp = BodyParts[bpIndex];
         float timeToDestroy = 5;
         bp.Transform.gameObject.GetComponent<SpriteRenderer>().color = dead ? Color.gray : Color.white;
 
         if (BodyParts.IndexOf(bp) == 0)
         {
-            CamBehaviour cb = GameObject.FindWithTag("MainCamera").GetComponent<CamBehaviour>();
-            cb.Player = null;
+            if (isOwned)
+            {
+                CamBehaviour cb = GameObject.FindWithTag("MainCamera").GetComponent<CamBehaviour>();
+                cb.Player = null;
+            }
         }
 
         Destroy(bp.Transform.gameObject, timeToDestroy);
     }
 
-    public void SetDead(bool dead)
+    /// <summary>
+    /// Not having moved yet grants immunity.
+    /// </summary>
+    public void HandleDeath()
+    {
+        if (!HasMoved)
+            return;
+
+        GameBehaviour game = GetComponentInChildren<GameBehaviour>();
+        game.OnGameOver(score: BodyParts.Count);
+        m_poc.HandleDeath(true);
+    }
+
+    [ClientRpc]
+    public void SetDeadClientRpc(bool dead)
     {
         _rb.simulated = !dead;
         frozen = dead;
         foreach (BodyPart part in BodyParts)
-            SetBodyPartDead(part, dead);
+            m_poc.HandleBodyPartDeath(part, dead);
         status.gameObject.SetActive(!dead);
-    }
-
-    /// <summary>
-    /// Handles death.
-    /// </summary>
-    public void HandleDeath()
-    {
-        SetDead(true);
-        GameBehaviour game = GetComponentInChildren<GameBehaviour>();
-        game.OnGameOver(score: BodyParts.Count);
     }
 
     /// <summary>
