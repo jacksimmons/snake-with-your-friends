@@ -151,12 +151,14 @@ public class PlayerObjectController : NetworkBehaviour
                     diff = bodyPartDatas.Count - bodyPartParent.childCount;
                 }
 
-                m_playerMovementController.BodyParts.Add(
-                    BodyPart.FromData(
-                        bodyPartDatas[i],
-                        m_playerMovementController.bodyPartContainer.transform.GetChild(i)
-                    )
+                BodyPart newBP = BodyPart.FromData(
+                    bodyPartDatas[i],
+                    m_playerMovementController.bodyPartContainer.transform.GetChild(i)
                 );
+
+                print(newBP.BPType.CurrentType.ToString());
+
+                m_playerMovementController.BodyParts.Add(newBP);
             }
         }
     }

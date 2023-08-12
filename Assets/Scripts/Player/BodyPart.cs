@@ -279,8 +279,8 @@ public class BodyPart
     /// <returns>The exported struct.</returns>
     public static BodyPartData ToData(BodyPart bp)
     {
-        BodyPartData data = new(bp.Position, bp.Direction, bp.Rotation.ToData(), bp.TeleportCounter
-            , bp.BPType.ToData());
+        BodyPartData data = new(bp.Position, bp.Direction, bp.Rotation.ToData(),
+            bp.TeleportCounter, bp.BPType.ToData());
         return data;
     }
 }
