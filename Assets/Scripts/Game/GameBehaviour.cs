@@ -199,7 +199,8 @@ public class GameBehaviour : NetworkBehaviour
         if (name != "Game")
             return;
 
-        CmdLoadGame();
+        if (isOwned)
+            CmdLoadGame();
     }
 
     [Command]
