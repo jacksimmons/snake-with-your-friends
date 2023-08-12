@@ -30,22 +30,6 @@ public class MainMenu : MonoBehaviour
         }
     }
 
-    public void Restart()
-    {
-        // Will enable the loading symbol
-        Chungus.ToggleLoadingSymbol(true);
-        Chungus.ClearDontDestroyOnLoad();
-
-        // Will enable then disable the loading symbol
-        Chungus.LoadSceneWithLoadingSymbol("MainMenu");
-    }
-
-    public void Quit()
-    {
-        Chungus.ShowLoadingSymbolUntil(() => false);
-        Application.Quit();
-    }
-
     public void TestSteamConnection()
     {
         if (!SteamManager.Initialized)
@@ -109,5 +93,21 @@ public class MainMenu : MonoBehaviour
     public void OnSettingsButtonPressed()
     {
         Chungus.LoadSceneWithLoadingSymbol("SettingsMenu");
+    }
+
+    public void Restart()
+    {
+        // Will enable the loading symbol
+        Chungus.ToggleLoadingSymbol(true);
+        Chungus.ClearDontDestroyOnLoad();
+
+        // Will enable then disable the loading symbol
+        Chungus.LoadSceneWithLoadingSymbol("MainMenu");
+    }
+
+    public void Quit()
+    {
+        Chungus.ShowLoadingSymbolUntil(() => false);
+        Application.Quit();
     }
 }

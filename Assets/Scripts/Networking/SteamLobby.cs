@@ -66,6 +66,12 @@ public class SteamLobby : MonoBehaviour
         _lobbyEnter.Set(handle);
     }
 
+    public void JoinLobby(CSteamID id)
+    {
+        SteamAPICall_t handle = SteamMatchmaking.JoinLobby(id);
+        _lobbyEnter.Set(handle);
+    }
+
     // Callbacks
     /// <summary>
     /// Called when a user joins through the friends list.
@@ -157,7 +163,7 @@ public class SteamLobby : MonoBehaviour
 
         // If we are a client then start client.
         print("I am not the host.");
-        _manager.networkAddress = SteamMatchmaking.GetLobbyData(new CSteamID(LobbyID), HOST_ADDRESS_KEY);
+        _manager.networkAddress = SteamMatchmaking.GetLobbyData((CSteamID)LobbyID, HOST_ADDRESS_KEY);
         _manager.StartClient();
 
         print("Entered lobby successfully.");

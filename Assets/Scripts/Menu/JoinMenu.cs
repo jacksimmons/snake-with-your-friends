@@ -48,23 +48,23 @@ public class JoinMenu : MonoBehaviour
             string name = SteamFriends.GetPersonaName();
             Debug.Log(name);
 
+            m_LobbyMatchList = CallResult<LobbyMatchList_t>.Create(OnLobbyMatchList);
+
             RefreshLobbyList();
         }
     }
 
     public void RefreshLobbyList()
     {
-        m_LobbyMatchList = CallResult<LobbyMatchList_t>.Create(OnLobbyMatchList);
         SteamAPICall_t handle = SteamMatchmaking.RequestLobbyList();
         m_LobbyMatchList.Set(handle);
     }
 
     public void OnLobbyJoinPressed(TextMeshProUGUI idField)
     {
-        ulong id;
-        ulong.TryParse(idField.text, out id);
+        ulong.TryParse(idField.text, out ulong id);
 
-        SteamMatchmaking.JoinLobby((CSteamID)id);
+        GameObject.Find("NetworkManager").GetComponent<SteamLobby>().JoinLobby((CSteamID)id);
     }
 
     public void OnDistanceDropdownUpdated(int distance)

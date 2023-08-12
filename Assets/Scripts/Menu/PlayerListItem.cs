@@ -54,15 +54,25 @@ public class PlayerListItem : MonoBehaviour
     {
         playerNameLabel.text = playerName;
         ChangeReadyStatus();
-        if (!_avatarReceived) { GetPlayerIcon(); }
+        if (!_avatarReceived)
+        {
+            StartCoroutine(
+                Wait.WaitForConditionThen(
+                    () => GetPlayerIcon(),
+                    new WaitForSeconds(0.1f)
+                )
+            );
+        }
     }
 
-    private void GetPlayerIcon()
+    private bool GetPlayerIcon()
     {
-        ulong id = steamID;
         int imageID = SteamFriends.GetLargeFriendAvatar(new CSteamID(steamID));
-        if (imageID == -1) { return; }
+        // -1 => Yet to be loaded, 0 => Not set
+        print(imageID);
+        if (imageID == -1 || imageID == 0) { return false; }
         icon.texture = GetSteamImageAsTexture(imageID);
+        return true;
     }
 
     private void OnImageLoaded(AvatarImageLoaded_t callback)

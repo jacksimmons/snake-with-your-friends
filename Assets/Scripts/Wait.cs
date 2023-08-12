@@ -5,26 +5,27 @@ using UnityEngine.SceneManagement;
 
 public class Wait
 {
-    public static IEnumerator WaitThen(float seconds, Action then)
+    public static IEnumerator WaitThen(float seconds, Action then=null)
     {
         yield return new WaitForSeconds(seconds);
-        then();
+        then?.Invoke();
+        yield return null;
     }
 
-    public static IEnumerator WaitForConditionThen(Func<bool> getCondition, Action then, YieldInstruction waitTime)
+    public static IEnumerator WaitForConditionThen(Func<bool> getCondition, YieldInstruction waitTime, Action then=null)
     {
         while (!getCondition())
         {
             yield return waitTime;
         }
-        then();
+        then?.Invoke();
         yield return null;
     }
 
     /// <summary>
     /// Uses a findObj function to attempt to locate the object every waitTime, and then calls the "then" action
     /// with the found object as a parameter.
-    public static IEnumerator WaitForObjectThen(Func<GameObject> findObj, Action<GameObject> then, YieldInstruction waitTime)
+    public static IEnumerator WaitForObjectThen(Func<GameObject> findObj, YieldInstruction waitTime, Action<GameObject> then=null)
     {
         GameObject obj = null;
         while (obj == null)
@@ -32,18 +33,18 @@ public class Wait
             obj = findObj();
             yield return waitTime;
         }
-        then(obj);
+        then?.Invoke(obj);
         yield return null;
     }
 
-    public static IEnumerator WaitForLoadSceneThen(string sceneName, Action then, YieldInstruction waitTime)
+    public static IEnumerator WaitForLoadSceneThen(string sceneName, YieldInstruction waitTime, Action then=null)
     {
         AsyncOperation load = SceneManager.LoadSceneAsync(sceneName);
         while (load.isDone)
         {
             yield return waitTime;
         }
-        then();
+        then?.Invoke();
         yield return null;
     }
 }

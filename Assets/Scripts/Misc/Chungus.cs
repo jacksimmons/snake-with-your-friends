@@ -51,8 +51,8 @@ public class Chungus : MonoBehaviour
         Instance.StartCoroutine(
             Wait.WaitForConditionThen(
                 check,
-                () => ToggleLoadingSymbol(false),
-                new WaitForEndOfFrame()
+                new WaitForEndOfFrame(),
+                () => ToggleLoadingSymbol(false)
             )
         );
     }
@@ -63,8 +63,8 @@ public class Chungus : MonoBehaviour
         Instance.StartCoroutine(
             Wait.WaitForLoadSceneThen(
                 sceneName,
-                () => ToggleLoadingSymbol(false),
-                new WaitForEndOfFrame()
+                new WaitForEndOfFrame(),
+                () => ToggleLoadingSymbol(false)
             )
         );
     }
