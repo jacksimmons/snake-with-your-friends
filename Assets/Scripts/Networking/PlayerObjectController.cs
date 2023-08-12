@@ -184,6 +184,8 @@ public class PlayerObjectController : NetworkBehaviour
     [Command]
     private void CmdHandleBodyPartDeath(int ocIndex, int bpIndex, bool dead)
     {
+        if (!isOwned)
+            return;
         PlayerObjectController poc = Manager.Players[ocIndex];
         poc.m_pmc.SetBodyPartDeadClientRpc(bpIndex, dead);
     }
@@ -202,6 +204,8 @@ public class PlayerObjectController : NetworkBehaviour
     [Command]
     private void CmdHandleDeath(int index, bool dead)
     {
+        if (!isOwned)
+            return;
         PlayerObjectController poc = Manager.Players[index];
         poc.m_pmc.SetDeadClientRpc(dead);
     }
