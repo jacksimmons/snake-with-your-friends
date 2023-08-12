@@ -23,8 +23,8 @@ public class GameBehaviour : NetworkBehaviour
     [SerializeField]
     private GameObject _menuSelectTemplate;
 
-    private Tilemap _groundTilemap;
-    private Tilemap _wallTilemap;
+    private static Tilemap s_groundTilemap;
+    private static Tilemap s_wallTilemap;
 
     [SerializeField]
     private Vector2 _spawnPoint;
@@ -76,24 +76,24 @@ public class GameBehaviour : NetworkBehaviour
 
         if (isOwned)
         {
-            LoadGame();
+            ClientLoadGame();
             CmdReady();
         }
     }
 
     [Client]
-    private void LoadGame()
+    private void ClientLoadGame()
     {
+        s_groundTilemap = CreateAndReturnTilemap(gridName: "Ground", hasCollider: false);
+        s_wallTilemap = CreateAndReturnTilemap(gridName: "Wall", hasCollider: true);
+
+        CreateGroundTilemap(ref s_groundTilemap, bl);
+        CreateWallTilemap(ref s_wallTilemap, bl);
+
         PlayerMovementController player = GameObject.Find("LocalPlayerObject").GetComponent<PlayerMovementController>();
 
         GameObject cam = GameObject.FindWithTag("MainCamera");
         cam.GetComponent<CamBehaviour>().Player = player;
-
-        _groundTilemap = CreateAndReturnTilemap(gridName: "Ground", hasCollider: false);
-        _wallTilemap = CreateAndReturnTilemap(gridName: "Wall", hasCollider: true);
-
-        CreateGroundTilemap(ref _groundTilemap, bl);
-        CreateWallTilemap(ref _wallTilemap, bl);
     }
 
     [Client]
@@ -190,21 +190,27 @@ public class GameBehaviour : NetworkBehaviour
 
         if (s_numPlayersReady == Manager.Players.Count)
         {
-            PlacePlayers(depth: 1, playersStartIndex: 0, bl);
-
-            List<Vector2> positions = new(Manager.Players.Count);
-            List<float> rotation_zs = new(Manager.Players.Count);
-            for (int i = 0; i < Manager.Players.Count; i++)
-            {
-                positions.Add(Manager.Players[i].transform.position);
-                rotation_zs.Add(Manager.Players[i].transform.rotation.eulerAngles.z);
-            }
-            PlacePlayersClientRpc(positions, rotation_zs);
-            ActivateLocalPlayerClientRpc();
-
-            Objects = new GameObject[(int)GroundSize * (int)GroundSize];
-            GenerateStartingFood();
+            ServerLoadGame();
         }
+    }
+
+    [Server]
+    private void ServerLoadGame()
+    {
+        PlacePlayers(depth: 1, playersStartIndex: 0, bl);
+
+        List<Vector2> positions = new(Manager.Players.Count);
+        List<float> rotation_zs = new(Manager.Players.Count);
+        for (int i = 0; i < Manager.Players.Count; i++)
+        {
+            positions.Add(Manager.Players[i].transform.position);
+            rotation_zs.Add(Manager.Players[i].transform.rotation.eulerAngles.z);
+        }
+        PlacePlayersClientRpc(positions, rotation_zs);
+        ActivateLocalPlayerClientRpc();
+
+        Objects = new GameObject[(int)GroundSize * (int)GroundSize];
+        GenerateStartingFood();
     }
 
     [Server]
@@ -225,10 +231,10 @@ public class GameBehaviour : NetworkBehaviour
         if (minDist < HARD_MIN_DIST)
             minDist = HARD_MIN_DIST;
 
-        Vector3 BL = _groundTilemap.CellToWorld((Vector3Int)(bl + (depth + 1) * Vector2Int.one));
-        Vector3 BR = _groundTilemap.CellToWorld((Vector3Int)(bl + new Vector2Int((int)GroundSize - depth + 1, depth + 1)));
-        Vector3 TL = _groundTilemap.CellToWorld((Vector3Int)(bl + new Vector2Int(depth + 1, (int)GroundSize - depth + 1)));
-        Vector3 TR = _groundTilemap.CellToWorld((Vector3Int)(bl + ((int)GroundSize - depth + 1) * Vector2Int.one));
+        Vector3 BL = s_groundTilemap.CellToWorld((Vector3Int)(bl + (depth + 1) * Vector2Int.one));
+        Vector3 BR = s_groundTilemap.CellToWorld((Vector3Int)(bl + new Vector2Int((int)GroundSize - depth + 1, depth + 1)));
+        Vector3 TL = s_groundTilemap.CellToWorld((Vector3Int)(bl + new Vector2Int(depth + 1, (int)GroundSize - depth + 1)));
+        Vector3 TR = s_groundTilemap.CellToWorld((Vector3Int)(bl + ((int)GroundSize - depth + 1) * Vector2Int.one));
 
         Vector3[] corners = { BL, BR, TL, TR };
         Vector2[] directions = { Vector2.one, new Vector2(-1, 1), new Vector2(1, -1), -Vector2.one };
@@ -236,7 +242,7 @@ public class GameBehaviour : NetworkBehaviour
         for (int i = 0; i < players.Count; i++)
         {
             players[i].transform.position = corners[i % 4]
-                + (Vector3)(Vector2.one * directions[i % 4] * _groundTilemap.cellSize / 2);
+                + (Vector3)(Vector2.one * directions[i % 4] * s_groundTilemap.cellSize / 2);
 
             // If i were 0 then it might enter this, causing -4 as length to be provided (in the PlacePlayers line).
             if (i != 0 && i % 4 == 0 && i < players.Count - 1)
