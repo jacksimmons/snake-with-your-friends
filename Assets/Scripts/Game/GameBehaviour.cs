@@ -311,11 +311,13 @@ public class GameBehaviour : NetworkBehaviour
         int foodIndex = Random.Range(0, _foodTemplates.Length);
         Vector2 foodPos = new((objectPos % (int)GroundSize) + (bl.x + 1.5f), (objectPos / (int)GroundSize) + (bl.y + 1.5f));
         
-        GameObject obj = Instantiate(_foodTemplates[foodIndex], foodPos, Quaternion.Euler(Vector3.forward * 0), GameObject.Find("Objects").transform);
+        GameObject obj = Instantiate(_foodTemplates[foodIndex], foodPos, Quaternion.Euler(Vector3.forward * 0));
         obj.GetComponent<GridObject>().gridPos.Value = objectPos;
-        NetworkServer.Spawn(obj);
 
-        AddObjectToGrid(objectPos, obj);
+        if (AddObjectToGrid(objectPos, obj) != -1)
+        {
+            NetworkServer.Spawn(obj);
+        }
     }
 
     /// <summary>
