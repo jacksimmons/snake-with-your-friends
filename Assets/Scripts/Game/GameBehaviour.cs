@@ -66,8 +66,7 @@ public class GameBehaviour : NetworkBehaviour
         }
     }
 
-    [SyncVar]
-    private int m_numPlayersReady = 0;
+    private static int m_numPlayersReady = 0;
 
     [Client]
     private Tilemap CreateAndReturnTilemap(string gridName, bool hasCollider)
