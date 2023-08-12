@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class GridObject : NetworkBehaviour
 {
-    private int _gridPos = -1;
+    public int _gridPos = -1;
     public int GridPos
     {
         get
