@@ -208,7 +208,7 @@ public class GameBehaviour : NetworkBehaviour
     {
         ClientLoadGame();
         SetupObjects();
-        CmdGenerateStartingFood();
+        GenerateStartingFood();
     }
 
     [ClientRpc]
@@ -247,12 +247,11 @@ public class GameBehaviour : NetworkBehaviour
         Objects = new GameObject[(int)GroundSize * (int)GroundSize];
     }
 
-    [Command]
-    private void CmdGenerateStartingFood()
+    private void GenerateStartingFood()
     {
         for (int i = 0; i < Manager.Players.Count; i++)
         {
-            this.GenerateFood();
+            GenerateFood();
         }
     }
 
