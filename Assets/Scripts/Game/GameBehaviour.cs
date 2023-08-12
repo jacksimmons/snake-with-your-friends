@@ -66,6 +66,7 @@ public class GameBehaviour : NetworkBehaviour
         }
     }
 
+    [SyncVar]
     private int m_numPlayersReady = 0;
 
     [Client]
@@ -232,6 +233,7 @@ public class GameBehaviour : NetworkBehaviour
     private void CmdReady()
     {
         m_numPlayersReady++;
+        print(m_numPlayersReady);
         if (m_numPlayersReady == Manager.Players.Count)
         {
             PlacePlayers(depth: 1, playersStartIndex: 0, bl);
