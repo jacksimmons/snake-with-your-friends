@@ -49,11 +49,13 @@ public class SettingsMenu : MonoBehaviour
     {
         audioHandler = GameObject.FindWithTag("AudioHandler");
 
-        menuVolumeSlider.onValueChanged.AddListener(SetMenuVolume);
         menuVolumeSlider.value = audioHandler.transform.Find("ButtonPressHandler").GetComponent<AudioSource>().volume * 100;
+        menuVolumeValue = menuVolumeSlider.value;
+        menuVolumeSlider.onValueChanged.AddListener(SetMenuVolume);
 
-        sfxVolumeSlider.onValueChanged.AddListener(SetSFXVolume);
         sfxVolumeSlider.value = audioHandler.transform.Find("EatHandler").GetComponent<AudioSource>().volume * 100;
+        sfxVolumeValue = sfxVolumeSlider.value;
+        sfxVolumeSlider.onValueChanged.AddListener(SetSFXVolume);
 
         resolutions = Screen.resolutions;
         for (int i = 0; i < resolutions.Length; i++)
@@ -74,8 +76,8 @@ public class SettingsMenu : MonoBehaviour
         // Dropdown value can be changed in the above for-if statement - add listener after so res doesn't get changed
         resDropdown.onValueChanged.AddListener(SetResolution);
 
-        fullscreenToggle.onValueChanged.AddListener(SetFullscreen);
         fullscreenToggle.isOn = Screen.fullScreen;
+        fullscreenToggle.onValueChanged.AddListener(SetFullscreen);
 
         //brightnessSlider.onValueChanged.AddListener(SetBrightness);
         //brightnessSlider.value = Screen.brightness * 100;
