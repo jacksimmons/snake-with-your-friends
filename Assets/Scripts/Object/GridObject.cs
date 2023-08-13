@@ -3,7 +3,8 @@ using UnityEngine;
 
 public class GridObject : NetworkBehaviour
 {
-    public SetOnce<int> gridPos = new();
+    [SyncVar]
+    public int gridPos;
 
     private void Start()
     {

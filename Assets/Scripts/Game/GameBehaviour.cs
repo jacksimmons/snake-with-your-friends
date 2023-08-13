@@ -314,7 +314,7 @@ public class GameBehaviour : NetworkBehaviour
         Vector2 foodPos = new((objectPos % (int)GroundSize) + (bl.x + 1.5f), (objectPos / (int)GroundSize) + (bl.y + 1.5f));
 
         GameObject obj = Instantiate(_foodTemplates[foodIndex], foodPos, Quaternion.Euler(Vector3.forward * 0));
-        obj.GetComponent<GridObject>().gridPos.Value = objectPos;
+        obj.GetComponent<GridObject>().gridPos = objectPos;
 
         if (AddObjectToGrid(objectPos, obj) != -1)
         {
@@ -351,9 +351,7 @@ public class GameBehaviour : NetworkBehaviour
     }
 
     /// <summary>
-    /// First gets every client to delete the object, THEN removes it from
-    /// the objects array. Because the array is a SyncVar, clients would lose
-    /// reference to it otherwise.
+    /// First gets every client to delete the object, THEN removes it.
     /// </summary>
     [Command]
     public void CmdRemoveObjectFromGrid(int objectPos)
