@@ -390,7 +390,9 @@ public class GameBehaviour : NetworkBehaviour
         if (!isOwned)
             return;
 
-        GameObject gameOver = GameObject.Find("Canvas").transform.Find("GameOver").gameObject;
+        GameObject canvas = GameObject.Find("Canvas");
+        GameObject gameOver = canvas.transform.Find("GameOver").gameObject;
+        GameObject spectateUI = canvas.transform.Find("SpectateUI").gameObject;
         gameOver.SetActive(active);
 
         if (active)
@@ -399,6 +401,13 @@ public class GameBehaviour : NetworkBehaviour
             gameOver.transform.Find("OnlineButton").gameObject.SetActive(online);
             gameOver.transform.Find("OfflineButton").gameObject.SetActive(!online);
             gameOver.transform.Find("Score").GetComponent<TextMeshProUGUI>().text = "Score: " + score.ToString();
+
+            StartCoroutine(
+                Wait.WaitThen(
+                    3,
+                    () => spectateUI.SetActive(true)
+                )
+            );
         }
     }
 

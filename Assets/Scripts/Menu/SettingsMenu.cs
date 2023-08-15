@@ -40,6 +40,10 @@ public class SettingsMenu : MonoBehaviour
     [SerializeField]
     private Toggle fullscreenToggle;
 
+    [SerializeField]
+    private Toggle borderlessToggle;
+    private bool borderlessValue;
+
     //[SerializeField]
     //private TextMeshProUGUI brightnessLabel;
     //[SerializeField]
@@ -49,11 +53,11 @@ public class SettingsMenu : MonoBehaviour
     {
         audioHandler = GameObject.FindWithTag("AudioHandler");
 
-        menuVolumeSlider.value = audioHandler.transform.Find("ButtonPressHandler").GetComponent<AudioSource>().volume * 100;
+        menuVolumeSlider.value = Chungus.Instance.settings.menuVolume * 100;
         menuVolumeValue = menuVolumeSlider.value;
         menuVolumeSlider.onValueChanged.AddListener(SetMenuVolume);
 
-        sfxVolumeSlider.value = audioHandler.transform.Find("EatHandler").GetComponent<AudioSource>().volume * 100;
+        sfxVolumeSlider.value = Chungus.Instance.settings.sfxVolume * 100;
         sfxVolumeValue = sfxVolumeSlider.value;
         sfxVolumeSlider.onValueChanged.AddListener(SetSFXVolume);
 
@@ -79,8 +83,9 @@ public class SettingsMenu : MonoBehaviour
         fullscreenToggle.isOn = Screen.fullScreen;
         fullscreenToggle.onValueChanged.AddListener(SetFullscreen);
 
-        //brightnessSlider.onValueChanged.AddListener(SetBrightness);
-        //brightnessSlider.value = Screen.brightness * 100;
+        borderlessValue = Chungus.Instance.settings.borderless;
+        borderlessToggle.isOn = borderlessValue;
+        borderlessToggle.onValueChanged.AddListener(SetBorderless);
     }
 
     private bool ResolutionEquals(Resolution res1, Resolution res2)
@@ -121,12 +126,18 @@ public class SettingsMenu : MonoBehaviour
     private void SetResolution(int index)
     {
         Resolution resolution = resolutions[index];
-        Screen.SetResolution(resolution.width, resolution.height, Screen.fullScreen, resolution.refreshRate);
+        Screen.SetResolution(resolution.width, resolution.height, Screen.fullScreenMode, resolution.refreshRate);
     }
 
     private void SetFullscreen(bool fullscreen)
     {
-        Screen.fullScreen = fullscreen;
+        Screen.fullScreenMode = Settings.GetWindowMode(fullscreen, borderlessValue);
+    }
+
+    private void SetBorderless(bool borderless)
+    {
+        borderlessValue = borderless;
+        Screen.fullScreenMode = Settings.GetWindowMode(Screen.fullScreen, borderless);
     }
 
     // Toggles which buttons are visible (Back, or the two save buttons)
@@ -171,7 +182,8 @@ public class SettingsMenu : MonoBehaviour
             menuVolumeValue / 100,
             sfxVolumeValue / 100,
             Screen.width, Screen.height, Screen.currentResolution.refreshRate,
-            Screen.fullScreen
+            Screen.fullScreen,
+            borderlessValue
         );
         BinaryFormatter bf = new BinaryFormatter();
         bf.Serialize(fs, settings);

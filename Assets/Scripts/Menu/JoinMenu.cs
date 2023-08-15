@@ -60,9 +60,9 @@ public class JoinMenu : MonoBehaviour
         m_LobbyMatchList.Set(handle);
     }
 
-    public void OnLobbyJoinPressed(TextMeshProUGUI idField)
+    public void OnLobbyJoinPressed(GameObject lobbyEntry)
     {
-        ulong.TryParse(idField.text, out ulong id);
+        ulong.TryParse(lobbyEntry.name, out ulong id);
 
         GameObject.Find("NetworkManager").GetComponent<SteamLobby>().JoinLobby((CSteamID)id);
     }
@@ -123,15 +123,14 @@ public class JoinMenu : MonoBehaviour
             GameObject newElement = Instantiate(_joinEntryTemplate, _contentOutput.transform);
             TextMeshProUGUI[] tmps = newElement.GetComponentsInChildren<TextMeshProUGUI>();
 
+            newElement.name = lobby_id.ToString();
             string name = SteamMatchmaking.GetLobbyData(lobby_id, "name");
             int players = SteamMatchmaking.GetNumLobbyMembers(lobby_id);
             int player_limit = SteamMatchmaking.GetLobbyMemberLimit(lobby_id);
 
-            // Odd indices are labels
-            tmps[0].text = (i + 1).ToString();
-            tmps[2].text = name;
-            tmps[4].text = players.ToString() + "/" + player_limit.ToString();
-            tmps[6].text = lobby_id.ToString();
+            // Even indices are labels
+            tmps[1].text = name;
+            tmps[3].text = players.ToString() + "/" + player_limit.ToString();
 
             //string lobbyTypeName;
             //switch (lobbyType)

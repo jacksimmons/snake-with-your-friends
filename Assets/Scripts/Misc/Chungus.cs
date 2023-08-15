@@ -88,10 +88,11 @@ public class Chungus : MonoBehaviour
         audioParent.transform.Find("ButtonPressHandler").GetComponent<AudioSource>().volume = Instance.settings.menuVolume;
         audioParent.transform.Find("EatHandler").GetComponent<AudioSource>().volume = Instance.settings.sfxVolume;
 
-        Screen.SetResolution(Instance.settings.resX, Instance.settings.resY, Instance.settings.fullscreen, Instance.settings.resHz);
+        FullScreenMode fsm = Settings.GetWindowMode(Instance.settings.fullscreen, Instance.settings.borderless);
+        Screen.SetResolution(Instance.settings.resX, Instance.settings.resY, fsm, Instance.settings.resHz);
 
         print($"Resolution: {Instance.settings.resX}x{Instance.settings.resY}@{Instance.settings.resHz}");
-        print($"Fullscreen: {Instance.settings.fullscreen}");
+        print($"Fullscreen: {Instance.settings.fullscreen} Borderless: {Instance.settings.borderless}");
         print($"Volume: MENU[{Instance.settings.menuVolume}], SFX[{Instance.settings.sfxVolume}]");
     }
 
