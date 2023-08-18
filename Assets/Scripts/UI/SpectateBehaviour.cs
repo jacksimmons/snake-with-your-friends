@@ -40,10 +40,16 @@ public class SpectateBehaviour : MonoBehaviour
             spectateIndex = Manager.Players.Count - 1;
         }
 
-        print(spectateIndex);
+        if (Manager.Players.Count == 0)
+        {
+            m_nameLabel.text = "Noone to spectate";
+            return;
+        }
 
         CamBehaviour cam = GameObject.FindWithTag("MainCamera").GetComponent<CamBehaviour>();
         m_currentTarget = Manager.Players[spectateIndex];
         cam.Player = m_currentTarget.GetComponent<PlayerMovementController>();
+
+        UpdateNameLabel();
     }
 }
