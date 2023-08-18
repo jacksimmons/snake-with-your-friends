@@ -93,7 +93,7 @@ ScriptedImporter:
     addSortingGroup: 1
     addShadowCasters: 0
   importFileNodeState: 1
-  platformSettingsDirtyTick: 638273774689890030
+  platformSettingsDirtyTick: 638278701755144134
   textureAssetName: 
   singleSpriteImportData:
   - name: 
@@ -128,7 +128,7 @@ ScriptedImporter:
       y: 44
       width: 14
       height: 31
-    spriteID: 42546a69a7a97b94690d75779d0392b7
+    spriteID: b584dcfb0fa99364886c1f4b0d5db667
     spriteBone: []
     spriteOutline: []
     vertices: []
@@ -148,7 +148,7 @@ ScriptedImporter:
       y: 4
       width: 14
       height: 32
-    spriteID: f185d23223519d5429bee27ce4747ed3
+    spriteID: 814f6e55aaaf2e2428c25ecf69e9635c
     spriteBone: []
     spriteOutline: []
     vertices: []
@@ -168,7 +168,7 @@ ScriptedImporter:
       y: 90
       width: 14
       height: 34
-    spriteID: 8dca8227ed870d6438ccd6589f995847
+    spriteID: c2539281bf45c6b47b9a108b36d08305
     spriteBone: []
     spriteOutline: []
     vertices: []
@@ -188,7 +188,7 @@ ScriptedImporter:
       y: 4
       width: 16
       height: 35
-    spriteID: b22b9e3d92d270345bf791f10726aade
+    spriteID: f33e53599a0aada4aa0ad137ded2b71e
     spriteBone: []
     spriteOutline: []
     vertices: []
@@ -208,7 +208,7 @@ ScriptedImporter:
       y: 47
       width: 16
       height: 35
-    spriteID: 114c6c9716e714e4da6c732a668b16ac
+    spriteID: dc285112ba2f6af4ba03a376e2318baf
     spriteBone: []
     spriteOutline: []
     vertices: []
@@ -233,7 +233,7 @@ ScriptedImporter:
         y: 0
         width: 14
         height: 31
-      spriteId: 42546a69a7a97b94690d75779d0392b7
+      spriteId: b584dcfb0fa99364886c1f4b0d5db667
     - name: Jack_Frame_1
       frameIndex: 1
       cellRect:
@@ -241,7 +241,7 @@ ScriptedImporter:
         y: 0
         width: 14
         height: 32
-      spriteId: f185d23223519d5429bee27ce4747ed3
+      spriteId: 814f6e55aaaf2e2428c25ecf69e9635c
     - name: Jack_Frame_2
       frameIndex: 2
       cellRect:
@@ -249,7 +249,7 @@ ScriptedImporter:
         y: 0
         width: 14
         height: 34
-      spriteId: 8dca8227ed870d6438ccd6589f995847
+      spriteId: c2539281bf45c6b47b9a108b36d08305
     - name: Jack_Frame_3
       frameIndex: 3
       cellRect:
@@ -257,7 +257,7 @@ ScriptedImporter:
         y: 0
         width: 16
         height: 35
-      spriteId: b22b9e3d92d270345bf791f10726aade
+      spriteId: f33e53599a0aada4aa0ad137ded2b71e
     - name: Jack_Frame_4
       frameIndex: 4
       cellRect:
@@ -265,7 +265,7 @@ ScriptedImporter:
         y: 0
         width: 16
         height: 35
-      spriteId: 114c6c9716e714e4da6c732a668b16ac
+      spriteId: dc285112ba2f6af4ba03a376e2318baf
     linkedCells: []
     parentIndex: -1
   platformSettings:

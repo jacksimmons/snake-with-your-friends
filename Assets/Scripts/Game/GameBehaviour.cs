@@ -391,8 +391,9 @@ public class GameBehaviour : NetworkBehaviour
             return;
 
         GameObject canvas = GameObject.Find("Canvas");
-        GameObject gameOver = canvas.transform.Find("GameOver").gameObject;
-        GameObject spectateUI = canvas.transform.Find("SpectateUI").gameObject;
+        Transform bg = canvas.transform.GetChild(0);
+        GameObject gameOver = bg.Find("GameOver").gameObject;
+        GameObject spectateUI = bg.Find("SpectateUI").gameObject;
         gameOver.SetActive(active);
 
         if (active)

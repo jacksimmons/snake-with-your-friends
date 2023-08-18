@@ -7,7 +7,7 @@ public class CamBehaviour : MonoBehaviour
     public PlayerMovementController Player { get; set; } = null;
     private float _followSharpness = 0.1f;
 
-    void LateUpdate()
+    private void LateUpdate()
     {
         if (Player != null)
         {

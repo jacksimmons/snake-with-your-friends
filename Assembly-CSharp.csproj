@@ -60,6 +60,7 @@
     <Compile Include="Assets\Scripts\Powerup\Projectile.cs" />
     <Compile Include="Assets\Scripts\Powerup\ProjectileBehaviour.cs" />
     <Compile Include="Assets\Scripts\Object\FoodObject.cs" />
+    <Compile Include="Assets\Scripts\Menu\Lobby\PowerupToggle.cs" />
     <Compile Include="Assets\Scripts\Powerup\TooManyPints.cs" />
     <Compile Include="Assets\Scripts\Object\Teleporter.cs" />
     <Compile Include="Assets\Scripts\Game\GameBehaviour.cs" />
@@ -68,7 +69,7 @@
     <Compile Include="Assets\Scripts\Object\ScootileTilemap.cs" />
     <Compile Include="Assets\Scripts\Powerup\Effect.cs" />
     <Compile Include="Assets\Scripts\Misc\LoadingIcon.cs" />
-    <Compile Include="Assets\Scripts\Menu\PlayerListItem.cs" />
+    <Compile Include="Assets\Scripts\Menu\Lobby\PlayerListItem.cs" />
     <Compile Include="Assets\Scripts\Vectors.cs" />
     <Compile Include="Assets\Scripts\Menu\SettingsMenu.cs" />
     <Compile Include="Assets\Scripts\Menu\JoinMenu.cs" />
@@ -77,10 +78,11 @@
     <Compile Include="Assets\Scripts\Networking\CustomNetworkManager.cs" />
     <Compile Include="Assets\Scripts\UI\DebugBehaviour.cs" />
     <Compile Include="Assets\Scripts\Object\ObjectController.cs" />
-    <Compile Include="Assets\Scripts\Menu\CreateMenu.cs" />
     <Compile Include="Assets\Scripts\Audio\AudioHandler.cs" />
     <Compile Include="Assets\Scripts\Object\ForegroundObject.cs" />
+    <Compile Include="Assets\AspectCam.cs" />
     <Compile Include="Assets\Scripts\Object\ForegroundBehaviour.cs" />
+    <Compile Include="Assets\Scripts\Menu\Lobby\HostOptionsHandler.cs" />
     <Compile Include="Assets\Scripts\Unused\FollowPlayer.cs" />
     <Compile Include="Assets\Scripts\Arrays.cs" />
     <Compile Include="Assets\Scripts\UI\MainMenuButton.cs" />
@@ -88,7 +90,7 @@
     <Compile Include="Assets\Scripts\Steamworks.NET\SteamManager.cs" />
     <Compile Include="Assets\Scripts\Player\BodyPartType.cs" />
     <Compile Include="Assets\Scripts\Wait.cs" />
-    <Compile Include="Assets\Scripts\Networking\LobbyController.cs" />
+    <Compile Include="Assets\Scripts\Menu\LobbyMenu.cs" />
     <Compile Include="Assets\Scripts\Misc\Settings.cs" />
     <Compile Include="Assets\Scripts\Object\ColliderToggleTilemap.cs" />
     <Compile Include="Assets\Scripts\Player\BodyPart.cs" />
@@ -100,6 +102,7 @@
     <Compile Include="Assets\Scripts\Networking\SteamLobby.cs" />
     <Compile Include="Assets\Scripts\Networking\PlayerObjectController.cs" />
     <Compile Include="Assets\Scripts\UI\SpectateNameLabel.cs" />
+    <Compile Include="Assets\Scripts\Player\Player.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Mirror\Plugins\Mono.Cecil\Mono.CecilX.dll" />

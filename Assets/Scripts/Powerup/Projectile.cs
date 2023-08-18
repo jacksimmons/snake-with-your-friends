@@ -2,9 +2,16 @@ using UnityEngine;
 
 public enum EProjectileType
 {
+    Shit,
+    InstantDamage,
+}
+
+public enum ECollisionType
+{
     None,
-    Blooper,
-    HurtOnce
+    IfPlayerExplodeElseBounce,
+    Splat,
+    Explode
 }
 
 public struct Projectile
@@ -31,15 +38,18 @@ public struct Projectile
             else { _counterMax = value; }
         }
     }
-    public float immunityDuration;
 
-    public Projectile(float lifetime, Vector2 direction, float rotation, int counterMax, float immunityDuration = 0)
+    public ECollisionType CollisionType { get; private set; }
+    public float ImmunityDuration { get; private set; }
+
+    public Projectile(float lifetime, Vector2 direction, float rotation, int counterMax,
+        ECollisionType collisionType, float immunityDuration = 0)
     {
         Lifetime = lifetime;
         Direction = direction;
         _counterMax = counterMax;
         Rotation = Quaternion.Euler(Vector3.forward * rotation);
-
-        this.immunityDuration = immunityDuration;
+        CollisionType = collisionType;
+        ImmunityDuration = immunityDuration;
     }
 }
