@@ -8,11 +8,14 @@ public class FoodObject : GridObject
     private void OnTriggerEnter2D(Collider2D collision)
     {
         GameObject obj = collision.gameObject;
-        Transform player = obj.transform.parent.parent;
-        if (player != null && player.CompareTag("Player"))
+        Transform player = Player.TryGetPlayerTransformFromBodyPart(obj);
+
+        bool removeAndReplaceFood = false;
+
+        // Collision with player
+        if (player != null)
         {
-            GameBehaviour game = obj.transform.parent.parent.GetComponentInChildren<GameBehaviour>();
-            PlayerMovementController playerMovementController = obj.transform.GetComponentInParent<PlayerMovementController>();
+            PlayerMovementController playerMovementController = player.GetComponent<PlayerMovementController>();
 
             // Not our collision to handle -> return.
             if (!playerMovementController.isOwned) return;
@@ -25,7 +28,25 @@ public class FoodObject : GridObject
                 GameObject.FindWithTag("AudioHandler").GetComponent<AudioHandler>().eatAudioSource.Play();
             }
 
-            game.CmdRemoveObjectFromGrid(gridPos);
+            removeAndReplaceFood = true;
+        }
+
+        if (TryGetComponent(out ProjectileBehaviour pb))
+        {
+            switch (pb.Type)
+            {
+                case EProjectileType.InstantDamage:
+                    removeAndReplaceFood = true;
+                    break;
+            }
+        }
+
+        if (removeAndReplaceFood)
+        {
+            GameObject playerObj = GameObject.Find("LocalPlayerObject");
+            GameBehaviour game = playerObj.GetComponentInChildren<GameBehaviour>();
+
+            game.CmdRemoveAndReplaceFood(gridPos);
         }
     }
 }

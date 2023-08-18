@@ -350,11 +350,8 @@ public class GameBehaviour : NetworkBehaviour
         return objectPos;
     }
 
-    /// <summary>
-    /// First gets every client to delete the object, THEN removes it.
-    /// </summary>
-    [Command]
-    public void CmdRemoveObjectFromGrid(int objectPos)
+    [Server]
+    public void RemoveObjectFromGrid(int objectPos)
     {
         GameObject go = s_objects[objectPos];
 
@@ -367,7 +364,12 @@ public class GameBehaviour : NetworkBehaviour
         NetworkServer.UnSpawn(go);
         NetworkServer.Destroy(go);
         s_objects[objectPos] = null;
+    }
 
+    [Command]
+    public void CmdRemoveAndReplaceFood(int objPos)
+    {
+        RemoveObjectFromGrid(objPos);
         GenerateFood();
     }
 

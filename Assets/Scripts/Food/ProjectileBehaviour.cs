@@ -4,10 +4,11 @@ using UnityEngine.XR;
 
 public class ProjectileBehaviour : MonoBehaviour
 {
+    [SerializeField]
+    public EProjectileType Type { get; private set; }
+
     private ParticleSystem m_explosionEffect;
 
-    [SerializeField]
-    private EProjectileType m_type;
     private Projectile _proj;
     public Projectile Proj
     {
@@ -41,11 +42,6 @@ public class ProjectileBehaviour : MonoBehaviour
     private Rigidbody2D _rb = null; // Assigned to in Proj setter
     private Sprite m_sprite; // Assigned to once in Awake
 
-    public EProjectileType GetProjectileType()
-    {
-        return m_type;
-    }
-
     private void Awake()
     {
         m_sprite = GetComponent<SpriteRenderer>().sprite;
@@ -73,7 +69,7 @@ public class ProjectileBehaviour : MonoBehaviour
         // Ignore collision with certain projectiles
         if (obj.TryGetComponent(out ProjectileBehaviour pb))
         {
-            if (pb.m_type == EProjectileType.Shit)
+            if (pb.Type == EProjectileType.Shit)
                 return;
         }
 
@@ -107,7 +103,7 @@ public class ProjectileBehaviour : MonoBehaviour
         if (!isPlayer) return;
 
         // Confirmed dealing with a Player collision
-        switch (m_type)
+        switch (Type)
         {
             case EProjectileType.Shit:
                 // Add a shit to the foreground overlay (blooper effect)
