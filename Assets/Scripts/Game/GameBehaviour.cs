@@ -8,6 +8,15 @@ using Random = UnityEngine.Random;
 
 public class GameBehaviour : NetworkBehaviour
 {
+    // Static variables
+    private static int numPlayersReady = 0;
+    // An array of child indices for objects (all objects in this go under the s_objects game object parent)
+    public static GameObject[] s_objects { get; private set; }
+
+    private static Tilemap s_groundTilemap;
+    private static Tilemap s_wallTilemap;
+
+    // Templates
     [SerializeField]
     private Tile _lightTile;
     [SerializeField]
@@ -22,9 +31,6 @@ public class GameBehaviour : NetworkBehaviour
     private GameObject[] _foodTemplates;
     [SerializeField]
     private GameObject _menuSelectTemplate;
-
-    private static Tilemap s_groundTilemap;
-    private static Tilemap s_wallTilemap;
 
     [SerializeField]
     private Vector2 _spawnPoint;
@@ -63,11 +69,14 @@ public class GameBehaviour : NetworkBehaviour
         }
     }
 
-    // Server Variables
-    [SyncVar]
-    private int m_numPlayersReady;
-    // An array of child indices for objects (all objects in this go under the s_objects game object parent)
-    public static GameObject[] s_objects { get; private set; }
+    private void Start()
+    {
+        // If this is the host object
+        if (NetworkServer.active)
+        {
+            numPlayersReady = 0;
+        }
+    }
 
     [Client]
     public void OnGameSceneLoaded(string name)
@@ -187,9 +196,9 @@ public class GameBehaviour : NetworkBehaviour
     {
         // Needs to be static, as every GameBehaviour calling this command will have its OWN
         // s_numPlayersReady incremented otherwise.
-        m_numPlayersReady++;
-        print(m_numPlayersReady);
-        if (m_numPlayersReady == Manager.Players.Count)
+        numPlayersReady++;
+        print(numPlayersReady);
+        if (numPlayersReady == Manager.Players.Count)
         {
             ServerLoadGame();
         }
