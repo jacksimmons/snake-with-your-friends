@@ -13,6 +13,8 @@ public class PlayerObjectController : NetworkBehaviour
     private GameObject m_bodyPartTemplate;
 
     // Player data
+    // SyncVars - Can only be changed on the server, and clients receive these changes.
+    // Hooks - Client functions are executed when the SyncVar updates, acting like a ClientRPC.
     [SyncVar] public int connectionID;
     [SyncVar] public int playerNo;
     [SyncVar] public ulong playerSteamID;

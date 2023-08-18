@@ -5,7 +5,7 @@ using UnityEngine.XR;
 public class ProjectileBehaviour : MonoBehaviour
 {
     [SerializeField]
-    public EProjectileType Type { get; private set; }
+    public EProjectileType type;
 
     private ParticleSystem m_explosionEffect;
 
@@ -69,7 +69,7 @@ public class ProjectileBehaviour : MonoBehaviour
         // Ignore collision with certain projectiles
         if (obj.TryGetComponent(out ProjectileBehaviour pb))
         {
-            if (pb.Type == EProjectileType.Shit)
+            if (pb.type == EProjectileType.Shit)
                 return;
         }
 
@@ -78,12 +78,10 @@ public class ProjectileBehaviour : MonoBehaviour
         if (player == null) isPlayer = false;
         if (m_playerImmune) isPlayer = false;
 
-        // Handle collision type first so we can quick-exit in the player section
-        switch (Proj.CollisionType)
+        // Handle VFX first so we can quick-exit in the player section
+        switch (type)
         {
-            case ECollisionType.None:
-                break;
-            case ECollisionType.IfPlayerExplodeElseBounce:
+            case EProjectileType.Orange:
                 if (isPlayer)
                     StartCoroutine(Explode());
                 else
@@ -92,10 +90,7 @@ public class ProjectileBehaviour : MonoBehaviour
                     transform.Rotate(0, 0, 180);
                 }
                 break;
-            case ECollisionType.Splat:
-                Destroy(gameObject);
-                break;
-            case ECollisionType.Explode:
+            default:
                 StartCoroutine(Explode());
                 break;
         }
@@ -103,7 +98,7 @@ public class ProjectileBehaviour : MonoBehaviour
         if (!isPlayer) return;
 
         // Confirmed dealing with a Player collision
-        switch (Type)
+        switch (type)
         {
             case EProjectileType.Shit:
                 // Add a shit to the foreground overlay (blooper effect)

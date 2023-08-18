@@ -33,7 +33,7 @@ public class FoodObject : GridObject
 
         if (TryGetComponent(out ProjectileBehaviour pb))
         {
-            switch (pb.Type)
+            switch (pb.type)
             {
                 case EProjectileType.InstantDamage:
                     removeAndReplaceFood = true;

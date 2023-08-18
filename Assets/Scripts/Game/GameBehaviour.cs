@@ -64,9 +64,7 @@ public class GameBehaviour : NetworkBehaviour
     }
 
     // Server Variables
-    // Note that these are static - if they weren't, [Command] functions cannot use them.
-
-    private static int s_numPlayersReady = 0;
+    private int m_numPlayersReady = 0;
     // An array of child indices for objects (all objects in this go under the s_objects game object parent)
     public static GameObject[] s_objects { get; private set; }
 
@@ -188,9 +186,9 @@ public class GameBehaviour : NetworkBehaviour
     {
         // Needs to be static, as every GameBehaviour calling this command will have its OWN
         // s_numPlayersReady incremented otherwise.
-        s_numPlayersReady++;
+        m_numPlayersReady++;
 
-        if (s_numPlayersReady == Manager.Players.Count)
+        if (m_numPlayersReady == Manager.Players.Count)
         {
             ServerLoadGame();
         }

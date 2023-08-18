@@ -109,7 +109,6 @@ public class StatusBehaviour : NetworkBehaviour
                     direction: head.Direction,
                     rotation: head.RegularAngle,
                     counterMax: Mathf.CeilToInt(_player.CounterMax / CRITICAL_MULT),
-                    collisionType: ECollisionType.Explode,
                     immunityDuration: 0.5f
                 );
                 NetworkServer.Spawn(fireball);
@@ -141,7 +140,6 @@ public class StatusBehaviour : NetworkBehaviour
                     direction: Vectors.Rotate(-_player.BodyParts[^1].Direction, randomRotation),
                     rotation: _player.BodyParts[^1].RegularAngle,
                     counterMax: Mathf.CeilToInt(_player.CounterMax / MINOR_MULT),
-                    collisionType: ECollisionType.Splat,
                     immunityDuration: 0.5f
                 );
                 break;

@@ -11,7 +11,7 @@ public class DeathTrigger : MonoBehaviour
         //GameObject maybeProjectile = obj;
         //if (maybeProjectile && maybeProjectile.TryGetComponent(out ProjectileBehaviour pb))
         //{
-        //    switch (pb.Type)
+        //    switch (pb.type)
         //    {
         //        case EProjectileType.Shit:
         //            pb.HandleCollision(EProjectileCollisionType.Splat, true);

@@ -4,14 +4,7 @@ public enum EProjectileType
 {
     Shit,
     InstantDamage,
-}
-
-public enum ECollisionType
-{
-    None,
-    IfPlayerExplodeElseBounce,
-    Splat,
-    Explode
+    Orange
 }
 
 public struct Projectile
@@ -39,17 +32,15 @@ public struct Projectile
         }
     }
 
-    public ECollisionType CollisionType { get; private set; }
     public float ImmunityDuration { get; private set; }
 
     public Projectile(float lifetime, Vector2 direction, float rotation, int counterMax,
-        ECollisionType collisionType, float immunityDuration = 0)
+        float immunityDuration = 0)
     {
         Lifetime = lifetime;
         Direction = direction;
         _counterMax = counterMax;
         Rotation = Quaternion.Euler(Vector3.forward * rotation);
-        CollisionType = collisionType;
         ImmunityDuration = immunityDuration;
     }
 }
