@@ -56,6 +56,7 @@ public class LobbyMenu : MonoBehaviour
 
     private void Start()
     {
+        // Determine if we are the host
         if (NetworkServer.active)
         {
             m_hostOptionsButton.SetActive(true);
@@ -80,7 +81,6 @@ public class LobbyMenu : MonoBehaviour
 
     public void UpdatePlayerList()
     {
-        // Host
         if (!playerItemCreated) { CreateHostPlayerItem(); }
 
         if (_playerListItems.Count < Manager.Players.Count) { CreateClientPlayerItem(); }
@@ -104,7 +104,7 @@ public class LobbyMenu : MonoBehaviour
         PlayerListItem newPlayerListItemScript = newPlayerItem.GetComponent<PlayerListItem>();
 
         // Defaults to disabled
-        if (newPlayerItem.GetComponent<PlayerObjectController>().isServer)
+        if (player.isServer)
             newPlayerListItemScript.hostCrown.SetActive(true);
 
         newPlayerListItemScript.playerName = player.playerName;
