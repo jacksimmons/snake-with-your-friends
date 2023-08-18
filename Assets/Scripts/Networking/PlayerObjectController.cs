@@ -19,6 +19,9 @@ public class PlayerObjectController : NetworkBehaviour
     [SyncVar(hook = nameof(OnPlayerNameUpdate))] public string playerName;
     [SyncVar(hook = nameof(OnPlayerReadyUpdate))] public bool ready;
 
+    [SyncVar]
+    public bool isHost;
+
     private CustomNetworkManager _manager;
     private CustomNetworkManager Manager
     {
@@ -31,7 +34,9 @@ public class PlayerObjectController : NetworkBehaviour
 
     private void Start()
     {
-        DontDestroyOnLoad(this.gameObject);
+        DontDestroyOnLoad(gameObject);
+        if (isServer && isLocalPlayer)
+            isHost = true;
     }
 
     // Lobby Methods

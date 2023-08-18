@@ -14,16 +14,16 @@ public class LobbyMenu : MonoBehaviour
     // UI Elements
     public TextMeshProUGUI lobbyNameLabel;
 
-    // Player Data
+    // GameObjects & Scripts
     public GameObject playerListViewContent;
     public GameObject playerListItemPrefab;
     public GameObject localPlayerObject;
+    public PlayerObjectController localPlayerController;
 
     // Other Data
     public ulong lobbyID;
     public bool playerItemCreated = false;
     private List<PlayerListItem> _playerListItems = new();
-    public PlayerObjectController localPlayerController;
 
     // Manager
     private CustomNetworkManager _manager;
@@ -56,11 +56,19 @@ public class LobbyMenu : MonoBehaviour
 
     private void Start()
     {
+        FindLocalPlayer();
+
         // Determine if we are the host
-        if (NetworkServer.active)
+        if (localPlayerController.isHost)
         {
             m_hostOptionsButton.SetActive(true);
         }
+    }
+
+    public void FindLocalPlayer()
+    {
+        localPlayerObject = GameObject.Find("LocalPlayerObject");
+        localPlayerController = localPlayerObject.GetComponent<PlayerObjectController>();
     }
 
     public void OnHostOptionsButtonPressed()
@@ -90,12 +98,6 @@ public class LobbyMenu : MonoBehaviour
         if (_playerListItems.Count == Manager.Players.Count) { UpdatePlayerItem(); }
     }
 
-    public void FindLocalPlayer()
-    {
-        localPlayerObject = GameObject.Find("LocalPlayerObject");
-        localPlayerController = localPlayerObject.GetComponent<PlayerObjectController>();
-    }
-
     public void CreatePlayerItem(PlayerObjectController player)
     {
         print("Members: " + SteamMatchmaking.GetNumLobbyMembers(new CSteamID(lobbyID)));
@@ -103,8 +105,8 @@ public class LobbyMenu : MonoBehaviour
         GameObject newPlayerItem = Instantiate(playerListItemPrefab);
         PlayerListItem newPlayerListItemScript = newPlayerItem.GetComponent<PlayerListItem>();
 
-        // Defaults to disabled
-        if (player.isServer)
+        // Host Crown (& other stuff in the future)
+        if (player.isHost)
             newPlayerListItemScript.hostCrown.SetActive(true);
 
         newPlayerListItemScript.playerName = player.playerName;
