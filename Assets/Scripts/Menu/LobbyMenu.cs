@@ -56,10 +56,8 @@ public class LobbyMenu : MonoBehaviour
 
     private void Start()
     {
-        FindLocalPlayer();
-
         // Determine if we are the host
-        if (localPlayerController.isHost)
+        if (NetworkServer.active)
         {
             m_hostOptionsButton.SetActive(true);
         }
