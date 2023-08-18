@@ -6,6 +6,8 @@ using System;
 
 public class PlayerMovementController : NetworkBehaviour
 {
+    public bool dead = false;
+
     [SerializeField]
     private GameBehaviour _gameBehaviour;
 
@@ -404,6 +406,7 @@ public class PlayerMovementController : NetworkBehaviour
     {
         _rb.simulated = !dead;
         frozen = dead;
+        this.dead = dead;
         foreach (BodyPart part in BodyParts)
             m_poc.HandleBodyPartDeath(part, dead);
         status.gameObject.SetActive(!dead);

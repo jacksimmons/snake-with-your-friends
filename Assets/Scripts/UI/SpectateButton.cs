@@ -14,14 +14,13 @@ public class SpectateButton : MonoBehaviour
     [SerializeField]
     private Sprite m_buttonHover;
 
-    [SerializeField]
-    private SpectateNameLabel m_nameLabel;
-
     private Image m_image;
+    private SpectateBehaviour m_sb;
 
     private void Start()
     {
         m_image = GetComponent<Image>();
+        m_sb = GetComponentInParent<SpectateBehaviour>();
     }
 
     public void OnPointerEnter()
@@ -36,6 +35,9 @@ public class SpectateButton : MonoBehaviour
 
     public void OnPointerClick()
     {
-        m_nameLabel.UpdateName();
+        if (m_isRight)
+            m_sb.ChangeTarget(1);
+        else
+            m_sb.ChangeTarget(-1);
     }
 }
