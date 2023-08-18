@@ -199,7 +199,7 @@ public class LobbyMenu : MonoBehaviour
 
     public void TogglePlayerReady()
     {
-        LocalPlayerController.ready = !LocalPlayerController.ready;
+        LocalPlayerController.CmdSetPlayerReady();
     }
 
     public void UpdateButton()

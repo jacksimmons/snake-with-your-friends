@@ -89,11 +89,11 @@ public class PlayerObjectController : NetworkBehaviour
         }
     }
 
-    //[Command]
-    //public void CmdSetPlayerReady()
-    //{
-    //    this.OnPlayerReadyUpdate(this.ready, !this.ready);
-    //}
+    [Command]
+    public void CmdSetPlayerReady()
+    {
+        this.OnPlayerReadyUpdate(this.ready, !this.ready);
+    }
 
     public void OnPlayerReadyUpdate(bool oldValue, bool newValue)
     {
