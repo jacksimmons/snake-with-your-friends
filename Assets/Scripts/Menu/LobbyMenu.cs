@@ -104,7 +104,7 @@ public class LobbyMenu : MonoBehaviour
         PlayerListItem newPlayerListItemScript = newPlayerItem.GetComponent<PlayerListItem>();
 
         // Defaults to disabled
-        if (NetworkServer.active)
+        if (newPlayerItem.GetComponent<PlayerObjectController>().isServer)
             newPlayerListItemScript.hostCrown.SetActive(true);
 
         newPlayerListItemScript.playerName = player.playerName;
