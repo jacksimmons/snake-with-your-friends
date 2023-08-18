@@ -64,6 +64,7 @@ public class GameBehaviour : NetworkBehaviour
     }
 
     // Server Variables
+    [SyncVar]
     private int m_numPlayersReady = 0;
     // An array of child indices for objects (all objects in this go under the s_objects game object parent)
     public static GameObject[] s_objects { get; private set; }
