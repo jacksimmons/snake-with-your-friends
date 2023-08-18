@@ -18,9 +18,7 @@ public class PlayerObjectController : NetworkBehaviour
     [SyncVar] public ulong playerSteamID;
     [SyncVar(hook = nameof(OnPlayerNameUpdate))] public string playerName;
     [SyncVar(hook = nameof(OnPlayerReadyUpdate))] public bool ready;
-
-    [SyncVar]
-    public bool isHost;
+    [SyncVar(hook = nameof(OnPlayerHostUpdate))] public bool isHost;
 
     private CustomNetworkManager _manager;
     private CustomNetworkManager Manager
@@ -49,7 +47,6 @@ public class PlayerObjectController : NetworkBehaviour
     {
         CmdSetPlayerName(SteamFriends.GetPersonaName());
         gameObject.name = "LocalPlayerObject";
-        LobbyMenu.instance.FindLocalPlayer();
         LobbyMenu.instance.UpdateLobbyName();
     }
 
@@ -92,11 +89,11 @@ public class PlayerObjectController : NetworkBehaviour
         }
     }
 
-    [Command]
-    public void CmdSetPlayerReady()
-    {
-        this.OnPlayerReadyUpdate(this.ready, !this.ready);
-    }
+    //[Command]
+    //public void CmdSetPlayerReady()
+    //{
+    //    this.OnPlayerReadyUpdate(this.ready, !this.ready);
+    //}
 
     public void OnPlayerReadyUpdate(bool oldValue, bool newValue)
     {
@@ -107,6 +104,14 @@ public class PlayerObjectController : NetworkBehaviour
         if (isClient)
         {
             LobbyMenu.instance.UpdatePlayerList();
+        }
+    }
+
+    public void OnPlayerHostUpdate(bool oldValue, bool newValue)
+    {
+        if (newValue)
+        {
+            
         }
     }
 

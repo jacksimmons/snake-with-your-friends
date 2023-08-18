@@ -26,21 +26,6 @@ public class PlayerListItem : MonoBehaviour
     protected Callback<AvatarImageLoaded_t> imageLoaded;
 
 
-    public void ChangeReadyStatus()
-    {
-        if (ready)
-        {
-            playerReadyLabel.text = "Ready";
-            playerReadyLabel.color = Color.green;
-        }
-        else
-        {
-            playerReadyLabel.text = "Not Ready";
-            playerReadyLabel.color = Color.red;
-        }
-    }
-
-
     private void Awake()
     {
         if (!SteamManager.Initialized)
@@ -61,6 +46,21 @@ public class PlayerListItem : MonoBehaviour
             GetPlayerIcon();
         }
     }
+
+    public void ChangeReadyStatus()
+    {
+        if (ready)
+        {
+            playerReadyLabel.text = "Ready";
+            playerReadyLabel.color = Color.green;
+        }
+        else
+        {
+            playerReadyLabel.text = "Not Ready";
+            playerReadyLabel.color = Color.red;
+        }
+    }
+
 
     private bool GetPlayerIcon()
     {
