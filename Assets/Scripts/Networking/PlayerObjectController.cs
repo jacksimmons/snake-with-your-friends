@@ -149,9 +149,6 @@ public class PlayerObjectController : NetworkBehaviour
             for (int i = 0; i < bodyPartDatas.Count; i++)
             {
                 BodyPartData data = bodyPartDatas[i];
-                print($"Body Part {i}: \n Position: {data.position} \n Direction: {data.direction}");
-                print($"Corner Rot: {data.CornerAngle} \n Rot: {data.RegularAngle}");
-                print($"Current Type: {data.CurrentType} \n Default Type: {data.DefaultType}");
 
                 Transform bodyPartParent = m_pmc.bodyPartContainer.transform;
                 int diff = bodyPartDatas.Count - bodyPartParent.childCount;

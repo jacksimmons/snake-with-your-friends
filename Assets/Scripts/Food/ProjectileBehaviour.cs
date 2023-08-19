@@ -81,7 +81,7 @@ public class ProjectileBehaviour : MonoBehaviour
         // Handle VFX first so we can quick-exit in the player section
         switch (type)
         {
-            case EProjectileType.Orange:
+            case EProjectileType.InstantDamage:
                 if (isPlayer)
                     StartCoroutine(Explode());
                 else

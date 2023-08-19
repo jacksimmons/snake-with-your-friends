@@ -56,14 +56,6 @@ public class SpectateBehaviour : MonoBehaviour
         if (!m_bother) return;
 
         spectateIndex = spectateIndex + diff;
-        if (spectateIndex == firstTryIndex)
-        {
-            UpdateNameLabel(null);
-            return;
-        }
-        if (firstTryIndex == -1)
-            firstTryIndex = spectateIndex;
-
         // Index wrapping
         if (spectateIndex >= Manager.Players.Count)
         {
@@ -74,12 +66,14 @@ public class SpectateBehaviour : MonoBehaviour
             spectateIndex = Manager.Players.Count - 1;
         }
 
-        if (Manager.Players.Count == 0)
+        // Check if the search has failed
+        if (spectateIndex == firstTryIndex)
         {
-            Debug.LogError("No players are in the game (Manager.Players)");
             UpdateNameLabel(null);
             return;
         }
+        if (firstTryIndex == -1)
+            firstTryIndex = spectateIndex;
 
         PlayerObjectController poc = Manager.Players[spectateIndex];
         PlayerMovementController pmc = poc.GetComponent<PlayerMovementController>();
