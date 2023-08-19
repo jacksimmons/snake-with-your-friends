@@ -415,7 +415,7 @@ public class GameBehaviour : NetworkBehaviour
 
             // Spectate the next player in the list
             spectateUI.SetActive(true);
-            spectateUI.GetComponent<SpectateBehaviour>().ChangeTarget(1);
+            spectateUI.GetComponent<SpectateBehaviour>().GetFirstTarget();
         }
     }
 

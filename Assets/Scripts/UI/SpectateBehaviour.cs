@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using static UnityEngine.GraphicsBuffer;
 
 public class SpectateBehaviour : MonoBehaviour
 {
@@ -24,12 +25,24 @@ public class SpectateBehaviour : MonoBehaviour
     public void UpdateNameLabel(PlayerObjectController target)
     {
         if (target)
-            m_nameLabel.text = string.Format($"Spectating: {target.playerName}");
+            m_nameLabel.text = string.Format($"Spectating: [{spectateIndex}] {target.playerName}");
         else
         {
             m_nameLabel.text = string.Format($"[Noone to spectate]");
             m_bother = false;
         }
+    }
+
+    // Gets the first spectate target that is defaulted to after you die (0th index)
+    public void GetFirstTarget()
+    {
+        PlayerObjectController firstTarget = null;
+        if (Manager.Players.Count == 0)
+            m_bother = false;
+        else
+            firstTarget = Manager.Players[0];
+
+        UpdateNameLabel(firstTarget);
     }
 
     // Changes target to spectateIndex + diff, unless that player is dead,
@@ -39,7 +52,7 @@ public class SpectateBehaviour : MonoBehaviour
     // to not waste resources. (m_bother = true)
     public void ChangeTarget(int diff, int firstTryIndex = -1)
     {
-        // If there no point in running this function
+        // If there is no point in running this function
         if (!m_bother) return;
 
         spectateIndex = spectateIndex + diff;
@@ -68,16 +81,22 @@ public class SpectateBehaviour : MonoBehaviour
             return;
         }
 
-        PlayerObjectController target = Manager.Players[spectateIndex];
-        if (target.GetComponent<PlayerMovementController>().dead)
+        PlayerObjectController poc = Manager.Players[spectateIndex];
+        PlayerMovementController pmc = poc.GetComponent<PlayerMovementController>();
+        if (pmc.dead)
         {
             ChangeTarget(diff, firstTryIndex);
             return;
         }
 
-        CamBehaviour cam = GameObject.FindWithTag("MainCamera").GetComponent<CamBehaviour>();
-        cam.Player = target.GetComponent<PlayerMovementController>();
+        SpectateTarget(pmc);
+    }
 
-        UpdateNameLabel(target);
+    private void SpectateTarget(PlayerMovementController target)
+    {
+        CamBehaviour cam = GameObject.FindWithTag("MainCamera").GetComponent<CamBehaviour>();
+        cam.Player = target;
+
+        UpdateNameLabel(target.GetComponent<PlayerObjectController>());
     }
 }
