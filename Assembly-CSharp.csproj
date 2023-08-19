@@ -72,6 +72,7 @@
     <Compile Include="Assets\Scripts\Menu\Lobby\PlayerListItem.cs" />
     <Compile Include="Assets\Scripts\Vectors.cs" />
     <Compile Include="Assets\Scripts\Menu\SettingsMenu.cs" />
+    <Compile Include="Assets\Scripts\UI\SpectateBehaviour.cs" />
     <Compile Include="Assets\Scripts\Menu\JoinMenu.cs" />
     <Compile Include="Assets\Scripts\Food\StatusBehaviour.cs" />
     <Compile Include="Assets\Scripts\UI\SpectateButton.cs" />
@@ -102,7 +103,6 @@
     <Compile Include="Assets\Scripts\Networking\SteamLobby.cs" />
     <Compile Include="Assets\Scripts\Networking\PlayerObjectController.cs" />
     <Compile Include="Assets\Scripts\UI\SpectateNameLabel.cs" />
-    <Compile Include="Assets\Scripts\UI\SpectateBehaviour.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Mirror\Plugins\Mono.Cecil\Mono.CecilX.dll" />

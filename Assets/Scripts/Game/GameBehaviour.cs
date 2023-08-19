@@ -413,12 +413,9 @@ public class GameBehaviour : NetworkBehaviour
             gameOver.transform.Find("OfflineButton").gameObject.SetActive(!online);
             gameOver.transform.Find("Score").GetComponent<TextMeshProUGUI>().text = "Score: " + score.ToString();
 
-            StartCoroutine(
-                Wait.WaitThen(
-                    3,
-                    () => spectateUI.SetActive(true)
-                )
-            );
+            // Spectate the next player in the list
+            spectateUI.SetActive(true);
+            spectateUI.GetComponent<SpectateBehaviour>().ChangeTarget(1);
         }
     }
 

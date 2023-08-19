@@ -15,7 +15,7 @@ public class SpectateBehaviour : MonoBehaviour
         }
     }
 
-    public int spectateIndex;
+    public int spectateIndex = 0;
     private bool m_bother = true;
 
     [SerializeField]
@@ -23,7 +23,13 @@ public class SpectateBehaviour : MonoBehaviour
 
     public void UpdateNameLabel(PlayerObjectController target)
     {
-        m_nameLabel.text = string.Format($"Spectating: {target.playerName}");
+        if (target)
+            m_nameLabel.text = string.Format($"Spectating: {target.playerName}");
+        else
+        {
+            m_nameLabel.text = string.Format($"[Noone to spectate]");
+            m_bother = false;
+        }
     }
 
     // Changes target to spectateIndex + diff, unless that player is dead,
@@ -39,7 +45,7 @@ public class SpectateBehaviour : MonoBehaviour
         spectateIndex = spectateIndex + diff;
         if (spectateIndex == firstTryIndex)
         {
-            m_bother = false;
+            UpdateNameLabel(null);
             return;
         }
         if (firstTryIndex == -1)
@@ -57,9 +63,8 @@ public class SpectateBehaviour : MonoBehaviour
 
         if (Manager.Players.Count == 0)
         {
-            Debug.LogError("Somehow, no players to spectate!");
-            m_nameLabel.text = "Noone to spectate (error)";
-            m_bother = false;
+            Debug.LogError("No players are in the game (Manager.Players)");
+            UpdateNameLabel(null);
             return;
         }
 
@@ -67,6 +72,7 @@ public class SpectateBehaviour : MonoBehaviour
         if (target.GetComponent<PlayerMovementController>().dead)
         {
             ChangeTarget(diff, firstTryIndex);
+            return;
         }
 
         CamBehaviour cam = GameObject.FindWithTag("MainCamera").GetComponent<CamBehaviour>();
