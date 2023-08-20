@@ -173,7 +173,7 @@ public class PlayerObjectController : NetworkBehaviour
         }
     }
 
-    public void HandleBodyPartDeath(BodyPart bp, bool dead)
+    public void HandleBodyPartDeath(BodyPart bp)
     {
         if (!isOwned)
             return;
@@ -190,14 +190,14 @@ public class PlayerObjectController : NetworkBehaviour
             Debug.LogError("Couldn't find BodyPart!");
             return;
         }
-        CmdHandleBodyPartDeath(ocIndex, bpIndex, dead);
+        CmdHandleBodyPartDeath(ocIndex, bpIndex);
     }
 
     [Command]
-    private void CmdHandleBodyPartDeath(int ocIndex, int bpIndex, bool dead)
+    private void CmdHandleBodyPartDeath(int ocIndex, int bpIndex)
     {
         PlayerObjectController poc = Manager.Players[ocIndex];
-        poc.m_pmc.SetBodyPartDeadClientRpc(bpIndex, dead);
+        poc.m_pmc.SetBodyPartDeadClientRpc(bpIndex);
     }
 
     public void HandleDeath(bool dead)

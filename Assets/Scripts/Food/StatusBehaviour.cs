@@ -9,6 +9,9 @@ using Random = UnityEngine.Random;
 public class StatusBehaviour : NetworkBehaviour
 {
     // Constants
+    private const float PROJ_SPEED_FAST = 0.25f;
+    private const float PROJ_SPEED_SLOW = 0.1f;
+
     private const float CRITICAL_MULT = 4f; // 400%
     private const float MAJOR_MULT = 2f; // 200%
     private const float MINOR_MULT = 1.5f; // 150%
@@ -106,10 +109,9 @@ public class StatusBehaviour : NetworkBehaviour
                 proj = fireball.GetComponent<ProjectileBehaviour>();
                 proj.Proj = new Projectile(
                     lifetime: 5,
-                    direction: head.Direction,
+                    velocity: head.Direction * PROJ_SPEED_FAST,
                     rotation: head.RegularAngle,
-                    counterMax: Mathf.CeilToInt(_player.CounterMax / CRITICAL_MULT),
-                    immunityDuration: 0.5f
+                    immunityDuration: 0f
                 );
                 NetworkServer.Spawn(fireball);
                 break;
@@ -137,10 +139,9 @@ public class StatusBehaviour : NetworkBehaviour
                 proj = shit.GetComponent<ProjectileBehaviour>();
                 proj.Proj = new Projectile(
                     lifetime: 5,
-                    direction: Vectors.Rotate(-_player.BodyParts[^1].Direction, randomRotation),
+                    velocity: Vectors.Rotate(-_player.BodyParts[^1].Direction, randomRotation) * PROJ_SPEED_SLOW,
                     rotation: _player.BodyParts[^1].RegularAngle,
-                    counterMax: Mathf.CeilToInt(_player.CounterMax / MINOR_MULT),
-                    immunityDuration: 0.5f
+                    immunityDuration: 0.2f
                 );
                 break;
         }

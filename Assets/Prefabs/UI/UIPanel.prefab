@@ -305,8 +305,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5d19ec10f9d7c6743b9fb71ce5663edd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _lobby: {fileID: 0}
-  _player: {fileID: 0}
   _contentOutput: {fileID: 7208155232660270189}
   _statusBlock: {fileID: 7208155232816010071}
   _debugTextField: {fileID: 1620728988649047122, guid: 679ca06b9e7750b4abebbfdf736a4309, type: 3}
@@ -950,7 +948,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 7208155233182527611}
   m_HandleRect: {fileID: 7208155233182527556}
   m_Direction: 0
-  m_Value: 0
+  m_Value: 1
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:

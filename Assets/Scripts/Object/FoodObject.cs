@@ -5,9 +5,9 @@ public class FoodObject : GridObject
     [SerializeField]
     public EFoodType food;
 
-    private void OnTriggerEnter2D(Collider2D collision)
+    private void OnTriggerEnter2D(Collider2D other)
     {
-        GameObject obj = collision.gameObject;
+        GameObject obj = other.gameObject;
         Transform player = Player.TryGetPlayerTransformFromBodyPart(obj);
 
         bool removeAndReplaceFood = false;

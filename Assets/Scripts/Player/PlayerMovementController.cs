@@ -84,11 +84,14 @@ public class PlayerMovementController : NetworkBehaviour
     // Components
     private Rigidbody2D _rb;
 
+    private bool _hasMoved = false;
     public bool HasMoved
     {
         get
         {
-            return (movement != Vector2.zero);
+            if (!_hasMoved && (movement != Vector2.zero))
+                _hasMoved = true;
+            return _hasMoved;
         }
     }
 
@@ -331,50 +334,40 @@ public class PlayerMovementController : NetworkBehaviour
     }
 
     /// <summary>
-    /// Bisects the snake at the body part which is removed.
+    /// Removes one body part from the snake, from the tail side.
     /// Not having moved yet grants immunity.
     /// </summary>
-    /// <param name="bp">The removed body part.</param>
-    private void RemoveBodyPart(BodyPart bp)
+    private void RemoveBodyPart()
     {
         if (!HasMoved)
             return;
 
-        int deadIndex = BodyParts.IndexOf(bp);
-        if (deadIndex == 0)
+        if (BodyParts.Count >= 3)
         {
-            HandleDeath();
-        }
+            BodyPart partToRemove = BodyParts[^2];
+            BodyPart tail = BodyParts[^1];
 
-        while (true)
-        {
-            if (deadIndex >= BodyParts.Count) break;
-            m_poc.HandleBodyPartDeath(BodyParts[deadIndex], true);
-            BodyParts.RemoveAt(deadIndex);
+            tail.Position = partToRemove.Position;
 
-            // Remove the body part from the container
-            bodyPartContainer.transform.GetChild(deadIndex).parent = GameObject.Find("Objects").transform;
-            continue;
-        }
+            if (partToRemove.CurrentType == EBodyPartType.Corner)
+                tail.RegularAngle = BodyParts[^3].RegularAngle;
+            else
+                tail.RegularAngle = partToRemove.RegularAngle;
 
-        if (BodyParts.Count > 1)
-        {
-            BodyParts[^1].DefaultType = EBodyPartType.Tail;
-            BodyParts[^1].CurrentType = EBodyPartType.Tail;
+            Destroy(partToRemove.Transform.gameObject);
+            BodyParts.Remove(partToRemove);
         }
         else
         {
-            // Snake must have >1 body part left.
-            m_poc.HandleDeath(true);
+            // Snake must have >= 2 body parts left.
+            HandleDeath();
         }
     }
 
     [ClientRpc]
-    public void SetBodyPartDeadClientRpc(int bpIndex, bool dead)
+    public void SetBodyPartDeadClientRpc(int bpIndex)
     {
         BodyPart bp = BodyParts[bpIndex];
-        float timeToDestroy = 5;
-        bp.Transform.gameObject.GetComponent<SpriteRenderer>().color = dead ? Color.gray : Color.white;
 
         if (BodyParts.IndexOf(bp) == 0)
         {
@@ -385,7 +378,7 @@ public class PlayerMovementController : NetworkBehaviour
             }
         }
 
-        Destroy(bp.Transform.gameObject, timeToDestroy);
+        Destroy(bp.Transform.gameObject);
     }
 
     /// <summary>
@@ -398,7 +391,7 @@ public class PlayerMovementController : NetworkBehaviour
 
         GameBehaviour game = GetComponentInChildren<GameBehaviour>();
         game.OnGameOver(score: BodyParts.Count);
-        m_poc.HandleDeath(true);
+        Destroy(gameObject);
     }
 
     [ClientRpc]
@@ -407,8 +400,13 @@ public class PlayerMovementController : NetworkBehaviour
         _rb.simulated = !dead;
         frozen = dead;
         this.dead = dead;
-        foreach (BodyPart part in BodyParts)
-            m_poc.HandleBodyPartDeath(part, dead);
+
+        if (dead)
+        {
+            foreach (BodyPart part in BodyParts)
+                m_poc.HandleBodyPartDeath(part);
+        }
+
         status.gameObject.SetActive(!dead);
     }
 
@@ -451,13 +449,12 @@ public class PlayerMovementController : NetworkBehaviour
         _queuedActions.Add(new Action(AddBodyPart));
     }
 
-    public void QRemoveBodyPart(BodyPart bp)
+    public void QRemoveBodyPart(int collisionIndex = -1)
     {
-        _queuedActions.Add(() => RemoveBodyPart(bp));
-    }
-    public void QRemoveBodyPart(int index)
-    {
-        QRemoveBodyPart(BodyParts[index]);
+        if (collisionIndex == 0)
+            HandleDeath();
+        else
+            _queuedActions.Add(() => RemoveBodyPart());
     }
 
     /// <summary>

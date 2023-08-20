@@ -334,6 +334,7 @@ MonoBehaviour:
   playerSteamID: 0
   playerName: 
   ready: 0
+  isHost: 0
 --- !u!114 &4440790568858733751
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -349,6 +350,7 @@ MonoBehaviour:
   syncDirection: 0
   syncMode: 0
   syncInterval: 0
+  dead: 0
   _gameBehaviour: {fileID: 3727899065049902516}
   status: {fileID: 7297529085144571617}
   m_poc: {fileID: 5691343852970272198}
@@ -421,7 +423,6 @@ MonoBehaviour:
   _wallTile: {fileID: 11400000, guid: 2a1c06836de000d4bb5cdb4ca8f49847, type: 2}
   _gameOverTemplate: {fileID: 5693628947570318495, guid: 7f037517319c66e41b1000faa200740e, type: 3}
   _foodTemplates:
-  - {fileID: 282451142020418660, guid: 0275836c03688364b84c9c8124927bf3, type: 3}
   - {fileID: 3540720362809897522, guid: 53751b131fb05bb4cb78371e89654a70, type: 3}
   _menuSelectTemplate: {fileID: 0}
   _spawnPoint: {x: 0, y: 0}

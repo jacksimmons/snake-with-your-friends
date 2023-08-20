@@ -23,14 +23,11 @@ public class ProjectileBehaviour : MonoBehaviour
             _rb = GetComponent<Rigidbody2D>();
             _proj = value;
             _ready = true;
-            // v = d / t; a distance of 1 is moved every counter completion.
-            m_speed = 1f / _proj.CounterMax;
             transform.rotation = _proj.Rotation;
             Destroy(gameObject, _proj.Lifetime);
         }
     }
     private bool _ready = false;
-    private float m_speed = 0f;
 
     [Range(0, 1)]
     // Bounciness - amount of speed retained after bounce
@@ -59,22 +56,22 @@ public class ProjectileBehaviour : MonoBehaviour
     {
         if (_ready)
         {
-            _rb.MovePosition(_rb.position + m_speedMod * m_speed * _proj.Direction);
+            _rb.MovePosition(_rb.position + _proj.Velocity * m_speedMod);
         }
     }
 
-    private void OnTriggerEnter2D(Collider2D collision)
+    private void OnTriggerEnter2D(Collider2D other)
     {
-        GameObject obj = collision.gameObject;
         // Ignore collision with certain projectiles
-        if (obj.TryGetComponent(out ProjectileBehaviour pb))
+        print(other.gameObject.name);
+        if (other.TryGetComponent(out ProjectileBehaviour otherPb))
         {
-            if (pb.type == EProjectileType.Shit)
-                return;
+            StartCoroutine(Explode());
+            otherPb.StartCoroutine(Explode());
         }
 
         bool isPlayer = true;
-        Transform player = Player.TryGetPlayerTransformFromBodyPart(obj);
+        Transform player = Player.TryGetPlayerTransformFromBodyPart(other.gameObject);
         if (player == null) isPlayer = false;
         if (m_playerImmune) isPlayer = false;
 
@@ -108,7 +105,7 @@ public class ProjectileBehaviour : MonoBehaviour
             case EProjectileType.InstantDamage: // e.g. fireball
                 // Remove the body part
                 PlayerMovementController pmc = player.GetComponent<PlayerMovementController>();
-                int index = obj.transform.GetSiblingIndex();
+                int index = other.transform.GetSiblingIndex();
                 pmc.QRemoveBodyPart(index);
                 break;
             default:

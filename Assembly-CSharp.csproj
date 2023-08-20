@@ -58,6 +58,7 @@
   <ItemGroup>
     <Compile Include="Assets\Scripts\SetOnce.cs" />
     <Compile Include="Assets\Scripts\Food\Projectile.cs" />
+    <Compile Include="Assets\Scripts\UI\DebugLabels.cs" />
     <Compile Include="Assets\Scripts\Food\ProjectileBehaviour.cs" />
     <Compile Include="Assets\Scripts\Object\FoodObject.cs" />
     <Compile Include="Assets\Scripts\Menu\Lobby\PowerupToggle.cs" />
