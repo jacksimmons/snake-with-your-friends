@@ -152,6 +152,11 @@ public class PlayerObjectController : NetworkBehaviour
 
                 Transform bodyPartParent = m_pmc.bodyPartContainer.transform;
                 int diff = bodyPartDatas.Count - bodyPartParent.childCount;
+
+                // Ensure all clients have the same number of BodyPart gameobjects (it doesn't
+                // matter which gameobject we remove when diff < 0)
+                // This seems computationally less expensive than destroying and reconstructing
+                // all the necessary gameobjects every move frame.
                 while (diff > 0)
                 {
                     Instantiate(m_bodyPartTemplate, bodyPartParent);
@@ -159,7 +164,7 @@ public class PlayerObjectController : NetworkBehaviour
                 }
                 while (diff < 0)
                 {
-                    Destroy(bodyPartParent.GetChild(bodyPartParent.childCount).gameObject);
+                    Destroy(bodyPartParent.GetChild(bodyPartParent.childCount - 1).gameObject);
                     diff = bodyPartDatas.Count - bodyPartParent.childCount;
                 }
 
