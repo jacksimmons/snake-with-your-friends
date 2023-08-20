@@ -62,8 +62,7 @@ public class ProjectileBehaviour : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        // Ignore collision with certain projectiles
-        print(other.gameObject.name);
+        // Projectile Collision section
         if (other.TryGetComponent(out ProjectileBehaviour otherPb))
         {
             StartCoroutine(Explode());
@@ -75,7 +74,8 @@ public class ProjectileBehaviour : MonoBehaviour
         if (player == null) isPlayer = false;
         if (m_playerImmune) isPlayer = false;
 
-        // Handle VFX first so we can quick-exit in the player section
+        // Other Collisions section
+        // Visual Effects section, enabled on all clients
         switch (type)
         {
             case EProjectileType.InstantDamage:
@@ -92,7 +92,10 @@ public class ProjectileBehaviour : MonoBehaviour
                 break;
         }
 
+        // Player callbacks section, enabled only on the owning client
         if (!isPlayer) return;
+        PlayerMovementController pmc = player.GetComponent<PlayerMovementController>();
+        if (!pmc.isOwned) return; // Not our collision to handle
 
         // Confirmed dealing with a Player collision
         switch (type)
@@ -104,7 +107,6 @@ public class ProjectileBehaviour : MonoBehaviour
                 break;
             case EProjectileType.InstantDamage: // e.g. fireball
                 // Remove the body part
-                PlayerMovementController pmc = player.GetComponent<PlayerMovementController>();
                 int index = other.transform.GetSiblingIndex();
                 pmc.QRemoveBodyPart(index);
                 break;
