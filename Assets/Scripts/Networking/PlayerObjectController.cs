@@ -148,8 +148,6 @@ public class PlayerObjectController : NetworkBehaviour
             m_pmc.BodyParts.Clear();
             for (int i = 0; i < bodyPartDatas.Count; i++)
             {
-                BodyPartData data = bodyPartDatas[i];
-
                 Transform bodyPartParent = m_pmc.bodyPartContainer.transform;
                 int diff = bodyPartDatas.Count - bodyPartParent.childCount;
 
@@ -157,15 +155,20 @@ public class PlayerObjectController : NetworkBehaviour
                 // matter which gameobject we remove when diff < 0)
                 // This seems computationally less expensive than destroying and reconstructing
                 // all the necessary gameobjects every move frame.
-                while (diff > 0)
+
+                if (diff > 0)
                 {
-                    Instantiate(m_bodyPartTemplate, bodyPartParent);
-                    diff = bodyPartDatas.Count - bodyPartParent.childCount;
+                    for (int _j = 0; _j < diff; _j++)
+                    {
+                        Instantiate(m_bodyPartTemplate, bodyPartParent);
+                    }
                 }
-                while (diff < 0)
+                else if (diff < 0)
                 {
-                    Destroy(bodyPartParent.GetChild(bodyPartParent.childCount - 1).gameObject);
-                    diff = bodyPartDatas.Count - bodyPartParent.childCount;
+                    for (int _j = 0; _j > diff; _j--)
+                    {
+                        Destroy(bodyPartParent.GetChild(0).gameObject);
+                    }
                 }
 
                 BodyPart newBP = BodyPart.FromData(
