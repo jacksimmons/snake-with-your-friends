@@ -391,7 +391,7 @@ public class PlayerMovementController : NetworkBehaviour
 
         GameBehaviour game = GetComponentInChildren<GameBehaviour>();
         game.OnGameOver(score: BodyParts.Count);
-        Destroy(gameObject);
+        dead = true;
     }
 
     [ClientRpc]
