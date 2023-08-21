@@ -31,6 +31,7 @@ public class SteamLobby : MonoBehaviour
         if (!SteamManager.Initialized)
         {
             Debug.LogError("SteamManager is not initialised!");
+            Application.Quit();
             return;
         }
 
