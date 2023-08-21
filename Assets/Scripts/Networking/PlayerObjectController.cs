@@ -167,7 +167,7 @@ public class PlayerObjectController : NetworkBehaviour
                 {
                     for (int _j = 0; _j > diff; _j--)
                     {
-                        Destroy(bodyPartParent.GetChild(0).gameObject);
+                        Destroy(bodyPartParent.GetChild(bodyPartParent.childCount - 2).gameObject);
                     }
                 }
 
