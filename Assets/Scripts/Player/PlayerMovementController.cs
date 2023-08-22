@@ -4,15 +4,15 @@ using Mirror;
 using UnityEngine.SceneManagement;
 using System;
 
+// Class which controls the Body Parts of a Player object.
+// Is Destroyed when the player dies, but other components are kept.
 public class PlayerMovementController : NetworkBehaviour
 {
-    public bool dead = false;
-
     [SerializeField]
     private GameBehaviour _gameBehaviour;
 
     [SerializeField]
-    public StatusBehaviour status;
+    public PlayerStatusBehaviour status;
 
     [SerializeField]
     private PlayerObjectController m_poc;
@@ -391,7 +391,7 @@ public class PlayerMovementController : NetworkBehaviour
 
         GameBehaviour game = GetComponentInChildren<GameBehaviour>();
         game.OnGameOver(score: BodyParts.Count);
-        dead = true;
+        Destroy(this);
     }
 
     [ClientRpc]
@@ -399,7 +399,6 @@ public class PlayerMovementController : NetworkBehaviour
     {
         _rb.simulated = !dead;
         frozen = dead;
-        this.dead = dead;
 
         if (dead)
         {

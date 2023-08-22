@@ -29,7 +29,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5210743148125606962, guid: a9390a10e77adec4bae6236616e05b40, type: 3}
       propertyPath: m_TagString
-      value: PoopProjectile
+      value: Untagged
       objectReference: {fileID: 0}
     - target: {fileID: 5697255094310367251, guid: a9390a10e77adec4bae6236616e05b40, type: 3}
       propertyPath: ClampVelocityModule.drag.scalar

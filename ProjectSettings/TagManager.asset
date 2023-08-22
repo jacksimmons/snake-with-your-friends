@@ -6,19 +6,15 @@ TagManager:
   tags:
   - Teleporter
   - Projectile
-  - Lobby
-  - LobbyPanel
-  - PlayerInput
   - PlayerParent
-  - AudioHandler
-  - GameHandler
   - Foreground
-  - PoopProjectile
-  - Counter
   - Debug
   - Effects
-  - BodyPart
   - PowerupUI
+  - BodyPart
+  - GameHandler
+  - StatusUI
+  - AudioHandler
   layers:
   - Default
   - TransparentFX

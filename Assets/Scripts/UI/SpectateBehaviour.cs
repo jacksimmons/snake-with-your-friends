@@ -77,7 +77,7 @@ public class SpectateBehaviour : MonoBehaviour
 
         PlayerObjectController poc = Manager.Players[spectateIndex];
         PlayerMovementController pmc = poc.GetComponent<PlayerMovementController>();
-        if (pmc.dead)
+        if (pmc != null)
         {
             ChangeTarget(diff, firstTryIndex);
             return;

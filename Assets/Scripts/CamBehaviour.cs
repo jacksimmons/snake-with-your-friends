@@ -9,7 +9,7 @@ public class CamBehaviour : MonoBehaviour
 
     private void LateUpdate()
     {
-        if (Player != null && !Player.dead)
+        if (Player != null)
         {
             float blend = 1 - Mathf.Pow(1 - _followSharpness, Time.deltaTime * 30);
 

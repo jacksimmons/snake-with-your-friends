@@ -25,10 +25,7 @@ public enum e_Effect
     BreathingFire,
     Pissing,
 
-    NoSpeedBoost,
-    MinorSpeedBoost,
-    MajorSpeedBoost,
-    CriticalSpeedBoost,
+    SpeedBoost,
 
     RocketShitting,
     Laxative,
@@ -43,6 +40,8 @@ public enum e_Effect
 public class Effect
 {
     public e_Effect EffectName { get; private set; }
+    public uint EffectLevel { get; private set; }
+
     public float Lifetime { get; private set; }
     public float TimeRemaining { get; set; }
     // The current value of the cooldown counter, which goes from CooldownMax to 0.
@@ -54,16 +53,18 @@ public class Effect
     public bool IsOneOff { get; set; } = false;
 
     // An effect which lasts for one frame, i.e. an action
-    public Effect(e_Effect effectName)
+    // Note that NO ICON will appear for this!
+    public Effect(e_Effect effectName, uint level=0)
     {
         EffectName = effectName;
-        IsOneOff = true;
+        EffectLevel = level;
     }
 
     // An effect which causes no other effects
-    public Effect(e_Effect effectName, float lifetime, float cooldown=0f, bool isInputEffect=false)
+    public Effect(e_Effect effectName, float lifetime, float cooldown=0f, bool isInputEffect=false, uint level=0)
     {
         EffectName = effectName;
+        EffectLevel = level;
         Lifetime = lifetime;
         TimeRemaining = Lifetime;
         Cooldown = cooldown;
@@ -72,9 +73,10 @@ public class Effect
     }
 
     // An effect which may cause another effect.
-    public Effect(e_Effect effectName, float lifetime, Effect[] causes, float cooldown=0f, bool isInputEffect=false)
+    public Effect(e_Effect effectName, float lifetime, Effect[] causes, float cooldown=0f, bool isInputEffect=false, uint level=0)
     {
         EffectName = effectName;
+        EffectLevel = level;
         Lifetime = lifetime;
         Causes = causes;
         TimeRemaining = Lifetime;
