@@ -1,16 +1,18 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class StatusBehaviour : MonoBehaviour
+public class StatusEffectUI : MonoBehaviour
 {
     private Transform m_statusUI;
     private Dictionary<string, GameObject> m_positiveStatusIcons;
+    private Dictionary<string, GameObject> m_negativeStatusIcons;
 
     private void Start()
     {
         m_statusUI = GameObject.FindWithTag("StatusUI").transform;
 
         m_positiveStatusIcons = new();
+        m_negativeStatusIcons = new();
 
         // Store the status icons in a dictionary, then disable them
         foreach (Transform child in m_statusUI.Find("Positive"))
@@ -19,23 +21,28 @@ public class StatusBehaviour : MonoBehaviour
             m_positiveStatusIcons.Add(childObj.name, childObj);
             childObj.SetActive(false);
         }
+        foreach (Transform child in m_statusUI.Find("Negative"))
+        {
+            GameObject childObj = child.gameObject;
+            m_negativeStatusIcons.Add(childObj.name, childObj);
+            childObj.SetActive(false);
+        }
     }
 
-    public void EnableSpeedIcon(uint level)
+    public void ChangeIconActive(bool positive, string effect, int level, bool active)
     {
-        m_positiveStatusIcons["Speed" + level.ToString()].SetActive(true);
-    }
-
-    public void DisableSpeedIcon(uint level)
-    {
-        m_positiveStatusIcons["Speed" + level.ToString()].SetActive(false);
+        if (positive)
+            m_positiveStatusIcons[effect + level.ToString()].SetActive(active);
+        else
+            m_negativeStatusIcons[effect + level.ToString()].SetActive(active);
     }
 
     public void DisableAllSpeedIcons()
     {
-        for (uint i = 1; i <= 5; i++)
+        for (int i = 1; i <= 5; i++)
         {
-            DisableSpeedIcon(i);
+            ChangeIconActive(true, "Fast", i, false);
+            ChangeIconActive(false, "Slow", i, false);
         }
     }
 

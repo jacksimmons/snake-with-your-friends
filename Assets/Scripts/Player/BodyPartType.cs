@@ -9,9 +9,9 @@ public enum EBodyPartType
     Corner
 }
 
-public class BodyPartType
+public static class BodyPartType
 {
-    public static Sprite TypeToPlayerSprite(EBodyPartType type, PlayerMovementController player)
+    public static Sprite TypeToPlayerSprite(EBodyPartType type, PlayerMovement player)
     {
         Sprite sprite = null;
         switch (type)

@@ -16,7 +16,7 @@ public class Teleporter : MonoBehaviour
         GameObject obj = collision.gameObject;
         if (obj.transform.parent.CompareTag("Player"))
         {
-            PlayerMovementController player = obj.transform.GetComponentInParent<PlayerMovementController>();
+            PlayerMovement player = obj.transform.GetComponentInParent<PlayerMovement>();
             BodyPart bp = player.BodyParts[obj.transform.GetSiblingIndex()];
             if (bp.TeleportCounter == 0)
             {

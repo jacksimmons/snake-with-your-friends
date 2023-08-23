@@ -15,7 +15,7 @@ public class FoodObject : GridObject
         // Collision with player
         if (player != null)
         {
-            PlayerMovementController playerMovementController = player.GetComponent<PlayerMovementController>();
+            PlayerMovement playerMovementController = player.GetComponent<PlayerMovement>();
 
             // Not our collision to handle -> return.
             if (!playerMovementController.isOwned) return;

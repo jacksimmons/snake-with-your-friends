@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class DebugBehaviour : MonoBehaviour
 {
-    private PlayerMovementController _player;
+    private PlayerMovement _player;
 
     [SerializeField]
     private GameObject _contentOutput;
@@ -26,7 +26,7 @@ public class DebugBehaviour : MonoBehaviour
 
     private void Start()
     {
-        _player = GameObject.Find("LocalPlayerObject").GetComponent<PlayerMovementController>();
+        _player = GameObject.Find("LocalPlayerObject").GetComponent<PlayerMovement>();
     }
 
     private void Update()

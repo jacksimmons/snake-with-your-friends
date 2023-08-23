@@ -4,7 +4,7 @@ using UnityEngine.SceneManagement;
 
 public class CamBehaviour : MonoBehaviour
 {
-    public PlayerMovementController Player { get; set; } = null;
+    public PlayerMovement Player { get; set; } = null;
     private float _followSharpness = 0.1f;
 
     private void LateUpdate()

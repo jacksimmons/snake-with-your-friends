@@ -16,7 +16,7 @@ public class ScootileTilemap : MonoBehaviour
         {
             if (parent.gameObject.CompareTag("Player"))
             {
-                parent.GetComponent<PlayerMovementController>().
+                parent.GetComponent<PlayerMovement>().
                 QBeginForcedMovement(direction, scootSpeed);
             }
         }
@@ -32,7 +32,7 @@ public class ScootileTilemap : MonoBehaviour
         {
             if (parent.gameObject.CompareTag("Player"))
             {
-                parent.GetComponent<PlayerMovementController>().
+                parent.GetComponent<PlayerMovement>().
                 QEndForcedMovement();
             }
         }

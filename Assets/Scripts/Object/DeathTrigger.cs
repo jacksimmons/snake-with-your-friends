@@ -34,10 +34,10 @@ public class DeathTrigger : MonoBehaviour
                 GameObject maybePlayer = maybeParent.parent.gameObject;
                 if (maybePlayer && maybePlayer.CompareTag("Player"))
                 {
-                    PlayerMovementController pmc = maybePlayer.GetComponent<PlayerMovementController>();
-                    player.position -= (Vector3)pmc.PrevMovement;
-                    if (!pmc.canMoveFreely)
-                        pmc.HandleDeath();
+                    PlayerMovement pm = maybePlayer.GetComponent<PlayerMovement>();
+                    player.position -= (Vector3)pm.PrevMovement;
+                    if (!pm.canMoveFreely)
+                        pm.HandleDeath();
                     return;
                 }
             }

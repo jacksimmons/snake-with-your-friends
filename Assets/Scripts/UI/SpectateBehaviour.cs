@@ -76,17 +76,17 @@ public class SpectateBehaviour : MonoBehaviour
             firstTryIndex = spectateIndex;
 
         PlayerObjectController poc = Manager.Players[spectateIndex];
-        PlayerMovementController pmc = poc.GetComponent<PlayerMovementController>();
-        if (pmc != null)
+        PlayerMovement pm = poc.GetComponent<PlayerMovement>();
+        if (pm != null)
         {
             ChangeTarget(diff, firstTryIndex);
             return;
         }
 
-        SpectateTarget(pmc);
+        SpectateTarget(pm);
     }
 
-    private void SpectateTarget(PlayerMovementController target)
+    private void SpectateTarget(PlayerMovement target)
     {
         CamBehaviour cam = GameObject.FindWithTag("MainCamera").GetComponent<CamBehaviour>();
         cam.Player = target;

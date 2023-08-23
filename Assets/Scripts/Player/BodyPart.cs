@@ -71,7 +71,7 @@ public class BodyPart
         }
     }
 
-    private PlayerMovementController Player;
+    private PlayerMovement Player;
 
     public Vector2 Direction { get; set; }
     public int TeleportCounter { get; set; }
@@ -179,7 +179,7 @@ public class BodyPart
 
     private void Init()
     {
-        Player = Transform.parent.parent.GetComponent<PlayerMovementController>();
+        Player = Transform.parent.parent.GetComponent<PlayerMovement>();
     }
 
     private void SetSprite(Sprite sprite)

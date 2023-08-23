@@ -8,13 +8,13 @@ public class DebugLabels : MonoBehaviour
     {
         GameObject localPlayerObj = GameObject.Find("LocalPlayerObject");
         if (localPlayerObj == null) return;
-        localPlayerObj.GetComponent<PlayerMovementController>().QAddBodyPart();
+        localPlayerObj.GetComponent<PlayerMovement>().QAddBodyPart();
     }
 
     public void Debug_RemoveBodyPart()
     {
         GameObject localPlayerObj = GameObject.Find("LocalPlayerObject");
         if (localPlayerObj == null) return;
-        localPlayerObj.GetComponent<PlayerMovementController>().QRemoveBodyPart();
+        localPlayerObj.GetComponent<PlayerMovement>().QRemoveBodyPart();
     }
 }

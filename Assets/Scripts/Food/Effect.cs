@@ -40,7 +40,7 @@ public enum e_Effect
 public class Effect
 {
     public e_Effect EffectName { get; private set; }
-    public uint EffectLevel { get; private set; }
+    public int EffectLevel { get; private set; }
 
     public float Lifetime { get; private set; }
     public float TimeRemaining { get; set; }
@@ -54,14 +54,14 @@ public class Effect
 
     // An effect which lasts for one frame, i.e. an action
     // Note that NO ICON will appear for this!
-    public Effect(e_Effect effectName, uint level=0)
+    public Effect(e_Effect effectName, int level=0)
     {
         EffectName = effectName;
         EffectLevel = level;
     }
 
     // An effect which causes no other effects
-    public Effect(e_Effect effectName, float lifetime, float cooldown=0f, bool isInputEffect=false, uint level=0)
+    public Effect(e_Effect effectName, float lifetime, float cooldown=0f, bool isInputEffect=false, int level=0)
     {
         EffectName = effectName;
         EffectLevel = level;
@@ -73,7 +73,7 @@ public class Effect
     }
 
     // An effect which may cause another effect.
-    public Effect(e_Effect effectName, float lifetime, Effect[] causes, float cooldown=0f, bool isInputEffect=false, uint level=0)
+    public Effect(e_Effect effectName, float lifetime, Effect[] causes, float cooldown=0f, bool isInputEffect=false, int level=0)
     {
         EffectName = effectName;
         EffectLevel = level;

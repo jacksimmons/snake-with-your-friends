@@ -94,8 +94,8 @@ public class ProjectileBehaviour : MonoBehaviour
 
         // Player callbacks section, enabled only on the owning client
         if (!isPlayer) return;
-        PlayerMovementController pmc = player.GetComponent<PlayerMovementController>();
-        if (!pmc.isOwned) return; // Not our collision to handle
+        PlayerMovement pm = player.GetComponent<PlayerMovement>();
+        if (!pm.isOwned) return; // Not our collision to handle
 
         // Confirmed dealing with a Player collision
         switch (type)
@@ -108,7 +108,7 @@ public class ProjectileBehaviour : MonoBehaviour
             case EProjectileType.InstantDamage: // e.g. fireball
                 // Remove the body part
                 int index = other.transform.GetSiblingIndex();
-                pmc.QRemoveBodyPart(index);
+                pm.QRemoveBodyPart(index);
                 break;
             default:
                 break;

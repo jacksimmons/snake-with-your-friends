@@ -6,13 +6,13 @@ using System;
 
 // Class which controls the Body Parts of a Player object.
 // Is Destroyed when the player dies, but other components are kept.
-public class PlayerMovementController : NetworkBehaviour
+public class PlayerMovement : NetworkBehaviour
 {
     [SerializeField]
     private GameBehaviour _gameBehaviour;
 
     [SerializeField]
-    public PlayerStatusBehaviour status;
+    public PlayerStatus status;
 
     [SerializeField]
     private PlayerObjectController m_poc;
@@ -95,58 +95,50 @@ public class PlayerMovementController : NetworkBehaviour
         }
     }
 
+    private void Awake()
+    {
+        // Components
+        _rb = GetComponent<Rigidbody2D>();
+    }
+
     private void Start()
     {
         bodyPartContainer.SetActive(false);
 
-        // Data structures
+        // Generate BodyParts structure & starting body parts
         BodyParts = new List<BodyPart>();
         Transform containerTransform = bodyPartContainer.transform;
         for (int i = 0; i < containerTransform.childCount; i++)
         {
             Transform _transform = containerTransform.GetChild(i);
-            BodyPart bp;
+            BodyPart bp = new
+            (
+                _transform,
+                _startingDirection,
 
-            // Head and body
-            if (i < containerTransform.childCount - 1)
-            {
-                Sprite _sprite;
-                EBodyPartType _bodyPartType;
-
-                // Calculate sprites for head and straights
-                if (i == 0)
-                {
-                    _bodyPartType = EBodyPartType.Head;
-                    _sprite = m_bpHead;
-                }
-                else
-                {
-                    _bodyPartType = EBodyPartType.Straight;
-                    _sprite = m_bpStraight;
-                }
-
-                bp = new BodyPart(_transform, _startingDirection, _bodyPartType);
-            }
-
-            // Tail - the BodyPart script handles these differently.
-            else
-            {
-                bp = new BodyPart(_transform, _startingDirection, EBodyPartType.Tail);
-            }
+                // if (i == 0) => Head
+                i == 0 ? 
+                EBodyPartType.Head :
+                
+                // else if (i is not the final index) => Straight
+                // else => Tail
+                i < containerTransform.childCount - 1 ?
+                EBodyPartType.Straight :
+                EBodyPartType.Tail
+            );
             BodyParts.Add(bp);
         }
 
+        // Generate QueuedActions structure
         _queuedActions = new List<Action>();
 
-        List<BodyPartStatus> bpss = new List<BodyPartStatus>();
-        for (int i = 0; i < BodyParts.Count; i++)
-        {
-            BodyPartStatus bps = new BodyPartStatus(false, false);
-            bpss.Add(bps);
-        }
+        //List<BodyPartStatus> bpss = new List<BodyPartStatus>();
+        //for (int i = 0; i < BodyParts.Count; i++)
+        //{
+        //    BodyPartStatus bps = new BodyPartStatus(false, false);
+        //    bpss.Add(bps);
+        //}
 
-        // Initialisation
-        _rb = GetComponent<Rigidbody2D>();
         //if (canMoveFreely)
         //    _moveTime = Mathf.CeilToInt(_moveTime / _freeMovementSpeedMod);
     }
@@ -161,7 +153,7 @@ public class PlayerMovementController : NetworkBehaviour
             }
 
             // So that we only move a player if we have authority over it
-            if (isOwned || _gameBehaviour.ClientMode == GameBehaviour.EClientMode.Offline)
+            if (isOwned)
             {
                 HandleInput();
                 HandleMovementLoop();
@@ -206,7 +198,6 @@ public class PlayerMovementController : NetworkBehaviour
         }
 
         // We can't have the snake going back on itself.
-        // So cancel the new input.
         if (direction == -PrevMovement)
             direction = Vector2.zero;
 
@@ -231,45 +222,39 @@ public class PlayerMovementController : NetworkBehaviour
             return;
         counter = 0;
 
-        // Queued actions happen every move frame, before movement occurs.
-        // Handle queued actions (other than any that
-        // get added by said actions)
+        // Queued actions wait until the next move frame before being called.
         for (int i = 0; i < _queuedActions.Count; i++)
         {
             _queuedActions[0]();
             _queuedActions.RemoveAt(0);
         }
 
-        // Ensures the first movement has been made
+        // Prevents an extra move occurring before death
+        if (CheckForInternalCollisions()) return;
+
         if (HasMoved)
         {
-            // Prevents an extra move occurring before death
-            if (CheckForInternalCollisions()) return;
-
-            // Update prevMovement
             PrevMovement = movement;
 
             // Iterate backwards through the body parts, from tail to head
-            // The reason for doing this is so every part inherits its next
-            // direction from the part before it.
+            // so every part inherits its direction from the part before it.
             
-            // Tail first
-            BodyPart tailPrev = BodyParts[^2];
-            BodyParts[^1].Move(tailPrev.Direction);
+            // Tail first - move in the same direction as the bp in front
+            BodyPart bpBeforeTail = BodyParts[^2];
+            BodyParts[^1].Move(bpBeforeTail.Direction);
 
-            // Then the rest of the body, tail - 1 to head
-            for (int i = BodyParts.Count - 2; i >= 0; i--)
+            // Tail - 1 to Head + 1
+            for (int i = BodyParts.Count - 2; i > 0; i--)
             {
-                BodyPart next = null;
-                Vector2 dir = movement;
-                if (i > 0)
-                {
-                    dir = BodyParts[i - 1].Direction;
-                }
-                if (i + 1 < BodyParts.Count)
-                    next = BodyParts[i + 1];
-                BodyParts[i].HandleMovement(dir, next);
+                // Inherit direction from in front.
+                Vector2 bpPrevDir = BodyParts[i - 1].Direction;
+                BodyPart bpNext = BodyParts[i + 1];
+
+                BodyParts[i].HandleMovement(bpPrevDir, bpNext);
             }
+
+            // Head
+            BodyParts[0].HandleMovement(movement, BodyParts[1]);
 
             // Update to server
             m_poc.UpdateBodyParts();

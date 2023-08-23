@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class FollowPlayer : MonoBehaviour
 {
-    public PlayerMovementController Player { get; set; }
+    public PlayerMovement Player { get; set; }
 
     private void Update()
     {

@@ -8,7 +8,7 @@ using UnityEditor;
 public class PlayerObjectController : NetworkBehaviour
 {
     [SerializeField]
-    private PlayerMovementController m_pmc;
+    private PlayerMovement m_pmc;
     [SerializeField]
     private GameObject m_bodyPartTemplate;
 

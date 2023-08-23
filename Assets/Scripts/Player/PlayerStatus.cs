@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 using Random = UnityEngine.Random;
 
-public class PlayerStatusBehaviour : NetworkBehaviour
+public class PlayerStatus : NetworkBehaviour
 {
     // Constants
     private const float PROJ_SPEED_FAST = 0.25f;
@@ -51,7 +51,7 @@ public class PlayerStatusBehaviour : NetworkBehaviour
     private Sprite _spriteBrownie;
 
     [SerializeField]
-    private PlayerMovementController _player;
+    private PlayerMovement _player;
     [SerializeField]
     private GameObject _fireball;
     [SerializeField]
@@ -146,6 +146,21 @@ public class PlayerStatusBehaviour : NetworkBehaviour
 
     private void Update()
     {
+        HandleTime();
+
+        // Powerups
+        if (ActiveInputEffects.Count > 0)
+        {
+            if (Input.GetKey(KeyCode.Space))
+                HandleInput();
+        }
+
+        HandleStatus();
+        HandlePassive();
+    }
+
+    private void HandleTime()
+    {
         if (ActiveInputEffects.Count > 0)
         {
             Effect effect = ActiveInputEffects[0];
@@ -156,6 +171,7 @@ public class PlayerStatusBehaviour : NetworkBehaviour
             }
             effect.SubtractCooldown(Time.deltaTime);
         }
+
         for (int i = 0; i < ActivePassiveEffects.Count; i++)
         {
             Effect effect = ActivePassiveEffects[i];
@@ -167,15 +183,6 @@ public class PlayerStatusBehaviour : NetworkBehaviour
             }
             effect.SubtractCooldown(Time.deltaTime);
         }
-
-        // Powerups
-        if (ActiveInputEffects.Count > 0)
-        {
-            if (Input.GetKey(KeyCode.Space))
-                HandleInput();
-        }
-        HandleStatus();
-        HandlePassive();
     }
 
     private void HandleStatus()
@@ -218,25 +225,28 @@ public class PlayerStatusBehaviour : NetworkBehaviour
             if (effect.Cooldown <= 0)
             {
                 effect.ResetCooldown();
-                StatusBehaviour status = GameObject.FindWithTag("StatusUI").GetComponent<StatusBehaviour>();
+                StatusEffectUI statusUI = GameObject.FindWithTag("StatusUI").GetComponent<StatusEffectUI>();
 
                 switch (effect.EffectName)
                 {
                     case e_Effect.SpeedBoost:
-                        // Speed boosts can only be applied IF no speed boost currently exists
-                        if (_player.CounterMax != PlayerMovementController.DEFAULT_COUNTER_MAX)
-                            break;
-
                         _player.CounterMax = 
                             Mathf.CeilToInt(
-                                PlayerMovementController.DEFAULT_COUNTER_MAX / StatusEffect.GetSpeedEffectByLevel(effect.EffectLevel));
+                                PlayerMovement.DEFAULT_COUNTER_MAX / SpeedEffect.GetSpeedMultFromSignedLevel(effect.EffectLevel));
 
-                        status.DisableAllSpeedIcons();
-                        status.EnableSpeedIcon(effect.EffectLevel);
+                        statusUI.DisableAllSpeedIcons();
+                        if (effect.EffectLevel >= 0)
+                        {
+                            statusUI.ChangeIconActive(true, "Fast", effect.EffectLevel, true);
+                        }
+                        else
+                        {
+                            statusUI.ChangeIconActive(false, "Slow", -effect.EffectLevel, true);
+                        }
                         break;
                     case e_Effect.RocketShitting:
                         CmdSpawn(e_Effect.RocketShitting);
-                        status.EnableShitIcon();
+                        statusUI.EnableShitIcon();
                         break;
                     case e_Effect.SoberUp:
                         NumPints--;
@@ -255,7 +265,7 @@ public class PlayerStatusBehaviour : NetworkBehaviour
         if (effect.IsInputEffect)
         {
             // Clear the old effect for the new one
-            _player.CounterMax = PlayerMovementController.DEFAULT_COUNTER_MAX;
+            _player.CounterMax = PlayerMovement.DEFAULT_COUNTER_MAX;
             if (ActiveInputEffects.Count > 0)
                 ClearInputEffects();
             ActiveInputEffects.Add(effect);
@@ -317,15 +327,15 @@ public class PlayerStatusBehaviour : NetworkBehaviour
     private void RemovePassiveEffect(int i)
     {
         Effect effect = ActivePassiveEffects[i];
-        StatusBehaviour status = GameObject.FindWithTag("StatusUI").GetComponent<StatusBehaviour>();
+        StatusEffectUI statusUI = GameObject.FindWithTag("StatusUI").GetComponent<StatusEffectUI>();
         switch (effect.EffectName)
         {
             case e_Effect.SpeedBoost:
-                _player.CounterMax = PlayerMovementController.DEFAULT_COUNTER_MAX;
-                status.DisableAllSpeedIcons();
+                _player.CounterMax = PlayerMovement.DEFAULT_COUNTER_MAX;
+                statusUI.DisableAllSpeedIcons();
                 break;
             case e_Effect.RocketShitting:
-                status.DisableShitIcon();
+                statusUI.DisableShitIcon();
                 break;
         }
 
@@ -347,15 +357,15 @@ public class PlayerStatusBehaviour : NetworkBehaviour
     /// </summary>
     public void ClearPassiveEffects()
     {
-        StatusBehaviour status = GameObject.FindWithTag("StatusUI").GetComponent<StatusBehaviour>();
-        status.DisableAllIcons();
+        StatusEffectUI statusUI = GameObject.FindWithTag("StatusUI").GetComponent<StatusEffectUI>();
+        statusUI.DisableAllIcons();
 
         ActivePassiveEffects.Clear();
 
         NumPints = 0;
         PotassiumLevels = 0;
 
-        _player.CounterMax = PlayerMovementController.DEFAULT_COUNTER_MAX;
+        _player.CounterMax = PlayerMovement.DEFAULT_COUNTER_MAX;
     }
 
     public Dictionary<string, string> GetStatusDebug()
@@ -428,6 +438,9 @@ public class PlayerStatusBehaviour : NetworkBehaviour
                 EatCrapALot();
                 break;
             case EFoodType.Balti:
+                // Prevent balti stacking
+                if (_player.CounterMax != PlayerMovement.DEFAULT_COUNTER_MAX)
+                    break;
                 EatBalti();
                 break;
             case EFoodType.Brownie:
@@ -532,19 +545,29 @@ public class PlayerStatusBehaviour : NetworkBehaviour
 
     /// <summary>
     /// Waits 2 seconds, then simultaneously starts RocketShitting, and a progressively increasing
-    /// speed boost for 10 seconds.
-    /// After the 10 seconds, the RocketShitting and the speed boosts both stop.
+    /// speed boost for 8 seconds.
     /// </summary>
     private void EatBalti()
     {
-        Effect rocketShit = new Effect(e_Effect.RocketShitting, lifetime: 10, cooldown: 0.05f);
+        Effect GenerateEpisode(Effect nextEpisode = null)
+        {
+            Effect speedBoost;
+            if (nextEpisode != null)
+                speedBoost = new Effect(e_Effect.SpeedBoost, level: 5, lifetime: 2, causes: new Effect[] { nextEpisode });
+            else
+                speedBoost = new Effect(e_Effect.SpeedBoost, level: 5, lifetime: 2);
+            Effect rocketShit = new Effect(e_Effect.RocketShitting, lifetime: 5, cooldown: 0.05f);
+            Effect episode = new Effect(e_Effect.SpeedBoost, level: -2, lifetime: 2, causes: new Effect[] { rocketShit, speedBoost });
+            return episode;
+        }
 
-        Effect thirdSpdBoost = new Effect(e_Effect.SpeedBoost, level: 5, lifetime: 2);
-        Effect secondSpdBoost = new Effect(e_Effect.SpeedBoost, level: 3, lifetime: 2, causes: new Effect[] { thirdSpdBoost } );
-        Effect firstSpdBoost = new Effect(e_Effect.SpeedBoost, level: 1, lifetime: 2, causes: new Effect[] { secondSpdBoost } );
-        Effect balti = new Effect(e_Effect.None, lifetime: 2, causes: new Effect[] { rocketShit, firstSpdBoost });
+        Effect episode5 = GenerateEpisode();
+        Effect episode4 = GenerateEpisode(episode5);
+        Effect episode3 = GenerateEpisode(episode4);
+        Effect episode2 = GenerateEpisode(episode3);
+        Effect episode1 = GenerateEpisode(episode2);
 
-        AddEffect(balti);
+        AddEffect(episode1);
     }
 
     private void EatBrownie()

@@ -45,13 +45,6 @@ public class GameBehaviour : NetworkBehaviour
     }
     public EWorldSize GroundSize { get; private set; } = EWorldSize.Lobby;
 
-    public enum EClientMode : int
-    {
-        Offline,
-        Online
-    }
-    public EClientMode ClientMode { get; private set; } = EClientMode.Online;
-
     Vector2Int bl = Vector2Int.zero;
 
     // Soft limit is preferred, but if it is too small, the hard limit is used (1 tile).
@@ -100,7 +93,7 @@ public class GameBehaviour : NetworkBehaviour
         CreateGroundTilemap(ref s_groundTilemap, bl);
         CreateWallTilemap(ref s_wallTilemap, bl);
 
-        PlayerMovementController player = GameObject.Find("LocalPlayerObject").GetComponent<PlayerMovementController>();
+        PlayerMovement player = GameObject.Find("LocalPlayerObject").GetComponent<PlayerMovement>();
 
         GameObject cam = GameObject.FindWithTag("MainCamera");
         cam.GetComponent<CamBehaviour>().Player = player;
@@ -289,8 +282,8 @@ public class GameBehaviour : NetworkBehaviour
     [ClientRpc]
     private void ActivateLocalPlayerClientRpc()
     {
-        PlayerMovementController pmc = GameObject.Find("LocalPlayerObject").GetComponent<PlayerMovementController>();
-        pmc.bodyPartContainer.SetActive(true);
+        PlayerMovement pm = GameObject.Find("LocalPlayerObject").GetComponent<PlayerMovement>();
+        pm.bodyPartContainer.SetActive(true);
     }
 
     [Server]

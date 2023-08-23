@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class Player : MonoBehaviour
+public static class Player
 {
     // Attempts to return the Player transform of a supposed Body Part.
     // Will return null if unsuccessful, indicating that a non-Body Part was provided.
