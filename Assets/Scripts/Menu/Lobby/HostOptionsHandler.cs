@@ -43,7 +43,7 @@ public class HostOptionsHandler : MonoBehaviour
             { EFoodType.Banana, false },
             { EFoodType.Dragonfruit, false },
             { EFoodType.Balti, false },
-            { EFoodType.Brownie, false },
+            { EFoodType.Doughnut, false },
             { EFoodType.Drumstick, false },
             { EFoodType.Booze, false },
         };

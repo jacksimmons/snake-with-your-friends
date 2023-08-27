@@ -10,8 +10,8 @@ public class SpeedEffect
         0.8f, // Lv1 -20%
         0.6f, // Lv2 -40%
         0.4f, // Lv3 -60%
-        0.2f, // Lv4 -80%
-        0f, // Lv5 -100% (This acts as a frozen effect)
+        0.25f, // Lv4 -75%
+        0.1f, // Lv5 -90%
     };
 
     private static readonly float[] SPEED_POSITIVE =

@@ -232,7 +232,7 @@ public class PlayerMovement : NetworkBehaviour
         // Prevents an extra move occurring before death
         if (CheckForInternalCollisions()) return;
 
-        if (HasMoved)
+        if (HasMoved && movement != Vector2.zero)
         {
             PrevMovement = movement;
 

@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -8,10 +9,13 @@ public class SentenceChangerButton : MonoBehaviour
     [SerializeField]
     private SentenceBehaviour m_sentenceBehaviour;
 
+    // Changes from the original words.
+    // "" = No change
+    // "-" = Disable word
     [SerializeField]
-    private Transform[] m_onHoverDisabledWords;
+    private string[] m_wordChanges;
     [SerializeField]
-    private Transform[] m_onHoverEnabledWords;
+    private Color m_firstWordColour;
 
     // Start is called before the first frame update
     void Start()
@@ -32,14 +36,13 @@ public class SentenceChangerButton : MonoBehaviour
     void OnPointerEnter()
     {
         print("enter");
-        m_sentenceBehaviour.SwapOutWords(m_onHoverDisabledWords, m_onHoverEnabledWords);
+        m_sentenceBehaviour.SwapOutWords(m_wordChanges, m_firstWordColour);
         m_sentenceBehaviour.UpdateSentence();
     }
 
     void OnPointerExit()
     {
-        print("exit");
-        m_sentenceBehaviour.SwapOutWords(m_onHoverEnabledWords, m_onHoverDisabledWords);
+        m_sentenceBehaviour.SwapOutWords(SentenceBehaviour.originalWords, Color.white);
         m_sentenceBehaviour.UpdateSentence();
     }
 }

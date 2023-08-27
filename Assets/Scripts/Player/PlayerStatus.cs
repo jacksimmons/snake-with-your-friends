@@ -18,37 +18,37 @@ public class PlayerStatus : NetworkBehaviour
     private const float SHIT_EXPLOSIVENESS = 45;
 
     [SerializeField]
-    private Sprite _spriteCoffee;
+    private Sprite _spriteApple;
+    [SerializeField]
+    private Sprite _spriteBalti;
+    [SerializeField]
+    private Sprite _spriteBanana;
+    [SerializeField]
+    private Sprite _spriteBone;
     [SerializeField]
     private Sprite _spriteBooze;
     [SerializeField]
-    private Sprite _spriteApple;
+    private Sprite _spriteCheese;
     [SerializeField]
-    private Sprite _spriteOrange;
+    private Sprite _spriteCoffee;
     [SerializeField]
-    private Sprite _spriteBanana;
+    private Sprite _spriteDoughnut;
     [SerializeField]
     private Sprite _spriteDragonfruit;
     [SerializeField]
     private Sprite _spriteDrumstick;
     [SerializeField]
-    private Sprite _spriteBone;
+    private Sprite _spriteIceCream;
     [SerializeField]
-    private Sprite _spriteCheese;
-    [SerializeField]
-    private Sprite _spritePizza;
+    private Sprite _spriteOrange;
     [SerializeField]
     private Sprite _spritePineapple;
     [SerializeField]
     private Sprite _spritePineapplePizza;
     [SerializeField]
-    private Sprite _spriteIceCream;
-    [SerializeField]
-    private Sprite _spriteCrapALot;
-    [SerializeField]
-    private Sprite _spriteBalti;
-    [SerializeField]
-    private Sprite _spriteBrownie;
+    private Sprite _spritePizza;
+
+    private Dictionary<EFoodType, Sprite> _foodSprites;
 
     [SerializeField]
     private PlayerMovement _player;
@@ -59,8 +59,20 @@ public class PlayerStatus : NetworkBehaviour
 
     private List<BodyPartStatus> _bodyPartStatuses;
 
-    public List<Effect> ActiveInputEffects { get; private set; } = new List<Effect>();
+    public Effect ActiveInputEffect { get; private set; } = null;
     public List<Effect> ActivePassiveEffects { get; private set; } = new List<Effect>();
+
+    private Effect _itemSlotEffect = null;
+    public Effect ItemSlotEffect
+    {
+        get { return _itemSlotEffect; }
+        private set
+        {
+            if (value == null)
+                ClearPowerupIcon();
+            _itemSlotEffect = value;
+        }
+    }
 
     private float _passiveEffectCooldownMax = 0f;
     private float _passiveEffectCooldown = 0f;
@@ -108,7 +120,7 @@ public class PlayerStatus : NetworkBehaviour
                     lifetime: 5,
                     velocity: head.Direction * PROJ_SPEED_FAST,
                     rotation: head.RegularAngle,
-                    immunityDuration: 0f
+                    immunityDuration: 0.5f
                 );
                 NetworkServer.Spawn(fireball);
                 break;
@@ -144,32 +156,86 @@ public class PlayerStatus : NetworkBehaviour
         }
     }
 
+    private void Awake()
+    {
+        _foodSprites = new()
+        {
+            { EFoodType.Apple, _spriteApple },
+            { EFoodType.Balti, _spriteBalti },
+            { EFoodType.Booze, _spriteBooze },
+            { EFoodType.Cheese, _spriteCheese },
+            { EFoodType.Coffee, _spriteCoffee },
+            { EFoodType.Doughnut, _spriteDoughnut },
+            { EFoodType.Dragonfruit, _spriteDragonfruit },
+            { EFoodType.Drumstick, _spriteDrumstick },
+            { EFoodType.IceCream, _spriteIceCream },
+            { EFoodType.Orange, _spriteOrange },
+            { EFoodType.Pineapple, _spritePineapple },
+            { EFoodType.PineapplePizza, _spritePineapplePizza },
+            { EFoodType.Pizza, _spritePizza },
+        };
+    }
+
     private void Update()
     {
         HandleTime();
 
-        // Powerups
-        if (ActiveInputEffects.Count > 0)
+        HandleVisualEffects();
+        HandlePassiveEffects();
+
+        void TryUseItem()
         {
-            if (Input.GetKey(KeyCode.Space))
-                HandleInput();
+            if (!FindConflictingPassiveEffect())
+            {
+                AddEffect(ItemSlotEffect);
+
+                // For input effects, we keep the icon visible.
+                if (!ItemSlotEffect.IsInputEffect)
+                    ItemSlotEffect = null;
+            }
         }
 
-        HandleStatus();
-        HandlePassive();
+        // false => No conflict; true => Conflict
+        bool FindConflictingPassiveEffect()
+        {
+            foreach (Effect effect in ActivePassiveEffects)
+            {
+                if (effect.EffectName == ItemSlotEffect.EffectName)
+                    return true;
+            }
+
+            return false;
+        }
+
+        // Powerup Input
+
+        // First check if we can apply the new effect.
+        // Second, if that isn't possible, check if we can fire ActiveInputEffect.
+        if (Input.GetButtonDown("Powerup"))
+        {
+            if (ItemSlotEffect == null) return;
+
+            if (!ItemSlotEffect.IsInputEffect)
+                TryUseItem();
+            else
+            {
+                if (ActiveInputEffect == null)
+                    ActiveInputEffect = ItemSlotEffect;
+                UseInputEffect();
+            }
+        }
     }
 
     private void HandleTime()
     {
-        if (ActiveInputEffects.Count > 0)
+        if (ActiveInputEffect != null)
         {
-            Effect effect = ActiveInputEffects[0];
-            if (!effect.SubtractTime(Time.deltaTime))
+            ActiveInputEffect.SubtractCooldown(Time.deltaTime);
+            if (!ActiveInputEffect.SubtractTime(Time.deltaTime))
             {
-                AddCausedEffect(effect);
-                RemoveInputEffect(0);
+                AddCausedEffects(ActiveInputEffect);
+                RemoveInputEffect();
             }
-            effect.SubtractCooldown(Time.deltaTime);
         }
 
         for (int i = 0; i < ActivePassiveEffects.Count; i++)
@@ -177,7 +243,7 @@ public class PlayerStatus : NetworkBehaviour
             Effect effect = ActivePassiveEffects[i];
             if (!effect.SubtractTime(Time.deltaTime))
             {
-                AddCausedEffect(effect);
+                AddCausedEffects(effect);
                 RemovePassiveEffect(i);
                 i--;
             }
@@ -185,7 +251,7 @@ public class PlayerStatus : NetworkBehaviour
         }
     }
 
-    private void HandleStatus()
+    private void HandleVisualEffects()
     {
         Transform tooManyPints = transform.Find("TooManyPints");
         if (NumPints > 0 && tooManyPints != null)
@@ -199,9 +265,9 @@ public class PlayerStatus : NetworkBehaviour
         }
     }
 
-    public void HandleInput()
+    public void UseInputEffect()
     {
-        Effect effect = ActiveInputEffects[0];
+        Effect effect = ActiveInputEffect;
         if (effect.Cooldown <= 0)
         {
             effect.ResetCooldown();
@@ -217,7 +283,7 @@ public class PlayerStatus : NetworkBehaviour
         }
     }
 
-    public void HandlePassive()
+    public void HandlePassiveEffects()
     {
         for (int i = 0; i < ActivePassiveEffects.Count; i++)
         {
@@ -229,10 +295,25 @@ public class PlayerStatus : NetworkBehaviour
 
                 switch (effect.EffectName)
                 {
+                    case e_Effect.CureAll:
+                        print("Hi");
+                        ClearInputEffects();
+                        ClearPassiveEffects();
+
+                        // Clear concealing objects
+                        GameObject foreground = GameObject.FindWithTag("Foreground");
+                        foreach (Transform fgObj in foreground.transform)
+                            Destroy(fgObj.gameObject);
+                        break;
+
                     case e_Effect.SpeedBoost:
-                        _player.CounterMax = 
-                            Mathf.CeilToInt(
-                                PlayerMovement.DEFAULT_COUNTER_MAX / SpeedEffect.GetSpeedMultFromSignedLevel(effect.EffectLevel));
+                        float counterMaxVal= PlayerMovement.DEFAULT_COUNTER_MAX / 
+                            SpeedEffect.GetSpeedMultFromSignedLevel(effect.EffectLevel);
+
+                        if (float.IsInfinity(counterMaxVal))
+                            _player.CounterMax = int.MaxValue;
+                        else
+                            _player.CounterMax = Mathf.CeilToInt(counterMaxVal);
 
                         statusUI.DisableAllSpeedIcons();
                         if (effect.EffectLevel >= 0)
@@ -244,12 +325,23 @@ public class PlayerStatus : NetworkBehaviour
                             statusUI.ChangeIconActive(false, "Slow", -effect.EffectLevel, true);
                         }
                         break;
+
                     case e_Effect.RocketShitting:
                         CmdSpawn(e_Effect.RocketShitting);
-                        statusUI.EnableShitIcon();
+                        statusUI.ToggleShitIcon(true);
                         break;
+
+                    case e_Effect.Drunk:
+                        NumPints++;
+                        break;
+
                     case e_Effect.SoberUp:
                         NumPints--;
+                        break;
+
+                    case e_Effect.Sleeping:
+                        _player.frozen = true;
+                        statusUI.ToggleSleepingIcon(true);
                         break;
                 }
 
@@ -266,9 +358,9 @@ public class PlayerStatus : NetworkBehaviour
         {
             // Clear the old effect for the new one
             _player.CounterMax = PlayerMovement.DEFAULT_COUNTER_MAX;
-            if (ActiveInputEffects.Count > 0)
+            if (ActiveInputEffect != null)
                 ClearInputEffects();
-            ActiveInputEffects.Add(effect);
+            ActiveInputEffect = effect;
         }
         else
         {
@@ -278,16 +370,13 @@ public class PlayerStatus : NetworkBehaviour
         }
     }
 
-    private void AddCausedEffect(Effect effect)
+    private void AddCausedEffects(Effect effect)
     {
         if (effect.Causes != null)
         {
             foreach (Effect cause in effect.Causes)
             {
-                if (cause != null)
-                {
-                    AddEffect(cause);
-                }
+                AddEffect(cause);
             }
         }
     }
@@ -299,29 +388,18 @@ public class PlayerStatus : NetworkBehaviour
         //}
     }
 
-    private void ClearInputEffectIcon()
+    private void ClearPowerupIcon()
     {
         Image powerupImg = GameObject.FindWithTag("PowerupUI").GetComponent<Image>();
         powerupImg.sprite = null;
         powerupImg.color = Color.clear;
     }
 
-    private void RemoveInputEffect(int i)
+    private void RemoveInputEffect()
     {
-        ClearInputEffectIcon();
-        Effect effect = ActiveInputEffects[i];
-        UndoEffect(effect);
-        ActiveInputEffects.RemoveAt(i);
-    }
-
-    private void RemovePassiveEffectImage(int i)
-    {
-    }
-
-    private void ClearPassiveEffectImages()
-    {
-        for (int i = 0; i < ActivePassiveEffects.Count; i++)
-            RemovePassiveEffectImage(i);
+        UndoEffect(ActiveInputEffect);
+        ItemSlotEffect = null;
+        ActiveInputEffect = null;
     }
 
     private void RemovePassiveEffect(int i)
@@ -335,7 +413,11 @@ public class PlayerStatus : NetworkBehaviour
                 statusUI.DisableAllSpeedIcons();
                 break;
             case e_Effect.RocketShitting:
-                statusUI.DisableShitIcon();
+                statusUI.ToggleShitIcon(false);
+                break;
+            case e_Effect.Sleeping:
+                _player.frozen = false;
+                statusUI.ToggleSleepingIcon(false);
                 break;
         }
 
@@ -348,8 +430,8 @@ public class PlayerStatus : NetworkBehaviour
     /// </summary>
     public void ClearInputEffects()
     {
-        ClearInputEffectIcon();
-        ActiveInputEffects.Clear();
+        ItemSlotEffect = null;
+        ActiveInputEffect = null;
     }
 
     /// <summary>
@@ -371,8 +453,9 @@ public class PlayerStatus : NetworkBehaviour
     public Dictionary<string, string> GetStatusDebug()
     {
         Dictionary<string, string> statuses = new Dictionary<string, string>();
-        foreach (Effect effect in ActiveInputEffects)
-            statuses[Enum.GetName(typeof(e_Effect), effect.EffectName)] = "True";
+        
+        if (ActiveInputEffect != null)
+            statuses[Enum.GetName(typeof(e_Effect), ActiveInputEffect.EffectName)] = "True";
         foreach (Effect effect in ActivePassiveEffects)
             statuses[Enum.GetName(typeof(e_Effect), effect.EffectName)] = "True";
         foreach (string e_name in Enum.GetNames(typeof(e_Effect)))
@@ -389,62 +472,71 @@ public class PlayerStatus : NetworkBehaviour
 
     public void Eat(EFoodType food)
     {
+        if (ItemSlotEffect != null) return;
+
         Image powerupImg = GameObject.FindWithTag("PowerupUI").GetComponent<Image>();
+
+        // Make the sprite visible (Color.clear is assigned on removal of icon)
+        powerupImg.sprite = _foodSprites[food];
+        powerupImg.color = Color.white;
 
         switch (food)
         {
+            case EFoodType.Apple:
+                ItemSlotEffect = new Effect(e_Effect.CureAll);
+                break;
+
+            case EFoodType.Balti:
+                // 5 cycles of slow, then fast & shitting
+                Effect GenerateEpisode(Effect nextEpisode = null)
+                {
+                    Effect speedBoost;
+                    if (nextEpisode != null)
+                        speedBoost = new Effect(e_Effect.SpeedBoost, level: 5, lifetime: 2, causes: new Effect[] { nextEpisode });
+                    else
+                        speedBoost = new Effect(e_Effect.SpeedBoost, level: 5, lifetime: 2);
+                    Effect rocketShit = new Effect(e_Effect.RocketShitting, lifetime: 5, cooldown: 0.05f);
+                    Effect episode = new Effect(e_Effect.SpeedBoost, level: -2, lifetime: 2, causes: new Effect[] { rocketShit, speedBoost });
+                    return episode;
+                }
+
+                Effect episode5 = GenerateEpisode();
+                Effect episode4 = GenerateEpisode(episode5);
+                Effect episode3 = GenerateEpisode(episode4);
+                Effect episode2 = GenerateEpisode(episode3);
+
+                ItemSlotEffect = GenerateEpisode(episode2);
+                break;
+
+            case EFoodType.Booze:
+                // Drunk effect, then piss then sober up
+                Effect soberUp = new Effect(e_Effect.SoberUp);
+
+                Effect pissing = new Effect(e_Effect.Pissing, lifetime: 5,
+                    cooldown: 0.1f, isInputEffect: true, causes: new Effect[] { soberUp });
+
+                Effect internalProcessing = new Effect(e_Effect.None, lifetime: 20,
+                    new Effect[] { pissing });
+
+                Effect drunk = new Effect(e_Effect.Drunk);
+
+                ItemSlotEffect = new Effect(e_Effect.None, lifetime: 0,
+                    new Effect[] { drunk, internalProcessing });
+
+                break;
+
             case EFoodType.Coffee:
                 DrinkCoffee();
                 break;
-            case EFoodType.Booze:
-                DrinkBooze();
+
+            case EFoodType.Doughnut:
+                // Sleep for 5 turns
+                ItemSlotEffect = new Effect(e_Effect.Sleeping, lifetime: 5);
                 break;
-            case EFoodType.Apple:
-                EatApple();
-                break;
-            case EFoodType.Orange:
-                EatOrange();
-                break;
-            case EFoodType.Banana:
-                EatBanana();
-                break;
+
             case EFoodType.Dragonfruit:
-                powerupImg.color = Color.white;
-                powerupImg.sprite = _spriteDragonfruit;
-                EatDragonfruit();
-                break;
-            case EFoodType.Drumstick:
-                EatDrumstick();
-                break;
-            case EFoodType.Bone:
-                EatBone();
-                break;
-            case EFoodType.Cheese:
-                EatCheese();
-                break;
-            case EFoodType.Pizza:
-                EatPizza();
-                break;
-            case EFoodType.Pineapple:
-                EatPineapple();
-                break;
-            case EFoodType.PineapplePizza:
-                EatPineapplePizza();
-                break;
-            case EFoodType.IceCream:
-                EatIceCream();
-                break;
-            case EFoodType.CrapALot:
-                EatCrapALot();
-                break;
-            case EFoodType.Balti:
-                // Prevent balti stacking
-                if (_player.CounterMax != PlayerMovement.DEFAULT_COUNTER_MAX)
-                    break;
-                EatBalti();
-                break;
-            case EFoodType.Brownie:
-                EatBrownie();
+                ItemSlotEffect = 
+                    new Effect(e_Effect.BreathingFire, lifetime: 5f, cooldown: 1f, isInputEffect: true);
                 break;
         }
     }
@@ -453,49 +545,6 @@ public class PlayerStatus : NetworkBehaviour
     {
         Effect major = new Effect(e_Effect.SpeedBoost, level: 3, lifetime: 10);
         AddEffect(major);
-    }
-
-    private void DrinkBooze()
-    {
-        NumPints++;
-
-        Effect soberUp = new Effect(e_Effect.SoberUp);
-        Effect drunkAPint = new Effect(e_Effect.None, lifetime: 20, new Effect[] { soberUp });
-
-        Effect pissing = new Effect(e_Effect.Pissing, lifetime:5, cooldown:0.1f, isInputEffect:true);
-        Effect needToPee = new Effect(e_Effect.None, lifetime:10, new Effect[] { pissing });
-        AddEffect(needToPee);
-        AddEffect(drunkAPint);
-    }
-
-    private void EatApple()
-    {
-        ClearInputEffects();
-        ClearPassiveEffects();
-        GameObject foreground = GameObject.FindWithTag("Foreground");
-        foreach (Transform fgObj in foreground.transform)
-            Destroy(fgObj.gameObject);
-    }
-
-    private void EatOrange()
-    {
-        // Produce projectile
-    }
-
-    private void EatBanana()
-    {
-        // Produce peel
-        PotassiumLevels++;
-        if (PotassiumLevels >= 3)
-        {
-            // Die ... ?
-        }
-    }
-
-    private void EatDragonfruit()
-    {
-        Effect fireBreath = new Effect(e_Effect.BreathingFire, lifetime:5f, cooldown:1f, isInputEffect:true);
-        AddEffect(fireBreath);
     }
 
     private void EatDrumstick()
@@ -510,68 +559,10 @@ public class PlayerStatus : NetworkBehaviour
         // Rupture asshole
     }
 
-    private void EatCheese()
-    {
-        // Get to eat it again
-    }
-
-    private void EatPizza()
-    {
-        // Get to eat it again twice
-    }
-
-    private void EatPineapple()
-    {
-        // ?
-    }
-
-    private void EatPineapplePizza()
-    {
-        // Die
-    }
-
     private void EatIceCream()
     {
         Effect brainFreeze = new Effect(e_Effect.BrainFreeze, 3);
         Effect unicorn = new Effect(e_Effect.Unicorn, 3, new Effect[] { brainFreeze });
         AddEffect(unicorn);
-    }
-
-    private void EatCrapALot()
-    {
-        Effect laxative = new Effect(e_Effect.Laxative, 20, 1);
-        AddEffect(laxative);
-    }
-
-    /// <summary>
-    /// Waits 2 seconds, then simultaneously starts RocketShitting, and a progressively increasing
-    /// speed boost for 8 seconds.
-    /// </summary>
-    private void EatBalti()
-    {
-        Effect GenerateEpisode(Effect nextEpisode = null)
-        {
-            Effect speedBoost;
-            if (nextEpisode != null)
-                speedBoost = new Effect(e_Effect.SpeedBoost, level: 5, lifetime: 2, causes: new Effect[] { nextEpisode });
-            else
-                speedBoost = new Effect(e_Effect.SpeedBoost, level: 5, lifetime: 2);
-            Effect rocketShit = new Effect(e_Effect.RocketShitting, lifetime: 5, cooldown: 0.05f);
-            Effect episode = new Effect(e_Effect.SpeedBoost, level: -2, lifetime: 2, causes: new Effect[] { rocketShit, speedBoost });
-            return episode;
-        }
-
-        Effect episode5 = GenerateEpisode();
-        Effect episode4 = GenerateEpisode(episode5);
-        Effect episode3 = GenerateEpisode(episode4);
-        Effect episode2 = GenerateEpisode(episode3);
-        Effect episode1 = GenerateEpisode(episode2);
-
-        AddEffect(episode1);
-    }
-
-    private void EatBrownie()
-    {
-        // Sleep for 5 turns
     }
 }

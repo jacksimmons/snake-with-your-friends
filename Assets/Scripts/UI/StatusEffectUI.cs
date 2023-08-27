@@ -46,14 +46,14 @@ public class StatusEffectUI : MonoBehaviour
         }
     }
 
-    public void EnableShitIcon()
+    public void ToggleShitIcon(bool on)
     {
-        m_positiveStatusIcons["Poo"].SetActive(true);
+        m_positiveStatusIcons["Poo"].SetActive(on);
     }
 
-    public void DisableShitIcon()
+    public void ToggleSleepingIcon(bool on)
     {
-        m_positiveStatusIcons["Poo"].SetActive(false);
+        m_negativeStatusIcons["Sleeping"].SetActive(on);
     }
 
     public void DisableAllIcons()

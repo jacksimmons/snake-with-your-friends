@@ -1,34 +1,42 @@
 public enum EFoodType
 {
-    Coffee,
-    Booze,
     Apple,
-    Orange,
+    Balti,
     Banana,
+    Bone,
+    Booze,
+    Cheese,
+    Coffee,
+    Doughnut,
     Dragonfruit,
     Drumstick,
-    Bone,
-    Cheese,
-    Pizza,
+    IceCream,
+    Orange,
     Pineapple,
     PineapplePizza,
-    IceCream,
-    CrapALot,
-    Balti,
-    Brownie,
+    Pizza,
 }
 
 public enum e_Effect
 {
     None,
 
+    // Apple
+    CureAll,
+
+    // Dragonfruit
     BreathingFire,
+
+    // Booze
+    Drunk,
     Pissing,
 
+    // Balti
     SpeedBoost,
-
     RocketShitting,
-    Laxative,
+
+    // Doughnut
+    Sleeping,
 
     SoberUp,
     Hallucination,
@@ -53,11 +61,10 @@ public class Effect
     public bool IsOneOff { get; set; } = false;
 
     // An effect which lasts for one frame, i.e. an action
-    // Note that NO ICON will appear for this!
-    public Effect(e_Effect effectName, int level=0)
+    public Effect(e_Effect effectName)
     {
         EffectName = effectName;
-        EffectLevel = level;
+        IsOneOff = true;
     }
 
     // An effect which causes no other effects

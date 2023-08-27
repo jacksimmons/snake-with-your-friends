@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Mirror;
-using static GameBehaviour;
 
 public class CustomNetworkManager : NetworkManager
 {

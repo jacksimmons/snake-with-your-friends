@@ -26,21 +26,10 @@ public class DeathTrigger : MonoBehaviour
         Transform player = Player.TryGetPlayerTransformFromBodyPart(obj);
         if (player == null) return;
 
-        if (collider.transform.parent)
-        {
-            Transform maybeParent = collider.transform.parent;
-            if (maybeParent.parent)
-            {
-                GameObject maybePlayer = maybeParent.parent.gameObject;
-                if (maybePlayer && maybePlayer.CompareTag("Player"))
-                {
-                    PlayerMovement pm = maybePlayer.GetComponent<PlayerMovement>();
-                    player.position -= (Vector3)pm.PrevMovement;
-                    if (!pm.canMoveFreely)
-                        pm.HandleDeath();
-                    return;
-                }
-            }
-        }
+        PlayerMovement pm = player.GetComponent<PlayerMovement>();
+        player.position -= (Vector3)pm.PrevMovement;
+        if (!pm.canMoveFreely)
+            pm.HandleDeath();
+        return;
     }
 }

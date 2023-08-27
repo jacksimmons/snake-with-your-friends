@@ -7,9 +7,21 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: -3731269874803983894, guid: 0d5ef4a463256884f8d08d92b9189471, type: 3}
+      propertyPath: _assetId
+      value: 1723603425
+      objectReference: {fileID: 0}
     - target: {fileID: 1617564155881034721, guid: 0d5ef4a463256884f8d08d92b9189471, type: 3}
       propertyPath: food
-      value: 5
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 2374218674754891897, guid: 0d5ef4a463256884f8d08d92b9189471, type: 3}
+      propertyPath: m_SpriteTilingProperty.oldSize.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2374218674754891897, guid: 0d5ef4a463256884f8d08d92b9189471, type: 3}
+      propertyPath: m_SpriteTilingProperty.oldSize.y
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2414048229727916978, guid: 0d5ef4a463256884f8d08d92b9189471, type: 3}
       propertyPath: m_Name
@@ -67,5 +79,9 @@ PrefabInstance:
       propertyPath: m_Sprite
       value: 
       objectReference: {fileID: 21300000, guid: cc0c599d216355c458a9c2502a74424c, type: 3}
+    - target: {fileID: 7747178195583985449, guid: 0d5ef4a463256884f8d08d92b9189471, type: 3}
+      propertyPath: m_WasSpriteAssigned
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 0d5ef4a463256884f8d08d92b9189471, type: 3}

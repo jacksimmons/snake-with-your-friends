@@ -44,4 +44,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 93383597cb76c0546af8f0a26893e748, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  modulate: {r: 1, g: 1, b: 1, a: 1}
+  m_word: 
+  m_modulate: {r: 1, g: 1, b: 1, a: 1}
+  m_letterTemplate: {fileID: 6606258657331975603, guid: 98143cfab5c01ed478593e2dbe574cae, type: 3}

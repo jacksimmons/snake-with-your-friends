@@ -17,8 +17,8 @@ public class SentenceBehaviour : MonoBehaviour
 
     [SerializeField]
     private Transform[] m_lineStarters;
-    [SerializeField]
-    private Transform[] m_disabledWords;
+
+    public static string[] originalWords = { "Snake", "With", "Your", "Friends" };
 
     private void Start()
     {
@@ -31,9 +31,8 @@ public class SentenceBehaviour : MonoBehaviour
         Transform prevChild = null;
         for (int i = 0; i < transform.childCount; i++)
         {
+            print(i);
             Transform child = transform.GetChild(i);
-
-            if (m_disabledWords.Contains(child)) continue;
 
             if (m_lineStarters.Contains(child))
             {
@@ -75,27 +74,26 @@ public class SentenceBehaviour : MonoBehaviour
         }
     }
 
-    // Swaps out a word in the sentence for a word which is not in the sentence.
-    // Note that words must be ordered in ascending sibling index for the sentence to work properly.
-    public void SwapOutWord(Transform originalWord, Transform newWord)
+    public void SwapOutWords(string[] newWords, Color firstWordColour)
     {
-        int newIndex = Array.IndexOf(m_disabledWords, newWord);
-        m_disabledWords[newIndex] = originalWord;
-        
-        originalWord.gameObject.SetActive(false);
-        newWord.gameObject.SetActive(true);
-    }
-
-    public void SwapOutWords(Transform[] originalWords, Transform[] newWords)
-    {
-        if (originalWords.Length != newWords.Length)
+        if (newWords.Length != transform.childCount)
         {
-            Debug.LogError("This function only works with two equal-sized arrays!");
+            Debug.LogError("Incorrect newWords length.");
             return;
         }
-        for (int i = 0; i < originalWords.Length; i++)
+
+        for (int i = 0; i < transform.childCount; i++)
         {
-            SwapOutWord(originalWords[i], newWords[i]);
+            if (newWords[i] == "")
+                continue;
+            Transform child = transform.GetChild(i);
+
+            Color colour;
+            if (i == 0)
+                colour = firstWordColour;
+            else
+                colour = Color.white;
+            child.GetComponent<WordBehaviour>().UpdateWord(newWords[i], colour);
         }
     }
 }
