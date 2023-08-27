@@ -8,6 +8,28 @@ using System;
 // Is Destroyed when the player dies, but other components are kept.
 public class PlayerMovement : NetworkBehaviour
 {
+    private BitField bf = new();
+    public bool Frozen
+    {
+        get { return bf.GetBit(0); }
+        set { bf.SetBit(0, value); }
+    }
+    public bool FreeMovement
+    {
+        get { return bf.GetBit(1); }
+        set { bf.SetBit(1, value); }
+    }
+    public bool HasMoved
+    {
+        get
+        {
+            if (!bf.GetBit(2) && (movement != Vector2.zero))
+                return true;
+            return false;
+        }
+        set { bf.SetBit(2, value); }
+    }
+
     [SerializeField]
     private GameBehaviour _gameBehaviour;
 
@@ -42,9 +64,6 @@ public class PlayerMovement : NetworkBehaviour
     // The last `movement` which was used
     public Vector2 PrevMovement { get; private set; }
 
-    // Free movement
-    [SerializeField]
-    public bool canMoveFreely;
     [SerializeField]
     private float _freeMovementSpeedMod = 1.0f;
 
@@ -55,8 +74,6 @@ public class PlayerMovement : NetworkBehaviour
     // Restored after forced movement ends
 
     private List<Vector2> _storedBodyPartDirections = new List<Vector2>();
-
-    public bool frozen = false;
 
     public const int LOWEST_COUNTER_MAX = 1;
     public const int DEFAULT_COUNTER_MAX = 20;
@@ -81,25 +98,6 @@ public class PlayerMovement : NetworkBehaviour
     // All actions are executed after the next movement frame
     private List<Action> _queuedActions;
 
-    // Components
-    private Rigidbody2D _rb;
-
-    private bool _hasMoved = false;
-    public bool HasMoved
-    {
-        get
-        {
-            if (!_hasMoved && (movement != Vector2.zero))
-                _hasMoved = true;
-            return _hasMoved;
-        }
-    }
-
-    private void Awake()
-    {
-        // Components
-        _rb = GetComponent<Rigidbody2D>();
-    }
 
     private void Start()
     {
@@ -119,7 +117,6 @@ public class PlayerMovement : NetworkBehaviour
                 // if (i == 0) => Head
                 i == 0 ? 
                 EBodyPartType.Head :
-                
                 // else if (i is not the final index) => Straight
                 // else => Tail
                 i < containerTransform.childCount - 1 ?
@@ -139,7 +136,7 @@ public class PlayerMovement : NetworkBehaviour
         //    bpss.Add(bps);
         //}
 
-        //if (canMoveFreely)
+        //if (CanMoveFreely)
         //    _moveTime = Mathf.CeilToInt(_moveTime / _freeMovementSpeedMod);
     }
 
@@ -168,9 +165,9 @@ public class PlayerMovement : NetworkBehaviour
         float y_input = Input.GetAxisRaw("Vertical");
 
         // Movement states
-        if (!frozen)
+        if (!Frozen)
         {
-            if (canMoveFreely || (direction != Vector2.zero))
+            if (FreeMovement || (direction != Vector2.zero))
             {
                 movement = direction;
             }
@@ -349,23 +346,6 @@ public class PlayerMovement : NetworkBehaviour
         }
     }
 
-    [ClientRpc]
-    public void SetBodyPartDeadClientRpc(int bpIndex)
-    {
-        BodyPart bp = BodyParts[bpIndex];
-
-        if (BodyParts.IndexOf(bp) == 0)
-        {
-            if (isOwned)
-            {
-                CamBehaviour cb = GameObject.FindWithTag("MainCamera").GetComponent<CamBehaviour>();
-                cb.Player = null;
-            }
-        }
-
-        Destroy(bp.Transform.gameObject);
-    }
-
     /// <summary>
     /// Not having moved yet grants immunity.
     /// </summary>
@@ -376,47 +356,14 @@ public class PlayerMovement : NetworkBehaviour
 
         GameBehaviour game = GetComponentInChildren<GameBehaviour>();
         game.OnGameOver(score: BodyParts.Count);
+
+        m_poc.LogDeath();
+
+        Destroy(bodyPartContainer.gameObject, 5);
         Destroy(this);
     }
 
-    [ClientRpc]
-    public void SetDeadClientRpc(bool dead)
-    {
-        _rb.simulated = !dead;
-        frozen = dead;
-
-        if (dead)
-        {
-            foreach (BodyPart part in BodyParts)
-                m_poc.HandleBodyPartDeath(part);
-        }
-
-        status.gameObject.SetActive(!dead);
-    }
-
-    /// <summary>
-    /// Outputs debug values for this object.
-    /// </summary>
-    /// <returns>A dictionary containing variable names and their values.</returns>
-    public Dictionary<string, string> GetPlayerDebug()
-    {
-        Dictionary<string, string> playerValues = new Dictionary<string, string>
-        {
-            { "direction", direction.ToString() },
-            { "movement", movement.ToString() },
-            { "PrevMovement", PrevMovement.ToString() },
-            { "CounterMax", CounterMax.ToString() }
-        };
-        for (int i = 0; i < _queuedActions.Count; i++)
-            playerValues.Add("queuedActions [" + i.ToString() + "]", _queuedActions[i].Target.ToString());
-        playerValues.Add("forcedMovement", _forcedMovement.ToString());
-        for (int i = 0; i < _storedBodyPartDirections.Count; i++)
-            playerValues.Add("storedBpDirections [" + i.ToString() + "]", _storedBodyPartDirections[i].ToString());
-        return playerValues;
-    }
-
-
-    /// <summary>
+        /// <summary>
     /// Queue a new ambiguous action.
     /// </summary>
     /// <param name="action">An action (call).</param>
@@ -450,7 +397,7 @@ public class PlayerMovement : NetworkBehaviour
     {
         _queuedActions.Add(new Action(() =>
         {
-            frozen = true;
+            Frozen = true;
             CounterMax = counterMax;
             _forcedMovement = direction;
             foreach (var part in BodyParts)
@@ -469,7 +416,7 @@ public class PlayerMovement : NetworkBehaviour
     {
         _queuedActions.Add(new Action(() =>
         {
-            frozen = false;
+            Frozen = false;
 
             // ! Limitation - the snake must continue,
             // this means if the snake starts on a scootile,
@@ -482,5 +429,26 @@ public class PlayerMovement : NetworkBehaviour
             }
             _storedBodyPartDirections.Clear();
         }));
+    }
+
+    /// <summary>
+    /// Outputs debug values for this object.
+    /// </summary>
+    /// <returns>A dictionary containing variable names and their values.</returns>
+    public Dictionary<string, string> GetPlayerDebug()
+    {
+        Dictionary<string, string> playerValues = new Dictionary<string, string>
+        {
+            { "direction", direction.ToString() },
+            { "movement", movement.ToString() },
+            { "PrevMovement", PrevMovement.ToString() },
+            { "CounterMax", CounterMax.ToString() }
+        };
+        for (int i = 0; i < _queuedActions.Count; i++)
+            playerValues.Add("queuedActions [" + i.ToString() + "]", _queuedActions[i].Target.ToString());
+        playerValues.Add("forcedMovement", _forcedMovement.ToString());
+        for (int i = 0; i < _storedBodyPartDirections.Count; i++)
+            playerValues.Add("storedBpDirections [" + i.ToString() + "]", _storedBodyPartDirections[i].ToString());
+        return playerValues;
     }
 }

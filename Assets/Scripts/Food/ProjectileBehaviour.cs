@@ -1,9 +1,20 @@
 using System.Collections;
 using UnityEngine;
-using UnityEngine.XR;
 
 public class ProjectileBehaviour : MonoBehaviour
 {
+    private BitField bf = new();
+    private bool Ready
+    {
+        get { return bf.GetBit(0); }
+        set { bf.SetBit(0, value); }
+    }
+    private bool PlayerImmune
+    {
+        get { return bf.GetBit(1); }
+        set { bf.SetBit(1, value); }
+    }
+
     [SerializeField]
     public EProjectileType type;
 
@@ -22,19 +33,16 @@ public class ProjectileBehaviour : MonoBehaviour
 
             _rb = GetComponent<Rigidbody2D>();
             _proj = value;
-            _ready = true;
+            Ready = true;
             transform.rotation = _proj.Rotation;
             Destroy(gameObject, _proj.Lifetime);
         }
     }
-    private bool _ready = false;
 
     [Range(0, 1)]
     // Bounciness - amount of speed retained after bounce
     private float m_restitution = 0.5f;
     private float m_speedMod = 1f;
-
-    private bool m_playerImmune = false;
 
     private Rigidbody2D _rb = null; // Assigned to in Proj setter
     private Sprite m_sprite; // Assigned to once in Awake
@@ -54,7 +62,7 @@ public class ProjectileBehaviour : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (_ready)
+        if (Ready)
         {
             _rb.MovePosition(_rb.position + _proj.Velocity * m_speedMod);
         }
@@ -72,7 +80,7 @@ public class ProjectileBehaviour : MonoBehaviour
         bool isPlayer = true;
         Transform player = Player.TryGetPlayerTransformFromBodyPart(other.gameObject);
         if (player == null) isPlayer = false;
-        if (m_playerImmune) isPlayer = false;
+        if (PlayerImmune) isPlayer = false;
 
         // Other Collisions section
         // Visual Effects section, enabled on all clients
@@ -117,11 +125,11 @@ public class ProjectileBehaviour : MonoBehaviour
 
     private IEnumerator HandleImmunity(float seconds)
     {
-        m_playerImmune = true;
+        PlayerImmune = true;
 
         yield return new WaitForSeconds(seconds);
 
-        m_playerImmune = false;
+        PlayerImmune = false;
     }
 
     private IEnumerator Explode()

@@ -44,6 +44,10 @@ public class SettingsMenu : MonoBehaviour
     private Toggle borderlessToggle;
     private bool borderlessValue;
 
+    [SerializeField]
+    private Toggle motionSicknessToggle;
+    private bool motionSicknessValue;
+
     //[SerializeField]
     //private TextMeshProUGUI brightnessLabel;
     //[SerializeField]
@@ -83,9 +87,13 @@ public class SettingsMenu : MonoBehaviour
         fullscreenToggle.isOn = Screen.fullScreen;
         fullscreenToggle.onValueChanged.AddListener(SetFullscreen);
 
-        borderlessValue = Chungus.Instance.settings.borderless;
+        borderlessValue = Chungus.Instance.settings.Borderless;
         borderlessToggle.isOn = borderlessValue;
         borderlessToggle.onValueChanged.AddListener(SetBorderless);
+
+        motionSicknessValue = Chungus.Instance.settings.HelpMotionSickness;
+        motionSicknessToggle.isOn = motionSicknessValue;
+        motionSicknessToggle.onValueChanged.AddListener(SetHelpMotionSickness);
     }
 
     private bool ResolutionEquals(Resolution res1, Resolution res2)
@@ -140,6 +148,11 @@ public class SettingsMenu : MonoBehaviour
         Screen.fullScreenMode = Settings.GetWindowMode(Screen.fullScreen, borderless);
     }
 
+    private void SetHelpMotionSickness(bool motionSickness)
+    {
+        motionSicknessValue = motionSickness;
+    }
+
     // Toggles which buttons are visible (Back, or the two save buttons)
     private void ToggleExitButtons(bool toggle)
     {
@@ -183,7 +196,8 @@ public class SettingsMenu : MonoBehaviour
             sfxVolumeValue / 100,
             Screen.width, Screen.height, Screen.currentResolution.refreshRate,
             Screen.fullScreen,
-            borderlessValue
+            borderlessValue,
+            motionSicknessValue
         );
         BinaryFormatter bf = new BinaryFormatter();
         bf.Serialize(fs, settings);

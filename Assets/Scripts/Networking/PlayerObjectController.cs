@@ -58,7 +58,7 @@ public class PlayerObjectController : NetworkBehaviour
     /// </summary>
     public override void OnStartClient()
     {
-        Manager.Players.Add(this);
+        Manager.AddPlayer(this);
         LobbyMenu.instance.UpdateLobbyName();
         LobbyMenu.instance.UpdatePlayerList();
     }
@@ -69,15 +69,12 @@ public class PlayerObjectController : NetworkBehaviour
     /// </summary>
     public override void OnStopClient()
     {
-        Manager.Players.Remove(this);
+        Manager.RemovePlayer(this);
         LobbyMenu.instance.UpdatePlayerList();
     }
 
     [Command]
-    private void CmdSetPlayerName(string playerName)
-    {
-        this.OnPlayerNameUpdate(this.playerName, playerName);
-    }
+    private void CmdSetPlayerName(string playerName) { OnPlayerNameUpdate(this.playerName, playerName); }
 
     public void OnPlayerNameUpdate(string oldValue, string newValue)
     {
@@ -92,16 +89,13 @@ public class PlayerObjectController : NetworkBehaviour
     }
 
     [Command]
-    public void CmdSetPlayerReady()
-    {
-        this.OnPlayerReadyUpdate(this.ready, !this.ready);
-    }
+    public void CmdSetPlayerReady() { OnPlayerReadyUpdate(ready, !ready); }
 
     public void OnPlayerReadyUpdate(bool oldValue, bool newValue)
     {
         if (isServer)
         {
-            this.ready = newValue;
+            ready = newValue;
         }
         if (isClient)
         {
@@ -118,10 +112,7 @@ public class PlayerObjectController : NetworkBehaviour
     }
 
     [Command]
-    public void CmdStartGame(string sceneName)
-    {
-        Manager.StartGame(sceneName);
-    }
+    public void CmdStartGame(string sceneName) { Manager.StartGame(sceneName); }
 
     // In-Game Methods
     public void UpdateBodyParts()
@@ -181,51 +172,11 @@ public class PlayerObjectController : NetworkBehaviour
         }
     }
 
-    public void HandleBodyPartDeath(BodyPart bp)
-    {
-        if (!isOwned)
-            return;
-
-        int ocIndex = Manager.Players.IndexOf(this);
-        if (ocIndex == -1)
-        {
-            Debug.LogError("Couldn't find player in Manager.Players!");
-            return;
-        }
-        int bpIndex = m_pmc.BodyParts.IndexOf(bp);
-        if (bpIndex == -1)
-        {
-            Debug.LogError("Couldn't find BodyPart!");
-            return;
-        }
-        CmdHandleBodyPartDeath(ocIndex, bpIndex);
-    }
+    public void LogDeath() { CmdLogDeath(Manager.Players.IndexOf(this)); }
 
     [Command]
-    private void CmdHandleBodyPartDeath(int ocIndex, int bpIndex)
-    {
-        PlayerObjectController poc = Manager.Players[ocIndex];
-        poc.m_pmc.SetBodyPartDeadClientRpc(bpIndex);
-    }
+    private void CmdLogDeath(int index) { LogDeathClientRpc(index); }
 
-    public void HandleDeath(bool dead)
-    {
-        if (!isOwned)
-            return;
-
-        int index = Manager.Players.IndexOf(this);
-        if (index == -1)
-        {
-            Debug.LogError("Couldn't find player in Manager.Players!");
-            return;
-        }
-        CmdHandleDeath(index, dead);
-    }
-
-    [Command]
-    private void CmdHandleDeath(int index, bool dead)
-    {
-        PlayerObjectController poc = Manager.Players[index];
-        poc.m_pmc.SetDeadClientRpc(dead);
-    }
+    [ClientRpc]
+    private void LogDeathClientRpc(int index) { Manager.AlivePlayers.RemoveAt(index); }
 }

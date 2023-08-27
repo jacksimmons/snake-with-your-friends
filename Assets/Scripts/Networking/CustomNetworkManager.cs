@@ -10,10 +10,29 @@ public class CustomNetworkManager : NetworkManager
     private PlayerObjectController _playerPrefab;
 
     // Players
-    public List<PlayerObjectController> Players { get; private set; } = new List<PlayerObjectController>();
+    public List<PlayerObjectController> Players { get; private set; } = new();
+    public List<PlayerObjectController> AlivePlayers { get; private set; } = new();
 
     public bool singleplayer = false;
 
+
+    public void AddPlayer(PlayerObjectController player)
+    {
+        Players.Add(player);
+        AlivePlayers.Add(player);
+    }
+
+    public void RemovePlayer(PlayerObjectController player)
+    {
+        Players.Remove(player);
+        AlivePlayers.Remove(player);
+    }
+
+    public void StartWithNoFriends()
+    {
+        singleplayer = true;
+        StartHost();
+    }
 
     public override void OnServerAddPlayer(NetworkConnectionToClient conn)
     {
@@ -23,7 +42,10 @@ public class CustomNetworkManager : NetworkManager
             PlayerObjectController playerInstance = Instantiate(_playerPrefab);
             playerInstance.connectionID = conn.connectionId;
             playerInstance.playerNo = Players.Count + 1;
-            playerInstance.playerSteamID = (ulong)SteamMatchmaking.GetLobbyMemberByIndex(new CSteamID(SteamLobby.instance.LobbyID), Players.Count);
+
+            CSteamID lobbyID = new(SteamLobby.instance.LobbyID);
+            playerInstance.playerSteamID = 
+                (ulong)SteamMatchmaking.GetLobbyMemberByIndex(lobbyID, Players.Count);
 
             NetworkServer.AddPlayerForConnection(conn, playerInstance.gameObject);
         }
@@ -49,11 +71,5 @@ public class CustomNetworkManager : NetworkManager
         GameBehaviour gb = lpo.GetComponentInChildren<GameBehaviour>();
 
         gb.OnGameSceneLoaded("Game");
-    }
-
-    public void StartWithNoFriends()
-    {
-        singleplayer = true;
-        StartHost();
     }
 }

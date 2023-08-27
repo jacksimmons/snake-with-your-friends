@@ -94,6 +94,7 @@ public class GameBehaviour : NetworkBehaviour
         CreateWallTilemap(ref s_wallTilemap, bl);
 
         PlayerMovement player = GameObject.Find("LocalPlayerObject").GetComponent<PlayerMovement>();
+        player.enabled = true;
 
         GameObject cam = GameObject.FindWithTag("MainCamera");
         cam.GetComponent<CamBehaviour>().Player = player;

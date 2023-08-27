@@ -56,7 +56,6 @@
     <Analyzer Include="C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\Extensions\Microsoft\Visual Studio Tools for Unity\Analyzers\Microsoft.Unity.Analyzers.dll" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Assets\Scripts\SetOnce.cs" />
     <Compile Include="Assets\Scripts\Food\Projectile.cs" />
     <Compile Include="Assets\Scripts\Food\ProjectileBehaviour.cs" />
     <Compile Include="Assets\Scripts\Object\FoodObject.cs" />
@@ -87,7 +86,6 @@
     <Compile Include="Assets\Scripts\Object\GridObject.cs" />
     <Compile Include="Assets\Scripts\Steamworks.NET\SteamManager.cs" />
     <Compile Include="Assets\Scripts\Player\BodyPartType.cs" />
-    <Compile Include="Assets\Scripts\Wait.cs" />
     <Compile Include="Assets\Scripts\Menu\LobbyMenu.cs" />
     <Compile Include="Assets\Scripts\Misc\Settings.cs" />
     <Compile Include="Assets\Scripts\Object\ColliderToggleTilemap.cs" />
@@ -107,7 +105,11 @@
     <Compile Include="Assets\Scripts\UI\StatusEffectUI.cs" />
     <Compile Include="Assets\Scripts\UI\DebugLabels.cs" />
     <Compile Include="Assets\Scripts\Menu\Main\SentenceChangerButton.cs" />
-    <Compile Include="Assets\Scripts\Extensions.cs" />
+    <Compile Include="Assets\Scripts\Extensions\SetOnce.cs" />
+    <Compile Include="Assets\Scripts\Extensions\Extensions.cs" />
+    <Compile Include="Assets\Scripts\Extensions\BitField.cs" />
+    <Compile Include="Assets\Scripts\Extensions\Wait.cs" />
+    <Compile Include="Assets\Scripts\Menu\Lobby\LobbySettings.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Mirror\Plugins\Mono.Cecil\Mono.CecilX.dll" />
