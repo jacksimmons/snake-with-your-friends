@@ -102,15 +102,15 @@ public class PlayerStatus : NetworkBehaviour
     /// </summary>
     /// <param name="effect">The projectile is based on the effect.</param>
     [Command]
-    private void CmdSpawn(e_Effect effect)
+    private void CmdSpawn(EEffect effect)
     {
         ProjectileBehaviour proj;
         switch (effect)
         {
-            case e_Effect.RocketShitting:
+            case EEffect.RocketShitting:
                 ClientSpawnUnsynced(effect);
                 break;
-            case e_Effect.BreathingFire:
+            case EEffect.BreathingFire:
                 BodyPart head = _player.BodyParts[0];
 
                 GameObject fireball = Instantiate(_fireball, GameObject.Find("Projectiles").transform);
@@ -133,11 +133,11 @@ public class PlayerStatus : NetworkBehaviour
     /// </summary>
     /// <param name="effect">The projectile is based on the effect.</param>
     [ClientRpc]
-    private void ClientSpawnUnsynced(e_Effect effect)
+    private void ClientSpawnUnsynced(EEffect effect)
     {
         switch (effect)
         {
-            case e_Effect.RocketShitting:
+            case EEffect.RocketShitting:
                 float randomRotation = Random.Range(-SHIT_EXPLOSIVENESS, SHIT_EXPLOSIVENESS);
                 
                 GameObject shit = Instantiate(_staticShit, GameObject.Find("Projectiles").transform);
@@ -202,7 +202,7 @@ public class PlayerStatus : NetworkBehaviour
             {
                 if (effect.EffectName == ItemSlotEffect.EffectName)
                 {
-                    if (effect.EffectName == e_Effect.None) continue;
+                    if (effect.EffectName == EEffect.None) continue;
                     return true;
                 }
             }
@@ -276,8 +276,8 @@ public class PlayerStatus : NetworkBehaviour
             effect.ResetCooldown();
             switch (effect.EffectName)
             {
-                case e_Effect.BreathingFire:
-                    CmdSpawn(e_Effect.BreathingFire);
+                case EEffect.BreathingFire:
+                    CmdSpawn(EEffect.BreathingFire);
                     break;
             }
             // Execute a OneOff effect only once its cooldown (which it typically won't have) reaches 0.
@@ -298,7 +298,7 @@ public class PlayerStatus : NetworkBehaviour
 
                 switch (effect.EffectName)
                 {
-                    case e_Effect.CureAll:
+                    case EEffect.CureAll:
                         print("Hi");
                         ClearInputEffects();
                         ClearPassiveEffects();
@@ -309,7 +309,7 @@ public class PlayerStatus : NetworkBehaviour
                             Destroy(fgObj.gameObject);
                         break;
 
-                    case e_Effect.SpeedBoost:
+                    case EEffect.SpeedBoost:
                         float counterMaxVal= PlayerMovement.DEFAULT_COUNTER_MAX / 
                             SpeedEffect.GetSpeedMultFromSignedLevel(effect.EffectLevel);
 
@@ -329,21 +329,21 @@ public class PlayerStatus : NetworkBehaviour
                         }
                         break;
 
-                    case e_Effect.RocketShitting:
-                        CmdSpawn(e_Effect.RocketShitting);
+                    case EEffect.RocketShitting:
+                        CmdSpawn(EEffect.RocketShitting);
                         statusUI.ToggleShitIcon(true);
                         break;
 
-                    case e_Effect.Drunk:
+                    case EEffect.Drunk:
                         NumPints++;
                         break;
 
-                    case e_Effect.SoberUp:
+                    case EEffect.SoberUp:
                         NumPints--;
                         break;
 
-                    case e_Effect.Sleeping:
-                        _player.frozen = true;
+                    case EEffect.Sleeping:
+                        _player.Frozen = true;
                         statusUI.ToggleSleepingIcon(true);
                         break;
                 }
@@ -411,15 +411,15 @@ public class PlayerStatus : NetworkBehaviour
         StatusEffectUI statusUI = GameObject.FindWithTag("StatusUI").GetComponent<StatusEffectUI>();
         switch (effect.EffectName)
         {
-            case e_Effect.SpeedBoost:
+            case EEffect.SpeedBoost:
                 _player.CounterMax = PlayerMovement.DEFAULT_COUNTER_MAX;
                 statusUI.DisableAllSpeedIcons();
                 break;
-            case e_Effect.RocketShitting:
+            case EEffect.RocketShitting:
                 statusUI.ToggleShitIcon(false);
                 break;
-            case e_Effect.Sleeping:
-                _player.frozen = false;
+            case EEffect.Sleeping:
+                _player.Frozen = false;
                 statusUI.ToggleSleepingIcon(false);
                 break;
         }
@@ -458,10 +458,10 @@ public class PlayerStatus : NetworkBehaviour
         Dictionary<string, string> statuses = new Dictionary<string, string>();
         
         if (ActiveInputEffect != null)
-            statuses[Enum.GetName(typeof(e_Effect), ActiveInputEffect.EffectName)] = "True";
+            statuses[Enum.GetName(typeof(EEffect), ActiveInputEffect.EffectName)] = "True";
         foreach (Effect effect in ActivePassiveEffects)
-            statuses[Enum.GetName(typeof(e_Effect), effect.EffectName)] = "True";
-        foreach (string e_name in Enum.GetNames(typeof(e_Effect)))
+            statuses[Enum.GetName(typeof(EEffect), effect.EffectName)] = "True";
+        foreach (string e_name in Enum.GetNames(typeof(EEffect)))
         {
             if (!statuses.ContainsKey(e_name))
                 statuses[e_name] = "False";
@@ -486,7 +486,7 @@ public class PlayerStatus : NetworkBehaviour
         switch (food)
         {
             case EFoodType.Apple:
-                ItemSlotEffect = new Effect(e_Effect.CureAll);
+                ItemSlotEffect = new Effect(EEffect.CureAll);
                 break;
 
             case EFoodType.Balti:
@@ -495,11 +495,11 @@ public class PlayerStatus : NetworkBehaviour
                 {
                     Effect speedBoost;
                     if (nextEpisode != null)
-                        speedBoost = new Effect(e_Effect.SpeedBoost, level: 5, lifetime: 2, causes: new Effect[] { nextEpisode });
+                        speedBoost = new Effect(EEffect.SpeedBoost, level: 5, lifetime: 2, causes: new Effect[] { nextEpisode });
                     else
-                        speedBoost = new Effect(e_Effect.SpeedBoost, level: 5, lifetime: 2);
-                    Effect rocketShit = new Effect(e_Effect.RocketShitting, lifetime: 5, cooldown: 0.05f);
-                    Effect episode = new Effect(e_Effect.SpeedBoost, level: -2, lifetime: 2, causes: new Effect[] { rocketShit, speedBoost });
+                        speedBoost = new Effect(EEffect.SpeedBoost, level: 5, lifetime: 2);
+                    Effect rocketShit = new Effect(EEffect.RocketShitting, lifetime: 5, cooldown: 0.05f);
+                    Effect episode = new Effect(EEffect.SpeedBoost, level: -2, lifetime: 2, causes: new Effect[] { rocketShit, speedBoost });
                     return episode;
                 }
 
@@ -513,17 +513,17 @@ public class PlayerStatus : NetworkBehaviour
 
             case EFoodType.Booze:
                 // Drunk effect, then piss then sober up
-                Effect soberUp = new Effect(e_Effect.SoberUp);
+                Effect soberUp = new Effect(EEffect.SoberUp);
 
-                Effect pissing = new Effect(e_Effect.Pissing, lifetime: 5,
+                Effect pissing = new Effect(EEffect.Pissing, lifetime: 5,
                     cooldown: 0.1f, isInputEffect: true, causes: new Effect[] { soberUp });
 
-                Effect internalProcessing = new Effect(e_Effect.None, lifetime: 20,
+                Effect internalProcessing = new Effect(EEffect.None, lifetime: 20,
                     new Effect[] { pissing });
 
-                Effect drunk = new Effect(e_Effect.Drunk);
+                Effect drunk = new Effect(EEffect.Drunk);
 
-                ItemSlotEffect = new Effect(e_Effect.None, lifetime: 0,
+                ItemSlotEffect = new Effect(EEffect.None, lifetime: 0,
                     new Effect[] { drunk, internalProcessing });
 
                 break;
@@ -534,25 +534,25 @@ public class PlayerStatus : NetworkBehaviour
 
             case EFoodType.Doughnut:
                 // Sleep for 5 turns
-                ItemSlotEffect = new Effect(e_Effect.Sleeping, lifetime: 5);
+                ItemSlotEffect = new Effect(EEffect.Sleeping, lifetime: 5);
                 break;
 
             case EFoodType.Dragonfruit:
                 ItemSlotEffect = 
-                    new Effect(e_Effect.BreathingFire, lifetime: 5f, cooldown: 1f, isInputEffect: true);
+                    new Effect(EEffect.BreathingFire, lifetime: 5f, cooldown: 1f, isInputEffect: true);
                 break;
         }
     }
 
     private void DrinkCoffee()
     {
-        Effect major = new Effect(e_Effect.SpeedBoost, level: 3, lifetime: 10);
+        Effect major = new Effect(EEffect.SpeedBoost, level: 3, lifetime: 10);
         AddEffect(major);
     }
 
     private void EatDrumstick()
     {
-        Effect buff = new Effect(e_Effect.Buff, lifetime: 20);
+        Effect buff = new Effect(EEffect.Buff, lifetime: 20);
         AddEffect(buff);
         EatBone();
     }
@@ -564,8 +564,8 @@ public class PlayerStatus : NetworkBehaviour
 
     private void EatIceCream()
     {
-        Effect brainFreeze = new Effect(e_Effect.BrainFreeze, 3);
-        Effect unicorn = new Effect(e_Effect.Unicorn, 3, new Effect[] { brainFreeze });
+        Effect brainFreeze = new Effect(EEffect.BrainFreeze, 3);
+        Effect unicorn = new Effect(EEffect.Unicorn, 3, new Effect[] { brainFreeze });
         AddEffect(unicorn);
     }
 }

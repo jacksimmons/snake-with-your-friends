@@ -45,26 +45,14 @@ public class SpectateBehaviour : MonoBehaviour
         UpdateNameLabel(firstTarget);
     }
 
-    // Changes target to spectateIndex + diff, unless that player is dead,
-    // in which case the function is recursively called until it wraps back
-    // to the original spectateIndex.
-    // Once this happens, the script won't bother with spectating any longer
-    // to not waste resources. (m_bother = true)
+    // Changes spectate target (by +1 or -1, determined by diff)
     public void ChangeTarget(int diff, int firstTryIndex = -1)
     {
-        // If there is no point in running this function
-        if (!m_bother) return;
-
-        spectateIndex = spectateIndex + diff;
-        // Index wrapping
-        if (spectateIndex >= Manager.Players.Count)
-        {
-            spectateIndex = 0;
-        }
-        else if (spectateIndex < 0)
-        {
-            spectateIndex = Manager.Players.Count - 1;
-        }
+        int nextIndex = spectateIndex + diff;
+        spectateIndex =
+            nextIndex == Manager.AlivePlayers.Count
+            ? (diff > 0 ? 0 : Manager.AlivePlayers.Count - 1)
+            : nextIndex;
 
         // Check if the search has failed
         if (spectateIndex == firstTryIndex)

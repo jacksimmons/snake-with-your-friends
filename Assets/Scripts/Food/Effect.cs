@@ -17,7 +17,7 @@ public enum EFoodType
     Pizza,
 }
 
-public enum e_Effect
+public enum EEffect
 {
     None,
 
@@ -47,7 +47,7 @@ public enum e_Effect
 
 public class Effect
 {
-    public e_Effect EffectName { get; private set; }
+    public EEffect EffectName { get; private set; }
     public int EffectLevel { get; private set; }
 
     public float Lifetime { get; private set; }
@@ -57,18 +57,28 @@ public class Effect
     // The max value of the Cooldown, set once it gets used to restart the cooldown.
     public float CooldownMax { get; private set; } = 0f;
     public Effect[] Causes { get; private set; } = null;
-    public bool IsInputEffect { get; private set; } = false;
-    public bool IsOneOff { get; set; } = false;
+
+    private BitField bf = new();
+    public bool IsInputEffect
+    {
+        get { return bf.GetBit(0); }
+        set { bf.SetBit(0, value); }
+    }
+    public bool IsOneOff
+    {
+        get { return bf.GetBit(1); }
+        set { bf.SetBit(1, value); }
+    }
 
     // An effect which lasts for one frame, i.e. an action
-    public Effect(e_Effect effectName)
+    public Effect(EEffect effectName)
     {
         EffectName = effectName;
         IsOneOff = true;
     }
 
     // An effect which causes no other effects
-    public Effect(e_Effect effectName, float lifetime, float cooldown=0f, bool isInputEffect=false, int level=0)
+    public Effect(EEffect effectName, float lifetime, float cooldown=0f, bool isInputEffect=false, int level=0)
     {
         EffectName = effectName;
         EffectLevel = level;
@@ -80,7 +90,7 @@ public class Effect
     }
 
     // An effect which may cause another effect.
-    public Effect(e_Effect effectName, float lifetime, Effect[] causes, float cooldown=0f, bool isInputEffect=false, int level=0)
+    public Effect(EEffect effectName, float lifetime, Effect[] causes, float cooldown=0f, bool isInputEffect=false, int level=0)
     {
         EffectName = effectName;
         EffectLevel = level;
