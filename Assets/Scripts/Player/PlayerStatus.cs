@@ -148,7 +148,7 @@ public class PlayerStatus : NetworkBehaviour
                 proj = shit.GetComponent<ProjectileBehaviour>();
                 proj.Proj = new Projectile(
                     lifetime: 5,
-                    velocity: Vectors.Rotate(-_player.BodyParts[^1].Direction, randomRotation) * PROJ_SPEED_SLOW,
+                    velocity: Extensions.Vectors.Rotate(-_player.BodyParts[^1].Direction, randomRotation) * PROJ_SPEED_SLOW,
                     rotation: _player.BodyParts[^1].RegularAngle,
                     immunityDuration: 0.2f
                 );
@@ -201,7 +201,10 @@ public class PlayerStatus : NetworkBehaviour
             foreach (Effect effect in ActivePassiveEffects)
             {
                 if (effect.EffectName == ItemSlotEffect.EffectName)
+                {
+                    if (effect.EffectName == e_Effect.None) continue;
                     return true;
+                }
             }
 
             return false;
