@@ -104,7 +104,7 @@ public class PlayerMovement : NetworkBehaviour
         for (int i = 0; i < count; i++)
         {
             GameObject bp = Instantiate(_bodyPartTemplate, bodyPartContainer.transform);
-            bp.transform.position = Vector3.up * (count - i);
+            bp.transform.position += Vector3.up * (count - i);
         }
     }
 
