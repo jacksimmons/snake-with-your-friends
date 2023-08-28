@@ -59,21 +59,20 @@ public class SpectateBehaviour : MonoBehaviour
 
         int nextIndex = spectateIndex + diff;
         spectateIndex =
-            nextIndex == Manager.AlivePlayers.Count
-            ? (diff > 0 ? 0 : Manager.AlivePlayers.Count - 1)
-            : (nextIndex == 0 ? Manager.AlivePlayers.Count - 1 : nextIndex);
+            nextIndex == Manager.AlivePlayers.Count ? 0
+            : 
+            nextIndex == 0 ? Manager.AlivePlayers.Count - 1
+            :
+            nextIndex;
 
-        PlayerObjectController poc = Manager.Players[spectateIndex];
-        PlayerMovement pm = poc.GetComponent<PlayerMovement>();
-
-        SpectateTarget(pm);
+        SpectateTarget();
     }
 
-    private void SpectateTarget(PlayerMovement target)
+    private void SpectateTarget()
     {
         CamBehaviour cam = GameObject.FindWithTag("MainCamera").GetComponent<CamBehaviour>();
-        cam.Player = target;
+        cam.Player = Manager.Players[spectateIndex].GetComponent<PlayerMovement>();
 
-        UpdateNameLabel(target.GetComponent<PlayerObjectController>());
+        UpdateNameLabel(Manager.Players[spectateIndex]);
     }
 }
