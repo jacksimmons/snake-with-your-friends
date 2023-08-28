@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Mirror;
+using System.Linq;
 
 public class CustomNetworkManager : NetworkManager
 {
@@ -14,6 +15,8 @@ public class CustomNetworkManager : NetworkManager
     public List<PlayerObjectController> AlivePlayers { get; private set; } = new();
 
     public bool singleplayer = false;
+
+    private readonly string[] GAME_SCENES = { "Game" };
 
 
     public void AddPlayer(PlayerObjectController player)
@@ -65,6 +68,7 @@ public class CustomNetworkManager : NetworkManager
         }
     }
 
+    [Server]
     public void StartGame(string sceneName)
     {
         ServerChangeScene(sceneName);
@@ -76,14 +80,22 @@ public class CustomNetworkManager : NetworkManager
         base.OnClientSceneChanged();
 
         string sceneName = SceneManager.GetActiveScene().name;
-        if (sceneName != "Game")
+
+        if (GAME_SCENES.Contains(sceneName))
         {
+
+            GameObject lpo = GameObject.Find("LocalPlayerObject");
+            GameBehaviour gb = lpo.GetComponentInChildren<GameBehaviour>();
+
+            gb.OnGameSceneLoaded(sceneName);
+
             return;
         }
+    }
 
-        GameObject lpo = GameObject.Find("LocalPlayerObject");
-        GameBehaviour gb = lpo.GetComponentInChildren<GameBehaviour>();
-
-        gb.OnGameSceneLoaded("Game");
+    [Server]
+    public void EndGame()
+    {
+        ServerChangeScene("LobbyMenu");
     }
 }
