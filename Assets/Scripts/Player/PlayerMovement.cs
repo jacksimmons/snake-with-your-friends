@@ -157,6 +157,9 @@ public class PlayerMovement : NetworkBehaviour
 
         //if (CanMoveFreely)
         //    _moveTime = Mathf.CeilToInt(_moveTime / _freeMovementSpeedMod);
+
+        // First update, necessary for second, third etc games
+        m_poc.UpdateBodyParts();
     }
 
     private void FixedUpdate()
