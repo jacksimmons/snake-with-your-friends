@@ -95,6 +95,8 @@ public class LobbyMenu : MonoBehaviour
 
     public void UpdatePlayerList()
     {
+        print("hi");
+
         if (!playerItemCreated) { CreateHostPlayerItems(); }
 
         if (_playerListItems.Count < Manager.Players.Count) { CreateClientPlayerItems(); }
@@ -104,7 +106,7 @@ public class LobbyMenu : MonoBehaviour
         if (_playerListItems.Count == Manager.Players.Count) { UpdatePlayerItems(); }
     }
 
-    public void CreatePlayerItems(PlayerObjectController player)
+    public void CreatePlayerItem(PlayerObjectController player)
     {
         print("Members: " + SteamMatchmaking.GetNumLobbyMembers(new CSteamID(lobbyID)));
 
@@ -131,7 +133,7 @@ public class LobbyMenu : MonoBehaviour
     {
         foreach (PlayerObjectController player in Manager.Players)
         {
-            CreatePlayerItems(player);
+            CreatePlayerItem(player);
         }
 
         playerItemCreated = true;
@@ -144,7 +146,7 @@ public class LobbyMenu : MonoBehaviour
             // If any items in the list have the same connection ID
             if (!_playerListItems.Any(b => b.connectionID == player.connectionID))
             {
-                CreatePlayerItems(player);
+                CreatePlayerItem(player);
             }
         }
     }

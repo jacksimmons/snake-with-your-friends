@@ -39,7 +39,7 @@ public class CustomNetworkManager : NetworkManager
         AlivePlayers.Remove(player);
         if (AlivePlayers.Count == 1)
         {
-            print("Game Over! " + AlivePlayers[0].name + " wins the game.");
+            print("Game Over! " + AlivePlayers[0].playerName + " wins the game.");
             CmdEndGame();
         }
     }
@@ -95,10 +95,8 @@ public class CustomNetworkManager : NetworkManager
         }
         if (LOBBY_SCENES.Contains(sceneName))
         {
-            foreach (PlayerObjectController player in Players)
-            {
-                player.GetComponent<PlayerMovement>();
-            }
+            GameObject.Find("LobbyController").GetComponent<LobbyMenu>()
+                .UpdatePlayerList();
         }
     }
 
