@@ -40,7 +40,7 @@ public class CustomNetworkManager : NetworkManager
         if (AlivePlayers.Count == 1)
         {
             print("Game Over! " + AlivePlayers[0].playerName + " wins the game.");
-            CmdEndGame();
+            AlivePlayers[0].CmdEndGame();
         }
     }
 
@@ -97,15 +97,25 @@ public class CustomNetworkManager : NetworkManager
         {
             GameObject.Find("LobbyController").GetComponent<LobbyMenu>()
                 .UpdatePlayerList();
+
+            // Reset every Player Object, so that the game can run again
+            foreach (PlayerObjectController poc in Players)
+            {
+                poc.TryGetComponent(out PlayerMovement pm);
+                if (pm) { Destroy(pm); }
+                poc.gameObject.AddComponent<PlayerMovement>();
+
+                foreach (Transform t in poc.transform.Find("BodyParts"))
+                {
+                    Destroy(t.gameObject);
+                }
+            }
         }
     }
 
     [Server]
-    private void EndGame()
+    public void EndGame()
     {
         ServerChangeScene("LobbyMenu");
     }
-
-    [Command]
-    public void CmdEndGame() { EndGame(); }
 }

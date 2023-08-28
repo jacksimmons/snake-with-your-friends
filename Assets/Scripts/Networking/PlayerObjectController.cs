@@ -179,4 +179,7 @@ public class PlayerObjectController : NetworkBehaviour
 
     [ClientRpc]
     private void LogDeathClientRpc(int index) { Manager.KillPlayer(index); }
+
+    [Command]
+    public void CmdEndGame() { Manager.EndGame(); }
 }
