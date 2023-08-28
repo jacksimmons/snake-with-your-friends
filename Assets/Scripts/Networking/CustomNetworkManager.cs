@@ -103,7 +103,8 @@ public class CustomNetworkManager : NetworkManager
             {
                 poc.TryGetComponent(out PlayerMovement pm);
                 if (pm) { Destroy(pm); }
-                poc.gameObject.AddComponent<PlayerMovement>();
+                PlayerMovement newPm = poc.gameObject.AddComponent<PlayerMovement>();
+                newPm.enabled = false;
 
                 foreach (Transform t in poc.transform.Find("BodyParts"))
                 {
