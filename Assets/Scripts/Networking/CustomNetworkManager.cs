@@ -101,11 +101,6 @@ public class CustomNetworkManager : NetworkManager
             // Reset every Player Object, so that the game can run again
             foreach (PlayerObjectController poc in Players)
             {
-                poc.TryGetComponent(out PlayerMovement pm);
-                if (pm) { Destroy(pm); }
-                PlayerMovement newPm = poc.gameObject.AddComponent<PlayerMovement>();
-                newPm.enabled = false;
-
                 foreach (Transform t in poc.transform.Find("BodyParts"))
                 {
                     Destroy(t.gameObject);

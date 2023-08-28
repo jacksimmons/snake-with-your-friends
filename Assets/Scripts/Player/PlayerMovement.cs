@@ -99,7 +99,7 @@ public class PlayerMovement : NetworkBehaviour
     private List<Action> _queuedActions;
 
 
-    private void Start()
+    private void OnEnable()
     {
         bodyPartContainer.SetActive(false);
 
