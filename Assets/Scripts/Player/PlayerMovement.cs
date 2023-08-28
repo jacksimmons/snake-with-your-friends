@@ -99,6 +99,14 @@ public class PlayerMovement : NetworkBehaviour
     private List<Action> _queuedActions;
 
 
+    public void RecreateStartingParts(int count)
+    {
+        for (int i = 0; i < count; i++)
+        {
+            Instantiate(_bodyPartTemplate, bodyPartContainer.transform);
+        }
+    }
+
     private void OnEnable()
     {
         bodyPartContainer.SetActive(false);
@@ -106,7 +114,15 @@ public class PlayerMovement : NetworkBehaviour
         // Generate BodyParts structure & starting body parts
         BodyParts = new List<BodyPart>();
         Transform containerTransform = bodyPartContainer.transform;
-        for (int i = 0; i < containerTransform.childCount; i++)
+
+        int bodyPartCount = containerTransform.childCount;
+        if (bodyPartCount == 0)
+        {
+            RecreateStartingParts(2);
+            bodyPartCount = containerTransform.childCount;
+        }
+
+        for (int i = 0; i < bodyPartCount; i++)
         {
             Transform _transform = containerTransform.GetChild(i);
             BodyPart bp = new
