@@ -106,5 +106,6 @@ public class CustomNetworkManager : NetworkManager
         ServerChangeScene("LobbyMenu");
     }
 
+    [Command]
     public void CmdEndGame() { EndGame(); }
 }
