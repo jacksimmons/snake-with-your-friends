@@ -38,7 +38,8 @@ public class CustomNetworkManager : NetworkManager
         AlivePlayers.Remove(player);
         if (AlivePlayers.Count == 1)
         {
-            print("Game Over! " + player.playerName + " wins the game.");
+            print("Game Over! " + AlivePlayers[0].name + " wins the game.");
+            CmdEndGame();
         }
     }
 
@@ -94,8 +95,10 @@ public class CustomNetworkManager : NetworkManager
     }
 
     [Server]
-    public void EndGame()
+    private void EndGame()
     {
         ServerChangeScene("LobbyMenu");
     }
+
+    public void CmdEndGame() { EndGame(); }
 }
