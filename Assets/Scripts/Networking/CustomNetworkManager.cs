@@ -28,6 +28,8 @@ public class CustomNetworkManager : NetworkManager
         KillPlayer(player);
     }
 
+    public void RemovePlayer(int index) { RemovePlayer(Players[index]); }
+
     public void KillPlayer(PlayerObjectController player)
     {
         AlivePlayers.Remove(player);
@@ -36,6 +38,9 @@ public class CustomNetworkManager : NetworkManager
             print("Game Over! " + player.playerName + " wins the game.");
         }
     }
+
+    // Note: Player must be in AlivePlayers for this to work. Error handling TBA.
+    public void KillPlayer(int index) { KillPlayer(Players[index]); }
 
     public void StartWithNoFriends()
     {

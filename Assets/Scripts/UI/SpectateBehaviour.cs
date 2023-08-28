@@ -37,10 +37,10 @@ public class SpectateBehaviour : MonoBehaviour
     public void GetFirstTarget()
     {
         PlayerObjectController firstTarget = null;
-        if (Manager.Players.Count == 0)
+        if (Manager.AlivePlayers.Count == 0)
             m_allPlayersDead = true;
         else
-            firstTarget = Manager.Players[0];
+            firstTarget = Manager.AlivePlayers[0];
 
         UpdateNameLabel(firstTarget);
     }
@@ -61,11 +61,12 @@ public class SpectateBehaviour : MonoBehaviour
 
         int nextIndex = spectateIndex + diff;
         spectateIndex =
-            nextIndex == Manager.AlivePlayers.Count ? 0
+            nextIndex >= Manager.AlivePlayers.Count ? 0
             : 
             nextIndex < 0 ? Manager.AlivePlayers.Count - 1
             :
             nextIndex;
+        print(spectateIndex);
 
         SpectateTarget();
     }
@@ -73,8 +74,9 @@ public class SpectateBehaviour : MonoBehaviour
     private void SpectateTarget()
     {
         CamBehaviour cam = GameObject.FindWithTag("MainCamera").GetComponent<CamBehaviour>();
-        cam.Player = Manager.Players[spectateIndex].GetComponent<PlayerMovement>();
+        PlayerObjectController poc = Manager.AlivePlayers[spectateIndex];
+        cam.Player = poc.GetComponent<PlayerMovement>();
 
-        UpdateNameLabel(Manager.Players[spectateIndex]);
+        UpdateNameLabel(poc);
     }
 }

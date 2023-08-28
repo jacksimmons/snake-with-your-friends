@@ -178,5 +178,5 @@ public class PlayerObjectController : NetworkBehaviour
     private void CmdLogDeath(int index) { LogDeathClientRpc(index); }
 
     [ClientRpc]
-    private void LogDeathClientRpc(int index) { Manager.AlivePlayers.RemoveAt(index); }
+    private void LogDeathClientRpc(int index) { Manager.KillPlayer(index); }
 }

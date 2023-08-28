@@ -191,7 +191,6 @@ public class GameBehaviour : NetworkBehaviour
         // Needs to be static, as every GameBehaviour calling this command will have its OWN
         // s_numPlayersReady incremented otherwise.
         numPlayersReady++;
-        print(numPlayersReady);
         if (numPlayersReady == Manager.Players.Count)
         {
             ServerLoadGame();
