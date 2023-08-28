@@ -359,7 +359,6 @@ public class PlayerMovement : NetworkBehaviour
         GameBehaviour game = GetComponentInChildren<GameBehaviour>();
         game.OnGameOver(score: BodyParts.Count);
 
-        Destroy(bodyPartContainer.gameObject, 5);
         Destroy(this);
     }
 
