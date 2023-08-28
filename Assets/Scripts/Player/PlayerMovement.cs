@@ -110,6 +110,8 @@ public class PlayerMovement : NetworkBehaviour
 
     private void OnEnable()
     {
+        print("OnEnable");
+
         bodyPartContainer.SetActive(false);
 
         // Generate BodyParts structure & starting body parts

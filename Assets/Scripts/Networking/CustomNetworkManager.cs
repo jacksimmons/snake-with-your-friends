@@ -106,6 +106,9 @@ public class CustomNetworkManager : NetworkManager
                 {
                     DestroyImmediate(bodyParts.GetChild(0).gameObject);
                 }
+
+                // Disable PlayerMovement so OnEnable is called later
+                poc.GetComponent<PlayerMovement>().enabled = false;
             }
         }
     }
