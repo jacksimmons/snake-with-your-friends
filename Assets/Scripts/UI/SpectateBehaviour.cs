@@ -48,6 +48,8 @@ public class SpectateBehaviour : MonoBehaviour
     // Changes spectate target (by +1 or -1, determined by diff)
     public void ChangeTarget(int diff)
     {
+        print(Manager.AlivePlayers.Count);
+
         if (m_allPlayersDead) return;
 
         if (Manager.AlivePlayers.Count == 0)
