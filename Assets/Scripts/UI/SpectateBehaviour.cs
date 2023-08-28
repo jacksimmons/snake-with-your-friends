@@ -17,7 +17,7 @@ public class SpectateBehaviour : MonoBehaviour
     }
 
     public int spectateIndex = 0;
-    private bool m_bother = true;
+    private bool m_allPlayersDead = false;
 
     [SerializeField]
     private TextMeshProUGUI m_nameLabel;
@@ -29,7 +29,7 @@ public class SpectateBehaviour : MonoBehaviour
         else
         {
             m_nameLabel.text = string.Format($"[Noone to spectate]");
-            m_bother = false;
+            m_allPlayersDead = true;
         }
     }
 
@@ -38,7 +38,7 @@ public class SpectateBehaviour : MonoBehaviour
     {
         PlayerObjectController firstTarget = null;
         if (Manager.Players.Count == 0)
-            m_bother = false;
+            m_allPlayersDead = true;
         else
             firstTarget = Manager.Players[0];
 
@@ -46,30 +46,25 @@ public class SpectateBehaviour : MonoBehaviour
     }
 
     // Changes spectate target (by +1 or -1, determined by diff)
-    public void ChangeTarget(int diff, int firstTryIndex = -1)
+    public void ChangeTarget(int diff)
     {
+        if (m_allPlayersDead) return;
+
+        if (Manager.AlivePlayers.Count == 0)
+        {
+            m_allPlayersDead = true;
+            UpdateNameLabel(null);
+            return;
+        }
+
         int nextIndex = spectateIndex + diff;
         spectateIndex =
             nextIndex == Manager.AlivePlayers.Count
             ? (diff > 0 ? 0 : Manager.AlivePlayers.Count - 1)
             : nextIndex;
 
-        // Check if the search has failed
-        if (spectateIndex == firstTryIndex)
-        {
-            UpdateNameLabel(null);
-            return;
-        }
-        if (firstTryIndex == -1)
-            firstTryIndex = spectateIndex;
-
         PlayerObjectController poc = Manager.Players[spectateIndex];
         PlayerMovement pm = poc.GetComponent<PlayerMovement>();
-        if (pm != null)
-        {
-            ChangeTarget(diff, firstTryIndex);
-            return;
-        }
 
         SpectateTarget(pm);
     }

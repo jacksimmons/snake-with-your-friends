@@ -35,7 +35,6 @@ public class SentenceChangerButton : MonoBehaviour
 
     void OnPointerEnter()
     {
-        print("enter");
         m_sentenceBehaviour.SwapOutWords(m_wordChanges, m_firstWordColour);
         m_sentenceBehaviour.UpdateSentence();
     }

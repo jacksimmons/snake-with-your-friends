@@ -31,7 +31,6 @@ public class SentenceBehaviour : MonoBehaviour
         Transform prevChild = null;
         for (int i = 0; i < transform.childCount; i++)
         {
-            print(i);
             Transform child = transform.GetChild(i);
 
             if (m_lineStarters.Contains(child))

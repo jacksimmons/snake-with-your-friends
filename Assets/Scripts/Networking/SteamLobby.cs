@@ -54,7 +54,10 @@ public class SteamLobby : MonoBehaviour
     public void HostLobby(bool singleplayer)
     {
         if (!SteamManager.Initialized)
+        {
+            print("WHAT THE ACTUAL FUCK");
             return;
+        }
 
         if (singleplayer)
         {

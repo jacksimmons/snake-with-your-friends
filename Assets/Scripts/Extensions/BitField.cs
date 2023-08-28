@@ -1,5 +1,8 @@
 // Simple Bitfield.
 // Any bool value used with this defaults to false.
+using System;
+
+[Serializable]
 public class BitField
 {
     // 32 bit integer (32 fields)

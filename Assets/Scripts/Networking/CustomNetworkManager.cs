@@ -25,7 +25,16 @@ public class CustomNetworkManager : NetworkManager
     public void RemovePlayer(PlayerObjectController player)
     {
         Players.Remove(player);
+        KillPlayer(player);
+    }
+
+    public void KillPlayer(PlayerObjectController player)
+    {
         AlivePlayers.Remove(player);
+        if (AlivePlayers.Count == 1)
+        {
+            print("Game Over! " + player.playerName + " wins the game.");
+        }
     }
 
     public void StartWithNoFriends()

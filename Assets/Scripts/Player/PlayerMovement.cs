@@ -354,10 +354,10 @@ public class PlayerMovement : NetworkBehaviour
         if (!HasMoved)
             return;
 
+        m_poc.LogDeath();
+
         GameBehaviour game = GetComponentInChildren<GameBehaviour>();
         game.OnGameOver(score: BodyParts.Count);
-
-        m_poc.LogDeath();
 
         Destroy(bodyPartContainer.gameObject, 5);
         Destroy(this);

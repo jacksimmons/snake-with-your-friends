@@ -35,6 +35,8 @@ public class Settings
         this.resX = resX;
         this.resY = resY;
         this.resHz = resHz;
+
+        bf = new();
         Fullscreen = fullscreen;
         Borderless = borderless;
         HelpMotionSickness = helpMotionSickness;
