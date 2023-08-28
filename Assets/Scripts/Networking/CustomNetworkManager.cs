@@ -17,6 +17,7 @@ public class CustomNetworkManager : NetworkManager
     public bool singleplayer = false;
 
     private readonly string[] GAME_SCENES = { "Game" };
+    private readonly string[] LOBBY_SCENES = { "LobbyMenu" };
 
 
     public void AddPlayer(PlayerObjectController player)
@@ -91,6 +92,13 @@ public class CustomNetworkManager : NetworkManager
             gb.OnGameSceneLoaded(sceneName);
 
             return;
+        }
+        if (LOBBY_SCENES.Contains(sceneName))
+        {
+            foreach (PlayerObjectController player in Players)
+            {
+                player.GetComponent<PlayerMovement>();
+            }
         }
     }
 

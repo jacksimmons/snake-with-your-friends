@@ -55,7 +55,6 @@ public class SteamLobby : MonoBehaviour
     {
         if (!SteamManager.Initialized)
         {
-            print("WHAT THE ACTUAL FUCK");
             return;
         }
 
