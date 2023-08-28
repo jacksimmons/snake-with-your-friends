@@ -61,7 +61,7 @@ public class SpectateBehaviour : MonoBehaviour
         spectateIndex =
             nextIndex == Manager.AlivePlayers.Count ? 0
             : 
-            nextIndex == 0 ? Manager.AlivePlayers.Count - 1
+            nextIndex < 0 ? Manager.AlivePlayers.Count - 1
             :
             nextIndex;
 
