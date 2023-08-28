@@ -61,7 +61,7 @@ public class SpectateBehaviour : MonoBehaviour
         spectateIndex =
             nextIndex == Manager.AlivePlayers.Count
             ? (diff > 0 ? 0 : Manager.AlivePlayers.Count - 1)
-            : nextIndex;
+            : (nextIndex == 0 ? Manager.AlivePlayers.Count - 1 : nextIndex);
 
         PlayerObjectController poc = Manager.Players[spectateIndex];
         PlayerMovement pm = poc.GetComponent<PlayerMovement>();
