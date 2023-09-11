@@ -112,7 +112,10 @@ public class PlayerObjectController : NetworkBehaviour
     }
 
     [Command]
-    public void CmdStartGame(string sceneName) { Manager.StartGame(sceneName); }
+    public void CmdStartGame(string sceneName)
+    {
+        Manager.StartGame(sceneName);
+    }
 
     // In-Game Methods
     public void UpdateBodyParts()

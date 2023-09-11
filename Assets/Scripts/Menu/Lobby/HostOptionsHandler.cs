@@ -6,11 +6,6 @@ using UnityEngine.UI;
 
 public class HostOptionsHandler : MonoBehaviour
 {
-    // Player will move every (FPS - speed) frames
-    private int m_speed;
-    private bool m_selfDmg;
-    private Dictionary<EFoodType, bool> m_powerups;
-
     [SerializeField]
     private Slider m_speedSlider;
     [SerializeField]
@@ -19,63 +14,63 @@ public class HostOptionsHandler : MonoBehaviour
     private TextMeshProUGUI m_speedVerbose;
 
     [SerializeField]
-    private Toggle m_selfDmgToggle;
+    private Toggle m_friendlyFireToggle;
     [SerializeField]
-    private TextMeshProUGUI m_selfDmgLabel;
+    private TextMeshProUGUI m_friendlyFireLabel;
     [SerializeField]
-    private TextMeshProUGUI m_selfDmgVerbose;
+    private TextMeshProUGUI m_friendlyFireVerbose;
 
     [SerializeField]
-    private GameObject[] m_powerupToggles;
+    private GameObject[] m_powerupToggleContainers;
+
+    public static GameSettings SavedGameSettings { get; private set; }
+    public GameSettings CurrentGameSettings { get; private set; }
 
     private void Start()
     {
         m_speedSlider.onValueChanged.AddListener(OnSpeedSliderUpdate);
         m_speedSlider.value = 30;
 
-        m_selfDmgToggle.onValueChanged.AddListener(OnSelfDmgTogglePressed);
-        OnSelfDmgTogglePressed(true);
+        m_friendlyFireToggle.onValueChanged.AddListener(OnFriendlyFireTogglePressed);
+        OnFriendlyFireTogglePressed(true);
 
-        m_powerups = new()
+        foreach (GameObject go in m_powerupToggleContainers)
         {
-            { EFoodType.Apple, false },
-            { EFoodType.Orange, false },
-            { EFoodType.Banana, false },
-            { EFoodType.Dragonfruit, false },
-            { EFoodType.Balti, false },
-            { EFoodType.Doughnut, false },
-            { EFoodType.Drumstick, false },
-            { EFoodType.Booze, false },
-        };
-
-        foreach (GameObject go in m_powerupToggles)
-        {
-            EFoodType foodType = go.GetComponent<PowerupToggle>().foodType;
+            EFoodType foodType = go.GetComponent<PowerupToggleContainer>().foodType;
             go.GetComponentInChildren<Toggle>().onValueChanged.AddListener((pressed) => OnPowerupTogglePressed(pressed, foodType));
         }
+
+        SavedGameSettings = new();
+        CurrentGameSettings = new();
     }
 
     public void OnSpeedSliderUpdate(float value)
     {
         m_speedVerbose.text = string.Format($"Snakes move every {1 - (float)value / 60:F2} seconds");
         m_speedLabel.text = string.Format($"Speed ({value})");
-        m_speed = (int)value;
+
+        CurrentGameSettings.PlayerSpeed = (int)value;
     }
 
-    public void OnSelfDmgTogglePressed(bool pressed)
+    public void OnFriendlyFireTogglePressed(bool pressed)
     {
         string onOrOff = pressed ? "ON" : "OFF";
-        m_selfDmgVerbose.text = string.Format($"Self-inflicted damage is {onOrOff}");
-        m_selfDmgLabel.text = string.Format($"Friendly Fire ({onOrOff})");
-        m_selfDmg = pressed;
+        m_friendlyFireVerbose.text = string.Format($"Self-inflicted damage is {onOrOff}");
+        m_friendlyFireLabel.text = string.Format($"Friendly Fire ({onOrOff})");
+
+        CurrentGameSettings.FriendlyFire = pressed;
     }
 
     public void OnPowerupTogglePressed(bool pressed, EFoodType food)
     {
-        m_powerups[food] = pressed;
+        if (!pressed)
+            CurrentGameSettings.DisableFood(food);
+        else
+            CurrentGameSettings.EnableFood(food);
     }
 
     public void OnClose()
     {
+        SavedGameSettings = new(CurrentGameSettings);
     }
 }

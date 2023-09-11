@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PowerupToggle : MonoBehaviour
+public class PowerupToggleContainer : MonoBehaviour
 {
     [SerializeField]
     public EFoodType foodType;

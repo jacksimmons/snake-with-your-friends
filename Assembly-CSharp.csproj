@@ -62,7 +62,7 @@
     <Compile Include="Assets\Scripts\Food\ProjectileBehaviour.cs" />
     <Compile Include="Assets\Scripts\Object\FoodObject.cs" />
     <Compile Include="Assets\Scripts\Food\StatusEffect.cs" />
-    <Compile Include="Assets\Scripts\Menu\Lobby\PowerupToggle.cs" />
+    <Compile Include="Assets\Scripts\Menu\Lobby\PowerupToggleContainer.cs" />
     <Compile Include="Assets\Scripts\Food\TooManyPints.cs" />
     <Compile Include="Assets\Scripts\Object\Teleporter.cs" />
     <Compile Include="Assets\Scripts\Game\GameBehaviour.cs" />
@@ -110,6 +110,7 @@
     <Compile Include="Assets\Scripts\Networking\SteamLobby.cs" />
     <Compile Include="Assets\Scripts\Networking\PlayerObjectController.cs" />
     <Compile Include="Assets\Scripts\UI\SpectateNameLabel.cs" />
+    <Compile Include="Assets\Scripts\Misc\GameSettings.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Mirror\Plugins\Mono.Cecil\Mono.CecilX.dll" />
