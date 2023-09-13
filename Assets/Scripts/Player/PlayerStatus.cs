@@ -310,7 +310,7 @@ public class PlayerStatus : NetworkBehaviour
                         break;
 
                     case EEffect.SpeedBoost:
-                        float counterMaxVal= PlayerMovement.DEFAULT_COUNTER_MAX / 
+                        float counterMaxVal = GameSettings.Saved.CounterMax / 
                             SpeedEffect.GetSpeedMultFromSignedLevel(effect.EffectLevel);
 
                         if (float.IsInfinity(counterMaxVal))
@@ -360,7 +360,7 @@ public class PlayerStatus : NetworkBehaviour
         if (effect.IsInputEffect)
         {
             // Clear the old effect for the new one
-            _player.CounterMax = PlayerMovement.DEFAULT_COUNTER_MAX;
+            _player.CounterMax = GameSettings.Saved.CounterMax;
             if (ActiveInputEffect != null)
                 ClearInputEffects();
             ActiveInputEffect = effect;
@@ -412,7 +412,7 @@ public class PlayerStatus : NetworkBehaviour
         switch (effect.EffectName)
         {
             case EEffect.SpeedBoost:
-                _player.CounterMax = PlayerMovement.DEFAULT_COUNTER_MAX;
+                _player.CounterMax = GameSettings.Saved.CounterMax;
                 statusUI.DisableAllSpeedIcons();
                 break;
             case EEffect.RocketShitting:
@@ -450,7 +450,7 @@ public class PlayerStatus : NetworkBehaviour
         NumPints = 0;
         PotassiumLevels = 0;
 
-        _player.CounterMax = PlayerMovement.DEFAULT_COUNTER_MAX;
+        _player.CounterMax = GameSettings.Saved.CounterMax;
     }
 
     public Dictionary<string, string> GetStatusDebug()

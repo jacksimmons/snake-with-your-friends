@@ -47,22 +47,21 @@ MonoBehaviour:
   syncDirection: 0
   syncMode: 0
   syncInterval: 0
-  _spriteCoffee: {fileID: 0}
-  _spriteBooze: {fileID: 21300000, guid: 3e8950d30a6f0b746b3b4f4e69012a6c, type: 3}
   _spriteApple: {fileID: 21300000, guid: 0e2a9133a1e406b49a184e3541e8c928, type: 3}
-  _spriteOrange: {fileID: 21300000, guid: 60dde592f2246e54691df1ba74d0c9d3, type: 3}
+  _spriteBalti: {fileID: 21300000, guid: 42969d740ee613646930a13d4bf0b299, type: 3}
   _spriteBanana: {fileID: 0}
+  _spriteBone: {fileID: 0}
+  _spriteBooze: {fileID: 21300000, guid: 3e8950d30a6f0b746b3b4f4e69012a6c, type: 3}
+  _spriteCheese: {fileID: 0}
+  _spriteCoffee: {fileID: 0}
+  _spriteDoughnut: {fileID: 21300000, guid: 09a1a6268160fcb41a493197fc5dbcb4, type: 3}
   _spriteDragonfruit: {fileID: 21300000, guid: cc0c599d216355c458a9c2502a74424c, type: 3}
   _spriteDrumstick: {fileID: 21300000, guid: 46237619613771f449525ab3b0647479, type: 3}
-  _spriteBone: {fileID: 0}
-  _spriteCheese: {fileID: 0}
-  _spritePizza: {fileID: 21300000, guid: 2094db1395fb0a948b77b3c6d39c8dbb, type: 3}
+  _spriteIceCream: {fileID: 0}
+  _spriteOrange: {fileID: 21300000, guid: 60dde592f2246e54691df1ba74d0c9d3, type: 3}
   _spritePineapple: {fileID: 0}
   _spritePineapplePizza: {fileID: 0}
-  _spriteIceCream: {fileID: 0}
-  _spriteCrapALot: {fileID: 0}
-  _spriteBalti: {fileID: 21300000, guid: 42969d740ee613646930a13d4bf0b299, type: 3}
-  _spriteDoughnut: {fileID: 21300000, guid: 09a1a6268160fcb41a493197fc5dbcb4, type: 3}
+  _spritePizza: {fileID: 21300000, guid: 2094db1395fb0a948b77b3c6d39c8dbb, type: 3}
   _player: {fileID: 4440790568858733751}
   _fireball: {fileID: 454872681040166018, guid: 42f111e0042b8da47bacd4f388020667, type: 3}
   _staticShit: {fileID: 8571051461681396745, guid: f045dd42fe85deb4abbaf393a5043e56, type: 3}
@@ -342,7 +341,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3315957918798202727}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: afbf16f900a47a24780d2c640d9e4a0d, type: 3}
   m_Name: 
@@ -361,9 +360,7 @@ MonoBehaviour:
   m_bpCornerL: {fileID: 21300000, guid: d9aa5ab9caf99a54db513b335fc29ede, type: 3}
   direction: {x: 0, y: 0}
   movement: {x: 0, y: 0}
-  canMoveFreely: 0
   _freeMovementSpeedMod: 1
-  frozen: 0
   counter: 0
 --- !u!1 &3727899065049902522
 GameObject:
@@ -444,7 +441,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &1047568325840457048
 Transform:
   m_ObjectHideFlags: 0

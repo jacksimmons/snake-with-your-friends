@@ -23,8 +23,7 @@ public class HostOptionsHandler : MonoBehaviour
     [SerializeField]
     private GameObject[] m_powerupToggleContainers;
 
-    public static GameSettings SavedGameSettings { get; private set; }
-    public GameSettings CurrentGameSettings { get; private set; }
+    public GameSettings CurrentGameSettings { get; private set; } = new();
 
     private void Start()
     {
@@ -39,17 +38,14 @@ public class HostOptionsHandler : MonoBehaviour
             EFoodType foodType = go.GetComponent<PowerupToggleContainer>().foodType;
             go.GetComponentInChildren<Toggle>().onValueChanged.AddListener((pressed) => OnPowerupTogglePressed(pressed, foodType));
         }
-
-        SavedGameSettings = new();
-        CurrentGameSettings = new();
     }
 
     public void OnSpeedSliderUpdate(float value)
     {
-        m_speedVerbose.text = string.Format($"Snakes move every {1 - (float)value / 60:F2} seconds");
-        m_speedLabel.text = string.Format($"Speed ({value})");
+        m_speedVerbose.text = string.Format($"Snakes move every {(float)value / 60:F2} seconds");
+        m_speedLabel.text = string.Format($"Movement Frequency ({value})");
 
-        CurrentGameSettings.PlayerSpeed = (int)value;
+        CurrentGameSettings.CounterMax = (int)value;
     }
 
     public void OnFriendlyFireTogglePressed(bool pressed)
@@ -71,6 +67,6 @@ public class HostOptionsHandler : MonoBehaviour
 
     public void OnClose()
     {
-        SavedGameSettings = new(CurrentGameSettings);
+        GameSettings.Saved = new(CurrentGameSettings);
     }
 }

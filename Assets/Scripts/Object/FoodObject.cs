@@ -31,7 +31,8 @@ public class FoodObject : GridObject
             removeAndReplaceFood = true;
         }
 
-        if (TryGetComponent(out ProjectileBehaviour pb))
+        // Collision with fireball, etc.
+        if (other.TryGetComponent(out ProjectileBehaviour pb))
         {
             switch (pb.type)
             {

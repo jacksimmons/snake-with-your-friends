@@ -28,7 +28,7 @@ public class GameBehaviour : NetworkBehaviour
     private GameObject _gameOverTemplate;
 
     [SerializeField]
-    private GameObject[] _foodTemplates;
+    private List<GameObject> _foodTemplates = new();
     [SerializeField]
     private GameObject _menuSelectTemplate;
 
@@ -200,6 +200,18 @@ public class GameBehaviour : NetworkBehaviour
     [Server]
     private void ServerLoadGame()
     {
+        // Unload food items which were removed in settings
+        for (int i = 0; i < _foodTemplates.Count; i++)
+        {
+            GameObject food = _foodTemplates[i];
+            if (GameSettings.Saved.DisabledFoods.Contains(food.GetComponent<FoodObject>().food))
+            {
+                _foodTemplates.Remove(food);
+                i--;
+            }
+            print(food.GetComponent<FoodObject>().food.ToString());
+        }
+
         PlacePlayers(depth: 1, playersStartIndex: 0, bl);
 
         List<Vector2> positions = new(Manager.Players.Count);
@@ -298,6 +310,9 @@ public class GameBehaviour : NetworkBehaviour
     [Server]
     private void GenerateFood()
     {
+        // If no foods are enabled, quick exit.
+        if (_foodTemplates.Count == 0) return;
+
         int objectPos = Random.Range(0, s_objects.Length);
 
         // Overwrite s_objects[objectPos] with -1 (if there are any vacancies)
@@ -311,7 +326,7 @@ public class GameBehaviour : NetworkBehaviour
             return;
         }
 
-        int foodIndex = Random.Range(0, _foodTemplates.Length);
+        int foodIndex = Random.Range(0, _foodTemplates.Count);
         Vector2 foodPos = new((objectPos % (int)GroundSize) + (bl.x + 1.5f), (objectPos / (int)GroundSize) + (bl.y + 1.5f));
 
         GameObject obj = Instantiate(_foodTemplates[foodIndex], foodPos, Quaternion.Euler(Vector3.forward * 0));

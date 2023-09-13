@@ -75,9 +75,7 @@ public class PlayerMovement : NetworkBehaviour
 
     private List<Vector2> _storedBodyPartDirections = new List<Vector2>();
 
-    public const int LOWEST_COUNTER_MAX = 1;
-    public const int DEFAULT_COUNTER_MAX = 20;
-    private int _counterMax = DEFAULT_COUNTER_MAX;
+    private int _counterMax;
     public int CounterMax
     { 
         get
@@ -86,7 +84,7 @@ public class PlayerMovement : NetworkBehaviour
         }
         set
         {
-            if (value < LOWEST_COUNTER_MAX) { _counterMax = LOWEST_COUNTER_MAX; }
+            if (value < GameSettings.LOWEST_COUNTER_MAX) { _counterMax = GameSettings.LOWEST_COUNTER_MAX; }
             else { _counterMax = value; }
         }
     }
@@ -110,7 +108,7 @@ public class PlayerMovement : NetworkBehaviour
 
     private void OnEnable()
     {
-        print("OnEnable");
+        CounterMax = GameSettings.Saved.CounterMax;
 
         bodyPartContainer.SetActive(false);
 
@@ -442,7 +440,7 @@ public class PlayerMovement : NetworkBehaviour
             // ! Limitation - the snake must continue,
             // this means if the snake starts on a scootile,
             // they start without input.
-            CounterMax = DEFAULT_COUNTER_MAX;
+            CounterMax = GameSettings.Saved.CounterMax;
             _forcedMovement = Vector2.zero;
             for (int i = 0; i < BodyParts.Count; i++)
             {

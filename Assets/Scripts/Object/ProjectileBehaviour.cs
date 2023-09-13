@@ -57,7 +57,10 @@ public class ProjectileBehaviour : MonoBehaviour
         m_explosionEffect = GetComponent<ParticleSystem>();
         m_explosionEffect.Stop();
 
-        StartCoroutine(HandleImmunity(Proj.ImmunityDuration));
+        if (GameSettings.Saved.FriendlyFire)
+            StartCoroutine(HandleImmunity(Proj.ImmunityDuration));
+        else
+            PlayerImmune = true;
     }
 
     private void FixedUpdate()

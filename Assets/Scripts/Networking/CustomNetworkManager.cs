@@ -93,6 +93,7 @@ public class CustomNetworkManager : NetworkManager
 
             return;
         }
+
         if (LOBBY_SCENES.Contains(sceneName))
         {
             GameObject.Find("LobbyController").GetComponent<LobbyMenu>()

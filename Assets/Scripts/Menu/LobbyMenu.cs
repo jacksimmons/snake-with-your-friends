@@ -95,8 +95,6 @@ public class LobbyMenu : MonoBehaviour
 
     public void UpdatePlayerList()
     {
-        print("hi");
-
         if (!playerItemCreated) { CreateHostPlayerItems(); }
 
         if (_playerListItems.Count < Manager.Players.Count) { CreateClientPlayerItems(); }
