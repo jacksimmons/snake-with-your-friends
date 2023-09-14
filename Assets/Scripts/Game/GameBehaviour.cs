@@ -311,7 +311,12 @@ public class GameBehaviour : NetworkBehaviour
     private void GenerateFood()
     {
         // If no foods are enabled, quick exit.
-        if (_foodTemplates.Count == 0) return;
+        // This is not necessarily erroneous, as players can disable all foods.
+        if (_foodTemplates.Count == 0)
+        {
+            Debug.LogWarning("No foods"); 
+            return;
+        }
 
         int objectPos = Random.Range(0, s_objects.Length);
 

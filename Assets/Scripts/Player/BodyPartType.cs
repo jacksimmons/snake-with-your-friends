@@ -17,7 +17,7 @@ public static class BodyPartType
         switch (type)
         {
             case EBodyPartType.Straight:
-                sprite = player.m_bpStraight;
+                sprite = player.m_bpTorso;
                 break;
             case EBodyPartType.Head:
                 sprite = player.m_bpHead;

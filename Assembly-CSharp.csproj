@@ -75,7 +75,7 @@
     <Compile Include="Assets\Scripts\UI\SpectateBehaviour.cs" />
     <Compile Include="Assets\Scripts\Menu\JoinMenu.cs" />
     <Compile Include="Assets\Scripts\Player\PlayerStatus.cs" />
-    <Compile Include="Assets\Scripts\UI\SpectateButton.cs" />
+    <Compile Include="Assets\Scripts\UI\SnakeButton.cs" />
     <Compile Include="Assets\Scripts\Networking\CustomNetworkManager.cs" />
     <Compile Include="Assets\Scripts\UI\DebugBehaviour.cs" />
     <Compile Include="Assets\Scripts\Object\ObjectController.cs" />
@@ -112,6 +112,7 @@
     <Compile Include="Assets\Scripts\Networking\PlayerObjectController.cs" />
     <Compile Include="Assets\Scripts\Object\Projectile.cs" />
     <Compile Include="Assets\Scripts\UI\SpectateNameLabel.cs" />
+    <Compile Include="Assets\OutfitComponentHandler.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Mirror\Plugins\Mono.Cecil\Mono.CecilX.dll" />

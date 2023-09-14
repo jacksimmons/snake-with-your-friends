@@ -4,15 +4,45 @@ using UnityEngine;
 
 public class CustomisationMenu : MonoBehaviour
 {
-    // Start is called before the first frame update
-    private void Start()
+    public enum OutfitComponent
     {
-        //Wait.WaitForObjectThen(findObj =>
-        //{
-        //    GameObject.Find("LocalPlayerObject");
-        //},
-        //new WaitForSeconds(0.1f)
-        
-        //);
+        Head,
+        Torso,
+        Tail,
+        Corner,
+        Colour,
+        Hat
+    }
+
+    public enum SnakeColourScheme
+    {
+        RedPurple,
+    }
+
+    public SnakeColourScheme currentColourScheme;
+    public Dictionary<SnakeColourScheme, Dictionary<OutfitComponent, Sprite[]>> spriteDictionary;
+
+    private void Awake()
+    {
+        PlayerPrefs.SetString("PlayerSnakeColour", "RedPurple");
+
+        Dictionary<OutfitComponent, Sprite[]> redPurple = new()
+        {
+            { OutfitComponent.Head, GetPartSprites("RedPurple", "Heads") },
+            { OutfitComponent.Torso, GetPartSprites("RedPurple", "Torsos") },
+            { OutfitComponent.Tail, GetPartSprites("RedPurple", "Tails") },
+            { OutfitComponent.Corner, GetPartSprites("RedPurple", "Corners") }
+        };
+
+        spriteDictionary = new()
+        {
+            { SnakeColourScheme.RedPurple, redPurple }
+        };
+    }
+
+    private Sprite[] GetPartSprites(string colour, string part)
+    {
+        string filePath = string.Format("Snake/{0}/{1}", colour, part);
+        return Resources.LoadAll<Sprite>(filePath);
     }
 }

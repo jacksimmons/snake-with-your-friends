@@ -51,7 +51,7 @@ public class PlayerMovement : NetworkBehaviour
     [SerializeField]
     public Sprite m_bpTail;
     [SerializeField]
-    public Sprite m_bpStraight;
+    public Sprite m_bpTorso;
     [SerializeField]
     public Sprite m_bpCornerL;
 

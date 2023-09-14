@@ -356,7 +356,7 @@ MonoBehaviour:
   _bodyPartTemplate: {fileID: 5018333784677603630, guid: 9908d17a7ea796245b69484d416bce59, type: 3}
   m_bpHead: {fileID: 21300000, guid: cab13cca9bd8fc74ab7f14aaeca14351, type: 3}
   m_bpTail: {fileID: 21300000, guid: 895c58017397a7a47b7c31c8ebe71234, type: 3}
-  m_bpStraight: {fileID: 21300000, guid: 5dbd08e1b155aad469cbcf43e9563923, type: 3}
+  m_bpTorso: {fileID: 21300000, guid: 5dbd08e1b155aad469cbcf43e9563923, type: 3}
   m_bpCornerL: {fileID: 21300000, guid: d9aa5ab9caf99a54db513b335fc29ede, type: 3}
   direction: {x: 0, y: 0}
   movement: {x: 0, y: 0}
@@ -441,7 +441,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1047568325840457048
 Transform:
   m_ObjectHideFlags: 0
