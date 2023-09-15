@@ -9,8 +9,6 @@ public class PlayerHUDElement : MonoBehaviour
     private TextMeshProUGUI m_nameLabel;
     [SerializeField]
     private TextMeshProUGUI m_numPartsLabel;
-    [SerializeField]
-    private Sprite m_deadSprite;
 
 
     public void SetName(string name)
@@ -25,8 +23,9 @@ public class PlayerHUDElement : MonoBehaviour
 
     public void AppearDead()
     {
-        transform.Find("NumPartsLabel").GetComponent<TextMeshProUGUI>().text = "Dead";
-        transform.Find("Head").GetComponent<Image>().sprite = m_deadSprite;
+        transform.Find("NumPartsLabel").GetComponent<TextMeshProUGUI>().text = "RIP";
+        transform.Find("DeathIcon").gameObject.SetActive(true);
+        transform.Find("Head").gameObject.SetActive(false);
         transform.Find("Torso").gameObject.SetActive(false);
         transform.Find("Tail").gameObject.SetActive(false);
     }

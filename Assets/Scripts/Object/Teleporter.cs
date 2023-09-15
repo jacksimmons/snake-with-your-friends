@@ -14,9 +14,10 @@ public class Teleporter : MonoBehaviour
     private void OnTriggerEnter2D(Collider2D collision)
     {
         GameObject obj = collision.gameObject;
-        if (obj.transform.parent.CompareTag("Player"))
+        Transform playerTransform;
+        if ((playerTransform = Player.TryGetPlayerTransformFromBodyPart(obj)) != null)
         {
-            PlayerMovement player = obj.transform.GetComponentInParent<PlayerMovement>();
+            PlayerMovement player = playerTransform.GetComponentInParent<PlayerMovement>();
             BodyPart bp = player.BodyParts[obj.transform.GetSiblingIndex()];
             if (bp.TeleportCounter == 0)
             {
