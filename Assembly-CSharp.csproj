@@ -77,8 +77,10 @@
     <Compile Include="Assets\Scripts\Misc\SaveData.cs" />
     <Compile Include="Assets\Scripts\UI\StatusEffectUI.cs" />
     <Compile Include="Assets\Scripts\Menu\Main\SentenceChangerButton.cs" />
+    <Compile Include="Assets\MainMenuSnakeActor.cs" />
     <Compile Include="Assets\Scripts\Object\GridObject.cs" />
     <Compile Include="Assets\Scripts\Menu\Lobby\LobbySettings.cs" />
+    <Compile Include="Assets\Scripts\Extensions\RandomDistribution.cs" />
     <Compile Include="Assets\Scripts\Menu\Settings\Settings.cs" />
     <Compile Include="Assets\Scripts\Menu\Customisation\OutfitComponentHandler.cs" />
     <Compile Include="Assets\Scripts\CamBehaviour.cs" />
@@ -94,12 +96,14 @@
     <Compile Include="Assets\Scripts\Effects\TooManyPints.cs" />
     <Compile Include="Assets\Scripts\Object\Teleporter.cs" />
     <Compile Include="Assets\Scripts\Player\PlayerMovement.cs" />
+    <Compile Include="Assets\IntroCutsceneHandler.cs" />
     <Compile Include="Assets\Scripts\Unused\Counter.cs" />
     <Compile Include="Assets\Scripts\Object\ScootileTilemap.cs" />
     <Compile Include="Assets\Scripts\Effects\Effect.cs" />
     <Compile Include="Assets\Scripts\Misc\LoadingIcon.cs" />
     <Compile Include="Assets\Scripts\UI\DebugBehaviour.cs" />
     <Compile Include="Assets\Scripts\Object\ObjectController.cs" />
+    <Compile Include="Assets\MainMenuSnakeSpawner.cs" />
     <Compile Include="Assets\Scripts\Menu\Lobby\HostOptionsHandler.cs" />
     <Compile Include="Assets\Scripts\Unused\FollowPlayer.cs" />
     <Compile Include="Assets\Scripts\Menu\Lobby\GameSettings.cs" />
@@ -117,9 +121,6 @@
     <Compile Include="Assets\Scripts\Networking\SteamLobby.cs" />
     <Compile Include="Assets\Scripts\Networking\PlayerObjectController.cs" />
     <Compile Include="Assets\Scripts\Object\Projectile.cs" />
-    <Compile Include="Assets\MainMenuSnakeActor.cs" />
-    <Compile Include="Assets\MainMenuSnakeSpawner.cs" />
-    <Compile Include="Assets\Scripts\Extensions\RandomDistribution.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Mirror\Plugins\Mono.Cecil\Mono.CecilX.dll" />

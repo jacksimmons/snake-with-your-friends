@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 2188b5b9995e99543b942024cfcf8ba8
+guid: 46a44c60ebd8c4f439a5b1505d53e55b
 ScriptedImporter:
   internalIDToNameTable: []
   externalObjects: {}
@@ -117,7 +117,7 @@ ScriptedImporter:
     tessellationDetail: 0
     uvTransform: {x: 0, y: 0}
   animatedSpriteImportData:
-  - name: Snake_with_your_freinds_logo_Frame_0
+  - name: IntroCutscene_Frame_0
     originalName: 
     pivot: {x: 0.5, y: 0}
     alignment: 9
@@ -128,7 +128,7 @@ ScriptedImporter:
       y: 4
       width: 240
       height: 135
-    spriteID: ddd3e53ec13015e4d9f1adf1dffe864b
+    spriteID: 35b5d3590d34e774abe541b066d0e987
     spriteBone: []
     spriteOutline: []
     vertices: []
@@ -137,7 +137,7 @@ ScriptedImporter:
     edges: []
     tessellationDetail: 0
     uvTransform: {x: 4, y: 4}
-  - name: Snake_with_your_freinds_logo_Frame_1
+  - name: IntroCutscene_Frame_1
     originalName: 
     pivot: {x: 0.5, y: 0}
     alignment: 9
@@ -148,7 +148,7 @@ ScriptedImporter:
       y: 147
       width: 240
       height: 135
-    spriteID: b533a4730fc60b14cb84913ba38003f4
+    spriteID: 70ea62b2b530d1e49af9384ce92b43e8
     spriteBone: []
     spriteOutline: []
     vertices: []
@@ -157,7 +157,7 @@ ScriptedImporter:
     edges: []
     tessellationDetail: 0
     uvTransform: {x: 4, y: 147}
-  - name: Snake_with_your_freinds_logo_Frame_2
+  - name: IntroCutscene_Frame_2
     originalName: 
     pivot: {x: 0.5, y: 0}
     alignment: 9
@@ -168,7 +168,7 @@ ScriptedImporter:
       y: 290
       width: 240
       height: 135
-    spriteID: ed80ab03d27af084ea1a2e6dd7a257b8
+    spriteID: 485c2c0bcdd9db84fa4bd89943ff19aa
     spriteBone: []
     spriteOutline: []
     vertices: []
@@ -177,7 +177,7 @@ ScriptedImporter:
     edges: []
     tessellationDetail: 0
     uvTransform: {x: 4, y: 290}
-  - name: Snake_with_your_freinds_logo_Frame_3
+  - name: IntroCutscene_Frame_3
     originalName: 
     pivot: {x: 0.5, y: 0}
     alignment: 9
@@ -188,7 +188,7 @@ ScriptedImporter:
       y: 4
       width: 240
       height: 135
-    spriteID: d728b49af57ee6d4db6632f6766c0da8
+    spriteID: 9033a7a39d7af4d4bb784278ca674750
     spriteBone: []
     spriteOutline: []
     vertices: []
@@ -197,75 +197,47 @@ ScriptedImporter:
     edges: []
     tessellationDetail: 0
     uvTransform: {x: 252, y: 4}
-  - name: Snake_with_your_freinds_logo_Frame_4
-    originalName: 
-    pivot: {x: 0.5, y: 0}
-    alignment: 9
-    border: {x: 0, y: 0, z: 0, w: 0}
-    rect:
-      serializedVersion: 2
-      x: 252
-      y: 147
-      width: 240
-      height: 135
-    spriteID: 8786aaea9dd2c814db6f42f03af13262
-    spriteBone: []
-    spriteOutline: []
-    vertices: []
-    spritePhysicsOutline: []
-    indices: 
-    edges: []
-    tessellationDetail: 0
-    uvTransform: {x: 252, y: 147}
   spriteSheetImportData: []
   asepriteLayers:
   - layerIndex: 0
-    guid: -1172351589
-    name: Snake_with_your_freinds_logo
+    guid: 1128297088
+    name: IntroCutscene
     layerFlags: 0
     layerType: 0
     blendMode: 0
     cells:
-    - name: Snake_with_your_freinds_logo_Frame_0
+    - name: IntroCutscene_Frame_0
       frameIndex: 0
       cellRect:
         x: 0
         y: 0
         width: 240
         height: 135
-      spriteId: ddd3e53ec13015e4d9f1adf1dffe864b
-    - name: Snake_with_your_freinds_logo_Frame_1
+      spriteId: 35b5d3590d34e774abe541b066d0e987
+    - name: IntroCutscene_Frame_1
       frameIndex: 1
       cellRect:
         x: 0
         y: 0
         width: 240
         height: 135
-      spriteId: b533a4730fc60b14cb84913ba38003f4
-    - name: Snake_with_your_freinds_logo_Frame_2
+      spriteId: 70ea62b2b530d1e49af9384ce92b43e8
+    - name: IntroCutscene_Frame_2
       frameIndex: 2
       cellRect:
         x: 0
         y: 0
         width: 240
         height: 135
-      spriteId: ed80ab03d27af084ea1a2e6dd7a257b8
-    - name: Snake_with_your_freinds_logo_Frame_3
+      spriteId: 485c2c0bcdd9db84fa4bd89943ff19aa
+    - name: IntroCutscene_Frame_3
       frameIndex: 3
       cellRect:
         x: 0
         y: 0
         width: 240
         height: 135
-      spriteId: d728b49af57ee6d4db6632f6766c0da8
-    - name: Snake_with_your_freinds_logo_Frame_4
-      frameIndex: 4
-      cellRect:
-        x: 0
-        y: 0
-        width: 240
-        height: 135
-      spriteId: 8786aaea9dd2c814db6f42f03af13262
+      spriteId: 9033a7a39d7af4d4bb784278ca674750
     linkedCells: []
     parentIndex: -1
   platformSettings: []

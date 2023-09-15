@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 
 public class MainMenuSnakeActor : MonoBehaviour
@@ -10,9 +11,13 @@ public class MainMenuSnakeActor : MonoBehaviour
     private float timeSinceLastMove = 0;
     private float moveTime;
 
+    private float bpWidth;
+
     private void Start()
     {
         moveTime = Random.Range(MIN_MOVE_TIME, MAX_MOVE_TIME);
+        RectTransform head = (RectTransform)transform.GetChild(0);
+        bpWidth = head.rect.width * transform.localScale.x;
     }
 
     // Update is called once per frame
@@ -26,7 +31,14 @@ public class MainMenuSnakeActor : MonoBehaviour
             transform.position += Vector3.right;
         }
 
-        if (transform.position.x > 200)
+        if (CalculateTailEndPos() > 250)
             Destroy(gameObject);
+    }
+
+    private float CalculateTailEndPos()
+    {
+        return
+            ((RectTransform)transform).anchoredPosition.x -
+            bpWidth * transform.childCount;
     }
 }

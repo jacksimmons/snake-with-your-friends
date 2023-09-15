@@ -38,14 +38,40 @@ public class Wait
         yield return null;
     }
 
-    public static IEnumerator WaitForLoadSceneThen(string sceneName, YieldInstruction waitTime, Action then=null)
+
+    public static IEnumerator WaitForLoadSceneThen(string sceneName, YieldInstruction waitTime,
+        Action then = null)
     {
         AsyncOperation load = SceneManager.LoadSceneAsync(sceneName);
-        while (load.isDone)
+
+        while (!load.isDone)
         {
             yield return waitTime;
         }
         then?.Invoke();
+        yield return null;
+    }
+
+    public static IEnumerator LoadSceneThenWait(string sceneName, 
+        Func<bool> conditionToActivate, YieldInstruction waitTime)
+    {
+        AsyncOperation load = SceneManager.LoadSceneAsync(sceneName);
+        load.allowSceneActivation = false;
+
+        Debug.Log("hi");
+
+        while (!load.isDone)
+        {
+            if (load.progress >= 0.9f)
+            {
+                Debug.Log(conditionToActivate());
+                if (conditionToActivate())
+                    load.allowSceneActivation = true;
+            }
+
+            yield return waitTime;
+        }
+
         yield return null;
     }
 }
