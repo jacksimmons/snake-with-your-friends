@@ -7,7 +7,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-// Chungus always persists. Nobody like chungus.
+// Always persists. Nobody like chungus.
 // A singleton class which contains always-available (global) methods.
 
 // Provides assurance (*) that the singleton is always defined after Awake.
@@ -17,7 +17,7 @@ public class Chungus : MonoBehaviour
     private string[] dontDestroyThese =
     {
         "Chungus",
-        "Loading"
+        "LoadingCanvas"
     };
     public Settings settings = null;
 

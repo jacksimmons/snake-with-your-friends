@@ -103,7 +103,7 @@ public class MainMenu : MonoBehaviour
         Chungus.ClearDontDestroyOnLoad();
 
         // Will enable then disable the loading symbol
-        GameObject.FindWithTag("LoadingCanvas").GetComponent<LoadingIcon>().LoadSceneWithLoadingSymbol("MainMenu");
+        LoadingIcon.Instance.LoadSceneWithLoadingSymbol("MainMenu");
     }
 
     public void Quit()

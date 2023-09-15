@@ -25,9 +25,10 @@ public class Wait
     /// <summary>
     /// Uses a findObj function to attempt to locate the object every waitTime, and then calls the "then" action
     /// with the found object as a parameter.
-    public static IEnumerator WaitForObjectThen(Func<GameObject> findObj, YieldInstruction waitTime, Action<GameObject> then=null)
+    public static IEnumerator WaitForObjectThen<T>(Func<T> findObj, YieldInstruction waitTime, Action<T> then=null)
+        where T : class
     {
-        GameObject obj = null;
+        T obj = null;
         while (obj == null)
         {
             obj = findObj();

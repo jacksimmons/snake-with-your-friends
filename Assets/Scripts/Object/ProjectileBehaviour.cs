@@ -73,6 +73,8 @@ public class ProjectileBehaviour : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D other)
     {
+        print("Hi");
+
         // Projectile Collision section
         if (other.TryGetComponent(out ProjectileBehaviour otherPb))
         {

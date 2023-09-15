@@ -19,6 +19,16 @@ public class CustomNetworkManager : NetworkManager
     private readonly string[] GAME_SCENES = { "Game" };
     private readonly string[] LOBBY_SCENES = { "LobbyMenu" };
 
+    private static CustomNetworkManager _instance;
+    public static CustomNetworkManager Instance
+    {
+        get
+        {
+            if (_instance != null) { return _instance; }
+            return _instance = CustomNetworkManager.singleton as CustomNetworkManager;
+        }
+    }
+
 
     public void AddPlayer(PlayerObjectController player)
     {

@@ -6,11 +6,13 @@ using UnityEngine.SceneManagement;
 
 public class LoadingIcon : MonoBehaviour
 {
+    private static LoadingIcon _instance;
     public static LoadingIcon Instance
     {
         get
         {
-            return GameObject.FindWithTag("LoadingIcon")
+            if (_instance != null) return _instance;
+            return _instance = GameObject.FindWithTag("LoadingIcon")
                 .GetComponent<LoadingIcon>();
         }
     }
@@ -51,7 +53,7 @@ public class LoadingIcon : MonoBehaviour
         StartCoroutine(
             Wait.WaitForConditionThen(
                 check,
-                new WaitForEndOfFrame(),
+                new WaitForSeconds(0.1f),
                 () => Toggle(false)
             )
         );
@@ -63,7 +65,7 @@ public class LoadingIcon : MonoBehaviour
         StartCoroutine(
             Wait.WaitForLoadSceneThen(
                 sceneName,
-                new WaitForEndOfFrame(),
+                new WaitForSeconds(0.1f),
                 () => Toggle(false)
             )
         );

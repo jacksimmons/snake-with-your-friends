@@ -32,6 +32,9 @@ public class PlayerObjectController : NetworkBehaviour
         }
     }
 
+    public PlayerHUDElement PlayerOnHUD { get; set; }
+
+
     private void Start()
     {
         DontDestroyOnLoad(gameObject);
@@ -125,6 +128,7 @@ public class PlayerObjectController : NetworkBehaviour
         {
             bodyPartDatas.Add(BodyPart.ToData(part));
         }
+        PlayerOnHUD.SetNumParts(bodyPartDatas.Count);
         CmdUpdateBodyParts(bodyPartDatas, playerSteamID);
     }
 
@@ -175,7 +179,11 @@ public class PlayerObjectController : NetworkBehaviour
         }
     }
 
-    public void LogDeath() { CmdLogDeath(Manager.Players.IndexOf(this)); }
+    public void LogDeath()
+    { 
+        CmdLogDeath(Manager.Players.IndexOf(this));
+        PlayerOnHUD.AppearDead();
+    }
 
     [Command]
     private void CmdLogDeath(int index) { LogDeathClientRpc(index); }

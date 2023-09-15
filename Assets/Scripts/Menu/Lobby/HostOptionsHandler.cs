@@ -20,8 +20,6 @@ public class HostOptionsHandler : MonoBehaviour
     private Toggle m_friendlyFireToggle;
     [SerializeField]
     private TextMeshProUGUI m_friendlyFireLabel;
-    [SerializeField]
-    private TextMeshProUGUI m_friendlyFireVerbose;
 
     [SerializeField]
     private GameObject[] m_powerupToggleContainers;
@@ -55,7 +53,6 @@ public class HostOptionsHandler : MonoBehaviour
     public void OnFriendlyFireTogglePressed(bool pressed)
     {
         string onOrOff = pressed ? "ON" : "OFF";
-        m_friendlyFireVerbose.text = $"Self-inflicted damage is {onOrOff}";
         m_friendlyFireLabel.text = $"Friendly Fire ({onOrOff})";
 
         m_currentGameSettings.FriendlyFire = pressed;
