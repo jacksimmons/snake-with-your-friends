@@ -117,6 +117,9 @@
     <Compile Include="Assets\Scripts\Networking\SteamLobby.cs" />
     <Compile Include="Assets\Scripts\Networking\PlayerObjectController.cs" />
     <Compile Include="Assets\Scripts\Object\Projectile.cs" />
+    <Compile Include="Assets\MainMenuSnakeActor.cs" />
+    <Compile Include="Assets\MainMenuSnakeSpawner.cs" />
+    <Compile Include="Assets\Scripts\Extensions\RandomDistribution.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Mirror\Plugins\Mono.Cecil\Mono.CecilX.dll" />
