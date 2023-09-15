@@ -141,6 +141,13 @@ public class PlayerMovement : NetworkBehaviour
                 EBodyPartType.Tail
             );
             BodyParts.Add(bp);
+
+            _transform.GetComponent<SpriteRenderer>().sprite =
+                bp.CurrentType == EBodyPartType.Head ? m_bpHead :
+                bp.CurrentType == EBodyPartType.Straight ? m_bpTorso :
+                bp.CurrentType == EBodyPartType.Tail ? m_bpTail :
+                bp.CurrentType == EBodyPartType.Corner ? m_bpCornerL :
+                null;
         }
 
         // Generate QueuedActions structure

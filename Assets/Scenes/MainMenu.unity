@@ -533,7 +533,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 6
+  m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &569866162
 PrefabInstance:
@@ -1080,7 +1080,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 4
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &983553305
 MonoBehaviour:
@@ -1974,7 +1974,7 @@ RectTransform:
   m_Children:
   - {fileID: 658449158}
   m_Father: {fileID: 0}
-  m_RootOrder: 5
+  m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -2069,6 +2069,22 @@ PrefabInstance:
       propertyPath: m_LocalPosition.y
       value: -212.5
       objectReference: {fileID: 0}
+    - target: {fileID: 4264483799789666039, guid: 1e90103ae3d7a03448c96421bba9a0c7, type: 3}
+      propertyPath: m_Name
+      value: LoadingIcon
+      objectReference: {fileID: 0}
+    - target: {fileID: 4264483799789666039, guid: 1e90103ae3d7a03448c96421bba9a0c7, type: 3}
+      propertyPath: m_TagString
+      value: Untagged
+      objectReference: {fileID: 0}
+    - target: {fileID: 5699350894214724474, guid: 1e90103ae3d7a03448c96421bba9a0c7, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 5699350894214724474, guid: 1e90103ae3d7a03448c96421bba9a0c7, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 100
+      objectReference: {fileID: 0}
     - target: {fileID: 5723551523446477340, guid: 1e90103ae3d7a03448c96421bba9a0c7, type: 3}
       propertyPath: m_AnchorMax.x
       value: 1
@@ -2101,6 +2117,10 @@ PrefabInstance:
       propertyPath: m_Camera
       value: 
       objectReference: {fileID: 405969962}
+    - target: {fileID: 7940590033882214898, guid: 1e90103ae3d7a03448c96421bba9a0c7, type: 3}
+      propertyPath: m_PlaneDistance
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 7940590033882214899, guid: 1e90103ae3d7a03448c96421bba9a0c7, type: 3}
       propertyPath: m_Pivot.x
       value: 0
@@ -2111,7 +2131,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7940590033882214899, guid: 1e90103ae3d7a03448c96421bba9a0c7, type: 3}
       propertyPath: m_RootOrder
-      value: 3
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 7940590033882214899, guid: 1e90103ae3d7a03448c96421bba9a0c7, type: 3}
       propertyPath: m_AnchorMax.x
@@ -2187,7 +2207,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7940590033882214903, guid: 1e90103ae3d7a03448c96421bba9a0c7, type: 3}
       propertyPath: m_Name
-      value: Loading
+      value: LoadingCanvas
+      objectReference: {fileID: 0}
+    - target: {fileID: 7940590033882214903, guid: 1e90103ae3d7a03448c96421bba9a0c7, type: 3}
+      propertyPath: m_TagString
+      value: LoadingIcon
       objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 6003292854637649620, guid: 1e90103ae3d7a03448c96421bba9a0c7, type: 3}

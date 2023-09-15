@@ -17,6 +17,7 @@ public class MainMenu : MonoBehaviour
     [SerializeField]
     private GameObject m_networkManager;
 
+
     private void Start()
     {
         // Ensures Chungus instance
@@ -71,7 +72,7 @@ public class MainMenu : MonoBehaviour
             return;
         }
 
-        Chungus.ShowLoadingSymbolUntil(() => SceneManager.GetActiveScene().name == "LobbyMenu");
+        LoadingIcon.Instance.Toggle(true);
 
         GameObject go = GameObject.Find("NetworkManager");
 
@@ -87,27 +88,27 @@ public class MainMenu : MonoBehaviour
             return;
         }
 
-        Chungus.LoadSceneWithLoadingSymbol("JoinMenu");
+        LoadingIcon.Instance.LoadSceneWithLoadingSymbol("JoinMenu");
     }
 
     public void OnSettingsButtonPressed()
     {
-        Chungus.LoadSceneWithLoadingSymbol("SettingsMenu");
+        LoadingIcon.Instance.LoadSceneWithLoadingSymbol("SettingsMenu");
     }
 
     public void OnRetryButtonPressed()
     {
         // Will enable the loading symbol
-        Chungus.ToggleLoadingSymbol(true);
+        LoadingIcon.Instance.Toggle(true);
         Chungus.ClearDontDestroyOnLoad();
 
         // Will enable then disable the loading symbol
-        Chungus.LoadSceneWithLoadingSymbol("MainMenu");
+        GameObject.FindWithTag("LoadingCanvas").GetComponent<LoadingIcon>().LoadSceneWithLoadingSymbol("MainMenu");
     }
 
     public void Quit()
     {
-        Chungus.ShowLoadingSymbolUntil(() => false);
+        LoadingIcon.Instance.ShowLoadingSymbolUntil(() => false);
         Application.Quit();
     }
 }

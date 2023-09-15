@@ -14,6 +14,6 @@ public class MainMenuButton : MonoBehaviour
             cnm.StopClient();
             cnm.StopHost();
         }
-        Chungus.LoadSceneWithLoadingSymbol("MainMenu");
+        LoadingIcon.Instance.LoadSceneWithLoadingSymbol("MainMenu");
     }
 }

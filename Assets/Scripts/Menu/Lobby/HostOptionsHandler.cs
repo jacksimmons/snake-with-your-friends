@@ -1,7 +1,10 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
+using System.Runtime.Serialization.Formatters.Binary;
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class HostOptionsHandler : MonoBehaviour
@@ -23,12 +26,12 @@ public class HostOptionsHandler : MonoBehaviour
     [SerializeField]
     private GameObject[] m_powerupToggleContainers;
 
-    public GameSettings CurrentGameSettings { get; private set; } = new();
+    private GameSettings m_currentGameSettings = new();
 
     private void Start()
     {
         m_speedSlider.onValueChanged.AddListener(OnSpeedSliderUpdate);
-        m_speedSlider.value = 30;
+        m_speedSlider.value = GameSettings.Saved.CounterMax;
 
         m_friendlyFireToggle.onValueChanged.AddListener(OnFriendlyFireTogglePressed);
         OnFriendlyFireTogglePressed(true);
@@ -37,36 +40,42 @@ public class HostOptionsHandler : MonoBehaviour
         {
             EFoodType foodType = go.GetComponent<PowerupToggleContainer>().foodType;
             go.GetComponentInChildren<Toggle>().onValueChanged.AddListener((pressed) => OnPowerupTogglePressed(pressed, foodType));
+            go.GetComponentInChildren<Toggle>().isOn = !GameSettings.Saved.DisabledFoods.Contains(foodType);
         }
     }
 
     public void OnSpeedSliderUpdate(float value)
     {
-        m_speedVerbose.text = string.Format($"Snakes move every {(float)value / 60:F2} seconds");
-        m_speedLabel.text = string.Format($"Movement Frequency ({value})");
+        m_speedVerbose.text = $"Snakes move every {(float)value / 60:F2} seconds";
+        m_speedLabel.text = $"Movement Frequency ({value})";
 
-        CurrentGameSettings.CounterMax = (int)value;
+        m_currentGameSettings.CounterMax = (int)value;
     }
 
     public void OnFriendlyFireTogglePressed(bool pressed)
     {
         string onOrOff = pressed ? "ON" : "OFF";
-        m_friendlyFireVerbose.text = string.Format($"Self-inflicted damage is {onOrOff}");
-        m_friendlyFireLabel.text = string.Format($"Friendly Fire ({onOrOff})");
+        m_friendlyFireVerbose.text = $"Self-inflicted damage is {onOrOff}";
+        m_friendlyFireLabel.text = $"Friendly Fire ({onOrOff})";
 
-        CurrentGameSettings.FriendlyFire = pressed;
+        m_currentGameSettings.FriendlyFire = pressed;
     }
 
     public void OnPowerupTogglePressed(bool pressed, EFoodType food)
     {
         if (!pressed)
-            CurrentGameSettings.DisableFood(food);
+            m_currentGameSettings.DisableFood(food);
         else
-            CurrentGameSettings.EnableFood(food);
+            m_currentGameSettings.EnableFood(food);
     }
 
+    /// <summary>
+    /// When host options is closed, save GameSettings to file, making it the player's new default.
+    /// </summary>
     public void OnClose()
     {
-        GameSettings.Saved = new(CurrentGameSettings);
+        GameSettings.Saved = new(m_currentGameSettings);
+
+        SaveData.SaveToFile(GameSettings.Saved, "GameSettings.dat");
     }
 }

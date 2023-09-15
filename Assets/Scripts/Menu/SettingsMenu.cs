@@ -183,14 +183,6 @@ public class SettingsMenu : MonoBehaviour
 
     public void SaveSettingsToFile()
     {
-        Chungus.ShowLoadingSymbolUntil(() => SceneManager.GetActiveScene().name == "MainMenu");
-
-        string dest = Application.persistentDataPath + "/settings.dat";
-        FileStream fs;
-
-        if (File.Exists(dest)) fs = File.OpenWrite(dest);
-        else fs = File.Create(dest);
-
         Settings settings = new Settings(
             menuVolumeValue / 100,
             sfxVolumeValue / 100,
@@ -199,8 +191,7 @@ public class SettingsMenu : MonoBehaviour
             borderlessValue,
             motionSicknessValue
         );
-        BinaryFormatter bf = new BinaryFormatter();
-        bf.Serialize(fs, settings);
-        fs.Close();
+
+        SaveData.SaveToFile(settings, "Settings.dat");
     }
 }

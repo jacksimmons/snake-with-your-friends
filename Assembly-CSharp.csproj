@@ -82,8 +82,10 @@
     <Compile Include="Assets\Scripts\Audio\AudioHandler.cs" />
     <Compile Include="Assets\Scripts\Object\ForegroundObject.cs" />
     <Compile Include="Assets\Scripts\Player\Player.cs" />
+    <Compile Include="Assets\Scripts\OutfitSettings.cs" />
     <Compile Include="Assets\Scripts\Object\ForegroundBehaviour.cs" />
     <Compile Include="Assets\Scripts\Object\ProjectileBehaviour.cs" />
+    <Compile Include="Assets\Scripts\SaveData.cs" />
     <Compile Include="Assets\Scripts\Menu\Lobby\HostOptionsHandler.cs" />
     <Compile Include="Assets\Scripts\UI\StatusEffectUI.cs" />
     <Compile Include="Assets\Scripts\Unused\FollowPlayer.cs" />
@@ -100,7 +102,7 @@
     <Compile Include="Assets\Scripts\Object\ColliderToggleTilemap.cs" />
     <Compile Include="Assets\Scripts\Player\BodyPart.cs" />
     <Compile Include="Assets\Scripts\Object\DeathTrigger.cs" />
-    <Compile Include="Assets\CustomisationMenu.cs" />
+    <Compile Include="Assets\Scripts\CustomisationMenu.cs" />
     <Compile Include="Assets\Scripts\Menu\Main\WordBehaviour.cs" />
     <Compile Include="Assets\Scripts\Extensions\SetOnce.cs" />
     <Compile Include="Assets\Scripts\CamBehaviour.cs" />
@@ -111,8 +113,8 @@
     <Compile Include="Assets\Scripts\Networking\SteamLobby.cs" />
     <Compile Include="Assets\Scripts\Networking\PlayerObjectController.cs" />
     <Compile Include="Assets\Scripts\Object\Projectile.cs" />
+    <Compile Include="Assets\Scripts\OutfitComponentHandler.cs" />
     <Compile Include="Assets\Scripts\UI\SpectateNameLabel.cs" />
-    <Compile Include="Assets\OutfitComponentHandler.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Mirror\Plugins\Mono.Cecil\Mono.CecilX.dll" />

@@ -24,8 +24,6 @@ public class CustomisationMenu : MonoBehaviour
 
     private void Awake()
     {
-        PlayerPrefs.SetString("PlayerSnakeColour", "RedPurple");
-
         Dictionary<OutfitComponent, Sprite[]> redPurple = new()
         {
             { OutfitComponent.Head, GetPartSprites("RedPurple", "Heads") },
@@ -42,7 +40,7 @@ public class CustomisationMenu : MonoBehaviour
 
     private Sprite[] GetPartSprites(string colour, string part)
     {
-        string filePath = string.Format("Snake/{0}/{1}", colour, part);
+        string filePath = $"Snake/{colour}/{part}";
         return Resources.LoadAll<Sprite>(filePath);
     }
 }

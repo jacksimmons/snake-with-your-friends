@@ -1005,7 +1005,7 @@ PrefabInstance:
     - target: {fileID: 8622739597364465728, guid: f72c23f85331fb74984a94a688d75a0e, type: 3}
       propertyPath: m_Delegates.Array.data[2].callback.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
-      objectReference: {fileID: 1166511248}
+      objectReference: {fileID: 0}
     - target: {fileID: 8622739597364465728, guid: f72c23f85331fb74984a94a688d75a0e, type: 3}
       propertyPath: m_Delegates.Array.data[2].callback.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
       value: 2
@@ -4383,7 +4383,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1166511247}
-  - component: {fileID: 1166511248}
   m_Layer: 0
   m_Name: ColourUI
   m_TagString: Untagged
@@ -4414,20 +4413,6 @@ RectTransform:
   m_AnchoredPosition: {x: 152.96, y: 63.320007}
   m_SizeDelta: {x: 305.92, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &1166511248
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1166511246}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d1f3de1f9ef3e0745b1da3b3d9c4bed7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_outfitComponent: 0
-  m_previewObjectsToUpdate: []
 --- !u!1001 &1181792678
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -5601,7 +5586,7 @@ PrefabInstance:
     - target: {fileID: 8622739597364465728, guid: f72c23f85331fb74984a94a688d75a0e, type: 3}
       propertyPath: m_Delegates.Array.data[2].callback.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
-      objectReference: {fileID: 1166511248}
+      objectReference: {fileID: 0}
     - target: {fileID: 8622739597364465728, guid: f72c23f85331fb74984a94a688d75a0e, type: 3}
       propertyPath: m_Delegates.Array.data[2].callback.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
       value: 2

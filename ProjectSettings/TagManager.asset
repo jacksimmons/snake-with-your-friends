@@ -17,6 +17,7 @@ TagManager:
   - AudioHandler
   - LobbyPanel
   - CustomisationMenu
+  - LoadingIcon
   layers:
   - Default
   - TransparentFX

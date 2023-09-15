@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 // Chungus always persists. Nobody like chungus.
 // A singleton class which contains always-available (global) methods.
@@ -19,7 +20,6 @@ public class Chungus : MonoBehaviour
         "Loading"
     };
     public Settings settings = null;
-    public GameObject LoadingObj { get; private set; } = null;
 
     // Singleton
     private static Chungus _instance;
@@ -31,57 +31,18 @@ public class Chungus : MonoBehaviour
             {
                 _instance = new GameObject().AddComponent<Chungus>();
                 _instance.name = "Chungus";
-                _instance.LoadingObj = GameObject.Find("Loading");
-                _instance.LoadingObj.SetActive(false);
                 DontDestroyOnLoad(_instance.gameObject);
-                DontDestroyOnLoad(_instance.LoadingObj);
             }
             return _instance;
         }
     }
 
-    public static void ToggleLoadingSymbol(bool show)
-    {
-        Instance.LoadingObj.SetActive(show);
-    }
-
-    public static void ShowLoadingSymbolUntil(Func<bool> check)
-    {
-        ToggleLoadingSymbol(true);
-        Instance.StartCoroutine(
-            Wait.WaitForConditionThen(
-                check,
-                new WaitForEndOfFrame(),
-                () => ToggleLoadingSymbol(false)
-            )
-        );
-    }
-
-    public static void LoadSceneWithLoadingSymbol(string sceneName)
-    {
-        ToggleLoadingSymbol(true);
-        Instance.StartCoroutine(
-            Wait.WaitForLoadSceneThen(
-                sceneName,
-                new WaitForEndOfFrame(),
-                () => ToggleLoadingSymbol(false)
-            )
-        );
-    }
-
     public static void LoadSettings()
     {
-        string dest = Application.persistentDataPath + "/settings.dat";
-        FileStream fs;
+        Settings settings = SaveData.LoadFromFile<Settings>("Settings.dat");
+        if (settings == null) return;
 
-        if (File.Exists(dest))
-        {
-            fs = File.OpenRead(dest);
-            BinaryFormatter bf = new BinaryFormatter();
-            Instance.settings = (Settings)bf.Deserialize(fs);
-        }
-        else fs = File.Create(dest);
-        fs.Close();
+        Instance.settings = settings;
 
         GameObject audioParent = GameObject.FindWithTag("AudioHandler");
         audioParent.transform.Find("ClickHandler").GetComponent<AudioSource>().volume = Instance.settings.menuVolume;

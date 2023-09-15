@@ -66,14 +66,20 @@ public class LobbyMenu : MonoBehaviour
     private void Awake()
     {
         if (instance == null) { instance = this; }
-    }
 
-    private void Start()
-    {
         // Determine if we are the host
         if (NetworkServer.active)
         {
             m_hostOptionsButton.SetActive(true);
+
+            // Load any previous host settings (if there are any)
+            GameSettings gameSettings = SaveData.LoadFromFile<GameSettings>("GameSettings.dat");
+            if (gameSettings != null)
+                GameSettings.Saved = gameSettings;
+
+            OutfitSettings outfitSettings = SaveData.LoadFromFile<OutfitSettings>("OutfitSettings.dat");
+            if (outfitSettings != null)
+                OutfitSettings.Saved = outfitSettings;
         }
     }
 
