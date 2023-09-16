@@ -88,7 +88,6 @@ public class OutfitComponentHandler : MonoBehaviour
         {
             case CustomisationMenu.OutfitComponent.Head:
                 OutfitSettings.Saved.HeadSpriteName = sprite.name;
-                print("Hi");
                 pm.m_bpHead = sprite;
                 break;
             case CustomisationMenu.OutfitComponent.Torso:
