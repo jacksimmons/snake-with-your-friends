@@ -7,18 +7,17 @@ public class GameSettings
 {
     public static GameSettings Saved = new();
 
-    public const int LOWEST_COUNTER_MAX = 1;
-    public const int DEFAULT_COUNTER_MAX = 20;
+    public const float DEFAULT_TIME_TO_MOVE = 0.6f;
     public const bool DEFAULT_FRIENDLY_FIRE = true;
 
-    public int CounterMax { get; set; }
+    public float TimeToMove { get; set; }
     public bool FriendlyFire { get; set; }
 
     public List<EFoodType> DisabledFoods { get; private set; }
 
     public GameSettings()
     {
-        CounterMax = DEFAULT_COUNTER_MAX;
+        TimeToMove = DEFAULT_TIME_TO_MOVE;
         FriendlyFire = DEFAULT_FRIENDLY_FIRE;
 
         DisabledFoods = new List<EFoodType>();
@@ -27,7 +26,7 @@ public class GameSettings
     // Copy constructor
     public GameSettings(GameSettings other)
     {
-        CounterMax = other.CounterMax;
+        TimeToMove = other.TimeToMove;
         FriendlyFire = other.FriendlyFire;
 
         DisabledFoods = other.DisabledFoods;

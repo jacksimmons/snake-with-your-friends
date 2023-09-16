@@ -209,7 +209,6 @@ public class GameBehaviour : NetworkBehaviour
                 _foodTemplates.Remove(food);
                 i--;
             }
-            print(food.GetComponent<FoodObject>().food.ToString());
         }
 
         PlacePlayers(depth: 1, playersStartIndex: 0, bl);

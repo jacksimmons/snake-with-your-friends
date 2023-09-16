@@ -73,21 +73,26 @@ public class ProjectileBehaviour : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        print("Hi");
-
-        // Projectile Collision section
+        // --- Projectile Collisions
         if (other.TryGetComponent(out ProjectileBehaviour otherPb))
         {
-            StartCoroutine(Explode());
-            otherPb.StartCoroutine(Explode());
+            if (otherPb.type == EProjectileType.InstantDamage)
+            {
+                StartCoroutine(Explode());
+            }
+
+            return;
         }
 
+        // --- Portal Collisions (ignore)
+        if (other.TryGetComponent(out Teleporter _)) { return; }
+
+        // --- Other Collisions
         bool isPlayer = true;
         Transform player = Player.TryGetPlayerTransformFromBodyPart(other.gameObject);
         if (player == null) isPlayer = false;
         if (PlayerImmune) isPlayer = false;
 
-        // Other Collisions section
         // Visual Effects section, enabled on all clients
         switch (type)
         {

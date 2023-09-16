@@ -55,7 +55,7 @@ public class Effect
     // The current value of the cooldown counter, which goes from CooldownMax to 0.
     public float Cooldown { get; private set; } = 0f;
     // The max value of the Cooldown, set once it gets used to restart the cooldown.
-    public float CooldownMax { get; private set; } = 0f;
+    public float CooldownMax { get; private set; }
     public Effect[] Causes { get; private set; } = null;
 
     private BitField bf = new();
@@ -84,7 +84,6 @@ public class Effect
         EffectLevel = level;
         Lifetime = lifetime;
         TimeRemaining = Lifetime;
-        Cooldown = cooldown;
         CooldownMax = cooldown;
         IsInputEffect = isInputEffect;
     }
@@ -98,7 +97,6 @@ public class Effect
         Causes = causes;
         TimeRemaining = Lifetime;
         IsInputEffect = isInputEffect;
-        Cooldown = cooldown;
         CooldownMax = cooldown;
     }
 

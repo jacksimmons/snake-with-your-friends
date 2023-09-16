@@ -299,7 +299,6 @@ public class PlayerStatus : NetworkBehaviour
                 switch (effect.EffectName)
                 {
                     case EEffect.CureAll:
-                        print("Hi");
                         ClearInputEffects();
                         ClearPassiveEffects();
 
@@ -310,13 +309,8 @@ public class PlayerStatus : NetworkBehaviour
                         break;
 
                     case EEffect.SpeedBoost:
-                        float counterMaxVal = GameSettings.Saved.CounterMax / 
+                        _player.TimeToMove = GameSettings.Saved.TimeToMove /
                             SpeedEffect.GetSpeedMultFromSignedLevel(effect.EffectLevel);
-
-                        if (float.IsInfinity(counterMaxVal))
-                            _player.CounterMax = int.MaxValue;
-                        else
-                            _player.CounterMax = Mathf.CeilToInt(counterMaxVal);
 
                         statusUI.DisableAllSpeedIcons();
                         if (effect.EffectLevel >= 0)
@@ -360,7 +354,7 @@ public class PlayerStatus : NetworkBehaviour
         if (effect.IsInputEffect)
         {
             // Clear the old effect for the new one
-            _player.CounterMax = GameSettings.Saved.CounterMax;
+            _player.TimeToMove = GameSettings.Saved.TimeToMove;
             if (ActiveInputEffect != null)
                 ClearInputEffects();
             ActiveInputEffect = effect;
@@ -412,7 +406,7 @@ public class PlayerStatus : NetworkBehaviour
         switch (effect.EffectName)
         {
             case EEffect.SpeedBoost:
-                _player.CounterMax = GameSettings.Saved.CounterMax;
+                _player.TimeToMove = GameSettings.Saved.TimeToMove;
                 statusUI.DisableAllSpeedIcons();
                 break;
             case EEffect.RocketShitting:
@@ -450,7 +444,7 @@ public class PlayerStatus : NetworkBehaviour
         NumPints = 0;
         PotassiumLevels = 0;
 
-        _player.CounterMax = GameSettings.Saved.CounterMax;
+        _player.TimeToMove = GameSettings.Saved.TimeToMove;
     }
 
     public Dictionary<string, string> GetStatusDebug()
@@ -503,12 +497,7 @@ public class PlayerStatus : NetworkBehaviour
                     return episode;
                 }
 
-                Effect episode5 = GenerateEpisode();
-                Effect episode4 = GenerateEpisode(episode5);
-                Effect episode3 = GenerateEpisode(episode4);
-                Effect episode2 = GenerateEpisode(episode3);
-
-                ItemSlotEffect = GenerateEpisode(episode2);
+                ItemSlotEffect = GenerateEpisode();
                 break;
 
             case EFoodType.Booze:

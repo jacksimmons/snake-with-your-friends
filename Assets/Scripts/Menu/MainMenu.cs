@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
-public class MainMenu : MonoBehaviour
+public class MainMenu : SceneTransitionHandler
 {
     [SerializeField]
     private Button m_noFriendsButton;
@@ -18,8 +18,10 @@ public class MainMenu : MonoBehaviour
     private GameObject m_networkManager;
 
 
-    private void Start()
+    protected override void Start()
     {
+        base.Start();
+
         // Ensures Chungus instance
         Chungus.LoadSettings();
 
@@ -88,12 +90,12 @@ public class MainMenu : MonoBehaviour
             return;
         }
 
-        LoadingIcon.Instance.LoadSceneWithLoadingSymbol("JoinMenu");
+        LoadScene("JoinMenu");
     }
 
     public void OnSettingsButtonPressed()
     {
-        LoadingIcon.Instance.LoadSceneWithLoadingSymbol("SettingsMenu");
+        LoadScene("SettingsMenu");
     }
 
     public void OnRetryButtonPressed()
@@ -103,12 +105,12 @@ public class MainMenu : MonoBehaviour
         Chungus.ClearDontDestroyOnLoad();
 
         // Will enable then disable the loading symbol
-        LoadingIcon.Instance.LoadSceneWithLoadingSymbol("MainMenu");
+        LoadScene("MainMenu");
     }
 
     public void Quit()
     {
-        LoadingIcon.Instance.ShowLoadingSymbolUntil(() => false);
+        LoadingIcon.Instance.Toggle(true);
         Application.Quit();
     }
 }

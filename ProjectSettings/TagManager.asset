@@ -18,6 +18,7 @@ TagManager:
   - LobbyPanel
   - CustomisationMenu
   - LoadingIcon
+  - IntroCutsceneHandler
   layers:
   - Default
   - TransparentFX

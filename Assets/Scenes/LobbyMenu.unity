@@ -393,6 +393,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 14932282}
     m_Modifications:
+    - target: {fileID: 1003683136193983570, guid: 978ed5384a7d72946bb51a3392189abb, type: 3}
+      propertyPath: stepDiff
+      value: 0.05
+      objectReference: {fileID: 0}
     - target: {fileID: 2097048688136547784, guid: 978ed5384a7d72946bb51a3392189abb, type: 3}
       propertyPath: m_text
       value: Speed
@@ -411,6 +415,22 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2097048688136547831, guid: 978ed5384a7d72946bb51a3392189abb, type: 3}
       propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2743673266729804608, guid: 978ed5384a7d72946bb51a3392189abb, type: 3}
+      propertyPath: m_Value
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2743673266729804608, guid: 978ed5384a7d72946bb51a3392189abb, type: 3}
+      propertyPath: m_MaxValue
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2743673266729804608, guid: 978ed5384a7d72946bb51a3392189abb, type: 3}
+      propertyPath: m_MinValue
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2743673266729804608, guid: 978ed5384a7d72946bb51a3392189abb, type: 3}
+      propertyPath: m_WholeNumbers
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2743673266729804609, guid: 978ed5384a7d72946bb51a3392189abb, type: 3}
@@ -455,7 +475,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2743673267496855865, guid: 978ed5384a7d72946bb51a3392189abb, type: 3}
       propertyPath: m_text
-      value: Movement Frequency
+      value: Time Between Moves
+      objectReference: {fileID: 0}
+    - target: {fileID: 2743673267496855865, guid: 978ed5384a7d72946bb51a3392189abb, type: 3}
+      propertyPath: m_fontSize
+      value: 42.7
       objectReference: {fileID: 0}
     - target: {fileID: 2743673267496855865, guid: 978ed5384a7d72946bb51a3392189abb, type: 3}
       propertyPath: m_fontColor.b
@@ -475,7 +499,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2743673267802125146, guid: 978ed5384a7d72946bb51a3392189abb, type: 3}
       propertyPath: m_Name
-      value: MoveFrequency
+      value: TimeToMove
       objectReference: {fileID: 0}
     - target: {fileID: 2743673267802125149, guid: 978ed5384a7d72946bb51a3392189abb, type: 3}
       propertyPath: m_Pivot.x

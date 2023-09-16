@@ -15,6 +15,7 @@ public class HostOptionsHandler : MonoBehaviour
     private TextMeshProUGUI m_speedLabel;
     [SerializeField]
     private TextMeshProUGUI m_speedVerbose;
+    private float m_speedLast;
 
     [SerializeField]
     private Toggle m_friendlyFireToggle;
@@ -26,10 +27,12 @@ public class HostOptionsHandler : MonoBehaviour
 
     private GameSettings m_currentGameSettings = new();
 
+
     private void Start()
     {
-        m_speedSlider.onValueChanged.AddListener(OnSpeedSliderUpdate);
-        m_speedSlider.value = GameSettings.Saved.CounterMax;
+        m_speedSlider.value = GameSettings.Saved.TimeToMove;
+        m_speedLast = m_speedSlider.value;
+        UpdateSpeedLabels();
 
         m_friendlyFireToggle.onValueChanged.AddListener(OnFriendlyFireTogglePressed);
         OnFriendlyFireTogglePressed(true);
@@ -42,13 +45,33 @@ public class HostOptionsHandler : MonoBehaviour
         }
     }
 
-    public void OnSpeedSliderUpdate(float value)
-    {
-        m_speedVerbose.text = $"Snakes move every {(float)value / 60:F2} seconds";
-        m_speedLabel.text = $"Movement Frequency ({value})";
 
-        m_currentGameSettings.CounterMax = (int)value;
+    private void Update()
+    {
+        if (m_speedSlider.value != m_speedLast)
+        {
+            UpdateSpeedLabels();
+        }
     }
+
+
+    public void UpdateSpeedLabels()
+    {
+        m_speedLast = m_speedSlider.value;
+
+        m_speedVerbose.text = $"Snakes move every {m_speedSlider.value} seconds";
+
+        string speed = "";
+        if (m_speedSlider.value <= 0.25f) speed = ": BAG GUY";
+        else if (m_speedSlider.value <= 0.5f) speed = ": FAST";
+        else if (m_speedSlider.value <= 0.75f) speed = ": SLOW";
+        else speed = ": SNAIL";
+
+        m_speedLabel.text = $"Time Between Moves ({m_speedSlider.value}{speed})";
+
+        m_currentGameSettings.TimeToMove = m_speedSlider.value;
+    }
+
 
     public void OnFriendlyFireTogglePressed(bool pressed)
     {

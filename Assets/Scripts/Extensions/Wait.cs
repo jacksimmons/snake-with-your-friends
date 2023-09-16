@@ -58,8 +58,6 @@ public class Wait
         AsyncOperation load = SceneManager.LoadSceneAsync(sceneName);
         load.allowSceneActivation = false;
 
-        Debug.Log("hi");
-
         while (!load.isDone)
         {
             if (load.progress >= 0.9f)

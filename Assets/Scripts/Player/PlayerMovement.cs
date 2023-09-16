@@ -75,20 +75,8 @@ public class PlayerMovement : NetworkBehaviour
 
     private List<Vector2> _storedBodyPartDirections = new List<Vector2>();
 
-    private int _counterMax;
-    public int CounterMax
-    { 
-        get
-        {
-            return _counterMax;
-        }
-        set
-        {
-            if (value < GameSettings.LOWEST_COUNTER_MAX) { _counterMax = GameSettings.LOWEST_COUNTER_MAX; }
-            else { _counterMax = value; }
-        }
-    }
-    public int counter = 0;
+    public float TimeToMove { get; set; }
+    private float m_timeSinceLastMove = 0;
 
     // Body Parts
     public List<BodyPart> BodyParts { get; set; }
@@ -108,7 +96,7 @@ public class PlayerMovement : NetworkBehaviour
 
     private void OnEnable()
     {
-        CounterMax = GameSettings.Saved.CounterMax;
+        TimeToMove = GameSettings.Saved.TimeToMove;
 
         bodyPartContainer.SetActive(false);
 
@@ -241,10 +229,11 @@ public class PlayerMovement : NetworkBehaviour
     public void HandleMovementLoop()
     {
         // Counter logic
-        counter++;
-        if (counter <= CounterMax)
+        m_timeSinceLastMove += Time.fixedDeltaTime;
+        if (m_timeSinceLastMove < TimeToMove)
             return;
-        counter = 0;
+
+        m_timeSinceLastMove = 0;
 
         // Queued actions wait until the next move frame before being called.
         for (int i = 0; i < _queuedActions.Count; i++)
@@ -418,13 +407,13 @@ public class PlayerMovement : NetworkBehaviour
     /// Queues the beginning of forced movement.
     /// </summary>
     /// <param name="direction">The direction of the forced movement.</param>
-    /// <param name="counterMax">The number of frames between each movement.</param>
-    public void QBeginForcedMovement(Vector2 direction, int counterMax)
+    /// <param name="timeToMove">The number of seconds between each movement.</param>
+    public void QBeginForcedMovement(Vector2 direction, float timeToMove)
     {
         _queuedActions.Add(new Action(() =>
         {
             Frozen = true;
-            CounterMax = counterMax;
+            TimeToMove = timeToMove;
             _forcedMovement = direction;
             foreach (var part in BodyParts)
             {
@@ -447,7 +436,7 @@ public class PlayerMovement : NetworkBehaviour
             // ! Limitation - the snake must continue,
             // this means if the snake starts on a scootile,
             // they start without input.
-            CounterMax = GameSettings.Saved.CounterMax;
+            TimeToMove = GameSettings.Saved.TimeToMove;
             _forcedMovement = Vector2.zero;
             for (int i = 0; i < BodyParts.Count; i++)
             {
@@ -468,7 +457,7 @@ public class PlayerMovement : NetworkBehaviour
             { "direction", direction.ToString() },
             { "movement", movement.ToString() },
             { "PrevMovement", PrevMovement.ToString() },
-            { "CounterMax", CounterMax.ToString() }
+            { "CounterMax", TimeToMove.ToString() }
         };
         for (int i = 0; i < _queuedActions.Count; i++)
             playerValues.Add("queuedActions [" + i.ToString() + "]", _queuedActions[i].Target.ToString());

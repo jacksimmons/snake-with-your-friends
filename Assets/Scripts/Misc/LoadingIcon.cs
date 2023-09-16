@@ -40,6 +40,7 @@ public class LoadingIcon : MonoBehaviour
         {
             GetComponent<Canvas>().worldCamera = cam.GetComponent<Camera>();
         }
+        Toggle(false);
     }
 
     public void Toggle(bool active)
