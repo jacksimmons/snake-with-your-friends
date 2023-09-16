@@ -4,7 +4,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public static class SaveData
+public static class Saving
 {
     /// <summary>
     /// Serialises objects and saves them to a given file location.
@@ -32,7 +32,7 @@ public static class SaveData
     /// Deserialises saved objects into usable objects.
     /// Returns plain "object" type, so casting is necessary.
     /// </summary>
-    public static T LoadFromFile<T>(string filename) where T : class
+    public static T LoadFromFile<T>(string filename) where T : class, new()
     {
         LoadingIcon.Instance.Toggle(true);
 
@@ -51,8 +51,11 @@ public static class SaveData
             fs.Close();
             return val;
         }
-
-        LoadingIcon.Instance.Toggle(false);
-        return null;
+        else
+        {
+            // Restart the function after creating a new T save
+            SaveToFile(new T(), filename);
+            return LoadFromFile<T>(filename);
+        }
     }
 }

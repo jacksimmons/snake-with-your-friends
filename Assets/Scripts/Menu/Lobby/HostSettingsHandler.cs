@@ -1,13 +1,8 @@
-using System.Collections;
-using System.Collections.Generic;
-using System.IO;
-using System.Runtime.Serialization.Formatters.Binary;
 using TMPro;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
-public class HostOptionsHandler : MonoBehaviour
+public class HostSettingsHandler : MonoBehaviour
 {
     [SerializeField]
     private Slider m_speedSlider;
@@ -23,6 +18,9 @@ public class HostOptionsHandler : MonoBehaviour
     private TextMeshProUGUI m_friendlyFireLabel;
 
     [SerializeField]
+    private TMP_Dropdown m_gameModeDropdown;
+
+    [SerializeField]
     private GameObject[] m_powerupToggleContainers;
 
     private GameSettings m_currentGameSettings = new();
@@ -36,6 +34,8 @@ public class HostOptionsHandler : MonoBehaviour
 
         m_friendlyFireToggle.onValueChanged.AddListener(OnFriendlyFireTogglePressed);
         OnFriendlyFireTogglePressed(true);
+
+        m_gameModeDropdown.onValueChanged.AddListener(OnGameModeUpdate);
 
         foreach (GameObject go in m_powerupToggleContainers)
         {
@@ -81,6 +81,13 @@ public class HostOptionsHandler : MonoBehaviour
         m_currentGameSettings.FriendlyFire = pressed;
     }
 
+
+    public void OnGameModeUpdate(int gameMode)
+    {
+        m_currentGameSettings.GameMode = GameBehaviour.GAME_MODES[gameMode];
+    }
+
+
     public void OnPowerupTogglePressed(bool pressed, EFoodType food)
     {
         if (!pressed)
@@ -89,13 +96,14 @@ public class HostOptionsHandler : MonoBehaviour
             m_currentGameSettings.EnableFood(food);
     }
 
+
     /// <summary>
-    /// When host options is closed, save GameSettings to file, making it the player's new default.
+    /// When host Settings is closed, save GameSettings to file, making it the player's new default.
     /// </summary>
     public void OnClose()
     {
         GameSettings.Saved = new(m_currentGameSettings);
 
-        SaveData.SaveToFile(GameSettings.Saved, "GameSettings.dat");
+        Saving.SaveToFile(GameSettings.Saved, "GameSettings.dat");
     }
 }

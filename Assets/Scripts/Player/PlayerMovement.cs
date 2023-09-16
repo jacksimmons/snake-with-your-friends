@@ -157,19 +157,19 @@ public class PlayerMovement : NetworkBehaviour
 
     private void FixedUpdate()
     {
-        if (SceneManager.GetActiveScene().name == "Game")
-        {
-            if (!bodyPartContainer.activeSelf)
-            {
-                bodyPartContainer.SetActive(true);
-            }
+        if (Array.IndexOf(GameBehaviour.GAME_SCENES, SceneManager.GetActiveScene().name) == -1)
+            return;
 
-            // So that we only move a player if we have authority over it
-            if (isOwned)
-            {
-                HandleInput();
-                HandleMovementLoop();
-            }
+        if (!bodyPartContainer.activeSelf)
+        {
+            bodyPartContainer.SetActive(true);
+        }
+
+        // So that we only move a player if we have authority over it
+        if (isOwned)
+        {
+            HandleInput();
+            HandleMovementLoop();
         }
     }
 
@@ -247,6 +247,16 @@ public class PlayerMovement : NetworkBehaviour
 
         if (HasMoved && movement != Vector2.zero)
         {
+            RaycastHit2D raycast = Physics2D.Raycast(
+                BodyParts[0].Position,
+                movement,
+                1);
+
+            Debug.DrawLine(BodyParts[0].Position, movement * 1f, Color.red);
+
+            if (raycast)
+                print("Would hit a wall");
+
             PrevMovement = movement;
 
             // Iterate backwards through the body parts, from tail to head

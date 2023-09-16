@@ -74,16 +74,15 @@
     <Compile Include="Assets\Scripts\Player\Player.cs" />
     <Compile Include="Assets\Scripts\Object\ForegroundBehaviour.cs" />
     <Compile Include="Assets\Scripts\Object\ProjectileBehaviour.cs" />
-    <Compile Include="Assets\Scripts\Misc\SaveData.cs" />
+    <Compile Include="Assets\Scripts\Misc\Saving.cs" />
     <Compile Include="Assets\Scripts\Cutscene\SceneTransitionHandler.cs" />
     <Compile Include="Assets\Scripts\Extensions\Vector2Comparison.cs" />
     <Compile Include="Assets\Scripts\UI\StatusEffectUI.cs" />
     <Compile Include="Assets\Scripts\Menu\Main\SentenceChangerButton.cs" />
     <Compile Include="Assets\Scripts\Cutscene\SnakeActor.cs" />
     <Compile Include="Assets\Scripts\Object\GridObject.cs" />
-    <Compile Include="Assets\Scripts\Menu\Lobby\LobbySettings.cs" />
     <Compile Include="Assets\Scripts\Extensions\RandomDistribution.cs" />
-    <Compile Include="Assets\Scripts\Menu\Settings\Settings.cs" />
+    <Compile Include="Assets\Scripts\Files\Settings.cs" />
     <Compile Include="Assets\Scripts\Menu\Customisation\OutfitComponentHandler.cs" />
     <Compile Include="Assets\Scripts\Camera\CamBehaviour.cs" />
     <Compile Include="Assets\Scripts\Unused\SetOnce.cs" />
@@ -95,7 +94,7 @@
     <Compile Include="Assets\Scripts\Menu\Customisation\CustomisationMenu.cs" />
     <Compile Include="Assets\Scripts\Object\FoodObject.cs" />
     <Compile Include="Assets\Scripts\Cutscene\CanvasSnakeSpawner.cs" />
-    <Compile Include="Assets\Scripts\Menu\Customisation\OutfitSettings.cs" />
+    <Compile Include="Assets\Scripts\Files\OutfitSettings.cs" />
     <Compile Include="Assets\Scripts\Effects\StatusEffect.cs" />
     <Compile Include="Assets\Scripts\Camera\TooManyPints.cs" />
     <Compile Include="Assets\Scripts\Object\TeleporterPair.cs" />
@@ -110,9 +109,9 @@
     <Compile Include="Assets\Scripts\UI\DebugBehaviour.cs" />
     <Compile Include="Assets\Scripts\Object\ObjectController.cs" />
     <Compile Include="Assets\Scripts\Menu\Main\MainMenuSnakeSpawner.cs" />
-    <Compile Include="Assets\Scripts\Menu\Lobby\HostOptionsHandler.cs" />
+    <Compile Include="Assets\Scripts\Menu\Lobby\HostSettingsHandler.cs" />
     <Compile Include="Assets\Scripts\Unused\FollowPlayer.cs" />
-    <Compile Include="Assets\Scripts\Menu\Lobby\GameSettings.cs" />
+    <Compile Include="Assets\Scripts\Files\GameSettings.cs" />
     <Compile Include="Assets\Scripts\UI\MainMenuButton.cs" />
     <Compile Include="Assets\Scripts\Menu\Main\SentenceBehaviour.cs" />
     <Compile Include="Assets\Scripts\Steamworks.NET\SteamManager.cs" />
@@ -128,6 +127,9 @@
     <Compile Include="Assets\Scripts\Networking\SteamLobby.cs" />
     <Compile Include="Assets\Scripts\Networking\PlayerObjectController.cs" />
     <Compile Include="Assets\Scripts\Object\Projectile.cs" />
+    <Compile Include="Assets\Scripts\Game\SnakeRoyaleBehaviour.cs" />
+    <Compile Include="Assets\Scripts\Files\SaveData.cs" />
+    <Compile Include="Assets\Scripts\Game\PuzzleBehaviour.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Mirror\Plugins\Mono.Cecil\Mono.CecilX.dll" />

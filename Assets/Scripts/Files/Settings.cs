@@ -27,6 +27,20 @@ public class Settings
         set { bf.SetBit(2, value); }
     }
 
+    public Settings()
+    {
+        menuVolume = 1;
+        sfxVolume = 1;
+        resX = 1920;
+        resY = 1080;
+        resHz = 60;
+
+        bf = new();
+        Fullscreen = false;
+        Borderless = true;
+        HelpMotionSickness = false;
+    }
+
     public Settings(float menuVolume, float sfxVolume, int resX, int resY, int resHz,
         bool fullscreen, bool borderless, bool helpMotionSickness)
     {

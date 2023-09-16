@@ -56,11 +56,11 @@ public class LobbyMenu : MonoBehaviour
     [SerializeField]
     private TextMeshProUGUI readyButtonText;
 
-    // Host Options
+    // Host Settings
     [SerializeField]
-    private GameObject m_hostOptionsButton;
+    private GameObject m_hostSettingsButton;
     [SerializeField]
-    private GameObject m_hostOptionsPanel;
+    private GameObject m_hostSettingsPanel;
 
 
     private void Awake()
@@ -70,27 +70,27 @@ public class LobbyMenu : MonoBehaviour
         // Determine if we are the host
         if (NetworkServer.active)
         {
-            m_hostOptionsButton.SetActive(true);
+            m_hostSettingsButton.SetActive(true);
 
             // Load any previous host settings (if there are any)
-            GameSettings gameSettings = SaveData.LoadFromFile<GameSettings>("GameSettings.dat");
+            GameSettings gameSettings = Saving.LoadFromFile<GameSettings>("GameSettings.dat");
             if (gameSettings != null)
                 GameSettings.Saved = gameSettings;
 
-            OutfitSettings outfitSettings = SaveData.LoadFromFile<OutfitSettings>("OutfitSettings.dat");
+            OutfitSettings outfitSettings = Saving.LoadFromFile<OutfitSettings>("OutfitSettings.dat");
             if (outfitSettings != null)
                 OutfitSettings.Saved = outfitSettings;
         }
     }
 
-    public void OnHostOptionsButtonPressed()
+    public void OnHostSettingsButtonPressed()
     {
-        m_hostOptionsPanel.SetActive(true);
+        m_hostSettingsPanel.SetActive(true);
     }
 
-    public void OnHostOptionsCloseButtonPressed()
+    public void OnHostSettingsCloseButtonPressed()
     {
-        m_hostOptionsPanel.SetActive(false);
+        m_hostSettingsPanel.SetActive(false);
     }
 
     public void UpdateLobbyName()
@@ -245,8 +245,22 @@ public class LobbyMenu : MonoBehaviour
         }
     }
 
-    public void StartGame(string sceneName)
+    public void OnStartGamePressed()
     {
-        LocalPlayerController.CmdStartGame(sceneName);
+        GameObject lpo = GameObject.Find("LocalPlayerObject");
+        GameObject game = lpo.transform.Find("Game").gameObject;
+        Destroy(game.GetComponent<GameBehaviour>());
+
+        switch (GameSettings.Saved.GameMode)
+        {
+            case "SnakeRoyale":
+                game.AddComponent<SnakeRoyaleBehaviour>();
+                break;
+            case "Puzzle":
+                game.AddComponent<PuzzleBehaviour>();
+                break;
+        }
+
+        LocalPlayerController.CmdStartGame();
     }
 }

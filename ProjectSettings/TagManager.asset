@@ -19,6 +19,10 @@ TagManager:
   - CustomisationMenu
   - LoadingIcon
   - IntroCutsceneHandler
+  - GroundTilemap
+  - WallTilemap
+  - PuzzleStart
+  - PuzzleGoal
   layers:
   - Default
   - TransparentFX

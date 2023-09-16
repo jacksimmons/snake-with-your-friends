@@ -1,5 +1,5 @@
 using Mirror;
-using Steamworks;
+using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -8,13 +8,18 @@ using Random = UnityEngine.Random;
 
 public class GameBehaviour : NetworkBehaviour
 {
+    public static readonly string[] GAME_SCENES =
+    { "Game" };
+    public static readonly string[] GAME_MODES =
+    { "SnakeRoyale", "Puzzle" };
+
     // Static variables
     private static int numPlayersReady = 0;
     // An array of child indices for objects (all objects in this go under the s_objects game object parent)
-    public static GameObject[] s_objects { get; private set; }
+    public static GameObject[] s_objects { get; protected set; }
 
-    private static Tilemap s_groundTilemap;
-    private static Tilemap s_wallTilemap;
+    protected static Tilemap s_groundTilemap;
+    protected static Tilemap s_wallTilemap;
 
     // Templates
     [SerializeField]
@@ -27,8 +32,6 @@ public class GameBehaviour : NetworkBehaviour
     [SerializeField]
     private GameObject _gameOverTemplate;
 
-    [SerializeField]
-    private List<GameObject> _foodTemplates = new();
     [SerializeField]
     private GameObject _menuSelectTemplate;
 
@@ -43,26 +46,10 @@ public class GameBehaviour : NetworkBehaviour
         Large = 60,
         Massive = 80
     }
-    public EWorldSize GroundSize { get; private set; } = EWorldSize.Lobby;
+    public EWorldSize GroundSize { get; private set; } = EWorldSize.Massive;
 
-    Vector2Int bl = Vector2Int.zero;
 
-    // Soft limit is preferred, but if it is too small, the hard limit is used (1 tile).
-    // The minimum ratio between the distance between two snakes, and the WORLD_SIZE, before an inner square must be established.
-    private const float SOFT_MIN_DIST_WORLD_SIZE_RATIO = 0.2f;
-    private const float HARD_MIN_DIST = 2f;
-
-    private CustomNetworkManager _manager;
-    private CustomNetworkManager Manager
-    {
-        get
-        {
-            if (_manager != null) { return _manager; }
-            return _manager = CustomNetworkManager.singleton as CustomNetworkManager;
-        }
-    }
-
-    private void Start()
+    protected virtual void Start()
     {
         // If this is the host object
         if (NetworkServer.active)
@@ -71,10 +58,11 @@ public class GameBehaviour : NetworkBehaviour
         }
     }
 
+
     [Client]
-    public void OnGameSceneLoaded(string name)
+    public virtual void OnGameSceneLoaded(string name)
     {
-        if (name != "Game")
+        if (Array.IndexOf(GAME_SCENES, name) != -1)
             return;
 
         if (isOwned)
@@ -85,23 +73,24 @@ public class GameBehaviour : NetworkBehaviour
     }
 
     [Client]
-    private void ClientLoadGame()
+    protected virtual void ClientLoadGame()
     {
+        if ((s_groundTilemap = GameObject.FindWithTag("GroundTilemap").GetComponent<Tilemap>()) != null)
+        {
+            s_wallTilemap = GameObject.FindWithTag("WallTilemap").GetComponent<Tilemap>();
+            return;
+        }
+
         s_groundTilemap = CreateAndReturnTilemap(gridName: "Ground", hasCollider: false);
         s_wallTilemap = CreateAndReturnTilemap(gridName: "Wall", hasCollider: true);
 
-        CreateGroundTilemap(ref s_groundTilemap, bl);
-        CreateWallTilemap(ref s_wallTilemap, bl);
-
-        PlayerMovement player = GameObject.Find("LocalPlayerObject").GetComponent<PlayerMovement>();
-        player.enabled = true;
-
-        GameObject cam = GameObject.FindWithTag("MainCamera");
-        cam.GetComponent<CamBehaviour>().Player = player;
+        CreateGroundTilemap(ref s_groundTilemap, Vector2Int.zero);
+        CreateWallTilemap(ref s_wallTilemap, Vector2Int.zero);
     }
 
+
     [Client]
-    private Tilemap CreateAndReturnTilemap(string gridName, bool hasCollider)
+    protected Tilemap CreateAndReturnTilemap(string gridName, bool hasCollider)
     {
         GameObject gridObject = new GameObject(gridName);
         gridObject.AddComponent<Grid>();
@@ -124,8 +113,9 @@ public class GameBehaviour : NetworkBehaviour
         return tilemap;
     }
 
+
     [Client]
-    private void CreateGroundTilemap(ref Tilemap groundTilemap, Vector2Int bl)
+    protected void CreateGroundTilemap(ref Tilemap groundTilemap, Vector2Int bl)
     {
         // Bounds are an inner square of the 51x51 wall bounds starting at 0,0
         BoundsInt bounds = new(
@@ -157,8 +147,9 @@ public class GameBehaviour : NetworkBehaviour
         groundTilemap.SetTilesBlock(bounds, tiles);
     }
 
+
     [Client]
-    private void CreateWallTilemap(ref Tilemap wallTilemap, Vector2Int bl)
+    protected void CreateWallTilemap(ref Tilemap wallTilemap, Vector2Int bl)
     {
         // This square is (int)GroundSize + 2 squared, since it is one bigger on each side of the x and y edges of the inner square
         BoundsInt bounds = new(
@@ -185,94 +176,27 @@ public class GameBehaviour : NetworkBehaviour
         wallTilemap.SetTilesBlock(bounds, tiles);
     }
 
+
     [Command]
-    private void CmdReady()
+    protected virtual void CmdReady()
     {
         // Needs to be static, as every GameBehaviour calling this command will have its OWN
         // s_numPlayersReady incremented otherwise.
         numPlayersReady++;
-        if (numPlayersReady == Manager.Players.Count)
+        if (numPlayersReady == CustomNetworkManager.Instance.Players.Count)
         {
             ServerLoadGame();
         }
     }
 
-    [Server]
-    private void ServerLoadGame()
-    {
-        // Unload food items which were removed in settings
-        for (int i = 0; i < _foodTemplates.Count; i++)
-        {
-            GameObject food = _foodTemplates[i];
-            if (GameSettings.Saved.DisabledFoods.Contains(food.GetComponent<FoodObject>().food))
-            {
-                _foodTemplates.Remove(food);
-                i--;
-            }
-        }
-
-        PlacePlayers(depth: 1, playersStartIndex: 0, bl);
-
-        List<Vector2> positions = new(Manager.Players.Count);
-        List<float> rotation_zs = new(Manager.Players.Count);
-        for (int i = 0; i < Manager.Players.Count; i++)
-        {
-            positions.Add(Manager.Players[i].transform.position);
-            rotation_zs.Add(Manager.Players[i].transform.rotation.eulerAngles.z);
-        }
-        PlacePlayersClientRpc(positions, rotation_zs);
-        ActivateLocalPlayerClientRpc();
-
-        s_objects = new GameObject[(int)GroundSize * (int)GroundSize];
-        GenerateStartingFood();
-    }
 
     [Server]
-    public void PlacePlayers(int depth, int playersStartIndex, Vector2Int bl)
-    {
-        // Outer snakes (along the walls)
-        // Calculate the maximum distance between snakes.
-        // If this distance is too small, spawn inner snakes.
+    protected virtual void ServerLoadGame() { }
 
-        int playersCount = 0;
-        if (Manager.Players.Count - playersStartIndex > 0)
-        {
-            playersCount = Manager.Players.Count - playersStartIndex;
-        }
-        List<PlayerObjectController> players = Manager.Players.GetRange(playersStartIndex, playersCount);
 
-        float minDist = (int)GroundSize * SOFT_MIN_DIST_WORLD_SIZE_RATIO;
-        if (minDist < HARD_MIN_DIST)
-            minDist = HARD_MIN_DIST;
+    [Server]
+    public virtual void PlacePlayers(int depth, int playersStartIndex, Vector2Int bl) { }
 
-        Vector3 BL = s_groundTilemap.CellToWorld((Vector3Int)(bl + (depth + 1) * Vector2Int.one));
-        Vector3 BR = s_groundTilemap.CellToWorld((Vector3Int)(bl + new Vector2Int((int)GroundSize - depth + 1, depth + 1)));
-        Vector3 TL = s_groundTilemap.CellToWorld((Vector3Int)(bl + new Vector2Int(depth + 1, (int)GroundSize - depth + 1)));
-        Vector3 TR = s_groundTilemap.CellToWorld((Vector3Int)(bl + ((int)GroundSize - depth + 1) * Vector2Int.one));
-
-        Vector3[] corners = { BL, BR, TL, TR };
-        Vector2[] directions = { Vector2.one, new Vector2(-1, 1), new Vector2(1, -1), -Vector2.one };
-
-        for (int i = 0; i < players.Count; i++)
-        {
-            players[i].transform.position = corners[i % 4]
-                + (Vector3)(Vector2.one * directions[i % 4] * s_groundTilemap.cellSize / 2);
-
-            // If i were 0 then it might enter this, causing -4 as length to be provided (in the PlacePlayers line).
-            if (i != 0 && i % 4 == 0 && i < players.Count - 1)
-            {
-                int newDepth = depth + (int)Mathf.Floor(minDist);
-                if (newDepth >= (int)GroundSize / 2)
-                {
-                    Debug.LogError("The players do not fit in the map provided.");
-                }
-                else
-                {
-                    PlacePlayers(newDepth, playersStartIndex + 4, bl);
-                }
-            }
-        }
-    }
 
     [ClientRpc]
     public void PlacePlayersClientRpc(List<Vector2> positions, List<float> rotation_zs)
@@ -285,62 +209,19 @@ public class GameBehaviour : NetworkBehaviour
 
         for (int i = 0; i < positions.Count; i++)
         {
-            PlayerObjectController poc = Manager.Players[i];
+            PlayerObjectController poc = CustomNetworkManager.Instance.Players[i];
             poc.transform.SetPositionAndRotation(positions[i], Quaternion.Euler(Vector3.forward * rotation_zs[i]));
         }
     }
 
+
     [ClientRpc]
-    private void ActivateLocalPlayerClientRpc()
+    protected void ActivateLocalPlayerClientRpc()
     {
         PlayerMovement pm = GameObject.Find("LocalPlayerObject").GetComponent<PlayerMovement>();
         pm.bodyPartContainer.SetActive(true);
     }
 
-    [Server]
-    private void GenerateStartingFood()
-    {
-        for (int i = 0; i < Manager.Players.Count; i++)
-        {
-            GenerateFood();
-        }
-    }
-
-    [Server]
-    private void GenerateFood()
-    {
-        // If no foods are enabled, quick exit.
-        // This is not necessarily erroneous, as players can disable all foods.
-        if (_foodTemplates.Count == 0)
-        {
-            Debug.LogWarning("No foods"); 
-            return;
-        }
-
-        int objectPos = Random.Range(0, s_objects.Length);
-
-        // Overwrite s_objects[objectPos] with -1 (if there are any vacancies)
-        // This effectively acts as a test to see if there are any vacancies,
-        // which also happens to locate the vacancy, while leaving its value
-        // as -1.
-        objectPos = AddObjectToGrid(objectPos, null);
-        if (objectPos == -1)
-        {
-            // No vacancies.
-            return;
-        }
-
-        int foodIndex = Random.Range(0, _foodTemplates.Count);
-        Vector2 foodPos = new((objectPos % (int)GroundSize) + (bl.x + 1.5f), (objectPos / (int)GroundSize) + (bl.y + 1.5f));
-
-        GameObject obj = Instantiate(_foodTemplates[foodIndex], foodPos, Quaternion.Euler(Vector3.forward * 0));
-        obj.GetComponent<GridObject>().gridPos = objectPos;
-
-        if (AddObjectToGrid(objectPos, obj) != -1)
-        {
-            NetworkServer.Spawn(obj);
-        }
-    }
 
     /// <summary>
     /// Checks if index `objectPos` is not -1 in s_objects, if so it recursively
@@ -370,6 +251,7 @@ public class GameBehaviour : NetworkBehaviour
         return objectPos;
     }
 
+
     [Server]
     public void RemoveObjectFromGrid(int objectPos)
     {
@@ -386,12 +268,13 @@ public class GameBehaviour : NetworkBehaviour
         s_objects[objectPos] = null;
     }
 
+
     [Command]
-    public void CmdRemoveAndReplaceFood(int objPos)
+    public virtual void CmdRemoveFood(int objPos)
     {
         RemoveObjectFromGrid(objPos);
-        GenerateFood();
     }
+
 
     //void CreateTeleportingMenuPair(
     //    string text1, string text2,
@@ -407,6 +290,7 @@ public class GameBehaviour : NetworkBehaviour
     //    teleporter.B.GetComponentInChildren<TextMeshProUGUI>().text = text2;
     //}
 
+
     private void SetGameOverScreenActivity(bool active, int score = 0)
     {
         if (!isOwned)
@@ -420,7 +304,7 @@ public class GameBehaviour : NetworkBehaviour
 
         if (active)
         {
-            bool online = !Manager.singleplayer;
+            bool online = !CustomNetworkManager.Instance.singleplayer;
             gameOver.transform.Find("OnlineButton").gameObject.SetActive(online);
             gameOver.transform.Find("OfflineButton").gameObject.SetActive(!online);
             gameOver.transform.Find("Score").GetComponent<TextMeshProUGUI>().text = "Score: " + score.ToString();

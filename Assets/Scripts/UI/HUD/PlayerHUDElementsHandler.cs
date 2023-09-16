@@ -18,10 +18,9 @@ public class PlayerHUDElementsHandler : MonoBehaviour
 
             poc.PlayerOnHUD = item;
 
-            PlayerMovement pm = poc.GetComponent<PlayerMovement>();
             item.SetName(poc.playerName);
             StartCoroutine(
-                Wait.WaitForObjectThen<PlayerMovement>(
+                Wait.WaitForObjectThen(
                     () => poc.GetComponent<PlayerMovement>(),
                     new WaitForSeconds(0.1f),
                     (PlayerMovement pm) =>

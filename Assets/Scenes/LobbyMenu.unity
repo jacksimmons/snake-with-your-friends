@@ -276,7 +276,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5485737577584597734, guid: 376e673a259860845884e7d2376b6403, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 234.1425
+      value: 234.14252
       objectReference: {fileID: 0}
     - target: {fileID: 5485737577584597734, guid: 376e673a259860845884e7d2376b6403, type: 3}
       propertyPath: m_AnchoredPosition.y
@@ -357,7 +357,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 233.88055, y: -146.98735}
+  m_AnchoredPosition: {x: 233.88055, y: -146.98734}
   m_SizeDelta: {x: 467.7611, y: 92.4947}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &44752259
@@ -1147,7 +1147,7 @@ GameObject:
   - component: {fileID: 249561402}
   - component: {fileID: 249561403}
   m_Layer: 5
-  m_Name: HOptionColumns
+  m_Name: HSettingColumns
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1705,11 +1705,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1967391614095193905, guid: 9069e6ba4608cf347a46df14f2e429b7, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[1].m_MethodName
-      value: OnHostOptionsButtonPressed
+      value: OnHostSettingsButtonPressed
       objectReference: {fileID: 0}
     - target: {fileID: 1967391614095193905, guid: 9069e6ba4608cf347a46df14f2e429b7, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[1].m_TargetAssemblyTypeName
-      value: LobbyController, Assembly-CSharp
+      value: LobbyMenu, Assembly-CSharp
       objectReference: {fileID: 0}
     - target: {fileID: 1967391614095193905, guid: 9069e6ba4608cf347a46df14f2e429b7, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[1].m_Arguments.m_StringArgument
@@ -1721,7 +1721,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1967391614095193911, guid: 9069e6ba4608cf347a46df14f2e429b7, type: 3}
       propertyPath: m_Name
-      value: HostOptions
+      value: HostSettingsButton
       objectReference: {fileID: 0}
     - target: {fileID: 1967391614095193911, guid: 9069e6ba4608cf347a46df14f2e429b7, type: 3}
       propertyPath: m_IsActive
@@ -2436,7 +2436,7 @@ PrefabInstance:
     - target: {fileID: 1967391614095193905, guid: 9069e6ba4608cf347a46df14f2e429b7, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[2].m_Target
       value: 
-      objectReference: {fileID: 1786559724}
+      objectReference: {fileID: 1786559726}
     - target: {fileID: 1967391614095193905, guid: 9069e6ba4608cf347a46df14f2e429b7, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[1].m_CallState
       value: 2
@@ -2447,7 +2447,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1967391614095193905, guid: 9069e6ba4608cf347a46df14f2e429b7, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[1].m_MethodName
-      value: OnHostOptionsCloseButtonPressed
+      value: OnHostSettingsCloseButtonPressed
       objectReference: {fileID: 0}
     - target: {fileID: 1967391614095193905, guid: 9069e6ba4608cf347a46df14f2e429b7, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[2].m_MethodName
@@ -2455,11 +2455,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1967391614095193905, guid: 9069e6ba4608cf347a46df14f2e429b7, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[1].m_TargetAssemblyTypeName
-      value: LobbyController, Assembly-CSharp
+      value: LobbyMenu, Assembly-CSharp
       objectReference: {fileID: 0}
     - target: {fileID: 1967391614095193905, guid: 9069e6ba4608cf347a46df14f2e429b7, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[2].m_TargetAssemblyTypeName
-      value: HostOptionsHandler, Assembly-CSharp
+      value: HostSettingsHandler, Assembly-CSharp
       objectReference: {fileID: 0}
     - target: {fileID: 1967391614095193905, guid: 9069e6ba4608cf347a46df14f2e429b7, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[1].m_Arguments.m_ObjectArgumentAssemblyTypeName
@@ -2471,7 +2471,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1967391614095193911, guid: 9069e6ba4608cf347a46df14f2e429b7, type: 3}
       propertyPath: m_Name
-      value: BtnCloseHostOptions
+      value: CloseHostSettingsButton
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 9069e6ba4608cf347a46df14f2e429b7, type: 3}
@@ -4395,6 +4395,8 @@ MonoBehaviour:
     m_Options:
     - m_Text: Snake Royale
       m_Image: {fileID: 0}
+    - m_Text: Puzzles
+      m_Image: {fileID: 0}
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -4900,7 +4902,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6760509062494244431, guid: ebb2eb6205d3be54199b403e8239ebe6, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -148.01
+      value: -148.00998
       objectReference: {fileID: 0}
     - target: {fileID: 6760509062494244431, guid: ebb2eb6205d3be54199b403e8239ebe6, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -5999,7 +6001,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5655269589308004150, guid: 376e673a259860845884e7d2376b6403, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -40.37
+      value: -40.369995
       objectReference: {fileID: 0}
     - target: {fileID: 5655269589308004151, guid: 376e673a259860845884e7d2376b6403, type: 3}
       propertyPath: m_text
@@ -6177,10 +6179,10 @@ GameObject:
   - component: {fileID: 1786559721}
   - component: {fileID: 1786559723}
   - component: {fileID: 1786559722}
-  - component: {fileID: 1786559724}
   - component: {fileID: 1786559725}
+  - component: {fileID: 1786559726}
   m_Layer: 5
-  m_Name: HostOptionsPanel
+  m_Name: HostSettingsPanel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6246,29 +6248,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1786559720}
   m_CullTransparentMesh: 1
---- !u!114 &1786559724
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1786559720}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3a8c2423a8e1d4644ae9fbd01a44d566, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_speedSlider: {fileID: 1142162069}
-  m_speedLabel: {fileID: 2075206485}
-  m_speedVerbose: {fileID: 168971488}
-  m_friendlyFireToggle: {fileID: 1109261208}
-  m_friendlyFireLabel: {fileID: 1865605513}
-  m_powerupToggleContainers:
-  - {fileID: 2035098234}
-  - {fileID: 1628811443}
-  - {fileID: 577870577}
-  - {fileID: 1662781330}
-  - {fileID: 1903634321}
 --- !u!114 &1786559725
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6295,6 +6274,30 @@ MonoBehaviour:
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
+--- !u!114 &1786559726
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1786559720}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3a8c2423a8e1d4644ae9fbd01a44d566, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_speedSlider: {fileID: 1142162069}
+  m_speedLabel: {fileID: 2075206485}
+  m_speedVerbose: {fileID: 168971488}
+  m_friendlyFireToggle: {fileID: 1109261208}
+  m_friendlyFireLabel: {fileID: 1865605513}
+  m_gameModeDropdown: {fileID: 1490733102}
+  m_powerupToggleContainers:
+  - {fileID: 1628811443}
+  - {fileID: 2035098234}
+  - {fileID: 1662781330}
+  - {fileID: 1903634321}
+  - {fileID: 577870577}
 --- !u!1 &1822310745
 GameObject:
   m_ObjectHideFlags: 0
@@ -7241,8 +7244,8 @@ MonoBehaviour:
   playerItemCreated: 0
   startGameButton: {fileID: 2141405748}
   readyButtonText: {fileID: 1699001868}
-  m_hostOptionsButton: {fileID: 492621958}
-  m_hostOptionsPanel: {fileID: 1786559720}
+  m_hostSettingsButton: {fileID: 492621958}
+  m_hostSettingsPanel: {fileID: 1786559720}
 --- !u!1 &2110421890
 GameObject:
   m_ObjectHideFlags: 0
@@ -7379,7 +7382,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 60.005, y: -23.88}
+  m_AnchoredPosition: {x: 60.005005, y: -23.88}
   m_SizeDelta: {x: 120.01, y: 47.76}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2111004880
@@ -7584,7 +7587,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1967391614095193905, guid: 9069e6ba4608cf347a46df14f2e429b7, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[1].m_Mode
-      value: 5
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1967391614095193905, guid: 9069e6ba4608cf347a46df14f2e429b7, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[1].m_Target
@@ -7596,11 +7599,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1967391614095193905, guid: 9069e6ba4608cf347a46df14f2e429b7, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[1].m_MethodName
-      value: StartGame
+      value: OnStartGamePressed
       objectReference: {fileID: 0}
     - target: {fileID: 1967391614095193905, guid: 9069e6ba4608cf347a46df14f2e429b7, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[1].m_TargetAssemblyTypeName
-      value: LobbyController, Assembly-CSharp
+      value: LobbyMenu, Assembly-CSharp
       objectReference: {fileID: 0}
     - target: {fileID: 1967391614095193905, guid: 9069e6ba4608cf347a46df14f2e429b7, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[1].m_Arguments.m_StringArgument

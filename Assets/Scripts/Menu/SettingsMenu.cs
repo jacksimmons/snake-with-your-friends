@@ -192,6 +192,6 @@ public class SettingsMenu : MonoBehaviour
             motionSicknessValue
         );
 
-        SaveData.SaveToFile(settings, "Settings.dat");
+        Saving.SaveToFile(settings, "Settings.dat");
     }
 }
