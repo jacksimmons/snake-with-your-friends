@@ -198,41 +198,33 @@ public class BodyPart
         if (Direction == Vector2.up)
         {
             if (prevDir == Vector2.left)
-                cornerRot = -180;
-            //Sprite = CornerSprites[3]; // -R
+                cornerRot = -180; // -R
             else if (prevDir == Vector2.right)
-                cornerRot = -90;
-            //Sprite = CornerSprites[2]; // R
+                cornerRot = -90; // R
         }
 
         else if (Direction == Vector2.left)
         {
             if (prevDir == Vector2.up)
-                cornerRot = -0;
-            //Sprite = CornerSprites[0]; // L
+                cornerRot = -0; // L
             else if (prevDir == Vector2.down)
-                cornerRot = -90;
-            //Sprite = CornerSprites[2]; // R
+                cornerRot = -90; // R
         }
 
         else if (Direction == Vector2.down)
         {
             if (prevDir == Vector2.left)
-                cornerRot = -270;
-            //Sprite = CornerSprites[1]; // -L
+                cornerRot = -270; // -L
             else if (prevDir == Vector2.right)
-                cornerRot = -0;
-            //Sprite = CornerSprites[0]; // L
+                cornerRot = -0; // L
         }
 
         else if (Direction == Vector2.right)
         {
             if (prevDir == Vector2.up)
-                cornerRot = -270;
-            //Sprite = CornerSprites[1]; // -L
+                cornerRot = -270; // -L
             else if (prevDir == Vector2.down)
-                cornerRot = -180;
-            //Sprite = CornerSprites[3]; // -R
+                cornerRot = -180; // -R
         }
 
         CurrentType = EBodyPartType.Corner;

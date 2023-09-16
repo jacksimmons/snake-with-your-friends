@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
-public class MainMenuSnakeActor : MonoBehaviour
+public class SnakeActor : MonoBehaviour
 {
     private float timeSinceLastMove = 0;
     private float bpWidth;

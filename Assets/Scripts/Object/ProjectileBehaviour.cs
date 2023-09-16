@@ -102,7 +102,7 @@ public class ProjectileBehaviour : MonoBehaviour
                 else
                 {
                     m_speedMod *= m_restitution * -1;
-                    transform.Rotate(0, 0, 180);
+                    transform.Rotate(Vector3.forward * 180);
                 }
                 break;
             default:

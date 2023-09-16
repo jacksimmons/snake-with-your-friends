@@ -28,7 +28,7 @@ public class CanvasSnakeSpawner : MonoBehaviour
     {
         GameObject spawned = Instantiate(m_snakeActorTemplate, transform);
 
-        MainMenuSnakeActor actor = spawned.GetComponent<MainMenuSnakeActor>();
+        SnakeActor actor = spawned.GetComponent<SnakeActor>();
         actor.moveTime = moveTime;
         actor.continuousSpeed = continuousSpeed;
 
