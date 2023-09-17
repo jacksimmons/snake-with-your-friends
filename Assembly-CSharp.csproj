@@ -84,6 +84,7 @@
     <Compile Include="Assets\Scripts\Extensions\RandomDistribution.cs" />
     <Compile Include="Assets\Scripts\Files\SaveData.cs" />
     <Compile Include="Assets\Scripts\Files\Settings.cs" />
+    <Compile Include="Assets\Scripts\Object\ObjectBehaviour.cs" />
     <Compile Include="Assets\Scripts\Menu\Customisation\OutfitComponentHandler.cs" />
     <Compile Include="Assets\Scripts\Camera\CamBehaviour.cs" />
     <Compile Include="Assets\Scripts\Unused\SetOnce.cs" />
@@ -108,7 +109,6 @@
     <Compile Include="Assets\Scripts\Cutscene\SceneTransitionCanvas.cs" />
     <Compile Include="Assets\Scripts\Misc\LoadingIcon.cs" />
     <Compile Include="Assets\Scripts\UI\DebugBehaviour.cs" />
-    <Compile Include="Assets\Scripts\Object\ObjectController.cs" />
     <Compile Include="Assets\Scripts\Menu\Main\MainMenuSnakeSpawner.cs" />
     <Compile Include="Assets\Scripts\Menu\Lobby\HostSettingsHandler.cs" />
     <Compile Include="Assets\Scripts\Unused\FollowPlayer.cs" />
@@ -129,7 +129,6 @@
     <Compile Include="Assets\Scripts\Networking\SteamLobby.cs" />
     <Compile Include="Assets\Scripts\Networking\PlayerObjectController.cs" />
     <Compile Include="Assets\Scripts\Object\Projectile.cs" />
-    <Compile Include="Assets\ObjectBehaviour.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Mirror\Plugins\Mono.Cecil\Mono.CecilX.dll" />

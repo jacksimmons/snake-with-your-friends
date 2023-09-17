@@ -146,27 +146,27 @@ public class GameBehaviour : NetworkBehaviour
         // Bounds are an inner square of the 51x51 wall bounds starting at 0,0
         BoundsInt bounds = new(
             (Vector3Int)(bl + Vector2Int.one),
-            (Vector3Int)((int)groundSize * Vector2Int.one) + Vector3Int.forward);
-        Tile[] tiles = new Tile[(int)groundSize * (int)groundSize];
-        for (int i = 0; i < (int)groundSize; i++)
+            (Vector3Int)(groundSize * Vector2Int.one) + Vector3Int.forward);
+        Tile[] tiles = new Tile[groundSize * groundSize];
+        for (int i = 0; i < groundSize; i++)
         {
-            for (int j = 0; j < (int)groundSize; j++)
+            for (int j = 0; j < groundSize; j++)
             {
                 if (i % 2 == 0)
                 {
                     // Even row -> starts with light (i.e. Even cols are light)
                     if (j % 2 == 0)
-                        tiles[(int)groundSize * i + j] = _lightTile;
+                        tiles[groundSize * i + j] = _lightTile;
                     else
-                        tiles[(int)groundSize * i + j] = _darkTile;
+                        tiles[groundSize * i + j] = _darkTile;
                 }
                 else
                 {
                     // Odd row -> starts with dark (i.e. Odd cols are light)
                     if (j % 2 == 0)
-                        tiles[(int)groundSize * i + j] = _darkTile;
+                        tiles[groundSize * i + j] = _darkTile;
                     else
-                        tiles[(int)groundSize * i + j] = _lightTile;
+                        tiles[groundSize * i + j] = _lightTile;
                 }
             }
         }
@@ -182,21 +182,21 @@ public class GameBehaviour : NetworkBehaviour
         // This square is (int)GroundSize + 2 squared, since it is one bigger on each side of the x and y edges of the inner square
         BoundsInt bounds = new(
             (Vector3Int)bl,
-            (Vector3Int)(((int)groundSize + 2) * Vector2Int.one) + Vector3Int.forward);
-        Tile[] tiles = new Tile[((int)groundSize + 2) * ((int)groundSize + 2)];
-        for (int i = 0; i < (int)groundSize + 2; i++)
+            (Vector3Int)((groundSize + 2) * Vector2Int.one) + Vector3Int.forward);
+        Tile[] tiles = new Tile[(groundSize + 2) * (groundSize + 2)];
+        for (int i = 0; i < groundSize + 2; i++)
         {
-            for (int j = 0; j < (int)groundSize + 2; j++)
+            for (int j = 0; j < groundSize + 2; j++)
             {
-                if (i == 0 || i == (int)groundSize + 1)
+                if (i == 0 || i == groundSize + 1)
                 {
                     // We are on the top or bottom row, so guaranteed placement of wall
-                    tiles[((int)groundSize + 2) * i + j] = _wallTile;
+                    tiles[(groundSize + 2) * i + j] = _wallTile;
                 }
-                else if (j == 0 || j == (int)groundSize + 1)
+                else if (j == 0 || j == groundSize + 1)
                 {
                     // We are on the leftmost or rightmost column, so place wall
-                    tiles[((int)groundSize + 2) * i + j] = _wallTile;
+                    tiles[(groundSize + 2) * i + j] = _wallTile;
                 }
             }
         }
@@ -223,7 +223,7 @@ public class GameBehaviour : NetworkBehaviour
     {
         int groundSize = GameSettings.Saved.GameSize;
 
-        s_objects = new GameObject[(int)groundSize * (int)groundSize];
+        s_objects = new GameObject[groundSize * groundSize];
 
         if (GameSettings.Saved.GameMode == EGameMode.Puzzle)
         {
@@ -316,14 +316,14 @@ public class GameBehaviour : NetworkBehaviour
         }
         List<PlayerObjectController> players = CustomNetworkManager.Instance.Players.GetRange(playersStartIndex, playersCount);
 
-        float minDist = (int)groundSize * SOFT_MIN_DIST_WORLD_SIZE_RATIO;
+        float minDist = groundSize * SOFT_MIN_DIST_WORLD_SIZE_RATIO;
         if (minDist < HARD_MIN_DIST)
             minDist = HARD_MIN_DIST;
 
         Vector3 BL = s_groundTilemap.CellToWorld((Vector3Int)(bl + (depth + 1) * Vector2Int.one));
-        Vector3 BR = s_groundTilemap.CellToWorld((Vector3Int)(bl + new Vector2Int((int)groundSize - depth + 1, depth + 1)));
-        Vector3 TL = s_groundTilemap.CellToWorld((Vector3Int)(bl + new Vector2Int(depth + 1, (int)groundSize - depth + 1)));
-        Vector3 TR = s_groundTilemap.CellToWorld((Vector3Int)(bl + ((int)groundSize - depth + 1) * Vector2Int.one));
+        Vector3 BR = s_groundTilemap.CellToWorld((Vector3Int)(bl + new Vector2Int(groundSize - depth + 1, depth + 1)));
+        Vector3 TL = s_groundTilemap.CellToWorld((Vector3Int)(bl + new Vector2Int(depth + 1, groundSize - depth + 1)));
+        Vector3 TR = s_groundTilemap.CellToWorld((Vector3Int)(bl + (groundSize - depth + 1) * Vector2Int.one));
 
         Vector3[] corners = { BL, BR, TL, TR };
         Vector2[] directions = { Vector2.one, new Vector2(-1, 1), new Vector2(1, -1), -Vector2.one };
@@ -337,7 +337,7 @@ public class GameBehaviour : NetworkBehaviour
             if (i != 0 && i % 4 == 0 && i < players.Count - 1)
             {
                 int newDepth = depth + (int)Mathf.Floor(minDist);
-                if (newDepth >= (int)groundSize / 2)
+                if (newDepth >= groundSize / 2)
                 {
                     Debug.LogError("The players do not fit in the map provided.");
                 }
@@ -386,7 +386,8 @@ public class GameBehaviour : NetworkBehaviour
 
         int foodIndex = Random.Range(0, _foodTemplates.Count);
         int groundSize = GameSettings.Saved.GameSize;
-        Vector2 foodPos = new((objectPos % (int)groundSize) + (1.5f), (objectPos / (int)groundSize) + (1.5f));
+
+        Vector2 foodPos = new((objectPos % groundSize) + (1.5f), (objectPos / groundSize) + (1.5f));
 
         GameObject obj = Instantiate(_foodTemplates[foodIndex], foodPos, Quaternion.Euler(Vector3.forward * 0));
         obj.GetComponent<GridObject>().gridPos = objectPos;
@@ -478,8 +479,6 @@ public class GameBehaviour : NetworkBehaviour
     {
         GameObject go = s_objects[objectPos];
 
-        print(objectPos);
-
         if (go == null)
         {
             Debug.LogError("GameObject was null!");
@@ -496,6 +495,11 @@ public class GameBehaviour : NetworkBehaviour
     public virtual void CmdRemoveFood(int objPos)
     {
         RemoveObjectFromGrid(objPos);
+
+        if (GameSettings.Saved.GameMode == EGameMode.SnakeRoyale)
+        {
+            GenerateFood();
+        }
     }
 
 

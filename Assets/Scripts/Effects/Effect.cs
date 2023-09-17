@@ -50,13 +50,13 @@ public class Effect
     public EEffect EffectName { get; private set; }
     public int EffectLevel { get; private set; }
 
-    public float Lifetime { get; private set; }
-    public float TimeRemaining { get; set; }
+    public float LifetimeMax { get; private set; }
+    public float LifetimeRemaining { get; set; }
     // The current value of the cooldown counter, which goes from CooldownMax to 0.
     public float Cooldown { get; private set; } = 0f;
     // The max value of the Cooldown, set once it gets used to restart the cooldown.
     public float CooldownMax { get; private set; }
-    public Effect[] Causes { get; private set; } = null;
+    public Effect[] Causes { get; private set; }
 
     private BitField bf = new();
     public bool IsInputEffect
@@ -70,34 +70,18 @@ public class Effect
         set { bf.SetBit(1, value); }
     }
 
-    // An effect which lasts for one frame, i.e. an action
-    public Effect(EEffect effectName, bool isInputEffect=false)
-    {
-        EffectName = effectName;
-        IsOneOff = true;
-    }
-
-    // An effect which causes no other effects
-    public Effect(EEffect effectName, float lifetime, float cooldown=0f, bool isInputEffect=false, int level=0)
-    {
-        EffectName = effectName;
-        EffectLevel = level;
-        Lifetime = lifetime;
-        TimeRemaining = Lifetime;
-        CooldownMax = cooldown;
-        IsInputEffect = isInputEffect;
-    }
-
     // An effect which may cause another effect.
-    public Effect(EEffect effectName, float lifetime, Effect[] causes, float cooldown=0f, bool isInputEffect=false, int level=0)
+    public Effect(EEffect effectName, float lifetime=0f, float cooldown=0f, bool isInputEffect=false,
+        int level=0, Effect[] causes = null, bool isOneOff=false)
     {
         EffectName = effectName;
-        EffectLevel = level;
-        Lifetime = lifetime;
-        Causes = causes;
-        TimeRemaining = Lifetime;
+        LifetimeMax = lifetime;
+        LifetimeRemaining = LifetimeMax;
         IsInputEffect = isInputEffect;
+        EffectLevel = level;
         CooldownMax = cooldown;
+        Causes = causes;
+        IsOneOff = isOneOff;
     }
 
     /// <summary>
@@ -112,8 +96,8 @@ public class Effect
     {
         if (IsOneOff) return true;
 
-        TimeRemaining -= seconds;
-        if (TimeRemaining <= 0)
+        LifetimeRemaining -= seconds;
+        if (LifetimeRemaining <= 0)
             return false;
         return true;
     }

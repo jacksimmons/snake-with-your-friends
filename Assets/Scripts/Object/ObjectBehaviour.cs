@@ -6,7 +6,11 @@ using UnityEngine;
 public class ObjectBehaviour : MonoBehaviour
 {
     [SerializeField]
-    public int HardToMoveness { get; private set; }
+    private int m_hardToMoveness;
+    public int HardToMoveness
+    {
+        get { return m_hardToMoveness; }
+    }
 
     private ParticleSystem m_explosionEffect;
     protected Sprite m_sprite; // Assigned to once in Awake
@@ -35,6 +39,8 @@ public class ObjectBehaviour : MonoBehaviour
 
     protected virtual void OnTriggerEnter2D(Collider2D other)
     {
+        print("HI");
+
         // --- Object Collisions
         if (other.TryGetComponent(out ObjectBehaviour otherOb))
         {
@@ -43,6 +49,14 @@ public class ObjectBehaviour : MonoBehaviour
                 StartCoroutine(Explode());
             }
 
+            return;
+        }
+
+
+        // --- Wall Collisions
+        if (other.TryGetComponent(out DeathTrigger dt))
+        {
+            StartCoroutine(Explode());
             return;
         }
 

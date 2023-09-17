@@ -170,6 +170,9 @@ public class PlayerMovement : NetworkBehaviour
         {
             HandleInput();
             HandleMovementLoop();
+
+            BodyPart head = BodyParts[0];
+            Debug.DrawRay(head.Position, head.Direction);
         }
     }
 
@@ -258,16 +261,6 @@ public class PlayerMovement : NetworkBehaviour
 
         if (HasMoved && movement != Vector2.zero)
         {
-            RaycastHit2D raycast = Physics2D.Raycast(
-                BodyParts[0].Position,
-                movement,
-                1);
-
-            Debug.DrawLine(BodyParts[0].Position, movement * 1f, Color.red);
-
-            if (raycast)
-                print("Would hit a wall");
-
             PrevMovement = movement;
 
             // Iterate backwards through the body parts, from tail to head
@@ -292,6 +285,8 @@ public class PlayerMovement : NetworkBehaviour
 
             // Update to server
             m_poc.UpdateBodyParts();
+
+            CheckForExternalCollisions();
         }
     }
 
@@ -313,6 +308,21 @@ public class PlayerMovement : NetworkBehaviour
         }
         return false;
     }
+
+
+    private void CheckForExternalCollisions()
+    {
+        // Player layer is layer 6, want any collision other than Players
+        int layerMask = ~(1 << 6);
+
+        BodyPart head = BodyParts[0];
+        RaycastHit2D hit;
+        if (hit = Physics2D.Raycast(head.Position, head.Direction, 1, layerMask))
+        {
+            print(hit.collider.gameObject.name);
+        }
+    }
+
 
     /// <summary>
     /// Adds a new body part onto the end of the snake, then makes it the new tail.

@@ -37,13 +37,15 @@ public class HostSettingsHandler : MonoBehaviour
         m_speedLast = m_speedSlider.value;
         UpdateSpeedLabels();
 
-        m_friendlyFireToggle.onValueChanged.AddListener(OnFriendlyFireTogglePressed);
         m_friendlyFireToggle.isOn = GameSettings.Saved.FriendlyFire;
+        m_friendlyFireToggle.onValueChanged.AddListener(OnFriendlyFireTogglePressed);
+        SetFriendlyFireLabel(m_friendlyFireToggle.isOn);
 
         m_gameModeDropdown.onValueChanged.AddListener(OnGameModeUpdate);
 
-        m_mapSizeSlider.onValueChanged.AddListener(OnMapSizeUpdate);
         m_mapSizeSlider.value = GameSettings.Saved.GameSize;
+        m_mapSizeSlider.onValueChanged.AddListener(OnMapSizeUpdate);
+        SetMapSizeLabel(m_mapSizeSlider.value);
 
         foreach (GameObject go in m_powerupToggleContainers)
         {
@@ -83,17 +85,24 @@ public class HostSettingsHandler : MonoBehaviour
 
     public void OnMapSizeUpdate(float value)
     {
-        m_mapSizeLabel.text = $"Map Size ({(int)value})";
+        SetMapSizeLabel(value);
         m_currentGameSettings.GameSize = (int)value;
+    }
+    private void SetMapSizeLabel(float value)
+    {
+        m_mapSizeLabel.text = $"Map Size ({(int)value})";
     }
 
 
     public void OnFriendlyFireTogglePressed(bool pressed)
     {
+        SetFriendlyFireLabel(pressed);
+        m_currentGameSettings.FriendlyFire = pressed;
+    }
+    private void SetFriendlyFireLabel(bool pressed)
+    {
         string onOrOff = pressed ? "ON" : "OFF";
         m_friendlyFireLabel.text = $"Friendly Fire ({onOrOff})";
-
-        m_currentGameSettings.FriendlyFire = pressed;
     }
 
 

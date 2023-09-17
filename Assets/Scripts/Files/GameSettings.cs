@@ -29,6 +29,7 @@ public class GameSettings
         TimeToMove = DEFAULT_TIME_TO_MOVE;
         FriendlyFire = DEFAULT_FRIENDLY_FIRE;
         GameMode = EGameMode.SnakeRoyale;
+        GameSize = 10;
 
         DisabledFoods = new List<EFoodType>();
     }
@@ -39,6 +40,7 @@ public class GameSettings
         TimeToMove = other.TimeToMove;
         FriendlyFire = other.FriendlyFire;
         GameMode = other.GameMode;
+        GameSize = other.GameSize;
 
         DisabledFoods = other.DisabledFoods;
     }

@@ -139,7 +139,7 @@ public class PlayerStatus : NetworkBehaviour
         {
             case EEffect.RocketShitting:
                 float randomRotation = Random.Range(-SHIT_EXPLOSIVENESS, SHIT_EXPLOSIVENESS);
-                
+
                 GameObject shit = Instantiate(_staticShit, GameObject.Find("Projectiles").transform);
                 shit.transform.position = _player.BodyParts[^1].Position - (Vector3)_player.BodyParts[^1].Direction;
                 shit.transform.Rotate(Vector3.forward * randomRotation);
@@ -272,7 +272,7 @@ public class PlayerStatus : NetworkBehaviour
     public void UseInputEffect()
     {
         Effect effect = ActiveInputEffect;
-        if (effect.Cooldown <= 0)
+        if (effect.Cooldown <= 0 || effect.IsOneOff)
         {
             effect.ResetCooldown();
             switch (effect.EffectName)
@@ -451,7 +451,7 @@ public class PlayerStatus : NetworkBehaviour
     public Dictionary<string, string> GetStatusDebug()
     {
         Dictionary<string, string> statuses = new Dictionary<string, string>();
-        
+
         if (ActiveInputEffect != null)
             statuses[Enum.GetName(typeof(EEffect), ActiveInputEffect.EffectName)] = "True";
         foreach (Effect effect in ActivePassiveEffects)
@@ -481,7 +481,7 @@ public class PlayerStatus : NetworkBehaviour
         switch (food)
         {
             case EFoodType.Apple:
-                ItemSlotEffect = new Effect(EEffect.CureAll);
+                ItemSlotEffect = new Effect(EEffect.CureAll, isOneOff: true);
                 break;
 
             case EFoodType.Balti:
@@ -503,23 +503,19 @@ public class PlayerStatus : NetworkBehaviour
 
             case EFoodType.Booze:
                 // Drunk effect, then piss then sober up
-                Effect soberUp = new Effect(EEffect.SoberUp);
+                Effect soberUp = new Effect(EEffect.SoberUp, isOneOff: true);
 
                 Effect pissing = new Effect(EEffect.Pissing, lifetime: 5,
                     cooldown: 0.1f, isInputEffect: true, causes: new Effect[] { soberUp });
 
-                Effect internalProcessing = new Effect(EEffect.None, lifetime: 20,
+                Effect internalProcessing = new Effect(EEffect.None, lifetime: 20, causes:
                     new Effect[] { pissing });
 
                 Effect drunk = new Effect(EEffect.Drunk);
 
-                ItemSlotEffect = new Effect(EEffect.None, lifetime: 0,
+                ItemSlotEffect = new Effect(EEffect.None, lifetime: 0, causes:
                     new Effect[] { drunk, internalProcessing });
 
-                break;
-
-            case EFoodType.Coffee:
-                DrinkCoffee();
                 break;
 
             case EFoodType.Doughnut:
@@ -528,34 +524,9 @@ public class PlayerStatus : NetworkBehaviour
                 break;
 
             case EFoodType.Dragonfruit:
-                ItemSlotEffect = 
-                    new Effect(EEffect.BreathingFire, true);
+                ItemSlotEffect =
+                    new(EEffect.BreathingFire, isInputEffect: true, isOneOff: true);
                 break;
         }
-    }
-
-    private void DrinkCoffee()
-    {
-        Effect major = new Effect(EEffect.SpeedBoost, level: 3, lifetime: 10);
-        AddEffect(major);
-    }
-
-    private void EatDrumstick()
-    {
-        Effect buff = new Effect(EEffect.Buff, lifetime: 20);
-        AddEffect(buff);
-        EatBone();
-    }
-
-    private void EatBone()
-    {
-        // Rupture asshole
-    }
-
-    private void EatIceCream()
-    {
-        Effect brainFreeze = new Effect(EEffect.BrainFreeze, 3);
-        Effect unicorn = new Effect(EEffect.Unicorn, 3, new Effect[] { brainFreeze });
-        AddEffect(unicorn);
     }
 }

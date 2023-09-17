@@ -11,6 +11,10 @@ PrefabInstance:
       propertyPath: type
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: -174306473056929130, guid: 1d3e8221bb16de04faa51c3884811002, type: 3}
+      propertyPath: m_hardToMoveness
+      value: 11
+      objectReference: {fileID: 0}
     - target: {fileID: 649762205103882181, guid: 1d3e8221bb16de04faa51c3884811002, type: 3}
       propertyPath: m_Name
       value: Fireball
@@ -196,7 +200,7 @@ CapsuleCollider2D:
   m_Enabled: 1
   m_Density: 1
   m_Material: {fileID: 0}
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_UsedByEffector: 0
   m_UsedByComposite: 0
   m_Offset: {x: 0.000000029802322, y: 0.3637277}

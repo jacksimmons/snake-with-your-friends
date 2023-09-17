@@ -22,7 +22,7 @@ public class ProjectileBehaviour : ObjectBehaviour
             _proj = value;
             Ready = true;
             transform.rotation = _proj.Rotation;
-            Destroy(gameObject, _proj.Lifetime);
+            Destroy(gameObject, _proj.LifetimeMax);
         }
     }
 
@@ -62,24 +62,7 @@ public class ProjectileBehaviour : ObjectBehaviour
         if (player == null) isPlayer = false;
         if (PlayerImmune) isPlayer = false;
 
-        // Visual Effects section, enabled on all clients
-        switch (type)
-        {
-            case EProjectileType.InstantDamage:
-                if (isPlayer)
-                    StartCoroutine(Explode());
-                else
-                {
-                    m_speedMod *= m_restitution * -1;
-                    transform.Rotate(Vector3.forward * 180);
-                }
-                break;
-            default:
-                StartCoroutine(Explode());
-                break;
-        }
-
-        // Player callbacks section, enabled only on the owning client
+        // Player callbacks, enabled only on the owning client
         if (!isPlayer) return;
         PlayerMovement pm = player.GetComponent<PlayerMovement>();
         if (!pm.isOwned) return; // Not our collision to handle
@@ -98,6 +81,23 @@ public class ProjectileBehaviour : ObjectBehaviour
                 pm.QRemoveBodyPart(index);
                 break;
             default:
+                break;
+        }
+
+        // Player collision VFX, enabled only on owning client (for now)
+        switch (type)
+        {
+            case EProjectileType.InstantDamage:
+                if (isPlayer)
+                    StartCoroutine(Explode());
+                else
+                {
+                    m_speedMod *= m_restitution * -1;
+                    transform.Rotate(Vector3.forward * 180);
+                }
+                break;
+            default:
+                StartCoroutine(Explode());
                 break;
         }
     }
