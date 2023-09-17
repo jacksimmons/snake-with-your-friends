@@ -247,20 +247,6 @@ public class LobbyMenu : MonoBehaviour
 
     public void OnStartGamePressed()
     {
-        GameObject lpo = GameObject.Find("LocalPlayerObject");
-        GameObject game = lpo.transform.Find("Game").gameObject;
-        Destroy(game.GetComponent<GameBehaviour>());
-
-        switch (GameSettings.Saved.GameMode)
-        {
-            case "SnakeRoyale":
-                game.AddComponent<SnakeRoyaleBehaviour>();
-                break;
-            case "Puzzle":
-                game.AddComponent<PuzzleBehaviour>();
-                break;
-        }
-
         LocalPlayerController.CmdStartGame();
     }
 }

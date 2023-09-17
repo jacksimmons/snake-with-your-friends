@@ -2,6 +2,12 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
+public enum EGameMode
+{
+    SnakeRoyale,
+    Puzzle
+}
+
 [Serializable]
 public class GameSettings
 {
@@ -10,7 +16,8 @@ public class GameSettings
     public const float DEFAULT_TIME_TO_MOVE = 0.6f;
     public const bool DEFAULT_FRIENDLY_FIRE = true;
 
-    public string GameMode { get; set; }
+    public EGameMode GameMode { get; set; }
+    public int GameSize { get; set; }
 
     public float TimeToMove { get; set; }
     public bool FriendlyFire { get; set; }
@@ -21,7 +28,7 @@ public class GameSettings
     {
         TimeToMove = DEFAULT_TIME_TO_MOVE;
         FriendlyFire = DEFAULT_FRIENDLY_FIRE;
-        GameMode = "SnakeRoyale";
+        GameMode = EGameMode.SnakeRoyale;
 
         DisabledFoods = new List<EFoodType>();
     }

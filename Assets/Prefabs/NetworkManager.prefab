@@ -57,6 +57,8 @@ MonoBehaviour:
   transport: {fileID: 5917249426234426199}
   networkAddress: localhost
   maxConnections: 100
+  disconnectInactiveConnections: 0
+  disconnectInactiveTimeout: 60
   authenticator: {fileID: 0}
   playerPrefab: {fileID: 9103070792587131126, guid: 0a14f23727928f14fb4e6254238b905c, type: 3}
   autoCreatePlayer: 1
@@ -67,13 +69,14 @@ MonoBehaviour:
   - {fileID: 282451142020418660, guid: 0275836c03688364b84c9c8124927bf3, type: 3}
   - {fileID: 8457383420197702784, guid: 56b349ba582b06f488f8aee4394c72fa, type: 3}
   - {fileID: 3540720362809897522, guid: 53751b131fb05bb4cb78371e89654a70, type: 3}
-  - {fileID: 454872681040166018, guid: 42f111e0042b8da47bacd4f388020667, type: 3}
+  - {fileID: 2942080626621601328, guid: 04777406194d8464aa1d686d6788ebe9, type: 3}
   - {fileID: 5883453940578565158, guid: 4992d10c21a5a1243b3b983015924347, type: 3}
   - {fileID: 5883453940578565158, guid: 809a9950b02bfd4408d55d27a661077d, type: 3}
   - {fileID: 5883453940578565158, guid: 2c7275bda0ac1014fb6f7354e1e94e20, type: 3}
   - {fileID: 5883453940578565158, guid: 03ce9e9f003e8d1438730ccec31150cf, type: 3}
   snapshotSettings:
     bufferTimeMultiplier: 2
+    bufferLimit: 32
     catchupNegativeThreshold: -1
     catchupPositiveThreshold: 1
     catchupSpeed: 0.019999999552965164
@@ -82,6 +85,7 @@ MonoBehaviour:
     dynamicAdjustment: 1
     dynamicAdjustmentTolerance: 1
     deliveryTimeEmaDuration: 2
+  connectionQualityInterval: 3
   timeInterpolationGui: 0
   _playerPrefab: {fileID: 5691343852970272198, guid: f10477f5b0dea214e9da6295d82dbfd9, type: 3}
   singleplayer: 0

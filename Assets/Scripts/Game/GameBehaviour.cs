@@ -3,7 +3,9 @@ using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Pool;
 using UnityEngine.Tilemaps;
+using static UnityEngine.ParticleSystem;
 using Random = UnityEngine.Random;
 
 public class GameBehaviour : NetworkBehaviour
@@ -38,18 +40,16 @@ public class GameBehaviour : NetworkBehaviour
     [SerializeField]
     private Vector2 _spawnPoint;
 
-    public enum EWorldSize : int
-    {
-        Lobby = 10,
-        Small = 20,
-        Medium = 40,
-        Large = 60,
-        Massive = 80
-    }
-    public EWorldSize GroundSize { get; private set; } = EWorldSize.Massive;
+    // Soft limit is preferred, but if it is too small, the hard limit is used (1 tile).
+    // The minimum ratio between the distance between two snakes, and the WORLD_SIZE, before an inner square must be established.
+    private const float SOFT_MIN_DIST_WORLD_SIZE_RATIO = 0.2f;
+    private const float HARD_MIN_DIST = 2f;
+
+    [SerializeField]
+    private List<GameObject> _foodTemplates = new();
 
 
-    protected virtual void Start()
+    private void Start()
     {
         // If this is the host object
         if (NetworkServer.active)
@@ -62,25 +62,49 @@ public class GameBehaviour : NetworkBehaviour
     [Client]
     public virtual void OnGameSceneLoaded(string name)
     {
-        if (Array.IndexOf(GAME_SCENES, name) != -1)
-            return;
+        if (!isOwned) return;
 
-        if (isOwned)
+        if (GameSettings.Saved.GameMode == EGameMode.Puzzle)
         {
-            ClientLoadGame();
-            CmdReady();
+            OnGameSceneLoaded_Puzzle();
         }
+        else
+        {
+            ClientLoadTilemaps();
+        }
+
+        EnableLocalPlayerMovement();
+        CmdReady();
     }
 
     [Client]
-    protected virtual void ClientLoadGame()
+    private void EnableLocalPlayerMovement()
     {
-        if ((s_groundTilemap = GameObject.FindWithTag("GroundTilemap").GetComponent<Tilemap>()) != null)
-        {
-            s_wallTilemap = GameObject.FindWithTag("WallTilemap").GetComponent<Tilemap>();
-            return;
-        }
+        PlayerMovement player = GameObject.Find("LocalPlayerObject").GetComponent<PlayerMovement>();
+        player.enabled = true;
 
+        GameObject cam = GameObject.FindWithTag("MainCamera");
+        cam.GetComponent<CamBehaviour>().Player = player;
+    }
+
+    [Client]
+    private void OnGameSceneLoaded_Puzzle()
+    {
+        SaveData data = Saving.LoadFromFile<SaveData>("SaveData.dat");
+
+        byte puzzleLevel = data.PuzzleLevel;
+        if (data.PuzzleLevel > SaveData.MaxPuzzleLevel)
+            puzzleLevel = SaveData.MaxPuzzleLevel;
+
+        GameObject puzzle = Instantiate(Resources.Load<GameObject>($"Puzzles/Puzzle{puzzleLevel}"));
+        s_groundTilemap = puzzle.transform.Find("Ground").GetComponent<Tilemap>();
+        s_wallTilemap = puzzle.transform.Find("Wall").GetComponent<Tilemap>();
+    }
+
+
+    [Client]
+    protected virtual void ClientLoadTilemaps()
+    {
         s_groundTilemap = CreateAndReturnTilemap(gridName: "Ground", hasCollider: false);
         s_wallTilemap = CreateAndReturnTilemap(gridName: "Wall", hasCollider: true);
 
@@ -117,30 +141,32 @@ public class GameBehaviour : NetworkBehaviour
     [Client]
     protected void CreateGroundTilemap(ref Tilemap groundTilemap, Vector2Int bl)
     {
+        int groundSize = GameSettings.Saved.GameSize;
+
         // Bounds are an inner square of the 51x51 wall bounds starting at 0,0
         BoundsInt bounds = new(
             (Vector3Int)(bl + Vector2Int.one),
-            (Vector3Int)((int)GroundSize * Vector2Int.one) + Vector3Int.forward);
-        Tile[] tiles = new Tile[(int)GroundSize * (int)GroundSize];
-        for (int i = 0; i < (int)GroundSize; i++)
+            (Vector3Int)((int)groundSize * Vector2Int.one) + Vector3Int.forward);
+        Tile[] tiles = new Tile[(int)groundSize * (int)groundSize];
+        for (int i = 0; i < (int)groundSize; i++)
         {
-            for (int j = 0; j < (int)GroundSize; j++)
+            for (int j = 0; j < (int)groundSize; j++)
             {
                 if (i % 2 == 0)
                 {
                     // Even row -> starts with light (i.e. Even cols are light)
                     if (j % 2 == 0)
-                        tiles[(int)GroundSize * i + j] = _lightTile;
+                        tiles[(int)groundSize * i + j] = _lightTile;
                     else
-                        tiles[(int)GroundSize * i + j] = _darkTile;
+                        tiles[(int)groundSize * i + j] = _darkTile;
                 }
                 else
                 {
                     // Odd row -> starts with dark (i.e. Odd cols are light)
                     if (j % 2 == 0)
-                        tiles[(int)GroundSize * i + j] = _darkTile;
+                        tiles[(int)groundSize * i + j] = _darkTile;
                     else
-                        tiles[(int)GroundSize * i + j] = _lightTile;
+                        tiles[(int)groundSize * i + j] = _lightTile;
                 }
             }
         }
@@ -151,24 +177,26 @@ public class GameBehaviour : NetworkBehaviour
     [Client]
     protected void CreateWallTilemap(ref Tilemap wallTilemap, Vector2Int bl)
     {
+        int groundSize = GameSettings.Saved.GameSize;
+
         // This square is (int)GroundSize + 2 squared, since it is one bigger on each side of the x and y edges of the inner square
         BoundsInt bounds = new(
             (Vector3Int)bl,
-            (Vector3Int)(((int)GroundSize + 2) * Vector2Int.one) + Vector3Int.forward);
-        Tile[] tiles = new Tile[((int)GroundSize + 2) * ((int)GroundSize + 2)];
-        for (int i = 0; i < (int)GroundSize + 2; i++)
+            (Vector3Int)(((int)groundSize + 2) * Vector2Int.one) + Vector3Int.forward);
+        Tile[] tiles = new Tile[((int)groundSize + 2) * ((int)groundSize + 2)];
+        for (int i = 0; i < (int)groundSize + 2; i++)
         {
-            for (int j = 0; j < (int)GroundSize + 2; j++)
+            for (int j = 0; j < (int)groundSize + 2; j++)
             {
-                if (i == 0 || i == (int)GroundSize + 1)
+                if (i == 0 || i == (int)groundSize + 1)
                 {
                     // We are on the top or bottom row, so guaranteed placement of wall
-                    tiles[((int)GroundSize + 2) * i + j] = _wallTile;
+                    tiles[((int)groundSize + 2) * i + j] = _wallTile;
                 }
-                else if (j == 0 || j == (int)GroundSize + 1)
+                else if (j == 0 || j == (int)groundSize + 1)
                 {
                     // We are on the leftmost or rightmost column, so place wall
-                    tiles[((int)GroundSize + 2) * i + j] = _wallTile;
+                    tiles[((int)groundSize + 2) * i + j] = _wallTile;
                 }
             }
         }
@@ -191,11 +219,183 @@ public class GameBehaviour : NetworkBehaviour
 
 
     [Server]
-    protected virtual void ServerLoadGame() { }
+    private void ServerLoadGame()
+    {
+        int groundSize = GameSettings.Saved.GameSize;
+
+        s_objects = new GameObject[(int)groundSize * (int)groundSize];
+
+        if (GameSettings.Saved.GameMode == EGameMode.Puzzle)
+        {
+            ServerLoadGame_Puzzle();
+            return;
+        }
+        else if (GameSettings.Saved.GameMode == EGameMode.SnakeRoyale)
+        {
+            ServerLoadGame_SnakeRoyale();
+            return;
+        }
+    }
+    private void ServerLoadGame_Puzzle()
+    {
+        PlacePlayers();
+    }
+    private void ServerLoadGame_SnakeRoyale()
+    {
+        PlacePlayers();
+
+        // Unload food items which were removed in settings
+        for (int i = 0; i < _foodTemplates.Count; i++)
+        {
+            GameObject food = _foodTemplates[i];
+            if (GameSettings.Saved.DisabledFoods.Contains(food.GetComponent<FoodObject>().food))
+            {
+                _foodTemplates.Remove(food);
+                i--;
+            }
+        }
+
+        List<Vector2> positions = new(CustomNetworkManager.Instance.Players.Count);
+        List<float> rotation_zs = new(CustomNetworkManager.Instance.Players.Count);
+        for (int i = 0; i < CustomNetworkManager.Instance.Players.Count; i++)
+        {
+            positions.Add(CustomNetworkManager.Instance.Players[i].transform.position);
+            rotation_zs.Add(CustomNetworkManager.Instance.Players[i].transform.rotation.eulerAngles.z);
+        }
+        PlacePlayersClientRpc(positions, rotation_zs);
+        ActivateLocalPlayerClientRpc();
+
+        GenerateStartingFood();
+    }
 
 
     [Server]
-    public virtual void PlacePlayers(int depth, int playersStartIndex, Vector2Int bl) { }
+    public void PlacePlayers()
+    {
+        if (GameSettings.Saved.GameMode == EGameMode.Puzzle)
+        {
+            PlacePlayers_Puzzle();
+        }
+        else if (GameSettings.Saved.GameMode == EGameMode.SnakeRoyale)
+        {
+            PlacePlayers_SnakeRoyale(depth: 1, playersStartIndex: 0, Vector2Int.zero);
+        }
+    }
+    [Server]
+    private void PlacePlayers_Puzzle()
+    {
+        Transform puzzleStartPoints = GameObject.FindWithTag("PuzzleStart").transform;
+        PlayerMovement pm = GetComponentInParent<PlayerMovement>();
+        pm.FreeMovement = true;
+        pm.TimeToMove = 0.5f;
+
+        for (int i = 0; i < pm.BodyParts.Count; i++)
+        {
+            Transform startPoint = puzzleStartPoints.GetChild(i);
+            float rot = startPoint.rotation.eulerAngles.z;
+            pm.BodyParts[i].Position = startPoint.position;
+            pm.BodyParts[i].Direction = Extensions.Vectors.Rotate(Vector2.up, rot);
+            pm.BodyParts[i].RegularAngle = rot;
+        }
+
+        pm.startingDirection = pm.BodyParts[0].Position - pm.BodyParts[1].Position;
+    }
+    [Server]
+    private void PlacePlayers_SnakeRoyale(int depth, int playersStartIndex, Vector2Int bl)
+    {
+        // Outer snakes (along the walls)
+        // Calculate the maximum distance between snakes.
+        // If this distance is too small, spawn inner snakes.
+
+        int groundSize = GameSettings.Saved.GameSize;
+
+        int playersCount = 0;
+        if (CustomNetworkManager.Instance.Players.Count - playersStartIndex > 0)
+        {
+            playersCount = CustomNetworkManager.Instance.Players.Count - playersStartIndex;
+        }
+        List<PlayerObjectController> players = CustomNetworkManager.Instance.Players.GetRange(playersStartIndex, playersCount);
+
+        float minDist = (int)groundSize * SOFT_MIN_DIST_WORLD_SIZE_RATIO;
+        if (minDist < HARD_MIN_DIST)
+            minDist = HARD_MIN_DIST;
+
+        Vector3 BL = s_groundTilemap.CellToWorld((Vector3Int)(bl + (depth + 1) * Vector2Int.one));
+        Vector3 BR = s_groundTilemap.CellToWorld((Vector3Int)(bl + new Vector2Int((int)groundSize - depth + 1, depth + 1)));
+        Vector3 TL = s_groundTilemap.CellToWorld((Vector3Int)(bl + new Vector2Int(depth + 1, (int)groundSize - depth + 1)));
+        Vector3 TR = s_groundTilemap.CellToWorld((Vector3Int)(bl + ((int)groundSize - depth + 1) * Vector2Int.one));
+
+        Vector3[] corners = { BL, BR, TL, TR };
+        Vector2[] directions = { Vector2.one, new Vector2(-1, 1), new Vector2(1, -1), -Vector2.one };
+
+        for (int i = 0; i < players.Count; i++)
+        {
+            players[i].transform.position = corners[i % 4]
+                + (Vector3)(Vector2.one * directions[i % 4] * s_groundTilemap.cellSize / 2);
+
+            // If i were 0 then it might enter this, causing -4 as length to be provided (in the PlacePlayers line).
+            if (i != 0 && i % 4 == 0 && i < players.Count - 1)
+            {
+                int newDepth = depth + (int)Mathf.Floor(minDist);
+                if (newDepth >= (int)groundSize / 2)
+                {
+                    Debug.LogError("The players do not fit in the map provided.");
+                }
+                else
+                {
+                    PlacePlayers_SnakeRoyale(newDepth, playersStartIndex + 4, bl);
+                }
+            }
+        }
+    }
+
+
+    [Server]
+    private void GenerateStartingFood()
+    {
+        for (int i = 0; i < CustomNetworkManager.Instance.Players.Count; i++)
+        {
+            GenerateFood();
+        }
+    }
+
+
+    [Server]
+    private void GenerateFood()
+    {
+        // If no foods are enabled, quick exit.
+        // This is not necessarily erroneous, as players can disable all foods.
+        if (_foodTemplates.Count == 0)
+        {
+            Debug.LogWarning("No foods");
+            return;
+        }
+
+        int objectPos = Random.Range(0, s_objects.Length);
+
+        // Overwrite s_objects[objectPos] with -1 (if there are any vacancies)
+        // This effectively acts as a test to see if there are any vacancies,
+        // which also happens to locate the vacancy, while leaving its value
+        // as -1.
+        objectPos = AddObjectToGrid(objectPos, null);
+        if (objectPos == -1)
+        {
+            // No vacancies.
+            return;
+        }
+
+        int foodIndex = Random.Range(0, _foodTemplates.Count);
+        int groundSize = GameSettings.Saved.GameSize;
+        Vector2 foodPos = new((objectPos % (int)groundSize) + (1.5f), (objectPos / (int)groundSize) + (1.5f));
+
+        GameObject obj = Instantiate(_foodTemplates[foodIndex], foodPos, Quaternion.Euler(Vector3.forward * 0));
+        obj.GetComponent<GridObject>().gridPos = objectPos;
+
+        if (AddObjectToGrid(objectPos, obj) != -1)
+        {
+            NetworkServer.Spawn(obj);
+        }
+    }
 
 
     [ClientRpc]
@@ -224,10 +424,31 @@ public class GameBehaviour : NetworkBehaviour
 
 
     /// <summary>
-    /// Checks if index `objectPos` is not -1 in s_objects, if so it recursively
-    /// searches for a valid index.
+    /// Finds the first free slot in s_objects(null slot), populates it with obj, and returns the
+    /// index. Linear Search = O(n)
+    [Server]
+    public int AddObjectToGrid(GameObject obj)
+    {
+        // Linear search for the first empty slot
+        int objPos = 0;
+        while (objPos < s_objects.Length)
+        {
+            if (s_objects[objPos] == null)
+            {
+                s_objects[objPos] = obj;
+                return objPos;
+            }
+            objPos++;
+        }
+        Debug.LogError("Grid filled with objects!");
+        return -1;
+    }
+
+
+    /// <summary>
+    /// Checks the given index to see if it is free. If not, searches every slot until it finds a
+    /// free slot. Then populates the slot with obj, returns the index of the slot. Recursive.
     /// </summary>
-    /// <returns>The final position of the object, or -1 if no vacancies in s_objects.</returns>
     [Server]
     public int AddObjectToGrid(int objectPos, GameObject obj)
     {
@@ -256,6 +477,8 @@ public class GameBehaviour : NetworkBehaviour
     public void RemoveObjectFromGrid(int objectPos)
     {
         GameObject go = s_objects[objectPos];
+
+        print(objectPos);
 
         if (go == null)
         {

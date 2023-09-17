@@ -1,3 +1,4 @@
+using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -19,6 +20,10 @@ public class HostSettingsHandler : MonoBehaviour
 
     [SerializeField]
     private TMP_Dropdown m_gameModeDropdown;
+    [SerializeField]
+    private Slider m_mapSizeSlider;
+    [SerializeField]
+    private TextMeshProUGUI m_mapSizeLabel;
 
     [SerializeField]
     private GameObject[] m_powerupToggleContainers;
@@ -33,9 +38,12 @@ public class HostSettingsHandler : MonoBehaviour
         UpdateSpeedLabels();
 
         m_friendlyFireToggle.onValueChanged.AddListener(OnFriendlyFireTogglePressed);
-        OnFriendlyFireTogglePressed(true);
+        m_friendlyFireToggle.isOn = GameSettings.Saved.FriendlyFire;
 
         m_gameModeDropdown.onValueChanged.AddListener(OnGameModeUpdate);
+
+        m_mapSizeSlider.onValueChanged.AddListener(OnMapSizeUpdate);
+        m_mapSizeSlider.value = GameSettings.Saved.GameSize;
 
         foreach (GameObject go in m_powerupToggleContainers)
         {
@@ -73,6 +81,13 @@ public class HostSettingsHandler : MonoBehaviour
     }
 
 
+    public void OnMapSizeUpdate(float value)
+    {
+        m_mapSizeLabel.text = $"Map Size ({(int)value})";
+        m_currentGameSettings.GameSize = (int)value;
+    }
+
+
     public void OnFriendlyFireTogglePressed(bool pressed)
     {
         string onOrOff = pressed ? "ON" : "OFF";
@@ -82,9 +97,10 @@ public class HostSettingsHandler : MonoBehaviour
     }
 
 
-    public void OnGameModeUpdate(int gameMode)
+    public void OnGameModeUpdate(int index)
     {
-        m_currentGameSettings.GameMode = GameBehaviour.GAME_MODES[gameMode];
+        m_currentGameSettings.GameMode = 
+        (EGameMode)Enum.GetValues(typeof(EGameMode)).GetValue(index);
     }
 
 

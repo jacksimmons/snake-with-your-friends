@@ -56,7 +56,7 @@ public class PlayerMovement : NetworkBehaviour
     public Sprite m_bpCornerL;
 
     // Directions and movement
-    private Vector2 _startingDirection = Vector2.up;
+    public Vector2 startingDirection = Vector2.up;
     // Simple boolean which gets set to false after the starting direction is set
     public Vector2 direction = Vector2.zero;
     // The last valid, non-zero direction vector
@@ -117,7 +117,7 @@ public class PlayerMovement : NetworkBehaviour
             BodyPart bp = new
             (
                 _transform,
-                _startingDirection,
+                startingDirection,
 
                 // if (i == 0) => Head
                 i == 0 ? 
@@ -179,17 +179,28 @@ public class PlayerMovement : NetworkBehaviour
         float x_input = Input.GetAxisRaw("Horizontal");
         float y_input = Input.GetAxisRaw("Vertical");
 
-        // Movement states
-        if (!Frozen)
-        {
-            if (FreeMovement || (direction != Vector2.zero))
-            {
-                movement = direction;
-            }
-        }
-        else
+        // Forced movement
+        if (Frozen)
         {
             movement = _forcedMovement;
+            return;
+        }
+
+        // Free Movement update
+        // - Instant if changing direction
+        // - Time delay if not
+        if (FreeMovement)
+        {
+            if (direction != movement)
+            {
+                movement = direction;
+                m_timeSinceLastMove = TimeToMove;
+            }
+        }
+        // Movement update
+        else if (direction != Vector2.zero && direction != movement)
+        {
+            movement = direction;
         }
 
         // Direction

@@ -1,24 +1,11 @@
 using System.Collections;
+using TMPro;
 using UnityEngine;
 
-public class ProjectileBehaviour : MonoBehaviour
+public class ProjectileBehaviour : ObjectBehaviour
 {
-    private BitField bf = new();
-    private bool Ready
-    {
-        get { return bf.GetBit(0); }
-        set { bf.SetBit(0, value); }
-    }
-    private bool PlayerImmune
-    {
-        get { return bf.GetBit(1); }
-        set { bf.SetBit(1, value); }
-    }
-
     [SerializeField]
     public EProjectileType type;
-
-    private ParticleSystem m_explosionEffect;
 
     private Projectile _proj;
     public Projectile Proj
@@ -45,17 +32,11 @@ public class ProjectileBehaviour : MonoBehaviour
     private float m_speedMod = 1f;
 
     private Rigidbody2D _rb = null; // Assigned to in Proj setter
-    private Sprite m_sprite; // Assigned to once in Awake
 
-    private void Awake()
-    {
-        m_sprite = GetComponent<SpriteRenderer>().sprite;
-    }
 
-    private void Start()
+    protected override void Start()
     {
-        m_explosionEffect = GetComponent<ParticleSystem>();
-        m_explosionEffect.Stop();
+        base.Start();
 
         if (GameSettings.Saved.FriendlyFire)
             StartCoroutine(HandleImmunity(Proj.ImmunityDuration));
@@ -71,21 +52,9 @@ public class ProjectileBehaviour : MonoBehaviour
         }
     }
 
-    private void OnTriggerEnter2D(Collider2D other)
+    protected override void OnTriggerEnter2D(Collider2D other)
     {
-        // --- Projectile Collisions
-        if (other.TryGetComponent(out ProjectileBehaviour otherPb))
-        {
-            if (otherPb.type == EProjectileType.InstantDamage)
-            {
-                StartCoroutine(Explode());
-            }
-
-            return;
-        }
-
-        // --- Portal Collisions (ignore)
-        if (other.TryGetComponent(out Teleporter _)) { return; }
+        base.OnTriggerEnter2D(other);
 
         // --- Other Collisions
         bool isPlayer = true;
@@ -140,17 +109,5 @@ public class ProjectileBehaviour : MonoBehaviour
         yield return new WaitForSeconds(seconds);
 
         PlayerImmune = false;
-    }
-
-    private IEnumerator Explode()
-    {
-        GetComponent<SpriteRenderer>().enabled = false;
-        GetComponent<Collider2D>().enabled = false;
-        m_explosionEffect.Play();
-        while (!m_explosionEffect.isStopped)
-        {
-            yield return null;
-        }
-        Destroy(gameObject);
     }
 }

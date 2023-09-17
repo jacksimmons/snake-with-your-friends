@@ -71,7 +71,7 @@ public class Effect
     }
 
     // An effect which lasts for one frame, i.e. an action
-    public Effect(EEffect effectName)
+    public Effect(EEffect effectName, bool isInputEffect=false)
     {
         EffectName = effectName;
         IsOneOff = true;

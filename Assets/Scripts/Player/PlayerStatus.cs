@@ -167,6 +167,7 @@ public class PlayerStatus : NetworkBehaviour
             { EFoodType.Coffee, _spriteCoffee },
             { EFoodType.Doughnut, _spriteDoughnut },
             { EFoodType.Dragonfruit, _spriteDragonfruit },
+
             { EFoodType.Drumstick, _spriteDrumstick },
             { EFoodType.IceCream, _spriteIceCream },
             { EFoodType.Orange, _spriteOrange },
@@ -528,7 +529,7 @@ public class PlayerStatus : NetworkBehaviour
 
             case EFoodType.Dragonfruit:
                 ItemSlotEffect = 
-                    new Effect(EEffect.BreathingFire, lifetime: 5f, cooldown: 1f, isInputEffect: true);
+                    new Effect(EEffect.BreathingFire, true);
                 break;
         }
     }
