@@ -40,6 +40,8 @@ public class Chungus : MonoBehaviour
     public static void LoadSettings()
     {
         Settings settings = Saving.LoadFromFile<Settings>("Settings.dat");
+        SaveData data = Saving.LoadFromFile<SaveData>("SaveData.dat");
+
         if (settings == null) return;
 
         Instance.settings = settings;

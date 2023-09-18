@@ -19,6 +19,5 @@ public class GridObject : NetworkBehaviour
             .transform.Find("Game")
             .GetComponent<GameBehaviour>()
             .AddObjectToGrid(gameObject);
-        print(gridPos);
     }
 }

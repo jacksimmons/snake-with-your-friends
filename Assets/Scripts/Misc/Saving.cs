@@ -1,17 +1,27 @@
-using System;
 using System.IO;
+using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using UnityEngine;
-using UnityEngine.SceneManagement;
+
+
+public interface ICached
+{
+    // Caching happens on Saves and Loads, can be used to save a static instance to reduce file use
+    void Cache();
+}
+
 
 public static class Saving
 {
     /// <summary>
     /// Serialises objects and saves them to a given file location.
     /// </summary>
-    public static void SaveToFile<T>(T serializable, string filename) where T : class
+    public static void SaveToFile<T>(T serializable, string filename) where T : class, ICached
     {
         LoadingIcon.Instance.Toggle(true);
+
+        if (serializable != null)
+            serializable.Cache();
 
         string dest = Application.persistentDataPath + "/" + filename;
         FileStream fs;
@@ -32,7 +42,7 @@ public static class Saving
     /// Deserialises saved objects into usable objects.
     /// Returns plain "object" type, so casting is necessary.
     /// </summary>
-    public static T LoadFromFile<T>(string filename) where T : class, new()
+    public static T LoadFromFile<T>(string filename) where T : class, ICached, new()
     {
         LoadingIcon.Instance.Toggle(true);
 
@@ -49,6 +59,9 @@ public static class Saving
 
             T val = (T)bf.Deserialize(fs);
             fs.Close();
+
+            if (val != null)
+                val.Cache();
             return val;
         }
         else

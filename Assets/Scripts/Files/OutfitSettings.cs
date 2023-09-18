@@ -1,7 +1,7 @@
 using System;
 
 [Serializable]
-public class OutfitSettings
+public class OutfitSettings : ICached
 {
     public static OutfitSettings Saved = new();
 
@@ -33,4 +33,5 @@ public class OutfitSettings
         ColourName = other.ColourName;
     }
 
+    public void Cache() { Saved = new(this); }
 }

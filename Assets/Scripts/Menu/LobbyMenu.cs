@@ -73,13 +73,9 @@ public class LobbyMenu : MonoBehaviour
             m_hostSettingsButton.SetActive(true);
 
             // Load any previous host settings (if there are any)
-            GameSettings gameSettings = Saving.LoadFromFile<GameSettings>("GameSettings.dat");
-            if (gameSettings != null)
-                GameSettings.Saved = gameSettings;
-
-            OutfitSettings outfitSettings = Saving.LoadFromFile<OutfitSettings>("OutfitSettings.dat");
-            if (outfitSettings != null)
-                OutfitSettings.Saved = outfitSettings;
+            Saving.LoadFromFile<GameSettings>("GameSettings.dat");
+            Saving.LoadFromFile<OutfitSettings>("OutfitSettings.dat");
+            Saving.LoadFromFile<SaveData>("SaveData.dat");
         }
     }
 

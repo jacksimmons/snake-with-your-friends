@@ -2,8 +2,10 @@ using System;
 using UnityEngine;
 
 [Serializable]
-public class Settings
+public class Settings : ICached
 {
+    public static Settings Saved = new();
+
     public float menuVolume;
     public float sfxVolume;
     public int resX, resY, resHz;
@@ -41,8 +43,22 @@ public class Settings
         HelpMotionSickness = false;
     }
 
+    public Settings(Settings other)
+    {
+        menuVolume = other.menuVolume;
+        sfxVolume = other.sfxVolume;
+        resX = other.resX;
+        resY = other.resY;
+        resHz = other.resHz;
+
+        bf = new();
+        Fullscreen = other.Fullscreen;
+        Borderless = other.Borderless;
+        HelpMotionSickness = other.HelpMotionSickness;
+    }
+
     public Settings(float menuVolume, float sfxVolume, int resX, int resY, int resHz,
-        bool fullscreen, bool borderless, bool helpMotionSickness)
+    bool fullscreen, bool borderless, bool helpMotionSickness)
     {
         this.menuVolume = menuVolume;
         this.sfxVolume = sfxVolume;
@@ -55,6 +71,8 @@ public class Settings
         Borderless = borderless;
         HelpMotionSickness = helpMotionSickness;
     }
+
+    public void Cache() { Saved = new(this); }
 
     public static FullScreenMode GetWindowMode(bool fullscreen, bool borderless)
     {

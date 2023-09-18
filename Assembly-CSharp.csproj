@@ -58,6 +58,7 @@
   <ItemGroup>
     <Compile Include="Assets\Scripts\UI\DebugLabels.cs" />
     <Compile Include="Assets\Scripts\Extensions\BitField.cs" />
+    <Compile Include="Assets\GoalBehaviour.cs" />
     <Compile Include="Assets\Scripts\Menu\Lobby\PowerupToggleContainer.cs" />
     <Compile Include="Assets\Scripts\Game\GameBehaviour.cs" />
     <Compile Include="Assets\Scripts\Extensions\Extensions.cs" />

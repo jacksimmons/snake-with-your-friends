@@ -56,18 +56,36 @@ public class ProjectileBehaviour : ObjectBehaviour
     {
         base.OnTriggerEnter2D(other);
 
-        // --- Other Collisions
+
+        // --- Object Collisions
+
+        // All projectiles can be "exploded" by objects.
+        // Determines if projectile explosion is necessary when hitting an object.
+        if (other.TryGetComponent(out ObjectBehaviour ob))
+        {
+            if (ob.HardToMoveness >= HardToMoveness)
+            {
+                StartCoroutine(Explode());
+            }
+
+            return;
+        }
+
+
+        // --- Wall Collisions
+        if (other.TryGetComponent(out DeathTrigger _))
+        {
+            return;
+        }
+
+
+        // --- Player Collisions
         bool isPlayer = true;
-        Transform player = Player.TryGetPlayerTransformFromBodyPart(other.gameObject);
-        if (player == null) isPlayer = false;
-        if (PlayerImmune) isPlayer = false;
+        Transform player = Player.TryGetOwnedPlayerTransformFromBodyPart(other.gameObject);
+        if (player == null) return;
+        if (PlayerImmune) return;
 
-        // Player callbacks, enabled only on the owning client
-        if (!isPlayer) return;
-        PlayerMovement pm = player.GetComponent<PlayerMovement>();
-        if (!pm.isOwned) return; // Not our collision to handle
 
-        // Confirmed dealing with a Player collision
         switch (type)
         {
             case EProjectileType.Shit:
@@ -78,6 +96,7 @@ public class ProjectileBehaviour : ObjectBehaviour
             case EProjectileType.InstantDamage: // e.g. fireball
                 // Remove the body part
                 int index = other.transform.GetSiblingIndex();
+                PlayerMovement pm = player.GetComponent<PlayerMovement>();
                 pm.QRemoveBodyPart(index);
                 break;
             default:

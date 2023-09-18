@@ -9,7 +9,7 @@ public enum EGameMode
 }
 
 [Serializable]
-public class GameSettings
+public class GameSettings : ICached
 {
     public static GameSettings Saved = new();
 
@@ -44,6 +44,8 @@ public class GameSettings
 
         DisabledFoods = other.DisabledFoods;
     }
+
+    public void Cache() { Saved = new(this); }
 
     public void EnableFood(EFoodType disabledFood)
     {

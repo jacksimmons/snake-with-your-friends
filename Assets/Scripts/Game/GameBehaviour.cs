@@ -15,6 +15,9 @@ public class GameBehaviour : NetworkBehaviour
     public static readonly string[] GAME_MODES =
     { "SnakeRoyale", "Puzzle" };
 
+    // --- Puzzle
+    public int availablePuzzles = 0;
+
     // Static variables
     private static int numPlayersReady = 0;
     // An array of child indices for objects (all objects in this go under the s_objects game object parent)
@@ -60,7 +63,7 @@ public class GameBehaviour : NetworkBehaviour
 
 
     [Client]
-    public virtual void OnGameSceneLoaded(string name)
+    public void OnGameSceneLoaded(string name)
     {
         if (!isOwned) return;
 
@@ -90,20 +93,18 @@ public class GameBehaviour : NetworkBehaviour
     [Client]
     private void OnGameSceneLoaded_Puzzle()
     {
-        SaveData data = Saving.LoadFromFile<SaveData>("SaveData.dat");
-
-        byte puzzleLevel = data.PuzzleLevel;
-        if (data.PuzzleLevel > SaveData.MaxPuzzleLevel)
-            puzzleLevel = SaveData.MaxPuzzleLevel;
+        byte puzzleLevel = SaveData.Saved.PuzzleLevel;
 
         GameObject puzzle = Instantiate(Resources.Load<GameObject>($"Puzzles/Puzzle{puzzleLevel}"));
+        puzzle.name = $"Puzzle{puzzleLevel}";
+
         s_groundTilemap = puzzle.transform.Find("Ground").GetComponent<Tilemap>();
         s_wallTilemap = puzzle.transform.Find("Wall").GetComponent<Tilemap>();
     }
 
 
     [Client]
-    protected virtual void ClientLoadTilemaps()
+    protected void ClientLoadTilemaps()
     {
         s_groundTilemap = CreateAndReturnTilemap(gridName: "Ground", hasCollider: false);
         s_wallTilemap = CreateAndReturnTilemap(gridName: "Wall", hasCollider: true);
@@ -139,7 +140,7 @@ public class GameBehaviour : NetworkBehaviour
 
 
     [Client]
-    protected void CreateGroundTilemap(ref Tilemap groundTilemap, Vector2Int bl)
+    private void CreateGroundTilemap(ref Tilemap groundTilemap, Vector2Int bl)
     {
         int groundSize = GameSettings.Saved.GameSize;
 
@@ -175,7 +176,7 @@ public class GameBehaviour : NetworkBehaviour
 
 
     [Client]
-    protected void CreateWallTilemap(ref Tilemap wallTilemap, Vector2Int bl)
+    private void CreateWallTilemap(ref Tilemap wallTilemap, Vector2Int bl)
     {
         int groundSize = GameSettings.Saved.GameSize;
 
@@ -206,7 +207,7 @@ public class GameBehaviour : NetworkBehaviour
 
 
     [Command]
-    protected virtual void CmdReady()
+    private void CmdReady()
     {
         // Needs to be static, as every GameBehaviour calling this command will have its OWN
         // s_numPlayersReady incremented otherwise.
@@ -417,7 +418,7 @@ public class GameBehaviour : NetworkBehaviour
 
 
     [ClientRpc]
-    protected void ActivateLocalPlayerClientRpc()
+    private void ActivateLocalPlayerClientRpc()
     {
         PlayerMovement pm = GameObject.Find("LocalPlayerObject").GetComponent<PlayerMovement>();
         pm.bodyPartContainer.SetActive(true);
@@ -492,7 +493,7 @@ public class GameBehaviour : NetworkBehaviour
 
 
     [Command]
-    public virtual void CmdRemoveFood(int objPos)
+    public void CmdRemoveFood(int objPos)
     {
         RemoveObjectFromGrid(objPos);
 

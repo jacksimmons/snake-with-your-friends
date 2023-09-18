@@ -21,4 +21,18 @@ public static class Player
         // All checks passed
         return player;
     }
+
+
+    public static Transform TryGetOwnedPlayerTransformFromBodyPart(GameObject obj)
+    {
+        Transform player;
+
+        // Ensure the original player conditions stand
+        if (!(player = TryGetPlayerTransformFromBodyPart(obj))) return null;
+
+        // An owned player has isOwned == true
+        if (!player.GetComponent<PlayerMovement>().isOwned) return null;
+
+        return player;
+    }
 }

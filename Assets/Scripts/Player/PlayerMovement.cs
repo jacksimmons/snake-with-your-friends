@@ -23,9 +23,10 @@ public class PlayerMovement : NetworkBehaviour
     {
         get
         {
-            if (!bf.GetBit(2) && (movement != Vector2.zero))
-                return true;
-            return false;
+            if (!bf.GetBit(2) && movement != Vector2.zero)
+                bf.SetBit(2, true);
+
+            return bf.GetBit(2);
         }
         set { bf.SetBit(2, value); }
     }
@@ -206,34 +207,22 @@ public class PlayerMovement : NetworkBehaviour
             movement = direction;
         }
 
-        // Direction
+        // --- Direction
         direction = Vector2.zero;
-        // Raw user input
         if (x_input > 0)
             direction = Vector2.right;
         else if (x_input < 0)
             direction = Vector2.left;
+        else if (y_input > 0)
+            direction = Vector2.up;
+        else if (y_input < 0)
+            direction = Vector2.down;
 
-        // If no x input was provided, check for y input
-        if (direction == Vector2.zero)
-        {
-            if (y_input > 0)
-                direction = Vector2.up;
-            else if (y_input < 0)
-                direction = Vector2.down;
-        }
-
-        // We can't have the snake going back on itself.
+        // Prevent snakes going back on themselves
+        // Snake can only go back on itself if FreeMovement is enabled and BodyParts.Count <= 2.
+        if (FreeMovement && BodyParts.Count <= 2) return;
         if (direction == -PrevMovement)
             direction = Vector2.zero;
-
-        // Pausing
-        if (Input.GetButtonDown("Pause"))
-        {
-            // 1 -> 0, 0 -> 1
-            // ! Steam callbacks will NOT WORK after this as Update is not called.
-            Time.timeScale = Mathf.Abs(Time.timeScale - 1f);
-        }
     }
 
     /// <summary>
@@ -261,11 +250,14 @@ public class PlayerMovement : NetworkBehaviour
 
         if (HasMoved && movement != Vector2.zero)
         {
+            if (CheckForExternalCollisions(movement)) return;
+
+            // `PrevMovement` should only be updated if `movement` causes no external collisions.
             PrevMovement = movement;
 
             // Iterate backwards through the body parts, from tail to head
             // so every part inherits its direction from the part before it.
-            
+
             // Tail first - move in the same direction as the bp in front
             BodyPart bpBeforeTail = BodyParts[^2];
             BodyParts[^1].Move(bpBeforeTail.Direction);
@@ -285,8 +277,6 @@ public class PlayerMovement : NetworkBehaviour
 
             // Update to server
             m_poc.UpdateBodyParts();
-
-            CheckForExternalCollisions();
         }
     }
 
@@ -294,6 +284,7 @@ public class PlayerMovement : NetworkBehaviour
     /// Only collisions that are possible without invincibility are head and other parts.
     /// Therefore, check if the head's position matches any of the others.
     /// </summary>
+    /// <returns>Whether a collision (and subsequent death) occurred.</returns>
     private bool CheckForInternalCollisions()
     {
         BoxCollider2D bcHead = BodyParts[0].Transform.GetComponent<BoxCollider2D>();
@@ -302,7 +293,8 @@ public class PlayerMovement : NetworkBehaviour
         {
             if (result[0].gameObject.CompareTag("BodyPart"))
             {
-                HandleDeath();
+                if (!FreeMovement) HandleDeath();
+                print("Internal collision.");
                 return true;
             }
         }
@@ -310,17 +302,34 @@ public class PlayerMovement : NetworkBehaviour
     }
 
 
-    private void CheckForExternalCollisions()
+    /// <summary>
+    /// Collisions with walls and static objects should be evaluated here.
+    /// This function is used for detection of collisions along a given
+    /// direction directly before the movement occurs.
+    /// This allows the death to be identified and the movement that would've
+    /// occurred can be changed accordingly.
+    /// </summary>
+    /// <param name="direction">The direction to test for collisions on.</param>
+    /// <returns>Whether a collision (and subsequent death) occurred.</returns>
+    private bool CheckForExternalCollisions(Vector2 direction)
     {
         // Player layer is layer 6, want any collision other than Players
-        int layerMask = ~(1 << 6);
+        int excludeMask = 1 << 6;
+        // NOT the exclude mask (to include everything but the exclude mask layers)
+        int layerMask = ~excludeMask;
 
         BodyPart head = BodyParts[0];
         RaycastHit2D hit;
-        if (hit = Physics2D.Raycast(head.Position, head.Direction, 1, layerMask))
+        if (hit = Physics2D.Raycast(head.Position, direction, 1, layerMask))
         {
-            print(hit.collider.gameObject.name);
+            if (hit.collider.gameObject.TryGetComponent<DeathTrigger>(out _))
+            {
+                if (!FreeMovement) HandleDeath();
+                print("External collision.");
+                return true;
+            }
         }
+        return false;
     }
 
 
