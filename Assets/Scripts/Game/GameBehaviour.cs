@@ -83,11 +83,19 @@ public class GameBehaviour : NetworkBehaviour
     [Client]
     private void EnableLocalPlayerMovement()
     {
-        PlayerMovement player = GameObject.Find("LocalPlayerObject").GetComponent<PlayerMovement>();
-        player.enabled = true;
+        StartCoroutine(Wait.WaitForObjectThen(() =>
+        {
+            return GameObject.Find("LocalPlayerObject").
+                GetComponent<PlayerObjectController>().PM;
+        },
+        0.1f,
+        (PlayerMovement player) =>
+        {
+            player.enabled = true;
 
-        GameObject cam = GameObject.FindWithTag("MainCamera");
-        cam.GetComponent<CamBehaviour>().Player = player;
+            GameObject cam = GameObject.FindWithTag("MainCamera");
+            cam.GetComponent<CamBehaviour>().Player = player;
+        }));
     }
 
     [Client]
