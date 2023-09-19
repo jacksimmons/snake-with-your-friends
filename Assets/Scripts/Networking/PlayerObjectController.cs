@@ -7,6 +7,7 @@ using UnityEditor;
 
 public class PlayerObjectController : NetworkBehaviour
 {
+    [SerializeField]
     private PlayerMovement m_pmc;
     [SerializeField]
     private GameObject m_bodyPartTemplate;
@@ -43,12 +44,6 @@ public class PlayerObjectController : NetworkBehaviour
             // This will be NULL if the HUD hasn't loaded yet.
             return hud.GetHUDElementOrNull(playerSteamID);
         }
-    }
-
-
-    private void Awake()
-    {
-        m_pmc = GetComponent<PlayerMovement>();
     }
 
 
