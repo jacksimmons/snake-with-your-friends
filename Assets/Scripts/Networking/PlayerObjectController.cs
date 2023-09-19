@@ -193,7 +193,7 @@ public class PlayerObjectController : NetworkBehaviour
                     PM.BodyParts.Add(newBP);
                 }
             }
-        }
+        }));
     }
 
     public void LogDeath()
