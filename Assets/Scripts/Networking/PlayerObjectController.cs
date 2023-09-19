@@ -8,7 +8,7 @@ using UnityEditor;
 public class PlayerObjectController : NetworkBehaviour
 {
     [SerializeField]
-    private PlayerMovement m_pmc;
+    private PlayerMovement PM;
     [SerializeField]
     private GameObject m_bodyPartTemplate;
 
@@ -136,7 +136,7 @@ public class PlayerObjectController : NetworkBehaviour
     public void UpdateBodyParts()
     {
         List<BodyPartData> bodyPartDatas = new();
-        foreach (BodyPart part in m_pmc.BodyParts)
+        foreach (BodyPart part in PM.BodyParts)
         {
             bodyPartDatas.Add(BodyPart.ToData(part));
         }
@@ -155,40 +155,43 @@ public class PlayerObjectController : NetworkBehaviour
     [ClientRpc]
     public void ClientUpdateBodyParts(List<BodyPartData> bodyPartDatas, ulong victimPlayerSteamID)
     {
-        if (playerSteamID == victimPlayerSteamID && !isOwned)
+        StartCoroutine(Wait.WaitForObjectThen(() => PM, 0.1f, (PlayerMovement _) =>
         {
-            m_pmc.BodyParts.Clear();
-            for (int i = 0; i < bodyPartDatas.Count; i++)
+            if (playerSteamID == victimPlayerSteamID && !isOwned)
             {
-                Transform bodyPartParent = m_pmc.bodyPartContainer.transform;
-                int diff = bodyPartDatas.Count - bodyPartParent.childCount;
-
-                // Ensure all clients have the same number of BodyPart gameobjects (it doesn't
-                // matter which gameobject we remove when diff < 0)
-                // This seems computationally less expensive than destroying and reconstructing
-                // all the necessary gameobjects every move frame.
-
-                if (diff > 0)
+                PM.BodyParts.Clear();
+                for (int i = 0; i < bodyPartDatas.Count; i++)
                 {
-                    for (int _j = 0; _j < diff; _j++)
-                    {
-                        Instantiate(m_bodyPartTemplate, bodyPartParent);
-                    }
-                }
-                else if (diff < 0)
-                {
-                    for (int _j = 0; _j > diff; _j--)
-                    {
-                        Destroy(bodyPartParent.GetChild(bodyPartParent.childCount - 2).gameObject);
-                    }
-                }
+                    Transform bodyPartParent = PM.bodyPartContainer.transform;
+                    int diff = bodyPartDatas.Count - bodyPartParent.childCount;
 
-                BodyPart newBP = BodyPart.FromData(
-                    bodyPartDatas[i],
-                    m_pmc.bodyPartContainer.transform.GetChild(i)
-                );
+                    // Ensure all clients have the same number of BodyPart gameobjects (it doesn't
+                    // matter which gameobject we remove when diff < 0)
+                    // This seems computationally less expensive than destroying and reconstructing
+                    // all the necessary gameobjects every move frame.
 
-                m_pmc.BodyParts.Add(newBP);
+                    if (diff > 0)
+                    {
+                        for (int _j = 0; _j < diff; _j++)
+                        {
+                            Instantiate(m_bodyPartTemplate, bodyPartParent);
+                        }
+                    }
+                    else if (diff < 0)
+                    {
+                        for (int _j = 0; _j > diff; _j--)
+                        {
+                            Destroy(bodyPartParent.GetChild(bodyPartParent.childCount - 2).gameObject);
+                        }
+                    }
+
+                    BodyPart newBP = BodyPart.FromData(
+                        bodyPartDatas[i],
+                        PM.bodyPartContainer.transform.GetChild(i)
+                    );
+
+                    PM.BodyParts.Add(newBP);
+                }
             }
         }
     }

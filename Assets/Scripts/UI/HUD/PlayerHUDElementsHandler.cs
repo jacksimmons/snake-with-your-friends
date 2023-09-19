@@ -21,7 +21,7 @@ public class PlayerHUDElementsHandler : MonoBehaviour
             item.SetName(poc.playerName);
             StartCoroutine(
                 Wait.WaitForObjectThen(
-                    () => poc.GetComponent<PlayerMovement>(),
+                    () => poc.PM,
                     0.1f,
                     (PlayerMovement pm) =>
                     {
