@@ -41,7 +41,7 @@ public class PlayerHUDElementsHandler : MonoBehaviour
     /// <summary>
     /// Returns the corresponding HUD element, if it exists, or null.
     /// </summary>
-    public PlayerHUDElement GetHUDElement(ulong steamID)
+    public PlayerHUDElement GetHUDElementOrNull(ulong steamID)
     {
         if (!m_mapSteamIDToHUDElement.ContainsKey(steamID)) return null;
         return m_mapSteamIDToHUDElement[steamID];

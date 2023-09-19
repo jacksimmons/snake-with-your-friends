@@ -39,14 +39,10 @@ public class PlayerObjectController : NetworkBehaviour
         {
             if (m_playerOnHUD) return m_playerOnHUD;
 
-            // Execution must suspend until we have this variable
             PlayerHUDElementsHandler hud = GameObject.FindWithTag("HUD").GetComponent<PlayerHUDElementsHandler>();
-            while (m_playerOnHUD == null)
-            {
-                m_playerOnHUD = hud.GetHUDElement(playerSteamID);
-            }
 
-            return m_playerOnHUD;
+            // This will be NULL if the HUD hasn't loaded yet.
+            return hud.GetHUDElementOrNull(playerSteamID);
         }
     }
 
@@ -144,7 +140,9 @@ public class PlayerObjectController : NetworkBehaviour
         {
             bodyPartDatas.Add(BodyPart.ToData(part));
         }
-        PlayerOnHUD.SetNumParts(bodyPartDatas.Count);
+
+        if (PlayerOnHUD) // Patient update - can wait if the HUD isn't ready.
+            PlayerOnHUD.SetNumParts(bodyPartDatas.Count);
         CmdUpdateBodyParts(bodyPartDatas, playerSteamID);
     }
 
