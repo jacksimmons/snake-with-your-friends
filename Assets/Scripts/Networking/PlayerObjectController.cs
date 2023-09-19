@@ -32,7 +32,23 @@ public class PlayerObjectController : NetworkBehaviour
         }
     }
 
-    public PlayerHUDElement PlayerOnHUD { get; private set; }
+    private PlayerHUDElement m_playerOnHUD = null;
+    public PlayerHUDElement PlayerOnHUD
+    {
+        get
+        {
+            if (m_playerOnHUD) return m_playerOnHUD;
+
+            // Execution must suspend until we have this variable
+            PlayerHUDElementsHandler hud = GameObject.FindWithTag("HUD").GetComponent<PlayerHUDElementsHandler>();
+            while (m_playerOnHUD == null)
+            {
+                m_playerOnHUD = hud.GetHUDElement(playerSteamID);
+            }
+
+            return m_playerOnHUD;
+        }
+    }
 
 
     private void Start()
@@ -40,14 +56,6 @@ public class PlayerObjectController : NetworkBehaviour
         DontDestroyOnLoad(gameObject);
         if (isServer && isLocalPlayer)
             isHost = true;
-
-        // Execution must suspend until we have every variable
-        PlayerHUDElementsHandler hud = GameObject.FindWithTag("HUD").GetComponent<PlayerHUDElementsHandler>();
-        while (PlayerOnHUD == null)
-        {
-            if (hud.MapSteamIDToHUDElement.ContainsKey(playerSteamID))
-                PlayerOnHUD = hud.MapSteamIDToHUDElement[playerSteamID];
-        }
     }
 
     // Lobby Methods

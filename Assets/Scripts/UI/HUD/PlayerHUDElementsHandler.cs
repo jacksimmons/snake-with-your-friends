@@ -8,7 +8,7 @@ public class PlayerHUDElementsHandler : MonoBehaviour
 {
     [SerializeField]
     private GameObject m_playerElementTemplate;
-    public Dictionary<ulong, PlayerHUDElement> MapSteamIDToHUDElement { get; private set; } = new();
+    private Dictionary<ulong, PlayerHUDElement> m_mapSteamIDToHUDElement = new();
 
 
     public void LoadHUD()
@@ -35,5 +35,15 @@ public class PlayerHUDElementsHandler : MonoBehaviour
 
             MapSteamIDToHUDElement[poc.playerSteamID] = item;
         }
+    }
+
+
+    /// <summary>
+    /// Returns the corresponding HUD element, if it exists, or null.
+    /// </summary>
+    public PlayerHUDElement GetHUDElement(ulong steamID)
+    {
+        if (!m_mapSteamIDToHUDElement.ContainsKey(steamID)) return null;
+        return m_mapSteamIDToHUDElement[steamID];
     }
 }
