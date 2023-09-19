@@ -23,6 +23,7 @@ TagManager:
   - WallTilemap
   - PuzzleStart
   - PuzzleGoal
+  - HUD
   layers:
   - Default
   - TransparentFX
