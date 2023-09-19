@@ -229,13 +229,12 @@ public class GameBehaviour : NetworkBehaviour
         if (GameSettings.Saved.GameMode == EGameMode.Puzzle)
         {
             ServerLoadGame_Puzzle();
-            return;
         }
         else if (GameSettings.Saved.GameMode == EGameMode.SnakeRoyale)
         {
             ServerLoadGame_SnakeRoyale();
-            return;
         }
+        GameObject.FindWithTag("HUD").GetComponent<PlayerHUDElementsHandler>().LoadHUD();
     }
     private void ServerLoadGame_Puzzle()
     {

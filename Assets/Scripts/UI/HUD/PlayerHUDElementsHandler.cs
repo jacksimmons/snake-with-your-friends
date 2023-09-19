@@ -9,7 +9,7 @@ public class PlayerHUDElementsHandler : MonoBehaviour
     private GameObject m_playerElementTemplate;
 
 
-    private void Start()
+    public void LoadHUD()
     {
         foreach (PlayerObjectController poc in CustomNetworkManager.Instance.Players)
         {
