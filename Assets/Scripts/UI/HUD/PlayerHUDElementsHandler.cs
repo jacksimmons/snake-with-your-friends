@@ -1,3 +1,4 @@
+using Steamworks;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -7,6 +8,7 @@ public class PlayerHUDElementsHandler : MonoBehaviour
 {
     [SerializeField]
     private GameObject m_playerElementTemplate;
+    public Dictionary<ulong, PlayerHUDElement> MapSteamIDToHUDElement { get; private set; } = new();
 
 
     public void LoadHUD()
@@ -15,8 +17,6 @@ public class PlayerHUDElementsHandler : MonoBehaviour
         {
             GameObject newElement = Instantiate(m_playerElementTemplate, transform);
             PlayerHUDElement item = newElement.GetComponent<PlayerHUDElement>();
-
-            poc.PlayerOnHUD = item;
 
             item.SetName(poc.playerName);
             StartCoroutine(
@@ -32,6 +32,8 @@ public class PlayerHUDElementsHandler : MonoBehaviour
                     }
                 )
             );
+
+            MapSteamIDToHUDElement[poc.playerSteamID] = item;
         }
     }
 }
