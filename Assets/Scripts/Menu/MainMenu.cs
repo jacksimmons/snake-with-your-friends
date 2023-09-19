@@ -7,11 +7,9 @@ using UnityEngine.UI;
 public class MainMenu : SceneTransitionHandler
 {
     [SerializeField]
-    private Button m_noFriendsButton;
+    private Button[] m_buttonsRequiringAuth;
     [SerializeField]
-    private Button m_createButton;
-    [SerializeField]
-    private Button m_joinButton;
+    private Button[] m_buttonsRequiringOnline;
     [SerializeField]
     private Button m_retryButton;
     [SerializeField]
@@ -37,25 +35,24 @@ public class MainMenu : SceneTransitionHandler
     {
         if (!SteamManager.Initialized)
         {
-            m_noFriendsButton.interactable = false;
-            m_createButton.interactable = false;
-            m_joinButton.interactable = false;
+            ToggleButtons(m_buttonsRequiringAuth, false);
             m_retryButton.gameObject.SetActive(true);
         }
         else if (!SteamUser.BLoggedOn())
         {
-            m_noFriendsButton.interactable = true;
-            m_createButton.interactable = false;
-            m_joinButton.interactable = false;
+            ToggleButtons(m_buttonsRequiringOnline, false);
             m_retryButton.gameObject.SetActive(true);
         }
         else
         {
-            m_noFriendsButton.interactable = true;
-            m_createButton.interactable = true;
-            m_joinButton.interactable = true;
             m_retryButton.gameObject.SetActive(false);
         }
+    }
+
+    private void ToggleButtons(Button[] buttonArray, bool interactable)
+    {
+        foreach (Button button in buttonArray)
+            button.interactable = interactable;
     }
 
     public void OnNoFriendsButtonPressed()
@@ -98,14 +95,15 @@ public class MainMenu : SceneTransitionHandler
         LoadScene("SettingsMenu");
     }
 
+    public void OnEditorButtonPressed()
+    {
+        LoadScene("EditorMenu");
+    }
+
     public void OnRetryButtonPressed()
     {
-        // Will enable the loading symbol
-        LoadingIcon.Instance.Toggle(true);
         Chungus.ClearDontDestroyOnLoad();
-
-        // Will enable then disable the loading symbol
-        LoadScene("MainMenu");
+        ReloadScene("MainMenu");
     }
 
     public void Quit()

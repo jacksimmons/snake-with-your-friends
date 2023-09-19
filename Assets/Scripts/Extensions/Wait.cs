@@ -12,11 +12,12 @@ public class Wait
         yield return null;
     }
 
-    public static IEnumerator WaitForConditionThen(Func<bool> getCondition, YieldInstruction waitTime, Action then=null)
+    public static IEnumerator WaitForConditionThen(Func<bool> getCondition, float secondsToWait,
+        Action then=null)
     {
         while (!getCondition())
         {
-            yield return waitTime;
+            yield return new WaitForSeconds(secondsToWait);
         }
         then?.Invoke();
         yield return null;
@@ -25,35 +26,22 @@ public class Wait
     /// <summary>
     /// Uses a findObj function to attempt to locate the object every waitTime, and then calls the "then" action
     /// with the found object as a parameter.
-    public static IEnumerator WaitForObjectThen<T>(Func<T> findObj, YieldInstruction waitTime, Action<T> then=null)
-        where T : class
+    public static IEnumerator WaitForObjectThen<T>(Func<T> findObj, float secondsToWait,
+        Action<T> then=null) where T : class
     {
         T obj = null;
         while (obj == null)
         {
             obj = findObj();
-            yield return waitTime;
+            yield return new WaitForSeconds(secondsToWait);
         }
         then?.Invoke(obj);
         yield return null;
     }
 
 
-    public static IEnumerator WaitForLoadSceneThen(string sceneName, YieldInstruction waitTime,
-        Action then = null)
-    {
-        AsyncOperation load = SceneManager.LoadSceneAsync(sceneName);
-
-        while (!load.isDone)
-        {
-            yield return waitTime;
-        }
-        then?.Invoke();
-        yield return null;
-    }
-
     public static IEnumerator LoadSceneThenWait(string sceneName, 
-        Func<bool> conditionToActivate, YieldInstruction waitTime)
+        Func<bool> conditionToActivate, float secondsToWait)
     {
         AsyncOperation load = SceneManager.LoadSceneAsync(sceneName);
         load.allowSceneActivation = false;
@@ -62,12 +50,11 @@ public class Wait
         {
             if (load.progress >= 0.9f)
             {
-                Debug.Log(conditionToActivate());
                 if (conditionToActivate())
                     load.allowSceneActivation = true;
             }
 
-            yield return waitTime;
+            yield return new WaitForSeconds(secondsToWait);
         }
 
         yield return null;

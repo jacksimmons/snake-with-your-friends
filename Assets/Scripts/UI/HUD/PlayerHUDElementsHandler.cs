@@ -22,7 +22,7 @@ public class PlayerHUDElementsHandler : MonoBehaviour
             StartCoroutine(
                 Wait.WaitForObjectThen(
                     () => poc.GetComponent<PlayerMovement>(),
-                    new WaitForSeconds(0.1f),
+                    0.1f,
                     (PlayerMovement pm) =>
                     {
                         item.SetNumParts(pm.BodyParts.Count);

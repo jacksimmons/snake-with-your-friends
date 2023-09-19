@@ -12,29 +12,43 @@ public class SceneTransitionHandler : MonoBehaviour
     {
         if (sceneName != "")
         {
-            LoadSceneInBackground();
+            LoadSceneInBackground(sceneName);
         }
     }
 
-    protected void LoadSceneInBackground()
+    protected void LoadSceneInBackground(string name)
     {
         StartCoroutine(
             Wait.LoadSceneThenWait(
-                sceneName,
-                GetReady,
-                new WaitForSeconds(0.1f)
+                name,
+                () => 
+                {
+                    bool ready = GetReady();
+                    SetReady(false); // E.g. if retry is used, ready will be used again later.
+                    return ready;
+                },
+                0.1f
             )
         );
     }
 
+    // Loads a scene with a loading symbol, and chungusnake anim.
     protected void LoadScene(string name)
     {
-        sceneName = name;
-        LoadSceneInBackground();
         LoadingIcon.Instance.Toggle(true);
+
+        LoadSceneInBackground(name);
         
         foreach (var spawner in snakeSpawners)
             spawner.SpawnChungusnake();
+    }
+
+    protected void ReloadScene(string name)
+    {
+        LoadingIcon.Instance.Toggle(true);
+
+        LoadSceneInBackground(name);
+        SetReady(true);
     }
 
     public void SetReady(bool ready) { isReady = ready; }

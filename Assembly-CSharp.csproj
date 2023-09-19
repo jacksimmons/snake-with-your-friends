@@ -66,6 +66,7 @@
     <Compile Include="Assets\Scripts\UI\HUD\PlayerHUDElement.cs" />
     <Compile Include="Assets\Scripts\Menu\SettingsMenu.cs" />
     <Compile Include="Assets\Scripts\UI\SpectateBehaviour.cs" />
+    <Compile Include="Assets\Scripts\Menu\EditorMenu.cs" />
     <Compile Include="Assets\Scripts\Menu\JoinMenu.cs" />
     <Compile Include="Assets\Scripts\Player\PlayerStatus.cs" />
     <Compile Include="Assets\Scripts\UI\SnakeButton.cs" />
@@ -80,6 +81,7 @@
     <Compile Include="Assets\Scripts\Extensions\Vector2Comparison.cs" />
     <Compile Include="Assets\Scripts\UI\StatusEffectUI.cs" />
     <Compile Include="Assets\Scripts\Menu\Main\SentenceChangerButton.cs" />
+    <Compile Include="Assets\EditorPaintBehaviour.cs" />
     <Compile Include="Assets\Scripts\Cutscene\SnakeActor.cs" />
     <Compile Include="Assets\Scripts\Object\GridObject.cs" />
     <Compile Include="Assets\Scripts\Extensions\RandomDistribution.cs" />

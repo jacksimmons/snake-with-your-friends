@@ -67,7 +67,7 @@ public class OutfitComponentHandler : MonoBehaviour
         {
             StartCoroutine(Wait.WaitForObjectThen(
                 () => GameObject.Find("LocalPlayerObject"),
-                new WaitForSeconds(0.1f),
+                0.1f,
                 (GameObject lpo) => UpdatePlayerSpriteInstance(sprite, lpo)));
             return;
         }

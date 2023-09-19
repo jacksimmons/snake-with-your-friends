@@ -54,19 +54,7 @@ public class LoadingIcon : MonoBehaviour
         StartCoroutine(
             Wait.WaitForConditionThen(
                 check,
-                new WaitForSeconds(0.1f),
-                () => Toggle(false)
-            )
-        );
-    }
-
-    public void LoadSceneWithLoadingSymbol(string sceneName)
-    {
-        Toggle(true);
-        StartCoroutine(
-            Wait.WaitForLoadSceneThen(
-                sceneName,
-                new WaitForSeconds(0.1f),
+                0.1f,
                 () => Toggle(false)
             )
         );
