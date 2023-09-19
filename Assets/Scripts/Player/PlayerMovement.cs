@@ -96,12 +96,6 @@ public class PlayerMovement : NetworkBehaviour
     }
 
 
-    private void Awake()
-    {
-        if (!isOwned) { Destroy(this); }
-    }
-
-
     private void OnEnable()
     {
         TimeToMove = GameSettings.Saved.TimeToMove;
