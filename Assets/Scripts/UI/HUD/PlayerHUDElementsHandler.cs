@@ -33,7 +33,7 @@ public class PlayerHUDElementsHandler : MonoBehaviour
                 )
             );
 
-            MapSteamIDToHUDElement[poc.playerSteamID] = item;
+            m_mapSteamIDToHUDElement[poc.playerSteamID] = item;
         }
     }
 
