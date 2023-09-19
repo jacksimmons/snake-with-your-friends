@@ -20,15 +20,15 @@ public class PlayerHUDElementsHandler : MonoBehaviour
 
             item.SetName(poc.playerName);
             StartCoroutine(
-                Wait.WaitForObjectThen(
-                    () => poc.PM,
+                Wait.WaitForConditionThen(
+                    () => poc.PM.enabled,
                     0.1f,
-                    (PlayerMovement pm) =>
+                    () =>
                     {
-                        item.SetNumParts(pm.BodyParts.Count);
-                        item.transform.Find("Tail").GetComponent<Image>().sprite = pm.m_bpTail;
-                        item.transform.Find("Torso").GetComponent<Image>().sprite = pm.m_bpTorso;
-                        item.transform.Find("Head").GetComponent<Image>().sprite = pm.m_bpHead;
+                        item.SetNumParts(poc.PM.BodyParts.Count);
+                        item.transform.Find("Tail").GetComponent<Image>().sprite = poc.PM.m_bpTail;
+                        item.transform.Find("Torso").GetComponent<Image>().sprite = poc.PM.m_bpTorso;
+                        item.transform.Find("Head").GetComponent<Image>().sprite = poc.PM.m_bpHead;
                     }
                 )
             );
