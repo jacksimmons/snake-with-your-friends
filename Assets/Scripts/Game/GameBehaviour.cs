@@ -54,6 +54,9 @@ public class GameBehaviour : NetworkBehaviour
 
     private void Start()
     {
+        // Other players' GameBehaviours don't concern us.
+        if (!isOwned) { Destroy(gameObject); }
+
         // If this is the host object
         if (NetworkServer.active)
         {
@@ -65,8 +68,6 @@ public class GameBehaviour : NetworkBehaviour
     [Client]
     public void OnGameSceneLoaded(string name)
     {
-        if (!isOwned) return;
-
         if (GameSettings.Saved.GameMode == EGameMode.Puzzle)
         {
             OnGameSceneLoaded_Puzzle();
@@ -85,8 +86,7 @@ public class GameBehaviour : NetworkBehaviour
     {
         StartCoroutine(Wait.WaitForObjectThen(() =>
         {
-            return GameObject.Find("LocalPlayerObject").
-                GetComponent<PlayerObjectController>().PM;
+            return GetComponentInParent<PlayerObjectController>().PM;
         },
         0.1f,
         (PlayerMovement player) =>
