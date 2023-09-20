@@ -15,21 +15,41 @@ public class EditorMenu : MonoBehaviour
     private TextMeshProUGUI m_mouseCoordsXValue;
     [SerializeField]
     private TextMeshProUGUI m_mouseCoordsYValue;
-    private Vector3 m_mousePos;
+    [SerializeField]
+    private TextMeshProUGUI m_mouseZoomValue;
+
+    private Vector3Int m_gridPos;
+
 
     // Update is called once per frame
-    void Update()
+    private void Update()
     {
-        if (m_mousePos != Input.mousePosition)
+        Vector3Int currentGridPos = GetGridPos();
+        if (currentGridPos != m_gridPos)
         {
-            m_mousePos = Input.mousePosition;
-            m_mouseCoordsXValue.text = $"{(int)m_mousePos.x}";
-            m_mouseCoordsYValue.text = $"{(int)m_mousePos.y}";
+            m_gridPos = currentGridPos;
+            m_mouseCoordsXValue.text = $"{m_gridPos.x}";
+            m_mouseCoordsYValue.text = $"{m_gridPos.y}";
         }
 
         if (Input.GetMouseButtonDown(0))
         {
-            m_painter.Draw(new((int)m_mousePos.x, (int)m_mousePos.y));
+            m_painter.Draw(m_gridPos);
         }
+    }
+
+
+    private Vector3Int GetGridPos()
+    {
+        Vector3 worldMousePos =
+            Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        return m_painter.groundTilemap.WorldToCell(worldMousePos);
+    }
+
+
+    public void UpdateZoom(float value)
+    {
+        print(value);
+        m_mouseZoomValue.text = $"{value:F2}x";
     }
 }
