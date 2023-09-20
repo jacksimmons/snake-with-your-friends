@@ -162,6 +162,9 @@ public class PlayerMovement : NetworkBehaviour
         if (Array.IndexOf(GameBehaviour.GAME_SCENES, SceneManager.GetActiveScene().name) == -1)
             return;
 
+        if (!isOwned)
+            return;
+
         if (!bodyPartContainer.activeSelf)
         {
             bodyPartContainer.SetActive(true);
