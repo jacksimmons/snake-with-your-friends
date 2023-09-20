@@ -288,7 +288,7 @@ public class GameBehaviour : NetworkBehaviour
             rotation_zs.Add(CustomNetworkManager.Instance.Players[i].transform.rotation.eulerAngles.z);
         }
         PlacePlayersClientRpc(positions, rotation_zs);
-        ActivateLocalPlayerClientRpc();
+        ActivatePlayersClientRpc();
 
         GenerateStartingFood();
     }
@@ -393,11 +393,13 @@ public class GameBehaviour : NetworkBehaviour
 
 
     [ClientRpc]
-    private void ActivateLocalPlayerClientRpc()
+    private void ActivatePlayersClientRpc()
     {
-        PlayerMovement pm = GameObject.Find("LocalPlayerObject")
-            .GetComponent<PlayerObjectController>().PM;
-        pm.bodyPartContainer.SetActive(true);
+        foreach (var player in CustomNetworkManager.Instance.Players)
+        {
+            PlayerMovement pm = player.PM;
+            pm.bodyPartContainer.SetActive(true);
+        }
     }
 
 
