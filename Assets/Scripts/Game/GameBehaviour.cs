@@ -54,6 +54,8 @@ public class GameBehaviour : NetworkBehaviour
 
     private void Start()
     {
+        if (!isOwned) return;
+
         // If this is the host object
         if (NetworkServer.active)
         {
