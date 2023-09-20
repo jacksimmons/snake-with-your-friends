@@ -107,6 +107,8 @@ public class GameBehaviour : NetworkBehaviour
             PlayerMovement pm = player.PM;
             pm.enabled = true;
 
+            print("hi");
+
             if (!pm.isOwned) return;
             GameObject cam = GameObject.FindWithTag("MainCamera");
             cam.GetComponent<CamBehaviour>().Player = pm;
@@ -442,7 +444,8 @@ public class GameBehaviour : NetworkBehaviour
     [ClientRpc]
     private void ActivateLocalPlayerClientRpc()
     {
-        PlayerMovement pm = GameObject.Find("LocalPlayerObject").GetComponent<PlayerMovement>();
+        PlayerMovement pm = GameObject.Find("LocalPlayerObject")
+            .GetComponent<PlayerObjectController>().PM;
         pm.bodyPartContainer.SetActive(true);
     }
 

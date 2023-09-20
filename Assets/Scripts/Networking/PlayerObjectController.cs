@@ -137,7 +137,10 @@ public class PlayerObjectController : NetworkBehaviour
         Manager.StartGame("Game");
     }
 
-    // In-Game Methods
+    
+    /// <summary>
+    /// Converts all Body Parts into BodyPartDatas, ready to be sent across the network.
+    /// </summary>
     public void UpdateBodyParts()
     {
         if (!isOwned) return;
