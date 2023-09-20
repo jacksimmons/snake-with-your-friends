@@ -80,21 +80,19 @@ public class GameBehaviour : NetworkBehaviour
         CmdReady();
     }
 
+
+    // Enables all player object movement components
     [Client]
     private void EnableLocalPlayerMovement()
     {
-        StartCoroutine(Wait.WaitForObjectThen(() =>
+        foreach (var player in CustomNetworkManager.Instance.Players)
         {
-            return GetComponentInParent<PlayerObjectController>().PM;
-        },
-        0.1f,
-        (PlayerMovement player) =>
-        {
-            player.enabled = true;
+            PlayerMovement pm = player.PM;
+            pm.enabled = true;
 
             GameObject cam = GameObject.FindWithTag("MainCamera");
-            cam.GetComponent<CamBehaviour>().Player = player;
-        }));
+            cam.GetComponent<CamBehaviour>().Player = pm;
+        }
     }
 
     [Client]
