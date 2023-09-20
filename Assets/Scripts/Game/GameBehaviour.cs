@@ -58,7 +58,22 @@ public class GameBehaviour : NetworkBehaviour
         if (NetworkServer.active)
         {
             numPlayersReady = 0;
+            CmdSendHostSettings();
         }
+    }
+
+
+    [Command]
+    private void CmdSendHostSettings()
+    {
+        ReceiveHostSettingsClientRpc(GameSettings.Saved);
+    }
+
+
+    [ClientRpc]
+    private void ReceiveHostSettingsClientRpc(GameSettings settings)
+    {
+        GameSettings.Saved = new(settings);
     }
 
 
