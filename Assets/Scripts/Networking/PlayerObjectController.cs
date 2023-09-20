@@ -205,7 +205,8 @@ public class PlayerObjectController : NetworkBehaviour
     public void LogDeath()
     { 
         CmdLogDeath(Manager.Players.IndexOf(this));
-        PlayerOnHUD.AppearDead();
+        if (PlayerOnHUD)
+            PlayerOnHUD.AppearDead();
     }
 
     [Command]
