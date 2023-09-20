@@ -105,6 +105,7 @@ public class GameBehaviour : NetworkBehaviour
             PlayerMovement pm = player.PM;
             pm.enabled = true;
 
+            if (!pm.isOwned) return;
             GameObject cam = GameObject.FindWithTag("MainCamera");
             cam.GetComponent<CamBehaviour>().Player = pm;
         }
