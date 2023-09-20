@@ -140,6 +140,8 @@ public class PlayerObjectController : NetworkBehaviour
     // In-Game Methods
     public void UpdateBodyParts()
     {
+        if (!isOwned) return;
+
         List<BodyPartData> bodyPartDatas = new();
         foreach (BodyPart part in PM.BodyParts)
         {
