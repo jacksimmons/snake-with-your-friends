@@ -109,7 +109,7 @@ public class GameBehaviour : NetworkBehaviour
 
             print("hi");
 
-            if (!pm.isOwned) return;
+            if (!pm.isOwned) continue;
             GameObject cam = GameObject.FindWithTag("MainCamera");
             cam.GetComponent<CamBehaviour>().Player = pm;
         }
@@ -375,6 +375,32 @@ public class GameBehaviour : NetworkBehaviour
     }
 
 
+    [ClientRpc]
+    public void PlacePlayersClientRpc(List<Vector2> positions, List<float> rotation_zs)
+    {
+        if (positions.Count != rotation_zs.Count)
+        {
+            Debug.LogError("Positions and rotations have mismatching lengths!");
+            return;
+        }
+
+        for (int i = 0; i < positions.Count; i++)
+        {
+            PlayerObjectController poc = CustomNetworkManager.Instance.Players[i];
+            poc.transform.SetPositionAndRotation(positions[i], Quaternion.Euler(Vector3.forward * rotation_zs[i]));
+        }
+    }
+
+
+    [ClientRpc]
+    private void ActivateLocalPlayerClientRpc()
+    {
+        PlayerMovement pm = GameObject.Find("LocalPlayerObject")
+            .GetComponent<PlayerObjectController>().PM;
+        pm.bodyPartContainer.SetActive(true);
+    }
+
+
     [Server]
     private void GenerateStartingFood()
     {
@@ -421,32 +447,6 @@ public class GameBehaviour : NetworkBehaviour
         {
             NetworkServer.Spawn(obj);
         }
-    }
-
-
-    [ClientRpc]
-    public void PlacePlayersClientRpc(List<Vector2> positions, List<float> rotation_zs)
-    {
-        if (positions.Count != rotation_zs.Count)
-        {
-            Debug.LogError("Positions and rotations have mismatching lengths!");
-            return;
-        }
-
-        for (int i = 0; i < positions.Count; i++)
-        {
-            PlayerObjectController poc = CustomNetworkManager.Instance.Players[i];
-            poc.transform.SetPositionAndRotation(positions[i], Quaternion.Euler(Vector3.forward * rotation_zs[i]));
-        }
-    }
-
-
-    [ClientRpc]
-    private void ActivateLocalPlayerClientRpc()
-    {
-        PlayerMovement pm = GameObject.Find("LocalPlayerObject")
-            .GetComponent<PlayerObjectController>().PM;
-        pm.bodyPartContainer.SetActive(true);
     }
 
 
