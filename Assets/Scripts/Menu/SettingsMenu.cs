@@ -57,11 +57,11 @@ public class SettingsMenu : MonoBehaviour
     {
         audioHandler = GameObject.FindWithTag("AudioHandler");
 
-        menuVolumeSlider.value = Chungus.Instance.settings.menuVolume * 100;
+        menuVolumeSlider.value = Settings.Saved.menuVolume * 100;
         menuVolumeValue = menuVolumeSlider.value;
         menuVolumeSlider.onValueChanged.AddListener(SetMenuVolume);
 
-        sfxVolumeSlider.value = Chungus.Instance.settings.sfxVolume * 100;
+        sfxVolumeSlider.value = Settings.Saved.sfxVolume * 100;
         sfxVolumeValue = sfxVolumeSlider.value;
         sfxVolumeSlider.onValueChanged.AddListener(SetSFXVolume);
 
@@ -87,11 +87,11 @@ public class SettingsMenu : MonoBehaviour
         fullscreenToggle.isOn = Screen.fullScreen;
         fullscreenToggle.onValueChanged.AddListener(SetFullscreen);
 
-        borderlessValue = Chungus.Instance.settings.Borderless;
+        borderlessValue = Settings.Saved.Borderless;
         borderlessToggle.isOn = borderlessValue;
         borderlessToggle.onValueChanged.AddListener(SetBorderless);
 
-        motionSicknessValue = Chungus.Instance.settings.HelpMotionSickness;
+        motionSicknessValue = Settings.Saved.HelpMotionSickness;
         motionSicknessToggle.isOn = motionSicknessValue;
         motionSicknessToggle.onValueChanged.AddListener(SetHelpMotionSickness);
     }

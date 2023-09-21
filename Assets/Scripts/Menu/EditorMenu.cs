@@ -22,6 +22,7 @@ public enum CreatorLayer
     Object
 }
 
+
 public class EditorMenu : MonoBehaviour
 {
     private const float DISABLED_LAYER_OPACITY = 0.2f;
