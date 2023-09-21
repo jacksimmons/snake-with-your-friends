@@ -5,10 +5,15 @@ using UnityEngine.Tilemaps;
 
 public class MapCreatorPaintBehaviour : MonoBehaviour
 {
-    public TileBase selectedTile;
+    public Tile selectedTile;
+    public GameObject selectedObject;
 
     [SerializeField]
     public Tilemap currentTilemap;
+    [SerializeField]
+    private GameObject objectLayer;
+
+    public Dictionary<Vector3Int, GameObject> m_objectMapping = new();
 
 
     public void Paint(CreatorTool tool, Vector3Int pos)
@@ -31,5 +36,27 @@ public class MapCreatorPaintBehaviour : MonoBehaviour
     public void Erase(Vector3Int pos)
     {
         currentTilemap.SetTile(pos, null);
+    }
+
+
+    public void DrawObject(Vector3Int pos)
+    {
+        GameObject go = Instantiate(selectedObject, objectLayer.transform);
+
+        // Add an offset for the object's actual position, equivalent to the tilemap's offset from
+        // the origin.
+        go.transform.position = (Vector3)pos + new Vector3(0.5f, 0.5f, 0);
+        go.GetComponent<SpriteRenderer>().sortingOrder = 0;
+
+        if (m_objectMapping.ContainsKey(pos))
+            Destroy(m_objectMapping[pos]);
+        m_objectMapping[pos] = go;
+    }
+
+
+    public void EraseObject(Vector3Int pos)
+    {
+        if (m_objectMapping.ContainsKey(pos))
+            Destroy(m_objectMapping[pos]);
     }
 }

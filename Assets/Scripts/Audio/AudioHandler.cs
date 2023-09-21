@@ -43,6 +43,7 @@ public class AudioHandler : MonoBehaviour
 
     public void OnButtonPressed()
     {
-        _buttonPressAudioSource.Play();
+        if (_buttonPressAudioSource)
+            _buttonPressAudioSource.Play();
     }
 }

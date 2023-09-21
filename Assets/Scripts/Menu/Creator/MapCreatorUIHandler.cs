@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
-
+using UnityEngine.UI;
 
 public class MapCreatorUIHandler : MonoBehaviour
 {
@@ -17,6 +17,14 @@ public class MapCreatorUIHandler : MonoBehaviour
     private TextMeshProUGUI m_mouseCoordsYValue;
     [SerializeField]
     private TextMeshProUGUI m_mouseZoomValue;
+
+    [SerializeField]
+    private Image m_tileIcon;
+    [SerializeField]
+    private Image m_objectIcon;
+
+    [SerializeField]
+    private TextMeshProUGUI m_helpLabel;
 
 
     private void Start()
@@ -42,5 +50,35 @@ public class MapCreatorUIHandler : MonoBehaviour
     public void UpdateZoom(float value)
     {
         m_mouseZoomValue.text = $"{value:F2}x";
+    }
+
+
+    public void UpdateTileIcon(Sprite sprite)
+    {
+        m_tileIcon.sprite = sprite;
+    }
+
+
+    public void UpdateObjectIcon(GameObject go)
+    {
+        m_objectIcon.sprite = go.GetComponent<SpriteRenderer>().sprite;
+    }
+
+
+    public void ToggleTileUI(bool toggle)
+    {
+        m_tileIcon.transform.parent.gameObject.SetActive(toggle);
+    }
+
+
+    public void ToggleObjectUI(bool toggle)
+    {
+        m_objectIcon.transform.parent.gameObject.SetActive(toggle);
+    }
+
+
+    public void ToggleHelpLabel()
+    {
+        m_helpLabel.enabled = !m_helpLabel.enabled;
     }
 }
