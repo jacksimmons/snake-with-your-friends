@@ -7,6 +7,10 @@ using UnityEngine.UI;
 public class MapCreatorUIHandler : MonoBehaviour
 {
     private EditorMenu m_editor;
+
+    [SerializeField]
+    private MapCreatorPaintBehaviour m_painter;
+
     [SerializeField]
     private TextMeshProUGUI m_toolValue;
     [SerializeField]
@@ -22,6 +26,8 @@ public class MapCreatorUIHandler : MonoBehaviour
     private Image m_tileIcon;
     [SerializeField]
     private Image m_objectIcon;
+    [SerializeField]
+    private TextMeshProUGUI m_objectCount;
 
     [SerializeField]
     private TextMeshProUGUI m_helpLabel;
@@ -37,6 +43,7 @@ public class MapCreatorUIHandler : MonoBehaviour
     {
         m_toolValue.text = m_editor.ToolInUse.ToString();
         m_layerValue.text = m_editor.CurrentLayer.ToString();
+        m_objectCount.text = $"({m_painter.numObjects}/{MapCreatorPaintBehaviour.MAX_OBJECTS})";
     }
 
 

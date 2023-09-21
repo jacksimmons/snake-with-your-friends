@@ -24,7 +24,7 @@ public enum CreatorLayer
 
 public class EditorMenu : MonoBehaviour
 {
-    private const float DISABLED_LAYER_OPACITY = 0.1f;
+    private const float DISABLED_LAYER_OPACITY = 0.2f;
 
     [SerializeField]
     private Camera m_cam;
@@ -36,6 +36,9 @@ public class EditorMenu : MonoBehaviour
     private Tilemap m_wallLayer;
     [SerializeField]
     private GameObject m_objectLayer;
+
+    [SerializeField]
+    private TextMeshProUGUI m_saveInfo;
 
     public CreatorTool ToolInUse { get; private set; }
 
@@ -74,7 +77,7 @@ public class EditorMenu : MonoBehaviour
                     SetLayerToTilemap(m_wallLayer);
                     break;
                 case CreatorLayer.Object:
-                    m_objectMode = true;
+                    SetLayerToObject();
                     break;
             }
             m_currentLayer = value;
@@ -228,5 +231,18 @@ public class EditorMenu : MonoBehaviour
         SetAllLayerOpacities(1);
         PrefabUtility.SaveAsPrefabAsset(m_groundLayer.transform.parent.parent.gameObject,
             "Assets/Prefabs/Maps/Map.prefab");
+
+        long fileLength = 0;
+        try
+        {
+            FileInfo mapFileInfo = new FileInfo("Assets/Prefabs/Maps/Map.prefab");
+            fileLength = mapFileInfo.Length;
+
+            m_saveInfo.text = $"Map.prefab ({fileLength / 1_000_000}MB)";
+        }
+        catch
+        {
+            m_saveInfo.text = $"Map.prefab (Unknown Size)";
+        }
     }
 }
