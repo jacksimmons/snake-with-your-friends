@@ -50,7 +50,9 @@ public class CustomNetworkManager : NetworkManager
         if (AlivePlayers.Count == 1)
         {
             print("Game Over! " + AlivePlayers[0].playerName + " wins the game.");
-            AlivePlayers[0].CmdEndGame();
+
+            if (NetworkServer.active) // [Server]
+                EndGame();
         }
     }
 
