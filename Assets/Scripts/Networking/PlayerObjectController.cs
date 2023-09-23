@@ -52,6 +52,11 @@ public class PlayerObjectController : NetworkBehaviour
     }
 
 
+    private void Start()
+    {
+        DontDestroyOnLoad(gameObject);
+    }
+
     // Lobby Methods
     /// <summary>
     /// Called when starting a player that we have authority over.
