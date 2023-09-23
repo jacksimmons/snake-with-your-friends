@@ -84,17 +84,24 @@ public class GameBehaviour : NetworkBehaviour
     {
         if (!isOwned) return;
 
-        if (GameSettings.Saved.GameMode == EGameMode.Puzzle)
+        // Wait to receive the host's GameSettings by RPC
+        StartCoroutine(Wait.WaitForConditionThen(
+        () => GameSettings.Saved != null,
+        0.1f,
+        () => 
         {
-            OnGameSceneLoaded_Puzzle();
-        }
-        else
-        {
-            ClientLoadTilemaps();
-        }
+            if (GameSettings.Saved.GameMode == EGameMode.Puzzle)
+            {
+                OnGameSceneLoaded_Puzzle();
+            }
+            else
+            {
+                ClientLoadTilemaps();
+            }
 
-        EnableLocalPlayerMovement();
-        CmdReady();
+            EnableLocalPlayerMovement();
+            CmdReady();
+        }));
     }
 
 
