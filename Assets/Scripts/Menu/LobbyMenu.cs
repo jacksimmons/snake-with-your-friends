@@ -36,7 +36,7 @@ public class LobbyMenu : MonoBehaviour
 
     // Other Data
     public ulong lobbyID;
-    public bool playerItemCreated = false;
+    public bool playerItemsCreated = false;
     private List<PlayerListItem> _playerListItems = new();
 
     // Manager
@@ -97,7 +97,7 @@ public class LobbyMenu : MonoBehaviour
 
     public void UpdatePlayerList()
     {
-        if (!playerItemCreated) { CreateHostPlayerItems(); }
+        if (!playerItemsCreated) { CreateHostPlayerItems(); }
 
         if (_playerListItems.Count < Manager.Players.Count) { CreateClientPlayerItems(); }
 
@@ -114,7 +114,7 @@ public class LobbyMenu : MonoBehaviour
         PlayerListItem newPlayerListItemScript = newPlayerItem.GetComponent<PlayerListItem>();
 
         // Host Crown (& other stuff in the future)
-        if (player.isHost)
+        if (NetworkServer.active)
             newPlayerListItemScript.hostCrown.SetActive(true);
 
         newPlayerListItemScript.playerName = player.playerName;
@@ -136,7 +136,7 @@ public class LobbyMenu : MonoBehaviour
             CreatePlayerItem(player);
         }
 
-        playerItemCreated = true;
+        playerItemsCreated = true;
     }
 
     public void CreateClientPlayerItems()
