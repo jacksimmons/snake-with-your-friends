@@ -36,7 +36,7 @@ public class LobbyMenu : MonoBehaviour
 
     // Other Data
     public ulong lobbyID;
-    public bool playerItemCreated = false;
+    public bool playerItemsCreated = false;
     private List<PlayerListItem> _playerListItems = new();
 
     // Manager
@@ -67,15 +67,17 @@ public class LobbyMenu : MonoBehaviour
     {
         if (instance == null) { instance = this; }
 
+        if (OutfitSettings.Saved == null)
+            Saving.LoadFromFile<OutfitSettings>("OutfitSettings.dat");
+
         // Determine if we are the host
         if (NetworkServer.active)
         {
             m_hostSettingsButton.SetActive(true);
 
             // Load any previous host settings (if there are any)
-            Saving.LoadFromFile<GameSettings>("GameSettings.dat");
-            Saving.LoadFromFile<OutfitSettings>("OutfitSettings.dat");
-            Saving.LoadFromFile<SaveData>("SaveData.dat");
+            if (GameSettings.Saved == null)
+                Saving.LoadFromFile<GameSettings>("GameSettings.dat");
         }
     }
 
@@ -97,7 +99,7 @@ public class LobbyMenu : MonoBehaviour
 
     public void UpdatePlayerList()
     {
-        if (!playerItemCreated) { CreateHostPlayerItems(); }
+        if (!playerItemsCreated) { CreateHostPlayerItems(); }
 
         if (_playerListItems.Count < Manager.Players.Count) { CreateClientPlayerItems(); }
 
@@ -136,7 +138,7 @@ public class LobbyMenu : MonoBehaviour
             CreatePlayerItem(player);
         }
 
-        playerItemCreated = true;
+        playerItemsCreated = true;
     }
 
     public void CreateClientPlayerItems()

@@ -3,7 +3,7 @@ using System;
 [Serializable]
 public class OutfitSettings : ICached
 {
-    public static OutfitSettings Saved = new();
+    public static OutfitSettings Saved = null;
 
     public string HeadSpriteName { get; set; }
     public string TorsoSpriteName { get; set; }

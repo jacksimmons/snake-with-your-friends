@@ -4,7 +4,7 @@ using UnityEngine;
 [Serializable]
 public class Settings : ICached
 {
-    public static Settings Saved = new();
+    public static Settings Saved = null;
 
     public float menuVolume;
     public float sfxVolume;

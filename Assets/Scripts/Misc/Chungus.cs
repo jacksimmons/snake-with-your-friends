@@ -19,7 +19,6 @@ public class Chungus : MonoBehaviour
         "Chungus",
         "LoadingCanvas"
     };
-    public Settings settings = null;
 
     // Singleton
     private static Chungus _instance;
@@ -35,28 +34,6 @@ public class Chungus : MonoBehaviour
             }
             return _instance;
         }
-    }
-
-    public static void LoadSettings()
-    {
-        Settings settings = Saving.LoadFromFile<Settings>("Settings.dat");
-        SaveData data = Saving.LoadFromFile<SaveData>("SaveData.dat");
-
-        if (settings == null) return;
-
-        Instance.settings = settings;
-
-        GameObject audioParent = GameObject.FindWithTag("AudioHandler");
-        audioParent.transform.Find("ClickHandler").GetComponent<AudioSource>().volume = Instance.settings.menuVolume;
-        audioParent.transform.Find("ButtonPressHandler").GetComponent<AudioSource>().volume = Instance.settings.menuVolume;
-        audioParent.transform.Find("EatHandler").GetComponent<AudioSource>().volume = Instance.settings.sfxVolume;
-
-        FullScreenMode fsm = Settings.GetWindowMode(Instance.settings.Fullscreen, Instance.settings.Borderless);
-        Screen.SetResolution(Instance.settings.resX, Instance.settings.resY, fsm, Instance.settings.resHz);
-
-        print($"Resolution: {Instance.settings.resX}x{Instance.settings.resY}@{Instance.settings.resHz}");
-        print($"Fullscreen: {Instance.settings.Fullscreen} Borderless: {Instance.settings.Borderless}");
-        print($"Volume: MENU[{Instance.settings.menuVolume}], SFX[{Instance.settings.sfxVolume}]");
     }
 
     public static void ClearDontDestroyOnLoad()

@@ -11,7 +11,7 @@ public enum EGameMode
 [Serializable]
 public class GameSettings : ICached
 {
-    public static GameSettings Saved = new();
+    public static GameSettings Saved = null;
 
     public const float DEFAULT_TIME_TO_MOVE = 0.6f;
     public const bool DEFAULT_FRIENDLY_FIRE = true;

@@ -25,7 +25,7 @@ public class PlayerObjectController : NetworkBehaviour
     [SyncVar] public ulong playerSteamID;
     [SyncVar(hook = nameof(OnPlayerNameUpdate))] public string playerName;
     [SyncVar(hook = nameof(OnPlayerReadyUpdate))] public bool ready;
-    [SyncVar(hook = nameof(OnPlayerHostUpdate))] public bool isHost;
+    [SyncVar(hook = nameof(OnPlayerHostUpdate))] public bool isHost = false;
 
     private CustomNetworkManager _manager;
     private CustomNetworkManager Manager
@@ -55,26 +55,24 @@ public class PlayerObjectController : NetworkBehaviour
     private void Start()
     {
         DontDestroyOnLoad(gameObject);
-        if (isServer && isLocalPlayer)
-            isHost = true;
     }
 
     // Lobby Methods
-
     /// <summary>
-    /// Called when starting as a host.
-    /// Used in SinglePlayer or MultiPlayer mode.
+    /// Called when starting a player that we have authority over.
     /// </summary>
     public override void OnStartAuthority()
     {
         CmdSetPlayerName(SteamFriends.GetPersonaName());
         gameObject.name = "LocalPlayerObject";
         LobbyMenu.instance.UpdateLobbyName();
+
+        if (NetworkServer.active)
+            isHost = true;
     }
 
     /// <summary>
-    /// Called when starting as a client.
-    /// Used in MultiPlayer mode.
+    /// Called when starting a player that we don't have authority over.
     /// </summary>
     public override void OnStartClient()
     {
@@ -125,10 +123,7 @@ public class PlayerObjectController : NetworkBehaviour
 
     public void OnPlayerHostUpdate(bool oldValue, bool newValue)
     {
-        if (newValue)
-        {
-            
-        }
+        
     }
 
     [Command]

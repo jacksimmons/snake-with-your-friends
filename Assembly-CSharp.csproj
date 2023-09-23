@@ -58,7 +58,8 @@
   <ItemGroup>
     <Compile Include="Assets\Scripts\UI\DebugLabels.cs" />
     <Compile Include="Assets\Scripts\Extensions\BitField.cs" />
-    <Compile Include="Assets\GoalBehaviour.cs" />
+    <Compile Include="Assets\SaveButtonGridBehaviour.cs" />
+    <Compile Include="Assets\Scripts\Game\Puzzle\GoalBehaviour.cs" />
     <Compile Include="Assets\Scripts\Menu\Lobby\PowerupToggleContainer.cs" />
     <Compile Include="Assets\Scripts\Game\GameBehaviour.cs" />
     <Compile Include="Assets\Scripts\Extensions\Extensions.cs" />
@@ -66,6 +67,7 @@
     <Compile Include="Assets\Scripts\UI\HUD\PlayerHUDElement.cs" />
     <Compile Include="Assets\Scripts\Menu\SettingsMenu.cs" />
     <Compile Include="Assets\Scripts\UI\SpectateBehaviour.cs" />
+    <Compile Include="Assets\Scripts\Menu\Creator\MapCreatorPanBehaviour.cs" />
     <Compile Include="Assets\Scripts\Menu\EditorMenu.cs" />
     <Compile Include="Assets\Scripts\Menu\JoinMenu.cs" />
     <Compile Include="Assets\Scripts\Player\PlayerStatus.cs" />
@@ -76,12 +78,12 @@
     <Compile Include="Assets\Scripts\Player\Player.cs" />
     <Compile Include="Assets\Scripts\Object\ForegroundBehaviour.cs" />
     <Compile Include="Assets\Scripts\Object\ProjectileBehaviour.cs" />
-    <Compile Include="Assets\Scripts\Misc\Saving.cs" />
+    <Compile Include="Assets\Scripts\Files\Saving.cs" />
     <Compile Include="Assets\Scripts\Cutscene\SceneTransitionHandler.cs" />
     <Compile Include="Assets\Scripts\Extensions\Vector2Comparison.cs" />
     <Compile Include="Assets\Scripts\UI\StatusEffectUI.cs" />
     <Compile Include="Assets\Scripts\Menu\Main\SentenceChangerButton.cs" />
-    <Compile Include="Assets\EditorPaintBehaviour.cs" />
+    <Compile Include="Assets\Scripts\Menu\Creator\MapCreatorPaintBehaviour.cs" />
     <Compile Include="Assets\Scripts\Cutscene\SnakeActor.cs" />
     <Compile Include="Assets\Scripts\Object\GridObject.cs" />
     <Compile Include="Assets\Scripts\Extensions\RandomDistribution.cs" />
@@ -90,7 +92,6 @@
     <Compile Include="Assets\Scripts\Object\ObjectBehaviour.cs" />
     <Compile Include="Assets\Scripts\Menu\Customisation\OutfitComponentHandler.cs" />
     <Compile Include="Assets\Scripts\Camera\CamBehaviour.cs" />
-    <Compile Include="Assets\Scripts\Unused\SetOnce.cs" />
     <Compile Include="Assets\Scripts\Menu\MainMenu.cs" />
     <Compile Include="Assets\Scripts\Extensions\Wait.cs" />
     <Compile Include="Assets\Scripts\UI\SpectateNameLabel.cs" />
@@ -117,6 +118,7 @@
     <Compile Include="Assets\Scripts\Unused\FollowPlayer.cs" />
     <Compile Include="Assets\Scripts\Files\GameSettings.cs" />
     <Compile Include="Assets\Scripts\UI\MainMenuButton.cs" />
+    <Compile Include="Assets\Scripts\Menu\Creator\MapCreatorZoomBehaviour.cs" />
     <Compile Include="Assets\Scripts\Menu\Main\SentenceBehaviour.cs" />
     <Compile Include="Assets\Scripts\Steamworks.NET\SteamManager.cs" />
     <Compile Include="Assets\Scripts\Game\SnakeRoyaleBehaviour.cs" />
@@ -132,6 +134,7 @@
     <Compile Include="Assets\Scripts\Networking\SteamLobby.cs" />
     <Compile Include="Assets\Scripts\Networking\PlayerObjectController.cs" />
     <Compile Include="Assets\Scripts\Object\Projectile.cs" />
+    <Compile Include="Assets\Scripts\Menu\Creator\MapCreatorUIHandler.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Mirror\Plugins\Mono.Cecil\Mono.CecilX.dll" />
