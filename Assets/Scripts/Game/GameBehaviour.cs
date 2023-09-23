@@ -68,6 +68,7 @@ public class GameBehaviour : NetworkBehaviour
     [Command]
     private void CmdSendHostSettings()
     {
+        print("a");
         ReceiveHostSettingsClientRpc(GameSettings.Saved);
     }
 
@@ -75,6 +76,7 @@ public class GameBehaviour : NetworkBehaviour
     [ClientRpc]
     private void ReceiveHostSettingsClientRpc(GameSettings settings)
     {
+        print("a");
         GameSettings.Saved = new(settings);
         print(GameSettings.Saved.GameMode);
     }
