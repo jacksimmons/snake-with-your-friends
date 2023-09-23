@@ -79,6 +79,24 @@ public class PlayerObjectController : NetworkBehaviour
         Manager.AddPlayer(this);
         LobbyMenu.instance.UpdateLobbyName();
         LobbyMenu.instance.UpdatePlayerList();
+        CmdRequestGameSettings(playerSteamID);
+    }
+
+    [Command]
+    private void CmdRequestGameSettings(ulong id)
+    {
+        ReceiveHostSettingsClientRpc(id, GameSettings.Saved);
+    }
+
+
+    [ClientRpc]
+    private void ReceiveHostSettingsClientRpc(ulong id, GameSettings settings)
+    {
+        if (playerSteamID != id) return;
+
+        print("a");
+        GameSettings.Saved = new(settings);
+        print(GameSettings.Saved.GameMode);
     }
 
     /// <summary>
