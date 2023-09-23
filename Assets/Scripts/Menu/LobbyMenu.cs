@@ -114,7 +114,7 @@ public class LobbyMenu : MonoBehaviour
         PlayerListItem newPlayerListItemScript = newPlayerItem.GetComponent<PlayerListItem>();
 
         // Host Crown (& other stuff in the future)
-        if (NetworkServer.active)
+        if (player.isHost)
             newPlayerListItemScript.hostCrown.SetActive(true);
 
         newPlayerListItemScript.playerName = player.playerName;
