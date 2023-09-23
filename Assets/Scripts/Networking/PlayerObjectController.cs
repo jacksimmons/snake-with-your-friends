@@ -177,7 +177,6 @@ public class PlayerObjectController : NetworkBehaviour
     [ClientRpc]
     public void ClientUpdateBodyParts(List<BodyPartData> bodyPartDatas, ulong victimPlayerSteamID)
     {
-        print(bodyPartDatas.Count);
         StartCoroutine(Wait.WaitForConditionThen(() => PM.enabled, 0.1f, () =>
         {
             if (playerSteamID == victimPlayerSteamID && !isOwned)

@@ -51,8 +51,8 @@ public class CustomNetworkManager : NetworkManager
         {
             print("Game Over! " + AlivePlayers[0].playerName + " wins the game.");
 
-            //if (NetworkServer.active) // [Server]
-            //    EndGame();
+            if (NetworkServer.active) // [Server]
+                StartCoroutine(Wait.WaitThen(5f, EndGame));
         }
     }
 
