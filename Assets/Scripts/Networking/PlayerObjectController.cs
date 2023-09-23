@@ -69,6 +69,8 @@ public class PlayerObjectController : NetworkBehaviour
 
         if (NetworkServer.active)
             isHost = true;
+        else
+            CmdRequestGameSettings(playerSteamID);
     }
 
     /// <summary>
@@ -79,7 +81,6 @@ public class PlayerObjectController : NetworkBehaviour
         Manager.AddPlayer(this);
         LobbyMenu.instance.UpdateLobbyName();
         LobbyMenu.instance.UpdatePlayerList();
-        CmdRequestGameSettings(playerSteamID);
     }
 
     [Command]
