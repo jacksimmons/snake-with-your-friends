@@ -79,6 +79,8 @@ public class LobbyMenu : MonoBehaviour
             if (GameSettings.Saved == null)
                 Saving.LoadFromFile<GameSettings>("GameSettings.dat");
         }
+
+        lobbyID = Manager.GetComponent<SteamLobby>().LobbyID;
     }
 
     public void OnHostSettingsButtonPressed()
@@ -93,7 +95,6 @@ public class LobbyMenu : MonoBehaviour
 
     public void UpdateLobbyName()
     {
-        lobbyID = Manager.GetComponent<SteamLobby>().LobbyID;
         lobbyNameLabel.text = SteamMatchmaking.GetLobbyData(new CSteamID(lobbyID), "name");
     }
 
