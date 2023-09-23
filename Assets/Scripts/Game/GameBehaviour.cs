@@ -76,6 +76,7 @@ public class GameBehaviour : NetworkBehaviour
     private void ReceiveHostSettingsClientRpc(GameSettings settings)
     {
         GameSettings.Saved = new(settings);
+        print(GameSettings.Saved.GameMode);
     }
 
 
