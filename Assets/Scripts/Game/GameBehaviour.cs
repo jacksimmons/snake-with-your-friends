@@ -99,8 +99,6 @@ public class GameBehaviour : NetworkBehaviour
             PlayerMovement pm = player.PM;
             pm.enabled = true;
 
-            print("hi");
-
             if (!pm.isOwned) continue;
             GameObject cam = GameObject.FindWithTag("MainCamera");
             cam.GetComponent<CamBehaviour>().Player = pm;

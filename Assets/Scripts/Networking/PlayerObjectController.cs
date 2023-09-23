@@ -95,9 +95,7 @@ public class PlayerObjectController : NetworkBehaviour
     {
         if (playerSteamID != id) return;
 
-        print("a");
         GameSettings.Saved = new(settings);
-        print(GameSettings.Saved.GameMode);
     }
 
     /// <summary>
