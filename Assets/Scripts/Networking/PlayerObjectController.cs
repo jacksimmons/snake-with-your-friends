@@ -230,4 +230,15 @@ public class PlayerObjectController : NetworkBehaviour
 
     [ClientRpc]
     private void LogDeathClientRpc(int index) { Manager.KillPlayer(index); }
+
+    [ClientRpc]
+    public void RpcDisableComponents()
+    {
+        GameBehaviour game = transform.Find("Game").GetComponent<GameBehaviour>();
+        game.enabled = false;
+
+        PlayerMovement pm = GetComponent<PlayerMovement>();
+        pm.bodyPartContainer.SetActive(false);
+        pm.enabled = false;
+    }
 }

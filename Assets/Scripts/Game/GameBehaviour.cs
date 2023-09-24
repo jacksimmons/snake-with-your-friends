@@ -52,7 +52,7 @@ public class GameBehaviour : NetworkBehaviour
     private List<GameObject> _foodTemplates = new();
 
 
-    private void Start()
+    private void OnEnable()
     {
         if (!isOwned) return;
 
@@ -62,7 +62,6 @@ public class GameBehaviour : NetworkBehaviour
             numPlayersReady = 0;
         }
     }
-
 
     [Client]
     public void OnGameSceneLoaded(string name)

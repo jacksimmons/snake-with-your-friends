@@ -128,6 +128,8 @@ public class CustomNetworkManager : NetworkManager
     [Server]
     public void EndGame()
     {
+        GameObject.Find("LocalPlayerObject").GetComponent<PlayerObjectController>()
+            .RpcDisableComponents();
         ServerChangeScene("LobbyMenu");
     }
 }

@@ -83,6 +83,11 @@ public class LobbyMenu : MonoBehaviour
         lobbyID = Manager.GetComponent<SteamLobby>().LobbyID;
     }
 
+    private void Start()
+    {
+        GameObject.Find("LocalPlayerObject").GetComponent<GameBehaviour>().enabled = true;
+    }
+
     public void OnHostSettingsButtonPressed()
     {
         m_hostSettingsPanel.SetActive(true);
