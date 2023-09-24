@@ -70,8 +70,6 @@ public class PlayerObjectController : NetworkBehaviour
 
         if (NetworkServer.active)
             isHost = true;
-        else
-            CmdRequestGameSettings(playerSteamID);
 
         GetComponentInChildren<GameBehaviour>().enabled = true;
     }
@@ -86,23 +84,6 @@ public class PlayerObjectController : NetworkBehaviour
         LobbyMenu.instance.UpdatePlayerList();
 
         GetComponentInChildren<GameBehaviour>().enabled = true;
-    }
-
-    [Command]
-    private void CmdRequestGameSettings(ulong id)
-    {
-        ReceiveHostSettingsClientRpc(id, GameSettings.Saved);
-    }
-
-
-    [ClientRpc]
-    private void ReceiveHostSettingsClientRpc(ulong id, GameSettings settings)
-    {
-        if (playerSteamID != id) return;
-
-        GameSettings.Saved = new(settings);
-
-        print(GameSettings.Saved.TimeToMove);
     }
 
     /// <summary>

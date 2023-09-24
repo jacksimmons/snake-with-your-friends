@@ -51,6 +51,8 @@ public class GameBehaviour : NetworkBehaviour
     [SerializeField]
     private List<GameObject> _foodTemplates = new();
 
+    private bool m_loadedHostSettings = false;
+
 
     private void OnEnable()
     {
@@ -67,6 +69,9 @@ public class GameBehaviour : NetworkBehaviour
     public void OnGameSceneLoaded(string name)
     {
         if (!isOwned) return;
+
+        if (!m_loadedHostSettings)
+            CmdRequestGameSettings();
 
         // Wait to receive the host's GameSettings by RPC
         StartCoroutine(Wait.WaitForConditionThen(
@@ -86,6 +91,23 @@ public class GameBehaviour : NetworkBehaviour
             EnableLocalPlayerMovement();
             CmdReady();
         }));
+    }
+
+
+    [Command]
+    private void CmdRequestGameSettings()
+    {
+        ReceiveHostSettingsClientRpc(GameSettings.Saved);
+    }
+
+
+    [ClientRpc]
+    private void ReceiveHostSettingsClientRpc(GameSettings settings)
+    {
+        if (m_loadedHostSettings) return;
+
+        GameSettings.Saved = new(settings);
+        m_loadedHostSettings = true;
     }
 
 
