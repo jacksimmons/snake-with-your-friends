@@ -107,6 +107,7 @@ public class GameBehaviour : NetworkBehaviour
         if (m_loadedHostSettings) return;
 
         GameSettings.Saved = new(settings);
+        print(GameSettings.Saved.TimeToMove);
         m_loadedHostSettings = true;
     }
 
