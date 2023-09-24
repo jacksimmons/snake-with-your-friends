@@ -59,9 +59,9 @@ public class PlayerMovement : NetworkBehaviour
     // Directions and movement
     public Vector2 startingDirection = Vector2.up;
     // Simple boolean which gets set to false after the starting direction is set
-    public Vector2 direction = Vector2.zero;
+    public Vector2 direction;
     // The last valid, non-zero direction vector
-    public Vector2 movement = Vector2.zero;
+    public Vector2 movement;
     // The last `movement` which was used
     public Vector2 PrevMovement { get; private set; }
 
@@ -99,6 +99,8 @@ public class PlayerMovement : NetworkBehaviour
     private void OnEnable()
     {
         TimeToMove = GameSettings.Saved.TimeToMove;
+        direction = Vector2.zero;
+        movement = Vector2.zero;
 
         bodyPartContainer.SetActive(false);
 
