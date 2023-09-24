@@ -65,12 +65,15 @@ public class PlayerObjectController : NetworkBehaviour
     {
         CmdSetPlayerName(SteamFriends.GetPersonaName());
         gameObject.name = "LocalPlayerObject";
+
         LobbyMenu.instance.UpdateLobbyName();
 
         if (NetworkServer.active)
             isHost = true;
         else
             CmdRequestGameSettings(playerSteamID);
+
+        GetComponent<GameBehaviour>().enabled = true;
     }
 
     /// <summary>
@@ -81,6 +84,8 @@ public class PlayerObjectController : NetworkBehaviour
         Manager.AddPlayer(this);
         LobbyMenu.instance.UpdateLobbyName();
         LobbyMenu.instance.UpdatePlayerList();
+
+        GetComponent<GameBehaviour>().enabled = true;
     }
 
     [Command]
