@@ -101,6 +101,8 @@ public class PlayerObjectController : NetworkBehaviour
         if (playerSteamID != id) return;
 
         GameSettings.Saved = new(settings);
+
+        print(GameSettings.Saved.TimeToMove);
     }
 
     /// <summary>
