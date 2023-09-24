@@ -75,7 +75,7 @@ public class GameBehaviour : NetworkBehaviour
 
         // Wait to receive the host's GameSettings by RPC
         StartCoroutine(Wait.WaitForConditionThen(
-        () => GameSettings.Saved != null,
+        () => m_loadedHostSettings,
         0.1f,
         () => 
         {
