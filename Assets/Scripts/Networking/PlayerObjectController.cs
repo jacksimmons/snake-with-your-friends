@@ -73,7 +73,7 @@ public class PlayerObjectController : NetworkBehaviour
         else
             CmdRequestGameSettings(playerSteamID);
 
-        GetComponent<GameBehaviour>().enabled = true;
+        GetComponentInChildren<GameBehaviour>().enabled = true;
     }
 
     /// <summary>
@@ -85,7 +85,7 @@ public class PlayerObjectController : NetworkBehaviour
         LobbyMenu.instance.UpdateLobbyName();
         LobbyMenu.instance.UpdatePlayerList();
 
-        GetComponent<GameBehaviour>().enabled = true;
+        GetComponentInChildren<GameBehaviour>().enabled = true;
     }
 
     [Command]

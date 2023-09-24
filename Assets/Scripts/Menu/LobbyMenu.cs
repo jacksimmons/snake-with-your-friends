@@ -89,7 +89,7 @@ public class LobbyMenu : MonoBehaviour
         GameObject go;
         if (go = GameObject.Find("LocalPlayerObject"))
         {
-            go.GetComponent<GameBehaviour>().enabled = true;
+            go.GetComponentInChildren<GameBehaviour>().enabled = true;
         }
     }
 
