@@ -367,8 +367,11 @@ public class GameBehaviour : NetworkBehaviour
 
         for (int i = 0; i < players.Count; i++)
         {
-            players[i].transform.position = corners[i % 4]
+            if (players[i].transform.position == Vector3.zero)
+            {
+                players[i].transform.position = corners[i % 4]
                 + (Vector3)(Vector2.one * directions[i % 4] * s_groundTilemap.cellSize / 2);
+            }
 
             // If i were 0 then it might enter this, causing -4 as length to be provided (in the PlacePlayers line).
             if (i != 0 && i % 4 == 0 && i < players.Count - 1)

@@ -8,8 +8,7 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>10.0.20506</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <RootNamespace>
-    </RootNamespace>
+    <RootNamespace></RootNamespace>
     <ProjectGuid>{02A1D8AB-7066-746D-0152-080D65C02CC8}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
@@ -55,16 +54,12 @@
   </PropertyGroup>
   <ItemGroup>
     <Analyzer Include="C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\Extensions\Microsoft\Visual Studio Tools for Unity\Analyzers\Microsoft.Unity.Analyzers.dll" />
-    <Analyzer Include="C:\Git\snake-with-your-friends\Assets\Mirror\Plugins\Mono.Cecil\Mono.CecilX.Pdb.dll" />
-    <Analyzer Include="C:\Git\snake-with-your-friends\Assets\Mirror\Plugins\Mono.Cecil\Mono.CecilX.dll" />
-    <Analyzer Include="C:\Git\snake-with-your-friends\Assets\Mirror\Plugins\Mono.Cecil\Mono.CecilX.Mdb.dll" />
-    <Analyzer Include="C:\Git\snake-with-your-friends\Assets\Mirror\Plugins\Mono.Cecil\Mono.CecilX.Rocks.dll" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Assets\Scripts\Object\PlayerSpawner.cs" />
     <Compile Include="Assets\Scripts\UI\DebugLabels.cs" />
     <Compile Include="Assets\Scripts\Extensions\BitField.cs" />
     <Compile Include="Assets\SaveButtonGridBehaviour.cs" />
+    <Compile Include="Assets\Scripts\Object\PlayerSpawner.cs" />
     <Compile Include="Assets\Scripts\Game\Puzzle\GoalBehaviour.cs" />
     <Compile Include="Assets\Scripts\Menu\Lobby\PowerupToggleContainer.cs" />
     <Compile Include="Assets\Scripts\Game\GameBehaviour.cs" />
@@ -104,6 +99,7 @@
     <Compile Include="Assets\Scripts\UI\SliderWithStep.cs" />
     <Compile Include="Assets\Scripts\UI\HUD\PlayerHUDElementsHandler.cs" />
     <Compile Include="Assets\Scripts\Menu\Customisation\CustomisationMenu.cs" />
+    <Compile Include="Assets\Scripts\Player\PlayerControls.cs" />
     <Compile Include="Assets\Scripts\Object\FoodObject.cs" />
     <Compile Include="Assets\Scripts\Cutscene\CanvasSnakeSpawner.cs" />
     <Compile Include="Assets\Scripts\Files\OutfitSettings.cs" />
@@ -140,7 +136,6 @@
     <Compile Include="Assets\Scripts\Networking\PlayerObjectController.cs" />
     <Compile Include="Assets\Scripts\Object\Projectile.cs" />
     <Compile Include="Assets\Scripts\Menu\Creator\MapCreatorUIHandler.cs" />
-    <Compile Include="Assets\Scripts\Player\PlayerControls.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Mirror\Plugins\Mono.Cecil\Mono.CecilX.dll" />
@@ -933,53 +928,53 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="com.rlabrecque.steamworks.net.editor.csproj">
-      <Project>{EDCC0A68-E706-C5E5-997F-47F8D4AE54F0}</Project>
-      <Name>com.rlabrecque.steamworks.net.editor</Name>
-    </ProjectReference>
-    <ProjectReference Include="com.rlabrecque.steamworks.net.csproj">
-      <Project>{449E99BB-54C6-9A8B-B06A-6B37DCD9AF9B}</Project>
-      <Name>com.rlabrecque.steamworks.net</Name>
-    </ProjectReference>
-    <ProjectReference Include="Mirror.Transports.csproj">
-      <Project>{30E59ADB-210B-86FC-F06E-059AD6511B06}</Project>
-      <Name>Mirror.Transports</Name>
-    </ProjectReference>
-    <ProjectReference Include="Mirror.Authenticators.csproj">
-      <Project>{72B6F884-8A39-911B-17F2-E1F0FF18EFC3}</Project>
-      <Name>Mirror.Authenticators</Name>
-    </ProjectReference>
-    <ProjectReference Include="Mirror.Components.csproj">
-      <Project>{FA1B8717-0A45-EA22-8192-70CA06B493F6}</Project>
-      <Name>Mirror.Components</Name>
-    </ProjectReference>
-    <ProjectReference Include="Mirror.Examples.csproj">
-      <Project>{BBC54401-1AFF-C5B8-603F-AD25CDD9283F}</Project>
-      <Name>Mirror.Examples</Name>
-    </ProjectReference>
-    <ProjectReference Include="Mirror.CompilerSymbols.csproj">
-      <Project>{9E687167-D8B3-9504-A789-A7122C0829D8}</Project>
-      <Name>Mirror.CompilerSymbols</Name>
-    </ProjectReference>
-    <ProjectReference Include="Telepathy.csproj">
-      <Project>{8334225A-D94F-AD46-4080-7F7C091FC2B6}</Project>
-      <Name>Telepathy</Name>
-    </ProjectReference>
     <ProjectReference Include="Mirror.csproj">
       <Project>{F12AE101-4061-A1F3-3349-648784272680}</Project>
       <Name>Mirror</Name>
-    </ProjectReference>
-    <ProjectReference Include="Mirror.Editor.csproj">
-      <Project>{72FF9A45-353A-95BC-4A3D-9F8D391662B0}</Project>
-      <Name>Mirror.Editor</Name>
     </ProjectReference>
     <ProjectReference Include="kcp2k.csproj">
       <Project>{9E21524C-5D2F-4751-1ADC-1B0BC457431C}</Project>
       <Name>kcp2k</Name>
     </ProjectReference>
+    <ProjectReference Include="Mirror.Examples.csproj">
+      <Project>{BBC54401-1AFF-C5B8-603F-AD25CDD9283F}</Project>
+      <Name>Mirror.Examples</Name>
+    </ProjectReference>
+    <ProjectReference Include="com.rlabrecque.steamworks.net.editor.csproj">
+      <Project>{EDCC0A68-E706-C5E5-997F-47F8D4AE54F0}</Project>
+      <Name>com.rlabrecque.steamworks.net.editor</Name>
+    </ProjectReference>
+    <ProjectReference Include="Mirror.Transports.csproj">
+      <Project>{30E59ADB-210B-86FC-F06E-059AD6511B06}</Project>
+      <Name>Mirror.Transports</Name>
+    </ProjectReference>
+    <ProjectReference Include="com.rlabrecque.steamworks.net.csproj">
+      <Project>{449E99BB-54C6-9A8B-B06A-6B37DCD9AF9B}</Project>
+      <Name>com.rlabrecque.steamworks.net</Name>
+    </ProjectReference>
+    <ProjectReference Include="Mirror.Editor.csproj">
+      <Project>{72FF9A45-353A-95BC-4A3D-9F8D391662B0}</Project>
+      <Name>Mirror.Editor</Name>
+    </ProjectReference>
+    <ProjectReference Include="Mirror.CompilerSymbols.csproj">
+      <Project>{9E687167-D8B3-9504-A789-A7122C0829D8}</Project>
+      <Name>Mirror.CompilerSymbols</Name>
+    </ProjectReference>
+    <ProjectReference Include="Mirror.Authenticators.csproj">
+      <Project>{72B6F884-8A39-911B-17F2-E1F0FF18EFC3}</Project>
+      <Name>Mirror.Authenticators</Name>
+    </ProjectReference>
+    <ProjectReference Include="Telepathy.csproj">
+      <Project>{8334225A-D94F-AD46-4080-7F7C091FC2B6}</Project>
+      <Name>Telepathy</Name>
+    </ProjectReference>
     <ProjectReference Include="SimpleWebTransport.csproj">
       <Project>{17061400-D344-5D1E-3508-618BDEA931CE}</Project>
       <Name>SimpleWebTransport</Name>
+    </ProjectReference>
+    <ProjectReference Include="Mirror.Components.csproj">
+      <Project>{FA1B8717-0A45-EA22-8192-70CA06B493F6}</Project>
+      <Name>Mirror.Components</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
