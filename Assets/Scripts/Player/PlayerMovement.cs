@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Mirror;
 using UnityEngine.SceneManagement;
+using UnityEngine.InputSystem;
 using System;
 
 // Class which controls the Body Parts of a Player object.
@@ -85,6 +86,8 @@ public class PlayerMovement : NetworkBehaviour
     // All actions are executed after the next movement frame
     private List<Action> _queuedActions;
 
+    private PlayerControls controls;
+
 
     public void RecreateStartingParts(int count)
     {
@@ -96,11 +99,21 @@ public class PlayerMovement : NetworkBehaviour
     }
 
 
+    private void Awake()
+    {
+        controls = new();
+        controls.Gameplay.Move.performed += ctx => direction = Extensions.Vectors.StickToDPad(ctx.ReadValue<Vector2>());
+        controls.Gameplay.Move.canceled += ctx => direction = Vector2.zero;
+    }
+
+
     private void OnEnable()
     {
         TimeToMove = GameSettings.Saved.TimeToMove;
         direction = Vector2.zero;
         movement = Vector2.zero;
+
+        controls.Gameplay.Enable();
 
         bodyPartContainer.SetActive(false);
 
@@ -160,6 +173,13 @@ public class PlayerMovement : NetworkBehaviour
             m_poc.UpdateBodyParts();
     }
 
+
+    private void OnDisable()
+    {
+        controls.Gameplay.Disable();
+    }
+
+
     private void FixedUpdate()
     {
         if (Array.IndexOf(GameBehaviour.GAME_SCENES, SceneManager.GetActiveScene().name) == -1)
@@ -186,9 +206,11 @@ public class PlayerMovement : NetworkBehaviour
 
     private void HandleInput()
     {
-        // Movement
-        float x_input = Input.GetAxisRaw("Horizontal");
-        float y_input = Input.GetAxisRaw("Vertical");
+        // Prevent snakes going back on themselves
+        // Snake can only go back on itself if FreeMovement is enabled and BodyParts.Count <= 2.
+        if (FreeMovement && BodyParts.Count <= 2) return;
+        if (direction == -PrevMovement)
+            direction = Vector2.zero;
 
         // Forced movement
         if (Frozen)
@@ -213,23 +235,6 @@ public class PlayerMovement : NetworkBehaviour
         {
             movement = direction;
         }
-
-        // --- Direction
-        direction = Vector2.zero;
-        if (x_input > 0)
-            direction = Vector2.right;
-        else if (x_input < 0)
-            direction = Vector2.left;
-        else if (y_input > 0)
-            direction = Vector2.up;
-        else if (y_input < 0)
-            direction = Vector2.down;
-
-        // Prevent snakes going back on themselves
-        // Snake can only go back on itself if FreeMovement is enabled and BodyParts.Count <= 2.
-        if (FreeMovement && BodyParts.Count <= 2) return;
-        if (direction == -PrevMovement)
-            direction = Vector2.zero;
     }
 
     /// <summary>

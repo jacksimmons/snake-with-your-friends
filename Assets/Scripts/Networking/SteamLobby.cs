@@ -122,31 +122,32 @@ public class SteamLobby : MonoBehaviour
             return;
         }
 
-        switch ((EChatRoomEnterResponse)result.m_EChatRoomEnterResponse)
+        EChatRoomEnterResponse response = (EChatRoomEnterResponse)result.m_EChatRoomEnterResponse;
+        switch (response)
         {
             case EChatRoomEnterResponse.k_EChatRoomEnterResponseSuccess:
-                print("Successfully entered lobby.");
+                HandleChatRoomEnterResponse("Successfully entered lobby.");
                 break;
             case EChatRoomEnterResponse.k_EChatRoomEnterResponseError:
-                print("Unable to enter lobby [error].");
+                HandleChatRoomEnterResponse("Unable to enter lobby.");
                 return;
             case EChatRoomEnterResponse.k_EChatRoomEnterResponseFull:
-                print("Unable to enter lobby [full].");
+                HandleChatRoomEnterResponse("Unable to join lobby, because it was full.");
                 return;
             case EChatRoomEnterResponse.k_EChatRoomEnterResponseBanned:
-                print("Unable to enter lobby [banned].");
+                HandleChatRoomEnterResponse("Unable to join lobby, because you were banned.");
                 return;
             case EChatRoomEnterResponse.k_EChatRoomEnterResponseClanDisabled:
-                print("Unable to enter lobby [clan_disabled].");
+                HandleChatRoomEnterResponse("Unable to join lobby (clan_disabled).");
                 return;
             case EChatRoomEnterResponse.k_EChatRoomEnterResponseCommunityBan:
-                print("Unable to enter lobby [community_ban].");
+                HandleChatRoomEnterResponse("Unable to join lobby (community_ban).");
                 return;
             case EChatRoomEnterResponse.k_EChatRoomEnterResponseDoesntExist:
-                print("Unable to enter lobby [doesn't exist].");
+                HandleChatRoomEnterResponse("Unable to join lobby, because it no longer exists.");
                 return;
             default:
-                print("Enter lobby: default case.");
+                HandleChatRoomEnterResponse(response.ToString());
                 break;
         }
 
@@ -170,6 +171,11 @@ public class SteamLobby : MonoBehaviour
         _manager.StartClient();
 
         print("Entered lobby successfully.");
+    }
+
+    private void HandleChatRoomEnterResponse(string message)
+    {
+        print(message);
     }
 
     private void OnLobbyChatUpdate(LobbyChatUpdate_t callback)

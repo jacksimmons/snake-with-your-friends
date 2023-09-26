@@ -72,6 +72,20 @@ public static class Extensions
 
             return v;
         }
+
+        /// <summary>
+        /// Converts multi-directional analog stick input into 4-direction DPad input.
+        /// Truncates the angled vector into a cardinal (NESW) direction vector.
+        /// </summary>
+        /// <param name="stickValue">Input in stick form (any vector)</param>
+        /// <returns>Input in DPad form (cardinal vector)</returns>
+        public static Vector2 StickToDPad(Vector2 stickValue)
+        {
+            if (Mathf.Abs(stickValue.x) >= Mathf.Abs(stickValue.y))
+                return new(Mathf.RoundToInt(stickValue.x), 0);
+            else
+                return new(0, Mathf.RoundToInt(stickValue.y));
+        }
     }
 
     //public static class Arrays

@@ -96,6 +96,15 @@ public class PlayerStatus : NetworkBehaviour
     public float SpeedIncrease { get; private set; } = 0f;
     public int PotassiumLevels { get; private set; } = 0;
 
+    private PlayerControls controls;
+
+
+    private void OnEnable() { controls.Gameplay.Enable(); }
+
+
+    private void OnDisable() { controls.Gameplay.Disable(); }
+
+
     /// <summary>
     /// Handles spawning of projectiles, determined by the effect enum passed.
     /// Some objects are synced with the server, some just have synced spawn times.
@@ -158,6 +167,9 @@ public class PlayerStatus : NetworkBehaviour
 
     private void Awake()
     {
+        controls = new();
+        controls.Gameplay.Powerup.performed += ctx => UsePowerup();
+
         _foodSprites = new()
         {
             { EFoodType.Apple, _spriteApple },
@@ -177,13 +189,9 @@ public class PlayerStatus : NetworkBehaviour
         };
     }
 
-    private void Update()
+
+    private void UsePowerup()
     {
-        HandleTime();
-
-        HandleVisualEffects();
-        HandlePassiveEffects();
-
         void TryUseItem()
         {
             if (!FindConflictingPassiveEffect())
@@ -211,23 +219,26 @@ public class PlayerStatus : NetworkBehaviour
             return false;
         }
 
-        // Powerup Input
-
         // First check if we can apply the new effect.
         // Second, if that isn't possible, check if we can fire ActiveInputEffect.
-        if (Input.GetButtonDown("Powerup"))
-        {
-            if (ItemSlotEffect == null) return;
+        if (ItemSlotEffect == null) return;
 
-            if (!ItemSlotEffect.IsInputEffect)
-                TryUseItem();
-            else
-            {
-                if (ActiveInputEffect == null)
-                    ActiveInputEffect = ItemSlotEffect;
-                UseInputEffect();
-            }
+        if (!ItemSlotEffect.IsInputEffect)
+            TryUseItem();
+        else
+        {
+            ActiveInputEffect ??= ItemSlotEffect;
+            UseInputEffect();
         }
+    }
+
+
+    private void Update()
+    {
+        HandleTime();
+
+        HandleVisualEffects();
+        HandlePassiveEffects();
     }
 
     private void HandleTime()
@@ -311,7 +322,7 @@ public class PlayerStatus : NetworkBehaviour
 
                     case EEffect.SpeedBoost:
                         _player.TimeToMove = GameSettings.Saved.TimeToMove /
-                            SpeedEffect.GetSpeedMultFromSignedLevel(effect.EffectLevel);
+                            Effect.GetSpeedMultFromSignedLevel(effect.EffectLevel);
 
                         statusUI.DisableAllSpeedIcons();
                         if (effect.EffectLevel >= 0)
