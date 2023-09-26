@@ -23,6 +23,6 @@ public class SaveData : ICached
 
     public void Cache()
     {
-        Saved = new(this);
+        Saved = this;
     }
 }

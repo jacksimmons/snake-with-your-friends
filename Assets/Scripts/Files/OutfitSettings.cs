@@ -33,5 +33,5 @@ public class OutfitSettings : ICached
         ColourName = other.ColourName;
     }
 
-    public void Cache() { Saved = new(this); }
+    public void Cache() { Saved = this; }
 }

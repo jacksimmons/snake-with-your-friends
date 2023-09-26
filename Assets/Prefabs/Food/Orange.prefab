@@ -13,7 +13,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1617564155881034721, guid: 0d5ef4a463256884f8d08d92b9189471, type: 3}
       propertyPath: food
-      value: 11
+      value: 12
       objectReference: {fileID: 0}
     - target: {fileID: 2374218674754891897, guid: 0d5ef4a463256884f8d08d92b9189471, type: 3}
       propertyPath: m_SpriteTilingProperty.oldSize.x

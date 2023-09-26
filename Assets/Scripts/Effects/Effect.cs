@@ -2,6 +2,8 @@ using UnityEngine;
 
 public enum EFoodType
 {
+    None,
+
     Apple,
     Balti,
     Banana,

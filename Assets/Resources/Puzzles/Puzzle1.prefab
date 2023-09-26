@@ -1093,6 +1093,26 @@ PrefabInstance:
       propertyPath: m_Tiles.Array.data[29].second.m_TileObjectToInstantiateIndex
       value: 65535
       objectReference: {fileID: 0}
+    - target: {fileID: 1567511164666570199, guid: 66eb20899a992e245871928e7b358852, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -2.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 1567511164666570199, guid: 66eb20899a992e245871928e7b358852, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 1567511164666570199, guid: 66eb20899a992e245871928e7b358852, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.7071068
+      objectReference: {fileID: 0}
+    - target: {fileID: 1567511164666570199, guid: 66eb20899a992e245871928e7b358852, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0.7071068
+      objectReference: {fileID: 0}
+    - target: {fileID: 1567511164666570199, guid: 66eb20899a992e245871928e7b358852, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: -90
+      objectReference: {fileID: 0}
     - target: {fileID: 1607754897027043550, guid: 66eb20899a992e245871928e7b358852, type: 3}
       propertyPath: m_IsActive
       value: 1

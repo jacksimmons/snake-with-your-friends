@@ -45,7 +45,7 @@ public class GameSettings : ICached
         DisabledFoods = other.DisabledFoods;
     }
 
-    public void Cache() { Saved = new(this); }
+    public void Cache() { Saved = this; }
 
     public void EnableFood(EFoodType disabledFood)
     {
