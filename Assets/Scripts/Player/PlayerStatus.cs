@@ -113,7 +113,6 @@ public class PlayerStatus : NetworkBehaviour
     [Command]
     private void CmdSpawn(EEffect effect)
     {
-        ProjectileBehaviour proj;
         switch (effect)
         {
             case EEffect.RocketShitting:
@@ -124,13 +123,11 @@ public class PlayerStatus : NetworkBehaviour
 
                 GameObject fireball = Instantiate(_fireball, GameObject.Find("Projectiles").transform);
                 fireball.transform.position = head.Position + (Vector3)head.Direction;
-                proj = fireball.GetComponent<ProjectileBehaviour>();
-                proj.Proj = new Projectile(
-                    lifetime: 5,
-                    velocity: head.Direction * PROJ_SPEED_FAST,
-                    rotation: head.RegularAngle,
-                    immunityDuration: 0.5f
-                );
+                fireball.GetComponent<ProjectileBehaviour>()
+                .Proj = Projectiles.ConstructFireball(
+                    head.Direction * PROJ_SPEED_FAST,
+                    head.RegularAngle);
+                
                 NetworkServer.Spawn(fireball);
                 break;
         }
@@ -153,14 +150,10 @@ public class PlayerStatus : NetworkBehaviour
                 shit.transform.position = _player.BodyParts[^1].Position - (Vector3)_player.BodyParts[^1].Direction;
                 shit.transform.Rotate(Vector3.forward * randomRotation);
 
-                ProjectileBehaviour proj;
-                proj = shit.GetComponent<ProjectileBehaviour>();
-                proj.Proj = new Projectile(
-                    lifetime: 5,
-                    velocity: Extensions.Vectors.Rotate(-_player.BodyParts[^1].Direction, randomRotation) * PROJ_SPEED_SLOW,
-                    rotation: _player.BodyParts[^1].RegularAngle,
-                    immunityDuration: 0.2f
-                );
+                shit.GetComponent<ProjectileBehaviour>()
+                .Proj = Projectiles.ConstructShit(
+                    Extensions.Vectors.Rotate(-_player.BodyParts[^1].Direction, randomRotation) * PROJ_SPEED_SLOW,
+                    _player.BodyParts[^1].RegularAngle);
                 break;
         }
     }

@@ -1,3 +1,4 @@
+using Mirror;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -16,13 +17,12 @@ public class GameSettings : ICached
     public const float DEFAULT_TIME_TO_MOVE = 0.6f;
     public const bool DEFAULT_FRIENDLY_FIRE = true;
 
-    public EGameMode GameMode { get; set; }
-    public int GameSize { get; set; }
+    public EGameMode GameMode;
+    public int GameSize;
+    public float TimeToMove;
+    public bool FriendlyFire;
 
-    public float TimeToMove { get; set; }
-    public bool FriendlyFire { get; set; }
-
-    public List<EFoodType> DisabledFoods { get; private set; }
+    public List<EFoodType> DisabledFoods;
 
     public GameSettings()
     {

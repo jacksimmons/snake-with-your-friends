@@ -14,14 +14,20 @@ public class PlayerSpawner : MonoBehaviour
 
         player.transform.position = transform.position;
 
-        for (int i = 0; i < player.PM.BodyParts.Count; i++)
+        StartCoroutine(Wait.WaitForObjectThen(() => player.PM, 0.1f, (PlayerMovement pm) =>
         {
             float rot = transform.rotation.eulerAngles.z;
-            player.PM.BodyParts[i].Position = transform.position;
-            player.PM.BodyParts[i].Direction = Extensions.Vectors.Rotate(Vector2.up, rot);
-            player.PM.BodyParts[i].RegularAngle = rot;
-        }
+            Vector3 startDir = Extensions.Vectors.Rotate(Vector3.up, rot);
 
-        player.PM.startingDirection = player.PM.BodyParts[0].Position - player.PM.BodyParts[1].Position;
+            for (int i = 0; i < pm.BodyParts.Count; i++)
+            {
+                pm.BodyParts[i].Position = transform.position - (startDir * i);
+                pm.BodyParts[i].Direction = startDir;
+                pm.BodyParts[i].RegularAngle = rot;
+            }
+
+            pm.startingDirection = startDir;
+            pm.FreeMovement = true;
+        }));
     }
 }

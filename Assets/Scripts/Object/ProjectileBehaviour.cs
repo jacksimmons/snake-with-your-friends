@@ -93,7 +93,7 @@ public class ProjectileBehaviour : ObjectBehaviour
                 GameObject fg = GameObject.FindWithTag("Foreground");
                 fg.GetComponent<ForegroundBehaviour>().AddToForeground(m_sprite);
                 break;
-            case EProjectileType.InstantDamage: // e.g. fireball
+            case EProjectileType.Fireball: // e.g. fireball
                 // Remove the body part
                 int index = other.transform.GetSiblingIndex();
                 PlayerMovement pm = player.GetComponent<PlayerMovement>();
@@ -106,7 +106,7 @@ public class ProjectileBehaviour : ObjectBehaviour
         // Player collision VFX, enabled only on owning client (for now)
         switch (type)
         {
-            case EProjectileType.InstantDamage:
+            case EProjectileType.Fireball:
                 if (isPlayer)
                     StartCoroutine(Explode());
                 else

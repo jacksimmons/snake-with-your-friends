@@ -206,12 +206,6 @@ public class PlayerMovement : NetworkBehaviour
 
     private void HandleInput()
     {
-        // Prevent snakes going back on themselves
-        // Snake can only go back on itself if FreeMovement is enabled and BodyParts.Count <= 2.
-        if (FreeMovement && BodyParts.Count <= 2) return;
-        if (direction == -PrevMovement)
-            direction = Vector2.zero;
-
         // Forced movement
         if (Frozen)
         {
@@ -219,11 +213,21 @@ public class PlayerMovement : NetworkBehaviour
             return;
         }
 
+        // Prevent snakes going back on themselves
+        // Snake can only go back on itself if FreeMovement is enabled and BodyParts.Count <= 2.
+        bool canGoBackOnItself = FreeMovement && BodyParts.Count <= 2;
+        if (!canGoBackOnItself)
+        {
+            if (direction == -PrevMovement)
+                direction = Vector2.zero;
+        }
+
         // Free Movement update
         // - Instant if changing direction
         // - Time delay if not
         if (FreeMovement)
         {
+            print($"Direction {direction}, Movement {movement}");
             if (direction != movement)
             {
                 movement = direction;

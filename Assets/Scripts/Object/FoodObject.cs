@@ -36,7 +36,7 @@ public class FoodObject : GridObject
         {
             switch (pb.type)
             {
-                case EProjectileType.InstantDamage:
+                case EProjectileType.Fireball:
                     removeAndReplaceFood = true;
                     break;
             }

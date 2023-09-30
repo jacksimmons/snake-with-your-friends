@@ -3,17 +3,13 @@ using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
-using UnityEngine.Pool;
 using UnityEngine.Tilemaps;
-using static UnityEngine.ParticleSystem;
 using Random = UnityEngine.Random;
 
 public class GameBehaviour : NetworkBehaviour
 {
     public static readonly string[] GAME_SCENES =
     { "Game" };
-    public static readonly string[] GAME_MODES =
-    { "SnakeRoyale", "Puzzle" };
 
     // --- Puzzle
     public int availablePuzzles = 0;
@@ -70,45 +66,17 @@ public class GameBehaviour : NetworkBehaviour
     {
         if (!isOwned) return;
 
-        if (!m_loadedHostSettings)
-            CmdRequestGameSettings();
-
-        // Wait to receive the host's GameSettings by RPC
-        StartCoroutine(Wait.WaitForConditionThen(
-        () => m_loadedHostSettings,
-        0.1f,
-        () => 
+        if (GameSettings.Saved.GameMode == EGameMode.Puzzle)
         {
-            if (GameSettings.Saved.GameMode == EGameMode.Puzzle)
-            {
-                OnGameSceneLoaded_Puzzle();
-            }
-            else
-            {
-                ClientLoadTilemaps();
-            }
+            OnGameSceneLoaded_Puzzle();
+        }
+        else
+        {
+            ClientLoadTilemaps();
+        }
 
-            EnableLocalPlayerMovement();
-            CmdReady();
-        }));
-    }
-
-
-    [Command]
-    private void CmdRequestGameSettings()
-    {
-        ReceiveHostSettingsClientRpc(GameSettings.Saved);
-    }
-
-
-    [ClientRpc]
-    private void ReceiveHostSettingsClientRpc(GameSettings settings)
-    {
-        if (m_loadedHostSettings) return;
-
-        GameSettings.Saved = new(settings);
-        print(GameSettings.Saved.TimeToMove);
-        m_loadedHostSettings = true;
+        EnableLocalPlayerMovement();
+        CmdReady();
     }
 
 
@@ -122,7 +90,7 @@ public class GameBehaviour : NetworkBehaviour
             pm.enabled = true;
 
             if (!pm.isOwned) continue;
-            GameObject cam = GameObject.FindWithTag("MainCamera");
+            Camera cam = Camera.main;
             cam.GetComponent<CamBehaviour>().Player = pm;
         }
     }
@@ -309,33 +277,10 @@ public class GameBehaviour : NetworkBehaviour
     [Server]
     public void PlacePlayers()
     {
-        if (GameSettings.Saved.GameMode == EGameMode.Puzzle)
-        {
-            PlacePlayers_Puzzle();
-        }
-        else if (GameSettings.Saved.GameMode == EGameMode.SnakeRoyale)
+        if (GameSettings.Saved.GameMode == EGameMode.SnakeRoyale)
         {
             PlacePlayers_SnakeRoyale(depth: 1, playersStartIndex: 0, Vector2Int.zero);
         }
-    }
-    [Server]
-    private void PlacePlayers_Puzzle()
-    {
-        Transform puzzleStartPoints = GameObject.FindWithTag("PuzzleStart").transform;
-        PlayerMovement pm = GetComponentInParent<PlayerMovement>();
-        pm.FreeMovement = true;
-        pm.TimeToMove = 0.5f;
-
-        for (int i = 0; i < pm.BodyParts.Count; i++)
-        {
-            Transform startPoint = puzzleStartPoints.GetChild(i);
-            float rot = startPoint.rotation.eulerAngles.z;
-            pm.BodyParts[i].Position = startPoint.position;
-            pm.BodyParts[i].Direction = Extensions.Vectors.Rotate(Vector2.up, rot);
-            pm.BodyParts[i].RegularAngle = rot;
-        }
-
-        pm.startingDirection = pm.BodyParts[0].Position - pm.BodyParts[1].Position;
     }
     [Server]
     private void PlacePlayers_SnakeRoyale(int depth, int playersStartIndex, Vector2Int bl)

@@ -1,10 +1,13 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using TMPro;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.Tilemaps;
+using UnityEngine.UI;
 using UnityEngine.UIElements;
 
 
@@ -12,7 +15,7 @@ public enum CreatorTool
 {
     None,
     Draw,
-    Erase
+    Fill,
 }
 
 public enum CreatorLayer
@@ -39,7 +42,8 @@ public class EditorMenu : MonoBehaviour
     private GameObject m_objectLayer;
 
     [SerializeField]
-    private TextMeshProUGUI m_saveInfo;
+    private TMP_InputField m_saveInfo;
+    private string m_savedName = null;
 
     public CreatorTool ToolInUse { get; private set; }
 
@@ -139,11 +143,8 @@ public class EditorMenu : MonoBehaviour
 
     private void HandleTileInput()
     {
-        int mouse = HandleMouseInput();
-        if (mouse == 0)
-            m_painter.Draw(GridPos);
-        else if (mouse == 1)
-            m_painter.Erase(GridPos);
+        HandleToolInput();
+        HandleClickInput(false);
 
         if (Input.GetKeyDown(KeyCode.LeftBracket))
             ChangeIndex(ref m_tileIndex, m_tiles.Length, -1);
@@ -155,13 +156,56 @@ public class EditorMenu : MonoBehaviour
     }
 
 
+    private void HandleToolInput()
+    {
+        if (Input.GetKeyDown(KeyCode.P))
+        {
+            ToolInUse = CreatorTool.Draw;
+        }
+        if (Input.GetKeyDown(KeyCode.F))
+        {
+            ToolInUse = CreatorTool.Fill;
+        }
+    }
+
+
+    private void HandleClickInput(bool objMode)
+    {
+        Action<Vector3Int> draw = objMode ? m_painter.DrawObject : m_painter.Draw;
+        Action<Vector3Int> erase = objMode ? m_painter.EraseObject : m_painter.Erase;
+        Action<Vector3Int, bool> fill = objMode ? m_painter.FillObject : m_painter.Fill;
+
+        if (Input.GetMouseButton(0))
+        {
+            switch (ToolInUse)
+            {
+                case CreatorTool.Draw:
+                    draw(GridPos);
+                    break;
+                case CreatorTool.Fill:
+                    fill(GridPos, true);
+                    break;
+            }
+        }
+        if (Input.GetMouseButton(1))
+        {
+            switch (ToolInUse)
+            {
+                case CreatorTool.Draw:
+                    erase(GridPos);
+                    break;
+                case CreatorTool.Fill:
+                    fill(GridPos, false);
+                    break;
+            }
+        }
+    }
+
+
     private void HandleObjectInput()
     {
-        int mouse = HandleMouseInput();
-        if (mouse == 0)
-            m_painter.DrawObject(GridPos);
-        else if (mouse == 1)
-            m_painter.EraseObject(GridPos);
+        HandleToolInput();
+        HandleClickInput(true);
 
         if (Input.GetKeyDown(KeyCode.LeftBracket))
             ChangeIndex(ref m_objectIndex, m_objects.Length, -1);
@@ -173,30 +217,6 @@ public class EditorMenu : MonoBehaviour
     }
 
 
-    private int HandleMouseInput()
-    {
-        if (!Input.GetKey(KeyCode.LeftControl))
-        {
-            if (Input.GetMouseButton(0))
-            {
-                ToolInUse = CreatorTool.Draw;
-                return 0;
-            }
-            else if (Input.GetMouseButton(1))
-            {
-                ToolInUse = CreatorTool.Erase;
-                return 1;
-            }
-            else
-            {
-                ToolInUse = CreatorTool.None;
-            }
-        }
-
-        return -1;
-    }
-
-
     private void ChangeIndex(ref int index, int length, int increment)
     {
         index += increment;
@@ -204,6 +224,12 @@ public class EditorMenu : MonoBehaviour
             index = length - 1;
         else if (index > length - 1)
             index = 0;
+    }
+
+
+    private float GetLayerOpacity(Tilemap tilemap)
+    {
+        return tilemap.color.a;
     }
 
 
@@ -229,21 +255,58 @@ public class EditorMenu : MonoBehaviour
             AssetDatabase.CreateFolder("Assets/Prefabs", "Maps");
         }
 
+        float ground_a = GetLayerOpacity(m_groundLayer);
+        float wall_a = GetLayerOpacity(m_wallLayer);
         SetAllLayerOpacities(1);
+
+        string savePath;
+        int numDuplicates = 0;
+        if (m_savedName != m_saveInfo.text)
+        {
+            // If {chosenName}.prefab exists, Increase numDuplicates until we find an unused filename of the format
+            // "{chosenName} [numDuplicates].prefab" that hasn't been taken in the maps folder.
+            while (true)
+            {
+                savePath = $"Assets/Prefabs/Maps/{m_saveInfo.text}";
+                if (numDuplicates > 0)
+                    savePath += $"({numDuplicates})";
+                savePath += ".prefab";
+
+                if (File.Exists(savePath))
+                {
+                    numDuplicates++;
+                    continue;
+                }
+                break;
+            }
+        }
+        else
+        {
+            savePath = $"Assets/Prefabs/Maps/{m_saveInfo.text}.prefab";
+        }
+
         PrefabUtility.SaveAsPrefabAsset(m_groundLayer.transform.parent.parent.gameObject,
-            "Assets/Prefabs/Maps/Map.prefab");
+            savePath);
+        m_savedName = m_saveInfo.text;
 
-        long fileLength = 0;
-        try
-        {
-            FileInfo mapFileInfo = new FileInfo("Assets/Prefabs/Maps/Map.prefab");
-            fileLength = mapFileInfo.Length;
+        EventSystem.current.SetSelectedGameObject(null);
+        if (numDuplicates > 0)
+            m_saveInfo.text += $"({numDuplicates})";
 
-            m_saveInfo.text = $"Map.prefab ({fileLength / 1_000_000}MB)";
-        }
-        catch
-        {
-            m_saveInfo.text = $"Map.prefab (Unknown Size)";
-        }
+        SetLayerOpacity(m_groundLayer, ground_a);
+        SetLayerOpacity(m_wallLayer, wall_a);
+
+        //long fileLength = 0;
+        //try
+        //{
+        //    FileInfo mapFileInfo = new FileInfo("Assets/Prefabs/Maps/Map.prefab");
+        //    fileLength = mapFileInfo.Length;
+
+        //    m_saveInfo.text = $"Map.prefab ({fileLength / 1_000_000}MB)";
+        //}
+        //catch
+        //{
+        //    m_saveInfo.text = $"Maps/Map.prefab";
+        //}
     }
 }

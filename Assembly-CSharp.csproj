@@ -87,6 +87,7 @@
     <Compile Include="Assets\Scripts\Menu\Creator\MapCreatorPaintBehaviour.cs" />
     <Compile Include="Assets\Scripts\Cutscene\SnakeActor.cs" />
     <Compile Include="Assets\Scripts\Object\GridObject.cs" />
+    <Compile Include="Assets\Scripts\Networking\NetworkGameSettings.cs" />
     <Compile Include="Assets\Scripts\Extensions\RandomDistribution.cs" />
     <Compile Include="Assets\Scripts\Files\SaveData.cs" />
     <Compile Include="Assets\Scripts\Files\Settings.cs" />
@@ -136,6 +137,7 @@
     <Compile Include="Assets\Scripts\Networking\PlayerObjectController.cs" />
     <Compile Include="Assets\Scripts\Object\Projectile.cs" />
     <Compile Include="Assets\Scripts\Menu\Creator\MapCreatorUIHandler.cs" />
+    <Compile Include="Assets\Scripts\Object\Shooter.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Mirror\Plugins\Mono.Cecil\Mono.CecilX.dll" />

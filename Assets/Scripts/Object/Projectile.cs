@@ -3,7 +3,7 @@ using UnityEngine;
 public enum EProjectileType
 {
     Shit,
-    InstantDamage,
+    Fireball,
     Orange
 }
 
@@ -21,5 +21,28 @@ public struct Projectile
         Velocity = velocity;
         Rotation = Quaternion.Euler(Vector3.forward * rotation);
         ImmunityDuration = immunityDuration;
+    }
+}
+
+public class Projectiles
+{
+    public static Projectile ConstructShit(Vector2 velocity_vec, float rotation_z)
+    {
+        return new Projectile(
+            lifetime: 5,
+            velocity: velocity_vec,
+            rotation: rotation_z,
+            immunityDuration: 0.2f
+        );
+    }
+
+    public static Projectile ConstructFireball(Vector2 velocity_vec, float rotation_z)
+    {
+        return new Projectile(
+            lifetime: 5,
+            velocity: velocity_vec,
+            rotation: rotation_z,
+            immunityDuration: 0.5f
+        );
     }
 }

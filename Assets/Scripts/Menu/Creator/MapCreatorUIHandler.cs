@@ -21,6 +21,7 @@ public class MapCreatorUIHandler : MonoBehaviour
     private TextMeshProUGUI m_mouseCoordsYValue;
     [SerializeField]
     private TextMeshProUGUI m_mouseZoomValue;
+    private Coroutine m_mouseZoomHideCoroutine = null;
 
     [SerializeField]
     private Image m_tileIcon;
@@ -47,6 +48,26 @@ public class MapCreatorUIHandler : MonoBehaviour
     }
 
 
+    private void BrieflyShowUIElement(GameObject elementGO, ref Coroutine hideCoroutine)
+    {
+        // Reset the hide timer (for successive UI element shows, we don't want it to flicker)
+        if (hideCoroutine != null)
+        {
+            StopCoroutine(hideCoroutine);
+            hideCoroutine = null;
+        }
+
+        void ToggleElem(bool on)
+        {
+            elementGO.SetActive(on);
+        }
+
+        // Show, then hide after a while
+        ToggleElem(true);
+        hideCoroutine = StartCoroutine(Wait.WaitThen(1, () => ToggleElem(false)));
+    }
+
+
     public void UpdateGridPos(Vector3Int gridPos)
     {
         m_mouseCoordsXValue.text = $"{gridPos.x}";
@@ -56,6 +77,7 @@ public class MapCreatorUIHandler : MonoBehaviour
 
     public void UpdateZoom(float value)
     {
+        BrieflyShowUIElement(m_mouseZoomValue.transform.parent.gameObject, ref m_mouseZoomHideCoroutine);
         m_mouseZoomValue.text = $"{value:F2}x";
     }
 

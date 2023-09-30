@@ -128,5 +128,7 @@ public class HostSettingsHandler : MonoBehaviour
     public void OnClose()
     {
         Saving.SaveToFile(m_currentGameSettings, "GameSettings.dat");
+        GameObject.Find("LocalPlayerObject").GetComponentInChildren<NetworkGameSettings>().
+            LoadGameSettings(m_currentGameSettings);
     }
 }
