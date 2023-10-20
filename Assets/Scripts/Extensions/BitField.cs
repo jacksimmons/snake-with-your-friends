@@ -14,13 +14,13 @@ public class BitField
 
     public void SetBit(int index, bool value)
     {
-        byte mask = (byte)(1 << index);
+        int mask = 1 << index;
         Data = value ? (int)(Data | mask) : (int)(Data & ~mask);
     }
 
     public bool GetBit(int index)
     {
-        byte mask = (byte)(1 << index);
+        int mask = 1 << index;
         return (Data & mask) != 0;
     }
 }
