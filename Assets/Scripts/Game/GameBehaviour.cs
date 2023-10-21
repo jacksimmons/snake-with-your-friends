@@ -59,15 +59,24 @@ public class GameBehaviour : NetworkBehaviour
         GameStarted,
     }
     [SyncVar(hook=nameof(OnLoadingStageUpdate))]
-    private LoadingStage playersLoadingStage = LoadingStage.Unloaded;
+    private LoadingStage playersLoadingStage;
 
     [SyncVar]
-    private int numPlayersReady = 0;
+    private int numPlayersReady;
 
 
     private void OnEnable()
     {
         if (!isOwned) return;
+
+
+        // Initialisation only on server-side
+        // If clients were to initialise, e.g. numPlayersReady keeps getting set to 0.
+        if (NetworkServer.active)
+        {
+            numPlayersReady = 0;
+            playersLoadingStage = LoadingStage.Unloaded;
+        }
     }
 
 
