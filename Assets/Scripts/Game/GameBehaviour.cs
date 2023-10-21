@@ -131,10 +131,6 @@ public class GameBehaviour : NetworkBehaviour
     [ClientRpc]
     private void RpcLoadingStageUpdate(LoadingStage newValue)
     {
-        if (!isOwned) return;
-
-        print(newValue.ToString());
-
         switch (newValue)
         {
             case LoadingStage.Unloaded:
