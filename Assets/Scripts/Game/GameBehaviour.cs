@@ -272,17 +272,21 @@ public class GameBehaviour : NetworkBehaviour
 
         // --- Players ---
         PlacePlayers();
-        ActivatePlayersClientRpc();
 
         // IF Snake Royale
-        //List<Vector2> positions = new(CustomNetworkManager.Instance.Players.Count);
-        //List<float> rotation_zs = new(CustomNetworkManager.Instance.Players.Count);
-        //for (int i = 0; i < CustomNetworkManager.Instance.Players.Count; i++)
-        //{
-        //    positions.Add(CustomNetworkManager.Instance.Players[i].transform.position);
-        //    rotation_zs.Add(CustomNetworkManager.Instance.Players[i].transform.rotation.eulerAngles.z);
-        //}
-        //PlacePlayersClientRpc(positions, rotation_zs);
+        if (GameSettings.Saved.GameMode == EGameMode.SnakeRoyale)
+        {
+            List<Vector2> positions = new(CustomNetworkManager.Instance.Players.Count);
+            List<float> rotation_zs = new(CustomNetworkManager.Instance.Players.Count);
+            for (int i = 0; i < CustomNetworkManager.Instance.Players.Count; i++)
+            {
+                positions.Add(CustomNetworkManager.Instance.Players[i].transform.position);
+                rotation_zs.Add(CustomNetworkManager.Instance.Players[i].transform.rotation.eulerAngles.z);
+            }
+            PlacePlayersClientRpc(positions, rotation_zs);
+        }
+
+        ActivatePlayersClientRpc();
     }
 
     [Server]
@@ -441,21 +445,21 @@ public class GameBehaviour : NetworkBehaviour
 
 
 
-    //[ClientRpc]
-    //public void PlacePlayersClientRpc(List<Vector2> positions, List<float> rotation_zs)
-    //{
-    //    if (positions.Count != rotation_zs.Count)
-    //    {
-    //        Debug.LogError("Positions and rotations have mismatching lengths!");
-    //        return;
-    //    }
+    [ClientRpc]
+    public void PlacePlayersClientRpc(List<Vector2> positions, List<float> rotation_zs)
+    {
+        if (positions.Count != rotation_zs.Count)
+        {
+            Debug.LogError("Positions and rotations have mismatching lengths!");
+            return;
+        }
 
-    //    for (int i = 0; i < positions.Count; i++)
-    //    {
-    //        PlayerObjectController poc = CustomNetworkManager.Instance.Players[i];
-    //        poc.transform.SetPositionAndRotation(positions[i], Quaternion.Euler(Vector3.forward * rotation_zs[i]));
-    //    }
-    //}
+        for (int i = 0; i < positions.Count; i++)
+        {
+            PlayerObjectController poc = CustomNetworkManager.Instance.Players[i];
+            poc.transform.SetPositionAndRotation(positions[i], Quaternion.Euler(Vector3.forward * rotation_zs[i]));
+        }
+    }
 
 
     [Server]
