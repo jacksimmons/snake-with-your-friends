@@ -8,6 +8,22 @@ using Random = UnityEngine.Random;
 
 public class GameBehaviour : NetworkBehaviour
 {
+    private static GameBehaviour _instance;
+    public static GameBehaviour Instance
+    {
+        get
+        {
+            if (!_instance)
+            {
+                GameObject lpo = GameObject.Find("LocalPlayerObject");
+                if (!lpo)
+                    return null;
+                _instance = lpo.GetComponentInChildren<GameBehaviour>();
+            }
+            return _instance;
+        }
+    }
+
     public static readonly string[] GAME_SCENES =
     { "Game" };
 

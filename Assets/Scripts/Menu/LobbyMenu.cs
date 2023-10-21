@@ -86,11 +86,9 @@ public class LobbyMenu : MonoBehaviour
     private void Start()
     {
         // Enable GameBehaviour as soon as scene is loaded, for subsequent games
-        GameObject go;
-        if (go = GameObject.Find("LocalPlayerObject"))
-        {
-            go.GetComponentInChildren<GameBehaviour>().enabled = true;
-        }
+        // It will be null on the first game.
+        if (GameBehaviour.Instance)
+            GameBehaviour.Instance.enabled = true;
     }
 
     public void OnHostSettingsButtonPressed()

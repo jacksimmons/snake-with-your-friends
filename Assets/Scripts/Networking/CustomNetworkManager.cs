@@ -97,11 +97,7 @@ public class CustomNetworkManager : NetworkManager
 
         if (GAME_SCENES.Contains(sceneName))
         {
-            GameObject lpo = GameObject.Find("LocalPlayerObject");
-            GameBehaviour gb = lpo.GetComponentInChildren<GameBehaviour>();
-
-            gb.OnGameSceneLoaded(sceneName);
-
+            GameBehaviour.Instance.OnGameSceneLoaded(sceneName);
             return;
         }
 
@@ -128,8 +124,8 @@ public class CustomNetworkManager : NetworkManager
     [Server]
     public void EndGame()
     {
-        GameObject.Find("LocalPlayerObject").GetComponent<PlayerObjectController>()
-            .RpcDisableComponents();
+        GameBehaviour.Instance.enabled = false;
+        GameObject.Find("LocalPlayerObject").GetComponent<PlayerObjectController>().RpcDisableComponents();
         ServerChangeScene("LobbyMenu");
     }
 }
