@@ -48,7 +48,7 @@ public class GameBehaviour : NetworkBehaviour
     [SerializeField]
     private List<GameObject> _foodTemplates = new();
 
-    // STATIC SYNCVARS -------------------
+    // STATIC VARIABLES --------------------
     // These must be static, so that they carry across to all GameBehaviours.
     // How "loaded" the game currently is for the furthest behind player.
     public enum LoadingStage
@@ -60,20 +60,24 @@ public class GameBehaviour : NetworkBehaviour
         PlayerScriptsEnabled,
         GameStarted,
     }
-    [SyncVar(hook=nameof(OnLoadingStageUpdate))]
-    private static LoadingStage playersLoadingStage = LoadingStage.Unloaded;
 
-    [SyncVar]
-    private static int numPlayersReady = 0;
+    private static LoadingStage playersLoadingStage;
+    private static int numPlayersReady;
 
 
     private void OnEnable()
     {
         if (!isOwned) return;
+
+        if (NetworkServer.active)
+        {
+            numPlayersReady = 0;
+            _playersLoadingStage = LoadingStage.Unloaded;
+        }
     }
 
 
-    // LOADING STAGES ---------------------
+    // LOADING STAGES ----------------------
     /// <summary>
     /// Increments the number of players that are ready in this stage.
     /// All players must be ready before the loading stage is incremented.
@@ -87,7 +91,9 @@ public class GameBehaviour : NetworkBehaviour
         if (numPlayersReady >= CustomNetworkManager.Instance.numPlayers)
         {
             numPlayersReady = 0;
-            playersLoadingStage++; // Note: Execution pauses and performs the hook before continuing here!
+
+            playersLoadingStage++;
+            RpcLoadingStageUpdate(playersLoadingStage);
         }
 
         if (numPlayersReady != 0) return;
@@ -105,11 +111,11 @@ public class GameBehaviour : NetworkBehaviour
     /// The progression through game loading is handled through a series of handshakes.
     /// Each handshake increments the loading stage and calls this function.
     /// </summary>
-    [Client]
-    private void OnLoadingStageUpdate(LoadingStage _, LoadingStage newValue)
+    [ClientRpc]
+    private void RpcLoadingStageUpdate(LoadingStage newValue)
     {
         if (!isOwned) return;
-        print(_.ToString());
+
         print(newValue.ToString());
 
         switch (newValue)
