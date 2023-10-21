@@ -48,7 +48,7 @@ public class GameBehaviour : NetworkBehaviour
     private List<GameObject> _foodTemplates = new();
 
     [SyncVar(hook=nameof(OnReceiveHostSettings))]
-    private GameSettings _hostSettings;
+    private GameSettingsData _hostSettings;
 
 
     private void OnEnable()
@@ -69,16 +69,14 @@ public class GameBehaviour : NetworkBehaviour
 
         if (NetworkServer.active)
         {
-            _hostSettings = GameSettings.Saved;
+            _hostSettings = new(GameSettings.Saved);
         }
     }
 
-    private void OnReceiveHostSettings(GameSettings _, GameSettings settings)
+    private void OnReceiveHostSettings(GameSettingsData _, GameSettingsData data)
     {
-        if (settings.foodSettings.FoodsEnabled == null)
-            print("received null");
-        GameSettings.Saved = settings;
-        print(settings.foodSettings.FoodsEnabled.Data);
+        GameSettings.Saved = new(data);
+        print(GameSettings.Saved.foodSettings.FoodsEnabled.Data);
 
         if (!isOwned) return;
 

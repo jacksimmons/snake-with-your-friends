@@ -10,6 +10,21 @@ public enum EGameMode
 }
 
 
+/// <summary>
+/// Struct form of the below class, used to transfer data between clients.
+/// </summary>
+[Serializable]
+public readonly struct FoodSettingsData
+{
+    public readonly int FoodsEnabled;
+
+    public FoodSettingsData(FoodSettings settings)
+    {
+        FoodsEnabled = settings.FoodsEnabled.Data;
+    }
+}
+
+
 [Serializable]
 public class FoodSettings
 {
@@ -17,7 +32,12 @@ public class FoodSettings
 
     public FoodSettings()
     {
-        FoodsEnabled = new BitField(int.MaxValue);
+        FoodsEnabled = new(int.MaxValue); // All enabled
+    }
+
+    public FoodSettings(FoodSettingsData data)
+    {
+        FoodsEnabled = new(data.FoodsEnabled);
     }
 
     public void SetFoodEnabled(EFoodType type, bool val)
@@ -28,6 +48,26 @@ public class FoodSettings
     public bool GetFoodEnabled(EFoodType type)
     {
         return FoodsEnabled.GetBit((int)type);
+    }
+}
+
+
+[Serializable]
+public readonly struct GameSettingsData
+{
+    public readonly EGameMode GameMode;
+    public readonly int GameSize;
+    public readonly float TimeToMove;
+    public readonly bool FriendlyFire;
+    public readonly FoodSettingsData FoodSettings;
+
+    public GameSettingsData(GameSettings settings)
+    {
+        GameMode = settings.GameMode;
+        GameSize = settings.GameSize;
+        TimeToMove = settings.TimeToMove;
+        FriendlyFire = settings.FriendlyFire;
+        FoodSettings = new(settings.foodSettings);
     }
 }
 
@@ -66,6 +106,17 @@ public class GameSettings : ICached
         GameSize = other.GameSize;
 
         foodSettings = other.foodSettings;
+    }
+
+
+    public GameSettings(GameSettingsData data)
+    {
+        TimeToMove = data.TimeToMove;
+        FriendlyFire = data.FriendlyFire;
+        GameMode = data.GameMode;
+        GameSize = data.GameSize;
+
+        foodSettings = new(data.FoodSettings);
     }
 
     public void Cache() { Saved = this; }

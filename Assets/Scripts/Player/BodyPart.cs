@@ -8,14 +8,15 @@ using UnityEngine.UIElements;
 /// <summary>
 /// Struct to represent data of a BodyPart needed for networking.
 /// </summary>
-public struct BodyPartData
+public readonly struct BodyPartData
 {
-    public Vector2 position;
-    public Vector2 direction;
-    public float CornerAngle;
-    public float RegularAngle;
-    public EBodyPartType DefaultType;
-    public EBodyPartType CurrentType;
+    public readonly Vector2 position;
+    public readonly Vector2 direction;
+    public readonly float CornerAngle;
+    public readonly float RegularAngle;
+    public readonly EBodyPartType DefaultType;
+    public readonly EBodyPartType CurrentType;
+
     public BodyPartData(Vector2 position, Vector2 direction, float cornerAngle, float regularAngle,
         EBodyPartType defaultType, EBodyPartType currentType)
     {
