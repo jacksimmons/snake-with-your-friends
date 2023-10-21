@@ -75,12 +75,12 @@ public class GameBehaviour : NetworkBehaviour
 
     private void OnReceiveHostSettings(GameSettings _, GameSettings settings)
     {
-        if (!isOwned) return;
-
         if (settings.foodSettings.FoodsEnabled == null)
             print("received null");
         GameSettings.Saved = settings;
         print(settings.foodSettings.FoodsEnabled.Data);
+
+        if (!isOwned) return;
 
         if (GameSettings.Saved.GameMode == EGameMode.Puzzle)
         {
