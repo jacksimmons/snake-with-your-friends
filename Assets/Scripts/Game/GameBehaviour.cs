@@ -48,8 +48,9 @@ public class GameBehaviour : NetworkBehaviour
     [SerializeField]
     private List<GameObject> _foodTemplates = new();
 
-    // STATIC VARIABLES --------------------
-    // These must be static, so that they carry across to all GameBehaviours.
+    // SERVER VARIABLES --------------------
+    // These are only accurate on the server; hence do NOT use them on a client.
+    // They are static because they belong to no particular GameBehaviour.
     // How "loaded" the game currently is for the furthest behind player.
     public enum LoadingStage
     {
@@ -61,8 +62,8 @@ public class GameBehaviour : NetworkBehaviour
         GameStarted,
     }
 
-    private static LoadingStage playersLoadingStage;
-    private static int numPlayersReady;
+    private static LoadingStage serverPlayersLoadingStage;
+    private static int serverNumPlayersReady;
 
 
     private void OnEnable()
@@ -71,8 +72,8 @@ public class GameBehaviour : NetworkBehaviour
 
         if (NetworkServer.active)
         {
-            numPlayersReady = 0;
-            playersLoadingStage = LoadingStage.Unloaded;
+            serverNumPlayersReady = 0;
+            serverPlayersLoadingStage = LoadingStage.Unloaded;
         }
     }
 
@@ -85,15 +86,15 @@ public class GameBehaviour : NetworkBehaviour
     [Command]
     private void CmdOnReady()
     {
-        numPlayersReady++;
+        serverNumPlayersReady++;
 
-        print($"Ready: {numPlayersReady}/{CustomNetworkManager.Instance.numPlayers}");
-        if (numPlayersReady >= CustomNetworkManager.Instance.numPlayers)
+        print($"Ready: {serverNumPlayersReady}/{CustomNetworkManager.Instance.numPlayers}");
+        if (serverNumPlayersReady >= CustomNetworkManager.Instance.numPlayers)
         {
-            numPlayersReady = 0;
+            serverNumPlayersReady = 0;
 
-            playersLoadingStage++;
-            RpcLoadingStageUpdate(playersLoadingStage);
+            serverPlayersLoadingStage++;
+            RpcLoadingStageUpdate(serverPlayersLoadingStage);
         }
 
         if (numPlayersReady != 0) return;
