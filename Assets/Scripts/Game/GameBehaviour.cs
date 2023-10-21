@@ -201,9 +201,6 @@ public class GameBehaviour : NetworkBehaviour
             {
                 map = Instantiate(_mapTemplate);
 
-                SetupGroundTilemap(map, Vector2Int.zero);
-                SetupWallTilemap(map, Vector2Int.zero);
-
                 NetworkServer.Spawn(map);
             }
 
@@ -218,6 +215,12 @@ public class GameBehaviour : NetworkBehaviour
     [TargetRpc]
     private void RpcReceiveMap(NetworkConnectionToClient _, GameObject map)
     {
+        if (GameSettings.Saved.GameMode == EGameMode.SnakeRoyale)
+        {
+            SetupGroundTilemap(map, Vector2Int.zero);
+            SetupWallTilemap(map, Vector2Int.zero);
+        }
+
         s_groundTilemap = map.transform.Find("Ground").GetComponentInChildren<Tilemap>();
         s_wallTilemap = map.transform.Find("Wall").GetComponentInChildren<Tilemap>();
         print("hi2");
