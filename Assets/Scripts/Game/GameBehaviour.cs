@@ -48,6 +48,8 @@ public class GameBehaviour : NetworkBehaviour
     [SerializeField]
     private List<GameObject> _foodTemplates = new();
 
+    // STATIC SYNCVARS -------------------
+    // These must be static, so that they carry across to all GameBehaviours.
     // How "loaded" the game currently is for the furthest behind player.
     public enum LoadingStage
     {
@@ -59,24 +61,15 @@ public class GameBehaviour : NetworkBehaviour
         GameStarted,
     }
     [SyncVar(hook=nameof(OnLoadingStageUpdate))]
-    private LoadingStage playersLoadingStage;
+    private static LoadingStage playersLoadingStage = LoadingStage.Unloaded;
 
     [SyncVar]
-    private int numPlayersReady;
+    private static int numPlayersReady = 0;
 
 
     private void OnEnable()
     {
         if (!isOwned) return;
-
-
-        // Initialisation only on server-side
-        // If clients were to initialise, e.g. numPlayersReady keeps getting set to 0.
-        if (NetworkServer.active)
-        {
-            numPlayersReady = 0;
-            playersLoadingStage = LoadingStage.Unloaded;
-        }
     }
 
 
