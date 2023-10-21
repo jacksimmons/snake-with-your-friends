@@ -200,7 +200,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5485737577584597734, guid: 376e673a259860845884e7d2376b6403, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 234.1425
+      value: 234.14252
       objectReference: {fileID: 0}
     - target: {fileID: 5485737577584597734, guid: 376e673a259860845884e7d2376b6403, type: 3}
       propertyPath: m_AnchoredPosition.y
@@ -4306,7 +4306,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6760509062494244431, guid: ebb2eb6205d3be54199b403e8239ebe6, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -148.01
+      value: -148.00998
       objectReference: {fileID: 0}
     - target: {fileID: 6760509062494244431, guid: ebb2eb6205d3be54199b403e8239ebe6, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -5368,7 +5368,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5655269589308004150, guid: 376e673a259860845884e7d2376b6403, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -40.37
+      value: -40.369995
       objectReference: {fileID: 0}
     - target: {fileID: 5655269589308004151, guid: 376e673a259860845884e7d2376b6403, type: 3}
       propertyPath: m_text
@@ -6406,11 +6406,12 @@ MonoBehaviour:
   playerListViewContent: {fileID: 5207022036219901643}
   playerListItemPrefab: {fileID: 8619388774921834, guid: 4c3214facb9322747bfa5b8653f55b28, type: 3}
   lobbyID: 0
-  playerItemCreated: 0
+  playerItemsCreated: 0
   startGameButton: {fileID: 2141405748}
   readyButtonText: {fileID: 1699001868}
   m_hostSettingsButton: {fileID: 492621958}
   m_hostSettingsPanel: {fileID: 1786559720}
+  m_gameTemplate: {fileID: 5763126349080349535, guid: 9c0213cab497fcc42bfeb13a456cb13d, type: 3}
 --- !u!1 &2110421890
 GameObject:
   m_ObjectHideFlags: 0

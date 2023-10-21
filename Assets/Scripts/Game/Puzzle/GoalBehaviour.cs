@@ -6,9 +6,7 @@ public class GoalBehaviour : MonoBehaviour
 {
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        // --- Players
-        Transform player = Player.TryGetOwnedPlayerTransformFromBodyPart(collision.gameObject);
-        if (player != null)
+        if (GameBehaviour.Instance != null)
         {
             // Prevents infinite loading of puzzles below
             GetComponent<Collider2D>().enabled = false;
@@ -24,9 +22,13 @@ public class GoalBehaviour : MonoBehaviour
             Saving.SaveToFile(SaveData.Saved, "SaveData.dat");
 
             // Load the next puzzle
-            player.GetComponentInChildren<GameBehaviour>().OnGameSceneLoaded("Game");
+            GameBehaviour.Instance.OnGameSceneLoaded();
             Destroy(transform.parent.gameObject);
             return;
+        }
+        else
+        {
+            Debug.LogError("GameBehaviour was null!");
         }
 
         // --- Everything else disappears

@@ -97,11 +97,7 @@ public class CustomNetworkManager : NetworkManager
 
         if (GAME_SCENES.Contains(sceneName))
         {
-            GameObject lpo = GameObject.Find("LocalPlayerObject");
-            GameBehaviour gb = lpo.GetComponentInChildren<GameBehaviour>();
-
-            gb.OnGameSceneLoaded(sceneName);
-
+            GameBehaviour.Instance.OnGameSceneLoaded();
             return;
         }
 

@@ -8,6 +8,20 @@ using Random = UnityEngine.Random;
 
 public class GameBehaviour : NetworkBehaviour
 {
+    private static GameBehaviour _instance;
+    public static GameBehaviour Instance
+    {
+        get
+        {
+            if (_instance == null)
+            {
+                _instance = GameObject.FindWithTag("Game").GetComponent<GameBehaviour>();
+            }
+            
+            return _instance;
+        }
+    }
+
     public static readonly string[] GAME_SCENES =
     { "Game" };
 
@@ -62,23 +76,27 @@ public class GameBehaviour : NetworkBehaviour
         GameStarted,
     }
 
-    private static LoadingStage serverPlayersLoadingStage;
-    private static int serverNumPlayersReady;
+    [SyncVar(hook=nameof(OnLoadingStageUpdate))]
+    private LoadingStage playersLoadingStage = LoadingStage.Unloaded;
+    [SyncVar]
+    private int numPlayersReady = 0;
 
 
     private void OnEnable()
     {
         if (!isOwned) return;
-
-        if (NetworkServer.active)
-        {
-            serverNumPlayersReady = 0;
-            serverPlayersLoadingStage = LoadingStage.Unloaded;
-        }
     }
 
 
     // LOADING STAGES ----------------------
+    [Client]
+    public void OnGameSceneLoaded()
+    {
+        if (!isOwned) return;
+
+        CmdOnReady();
+    }
+
     /// <summary>
     /// Increments the number of players that are ready in this stage.
     /// All players must be ready before the loading stage is incremented.
@@ -86,21 +104,19 @@ public class GameBehaviour : NetworkBehaviour
     [Command]
     private void CmdOnReady()
     {
-        serverNumPlayersReady++;
+        numPlayersReady++;
 
-        print($"Ready: {serverNumPlayersReady}/{CustomNetworkManager.Instance.numPlayers}");
-        if (serverNumPlayersReady >= CustomNetworkManager.Instance.numPlayers)
+        print($"Ready: {numPlayersReady}/{CustomNetworkManager.Instance.numPlayers}");
+        if (numPlayersReady >= CustomNetworkManager.Instance.numPlayers)
         {
-            serverNumPlayersReady = 0;
-
-            serverPlayersLoadingStage++;
-            RpcLoadingStageUpdate(serverPlayersLoadingStage);
+            numPlayersReady = 0;
+            playersLoadingStage++;
         }
 
-        if (serverNumPlayersReady != 0) return;
+        if (numPlayersReady != 0) return;
         // ^ Following code executes directly after the last readier, every handshake
 
-        switch (serverPlayersLoadingStage)
+        switch (playersLoadingStage)
         {
             case LoadingStage.PlayerScriptsEnabled:
                 ServerSetupGame();
@@ -112,11 +128,9 @@ public class GameBehaviour : NetworkBehaviour
     /// The progression through game loading is handled through a series of handshakes.
     /// Each handshake increments the loading stage and calls this function.
     /// </summary>
-    [ClientRpc]
-    private void RpcLoadingStageUpdate(LoadingStage newValue)
+    [Client]
+    private void OnLoadingStageUpdate(LoadingStage _, LoadingStage newValue)
     {
-        if (!isOwned) return;
-
         print(newValue.ToString());
 
         switch (newValue)
@@ -124,23 +138,15 @@ public class GameBehaviour : NetworkBehaviour
             case LoadingStage.Unloaded:
                 break;
             case LoadingStage.SceneLoaded:
-                CmdRequestGameSettings(transform.parent.gameObject);
+                CmdRequestGameSettings(GameObject.Find("LocalPlayerObject"));
                 break;
             case LoadingStage.GameSettingsSynced:
-                CmdRequestMap(transform.parent.gameObject);
+                CmdRequestMap(GameObject.Find("LocalPlayerObject"));
                 break;
             case LoadingStage.MapLoaded:
                 EnablePlayerScripts();
                 break;
         }
-    }
-
-    [Client]
-    public void OnGameSceneLoaded(string name)
-    {
-        if (!isOwned) return;
-
-        CmdOnReady();
     }
     // ------------------------------------
 

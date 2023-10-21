@@ -51,6 +51,10 @@ public class PlayerObjectController : NetworkBehaviour
         }
     }
 
+    // GameBehaviour
+    [SerializeField]
+    private GameObject m_gameTemplate;
+
 
     private void Start()
     {
@@ -66,12 +70,15 @@ public class PlayerObjectController : NetworkBehaviour
         CmdSetPlayerName(SteamFriends.GetPersonaName());
         gameObject.name = "LocalPlayerObject";
 
+        // Create GameBehaviour as soon as player is loaded, give authority to the player.
+        GameObject game = Instantiate(m_gameTemplate);
+        DontDestroyOnLoad(game);
+        NetworkServer.Spawn(game, gameObject);
+
         LobbyMenu.instance.UpdateLobbyName();
 
         if (NetworkServer.active)
             isHost = true;
-
-        GetComponentInChildren<GameBehaviour>().enabled = true;
     }
 
     /// <summary>
@@ -82,8 +89,6 @@ public class PlayerObjectController : NetworkBehaviour
         Manager.AddPlayer(this);
         LobbyMenu.instance.UpdateLobbyName();
         LobbyMenu.instance.UpdatePlayerList();
-
-        GetComponentInChildren<GameBehaviour>().enabled = true;
     }
 
     /// <summary>
