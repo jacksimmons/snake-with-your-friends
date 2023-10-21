@@ -95,6 +95,14 @@ public class GameBehaviour : NetworkBehaviour
 
 
     // LOADING STAGES ----------------------
+    [Client]
+    public void OnGameSceneLoaded(string name)
+    {
+        if (!isOwned) return;
+
+        CmdOnReady();
+    }
+
     /// <summary>
     /// Increments the number of players that are ready in this stage.
     /// All players must be ready before the loading stage is incremented.
@@ -147,14 +155,6 @@ public class GameBehaviour : NetworkBehaviour
                 break;
         }
     }
-
-    [Client]
-    public void OnGameSceneLoaded(string name)
-    {
-        if (!isOwned) return;
-
-        CmdOnReady();
-    }
     // ------------------------------------
 
 
@@ -172,6 +172,7 @@ public class GameBehaviour : NetworkBehaviour
     {
         if (!isOwned) return;
         GameSettings.Saved = new(data);
+        print("hi");
         CmdOnReady();
     }
     // ------------------------------------
@@ -212,6 +213,7 @@ public class GameBehaviour : NetworkBehaviour
     {
         s_groundTilemap = map.transform.Find("Ground").GetComponentInChildren<Tilemap>();
         s_wallTilemap = map.transform.Find("Wall").GetComponentInChildren<Tilemap>();
+        print("hi2");
         CmdOnReady();
     }
     // ------------------------------------
@@ -231,6 +233,7 @@ public class GameBehaviour : NetworkBehaviour
             cam.GetComponent<CamBehaviour>().Player = pm;
         }
 
+        print("hi3");
         CmdOnReady();
     }
     // ------------------------------------
@@ -350,6 +353,7 @@ public class GameBehaviour : NetworkBehaviour
             pm.bodyPartContainer.SetActive(true);
         }
 
+        print("hi4");
         CmdOnReady();
     }
     // ------------------------------------
