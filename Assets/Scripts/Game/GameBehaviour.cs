@@ -140,6 +140,10 @@ public class GameBehaviour : NetworkBehaviour
     [ClientRpc]
     private void RpcLoadingStageUpdate(LoadingStage newValue)
     {
+        // Navigate from Host's GB locally -> Your GB locally
+        // Call commands from Your GB locally for authority
+        // Some commands need a target; this is the gameObject
+        // of Your GB locally.
         switch (newValue)
         {
             case LoadingStage.Unloaded:
