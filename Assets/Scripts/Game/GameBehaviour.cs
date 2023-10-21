@@ -186,26 +186,29 @@ public class GameBehaviour : NetworkBehaviour
     [Command]
     private void CmdRequestMap(GameObject player)
     {
-        GameObject map;
-        if (GameSettings.Saved.GameMode == EGameMode.Puzzle)
+        GameObject map = GameObject.Find("Map");
+        if (!map)
         {
-            int puzzleLevel = SaveData.Saved.PuzzleLevel;
+            if (GameSettings.Saved.GameMode == EGameMode.Puzzle)
+            {
+                int puzzleLevel = SaveData.Saved.PuzzleLevel;
 
-            map = Instantiate(Resources.Load<GameObject>($"Puzzles/Puzzle{puzzleLevel}"));
+                map = Instantiate(Resources.Load<GameObject>($"Puzzles/Puzzle{puzzleLevel}"));
 
-            NetworkServer.Spawn(map);
+                NetworkServer.Spawn(map);
+            }
+            else
+            {
+                map = Instantiate(_mapTemplate);
+
+                SetupGroundTilemap(map, Vector2Int.zero);
+                SetupWallTilemap(map, Vector2Int.zero);
+
+                NetworkServer.Spawn(map);
+            }
+
+            map.name = "Map";
         }
-        else
-        {
-            map = Instantiate(_mapTemplate);
-
-            SetupGroundTilemap(map, Vector2Int.zero);
-            SetupWallTilemap(map, Vector2Int.zero);
-
-            NetworkServer.Spawn(map);
-        }
-
-        map.name = "Map";
 
         NetworkIdentity netIdentity = player.GetComponent<NetworkIdentity>();
         RpcReceiveMap(netIdentity.connectionToClient, map);
