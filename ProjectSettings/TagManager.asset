@@ -24,8 +24,6 @@ TagManager:
   - PuzzleStart
   - PuzzleGoal
   - HUD
-  - Counter
-  - Game
   layers:
   - Default
   - TransparentFX

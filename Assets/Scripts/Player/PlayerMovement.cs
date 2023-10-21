@@ -33,6 +33,9 @@ public class PlayerMovement : NetworkBehaviour
     }
 
     [SerializeField]
+    private GameBehaviour _gameBehaviour;
+
+    [SerializeField]
     public PlayerStatus status;
 
     [SerializeField]
@@ -425,7 +428,9 @@ public class PlayerMovement : NetworkBehaviour
 
         m_poc.LogDeath();
 
-        GameBehaviour.Instance.OnGameOver(score: BodyParts.Count);
+        GameBehaviour game = GetComponentInChildren<GameBehaviour>();
+        game.OnGameOver(score: BodyParts.Count);
+
         enabled = false;
     }
 

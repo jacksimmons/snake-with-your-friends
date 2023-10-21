@@ -15,6 +15,9 @@ public class GridObject : NetworkBehaviour
         // We need to add all manually placed objects to the objects array
         // Manually placed objects have a grid pos of -1
         if (gridPos != -1) return;
-        GameBehaviour.Instance.AddObjectToGrid(gameObject);
+        gridPos = GameObject.Find("LocalPlayerObject")
+            .transform.Find("Game")
+            .GetComponent<GameBehaviour>()
+            .AddObjectToGrid(gameObject);
     }
 }

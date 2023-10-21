@@ -44,7 +44,10 @@ public class FoodObject : GridObject
 
         if (removeAndReplaceFood)
         {
-            GameBehaviour.Instance.CmdRemoveFood(gridPos);
+            GameObject playerObj = GameObject.Find("LocalPlayerObject");
+            GameBehaviour game = playerObj.GetComponentInChildren<GameBehaviour>();
+
+            game.CmdRemoveFood(gridPos);
         }
     }
 }

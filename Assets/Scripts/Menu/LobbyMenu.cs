@@ -83,6 +83,16 @@ public class LobbyMenu : MonoBehaviour
         lobbyID = Manager.GetComponent<SteamLobby>().LobbyID;
     }
 
+    private void Start()
+    {
+        // Enable GameBehaviour as soon as scene is loaded, for subsequent games
+        GameObject go;
+        if (go = GameObject.Find("LocalPlayerObject"))
+        {
+            go.GetComponentInChildren<GameBehaviour>().enabled = true;
+        }
+    }
+
     public void OnHostSettingsButtonPressed()
     {
         m_hostSettingsPanel.SetActive(true);
