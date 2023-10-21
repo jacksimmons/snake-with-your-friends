@@ -97,10 +97,10 @@ public class GameBehaviour : NetworkBehaviour
             RpcLoadingStageUpdate(serverPlayersLoadingStage);
         }
 
-        if (numPlayersReady != 0) return;
+        if (serverNumPlayersReady != 0) return;
         // ^ Following code executes directly after the last readier, every handshake
 
-        switch (playersLoadingStage)
+        switch (serverPlayersLoadingStage)
         {
             case LoadingStage.PlayerScriptsEnabled:
                 ServerSetupGame();
