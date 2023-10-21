@@ -47,9 +47,6 @@ public class GameBehaviour : NetworkBehaviour
     [SerializeField]
     private List<GameObject> _foodTemplates = new();
 
-    [SyncVar(hook=nameof(OnReceiveHostSettings))]
-    private GameSettingsData _hostSettings;
-
 
     private void OnEnable()
     {
@@ -67,18 +64,25 @@ public class GameBehaviour : NetworkBehaviour
     {
         if (!isOwned) return;
 
-        if (NetworkServer.active)
+        if (!NetworkServer.active)
         {
-            _hostSettings = new(GameSettings.Saved);
+            CmdRequestGameSettings(transform.parent.gameObject);
         }
     }
 
-    private void OnReceiveHostSettings(GameSettingsData _, GameSettingsData data)
+    [Command]
+    private void CmdRequestGameSettings(GameObject player)
     {
-        GameSettings.Saved = new(data);
-        print(GameSettings.Saved.foodSettings.FoodsEnabled.Data);
+        NetworkIdentity netId = player.GetComponent<NetworkIdentity>();
+        RpcReceiveGameSettings(netId.connectionToClient , new(GameSettings.Saved));
+    }
 
+    [TargetRpc]
+    private void RpcReceiveGameSettings(NetworkConnectionToClient target, GameSettingsData data)
+    {
         if (!isOwned) return;
+        
+        GameSettings.Saved = new(data);
 
         if (GameSettings.Saved.GameMode == EGameMode.Puzzle)
         {
