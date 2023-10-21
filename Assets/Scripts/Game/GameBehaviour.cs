@@ -145,10 +145,10 @@ public class GameBehaviour : NetworkBehaviour
             case LoadingStage.Unloaded:
                 break;
             case LoadingStage.SceneLoaded:
-                Instance.CmdRequestGameSettings(transform.parent.gameObject);
+                Instance.CmdRequestGameSettings(Instance.transform.parent.gameObject);
                 break;
             case LoadingStage.GameSettingsSynced:
-                Instance.CmdRequestMap(transform.parent.gameObject);
+                Instance.CmdRequestMap(Instance.transform.parent.gameObject);
                 break;
             case LoadingStage.MapLoaded:
                 Instance.EnablePlayerScripts();
