@@ -51,7 +51,7 @@ public class HostSettingsHandler : MonoBehaviour
         {
             EFoodType foodType = go.GetComponent<PowerupToggleContainer>().foodType;
             go.GetComponentInChildren<Toggle>().onValueChanged.AddListener((pressed) => OnPowerupTogglePressed(pressed, foodType));
-            go.GetComponentInChildren<Toggle>().isOn = !GameSettings.Saved.DisabledFoods.Contains(foodType);
+            go.GetComponentInChildren<Toggle>().isOn = GameSettings.Saved.foodSettings.GetFoodEnabled(foodType);
         }
     }
 
@@ -115,10 +115,7 @@ public class HostSettingsHandler : MonoBehaviour
 
     public void OnPowerupTogglePressed(bool pressed, EFoodType food)
     {
-        if (!pressed)
-            m_currentGameSettings.DisableFood(food);
-        else
-            m_currentGameSettings.EnableFood(food);
+        m_currentGameSettings.foodSettings.SetFoodEnabled(food, pressed);
     }
 
 
@@ -128,7 +125,5 @@ public class HostSettingsHandler : MonoBehaviour
     public void OnClose()
     {
         Saving.SaveToFile(m_currentGameSettings, "GameSettings.dat");
-        GameObject.Find("LocalPlayerObject").GetComponentInChildren<NetworkGameSettings>().
-            LoadGameSettings(m_currentGameSettings);
     }
 }

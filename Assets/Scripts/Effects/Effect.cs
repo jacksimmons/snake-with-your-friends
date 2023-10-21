@@ -2,7 +2,7 @@ using UnityEngine;
 
 public enum EFoodType
 {
-    None,
+    None, // 0
 
     Apple,
     Balti,
@@ -18,7 +18,9 @@ public enum EFoodType
     Orange,
     Pineapple,
     PineapplePizza,
-    Pizza,
+    Pizza, // 15
+
+    // !Final index must be less than 32 (for FoodSettings bitfield)
 }
 
 public enum EEffect

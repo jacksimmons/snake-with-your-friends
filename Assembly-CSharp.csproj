@@ -87,7 +87,6 @@
     <Compile Include="Assets\Scripts\Menu\Creator\MapCreatorPaintBehaviour.cs" />
     <Compile Include="Assets\Scripts\Cutscene\SnakeActor.cs" />
     <Compile Include="Assets\Scripts\Object\GridObject.cs" />
-    <Compile Include="Assets\Scripts\Networking\NetworkGameSettings.cs" />
     <Compile Include="Assets\Scripts\Extensions\RandomDistribution.cs" />
     <Compile Include="Assets\Scripts\Files\SaveData.cs" />
     <Compile Include="Assets\Scripts\Files\Settings.cs" />

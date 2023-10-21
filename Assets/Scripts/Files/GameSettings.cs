@@ -9,6 +9,29 @@ public enum EGameMode
     Puzzle
 }
 
+
+[Serializable]
+public class FoodSettings
+{
+    public BitField FoodsEnabled { get; private set; }
+
+    public FoodSettings()
+    {
+        FoodsEnabled = new BitField(int.MaxValue);
+    }
+
+    public void SetFoodEnabled(EFoodType type, bool val)
+    {
+        FoodsEnabled.SetBit((int)type, val);
+    }
+
+    public bool GetFoodEnabled(EFoodType type)
+    {
+        return FoodsEnabled.GetBit((int)type);
+    }
+}
+
+
 [Serializable]
 public class GameSettings : ICached
 {
@@ -22,7 +45,7 @@ public class GameSettings : ICached
     public float TimeToMove;
     public bool FriendlyFire;
 
-    public List<EFoodType> DisabledFoods;
+    public FoodSettings foodSettings;
 
     public GameSettings()
     {
@@ -31,7 +54,7 @@ public class GameSettings : ICached
         GameMode = EGameMode.SnakeRoyale;
         GameSize = 10;
 
-        DisabledFoods = new List<EFoodType>();
+        foodSettings = new FoodSettings();
     }
 
     // Copy constructor
@@ -42,20 +65,8 @@ public class GameSettings : ICached
         GameMode = other.GameMode;
         GameSize = other.GameSize;
 
-        DisabledFoods = other.DisabledFoods;
+        foodSettings = other.foodSettings;
     }
 
     public void Cache() { Saved = this; }
-
-    public void EnableFood(EFoodType disabledFood)
-    {
-        if (!DisabledFoods.Contains(disabledFood)) { return; }
-        DisabledFoods.Remove(disabledFood);
-    }
-
-    public void DisableFood(EFoodType disabledFood)
-    {
-        if (DisabledFoods.Contains(disabledFood)) { return; }
-        DisabledFoods.Add(disabledFood);
-    }
 }

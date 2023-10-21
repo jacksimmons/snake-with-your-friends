@@ -15,7 +15,6 @@ public class MapCreatorZoomBehaviour : MonoBehaviour
     private float currentMouseZoom = 1f;
 
 
-
     private void Start()
     {
         previousMouseZoom = currentMouseZoom = startingMouseZoom = Camera.main.orthographicSize;

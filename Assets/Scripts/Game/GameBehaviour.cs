@@ -47,7 +47,8 @@ public class GameBehaviour : NetworkBehaviour
     [SerializeField]
     private List<GameObject> _foodTemplates = new();
 
-    private bool m_loadedHostSettings = false;
+    [SyncVar(hook=nameof(OnReceiveHostSettings))]
+    private GameSettings _hostSettings;
 
 
     private void OnEnable()
@@ -65,6 +66,19 @@ public class GameBehaviour : NetworkBehaviour
     public void OnGameSceneLoaded(string name)
     {
         if (!isOwned) return;
+
+        if (NetworkServer.active)
+        {
+            _hostSettings = GameSettings.Saved;
+        }
+    }
+
+    private void OnReceiveHostSettings(GameSettings _, GameSettings settings)
+    {
+        if (settings.foodSettings.FoodsEnabled == null)
+            print("received null");
+        GameSettings.Saved = settings;
+        print(settings.foodSettings.FoodsEnabled.Data);
 
         if (GameSettings.Saved.GameMode == EGameMode.Puzzle)
         {
@@ -114,8 +128,8 @@ public class GameBehaviour : NetworkBehaviour
         s_groundTilemap = CreateAndReturnTilemap(gridName: "Ground", hasCollider: false);
         s_wallTilemap = CreateAndReturnTilemap(gridName: "Wall", hasCollider: true);
 
-        CreateGroundTilemap(ref s_groundTilemap, Vector2Int.zero);
-        CreateWallTilemap(ref s_wallTilemap, Vector2Int.zero);
+        CreateGroundTilemap(s_groundTilemap, Vector2Int.zero);
+        CreateWallTilemap(s_wallTilemap, Vector2Int.zero);
     }
 
 
@@ -145,7 +159,7 @@ public class GameBehaviour : NetworkBehaviour
 
 
     [Client]
-    private void CreateGroundTilemap(ref Tilemap groundTilemap, Vector2Int bl)
+    private void CreateGroundTilemap(Tilemap groundTilemap, Vector2Int bl)
     {
         int groundSize = GameSettings.Saved.GameSize;
 
@@ -181,7 +195,7 @@ public class GameBehaviour : NetworkBehaviour
 
 
     [Client]
-    private void CreateWallTilemap(ref Tilemap wallTilemap, Vector2Int bl)
+    private void CreateWallTilemap(Tilemap wallTilemap, Vector2Int bl)
     {
         int groundSize = GameSettings.Saved.GameSize;
 
@@ -253,7 +267,7 @@ public class GameBehaviour : NetworkBehaviour
         for (int i = 0; i < _foodTemplates.Count; i++)
         {
             GameObject food = _foodTemplates[i];
-            if (GameSettings.Saved.DisabledFoods.Contains(food.GetComponent<FoodObject>().food))
+            if (GameSettings.Saved.foodSettings.GetFoodEnabled(food.GetComponent<FoodObject>().food))
             {
                 _foodTemplates.Remove(food);
                 i--;

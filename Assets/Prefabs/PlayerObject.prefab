@@ -262,7 +262,6 @@ GameObject:
   m_Component:
   - component: {fileID: 6455847458901780061}
   - component: {fileID: 3727899065049902516}
-  - component: {fileID: 6988683576489068098}
   m_Layer: 6
   m_Name: Game
   m_TagString: GameHandler
@@ -318,25 +317,6 @@ MonoBehaviour:
   - {fileID: 8457383420197702784, guid: 56b349ba582b06f488f8aee4394c72fa, type: 3}
   - {fileID: 5883453940578565158, guid: 4992d10c21a5a1243b3b983015924347, type: 3}
   - {fileID: 3540720362809897522, guid: 53751b131fb05bb4cb78371e89654a70, type: 3}
---- !u!114 &6988683576489068098
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3727899065049902522}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ebed6678e36db1848983de4c775ab124, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  syncDirection: 0
-  syncMode: 0
-  syncInterval: 0
-  GameMode: 0
-  GameSize: 0
-  TimeToMove: 0
-  FriendlyFire: 0
 --- !u!1 &6366460689727907375
 GameObject:
   m_ObjectHideFlags: 0

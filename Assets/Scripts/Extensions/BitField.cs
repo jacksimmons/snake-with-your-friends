@@ -1,6 +1,7 @@
 // Simple Bitfield.
 // Any bool value used with this defaults to false.
 using System;
+using System.Collections;
 
 [Serializable]
 public class BitField
@@ -9,8 +10,8 @@ public class BitField
     // Undefined behaviour if !(0 <= index <= 31)
     public int Data { get; private set; }
 
-    // Set every bit to 0 by default
-    public BitField(int data = 0) { this.Data = data; }
+    public BitField(int data) { Data = data; }
+    public BitField() { Data = 0; }
 
     public void SetBit(int index, bool value)
     {
