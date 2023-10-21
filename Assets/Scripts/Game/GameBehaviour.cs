@@ -14,8 +14,6 @@ public class GameBehaviour : NetworkBehaviour
     // --- Puzzle
     public int availablePuzzles = 0;
 
-    // Static variables
-    private static int numPlayersReady = 0;
     // An array of child indices for objects (all objects in this go under the s_objects game object parent)
     public static GameObject[] s_objects { get; protected set; }
 
@@ -23,6 +21,9 @@ public class GameBehaviour : NetworkBehaviour
     protected static Tilemap s_wallTilemap;
 
     // Templates
+    [SerializeField]
+    private GameObject _mapTemplate;
+
     [SerializeField]
     private Tile _lightTile;
     [SerializeField]
@@ -47,15 +48,81 @@ public class GameBehaviour : NetworkBehaviour
     [SerializeField]
     private List<GameObject> _foodTemplates = new();
 
+    // How "loaded" the game currently is for the furthest behind player.
+    public enum LoadingStage
+    {
+        Unloaded,
+        SceneLoaded,
+        GameSettingsSynced,
+        MapLoaded,
+        PlayerScriptsEnabled,
+        GameStarted,
+    }
+    [SyncVar(hook=nameof(OnLoadingStageUpdate))]
+    private LoadingStage playersLoadingStage = LoadingStage.Unloaded;
+
+    [SyncVar]
+    private int numPlayersReady = 0;
+
 
     private void OnEnable()
     {
         if (!isOwned) return;
+    }
 
-        // If this is the host object
-        if (NetworkServer.active)
+
+    // LOADING STAGES ---------------------
+    /// <summary>
+    /// Increments the number of players that are ready in this stage.
+    /// All players must be ready before the loading stage is incremented.
+    /// </summary>
+    [Command]
+    private void CmdOnReady()
+    {
+        numPlayersReady++;
+
+        print($"Ready: {numPlayersReady}/{CustomNetworkManager.Instance.numPlayers}");
+        if (numPlayersReady >= CustomNetworkManager.Instance.numPlayers)
         {
             numPlayersReady = 0;
+            playersLoadingStage++; // Note: Execution pauses and performs the hook before continuing here!
+        }
+
+        if (numPlayersReady != 0) return;
+        // ^ Following code executes directly after the last readier, every handshake
+
+        switch (playersLoadingStage)
+        {
+            case LoadingStage.PlayerScriptsEnabled:
+                ServerSetupGame();
+                break;
+        }
+    }
+
+    /// <summary>
+    /// The progression through game loading is handled through a series of handshakes.
+    /// Each handshake increments the loading stage and calls this function.
+    /// </summary>
+    [Client]
+    private void OnLoadingStageUpdate(LoadingStage _, LoadingStage newValue)
+    {
+        if (!isOwned) return;
+        print(_.ToString());
+        print(newValue.ToString());
+
+        switch (newValue)
+        {
+            case LoadingStage.Unloaded:
+                break;
+            case LoadingStage.SceneLoaded:
+                CmdRequestGameSettings(transform.parent.gameObject);
+                break;
+            case LoadingStage.GameSettingsSynced:
+                CmdRequestMap(transform.parent.gameObject);
+                break;
+            case LoadingStage.MapLoaded:
+                EnablePlayerScripts();
+                break;
         }
     }
 
@@ -64,43 +131,73 @@ public class GameBehaviour : NetworkBehaviour
     {
         if (!isOwned) return;
 
-        if (!NetworkServer.active)
-        {
-            CmdRequestGameSettings(transform.parent.gameObject);
-        }
+        CmdOnReady();
     }
+    // ------------------------------------
 
+
+    // GAME SETTINGS HANDSHAKE ------------
     [Command]
     private void CmdRequestGameSettings(GameObject player)
     {
-        NetworkIdentity netId = player.GetComponent<NetworkIdentity>();
-        RpcReceiveGameSettings(netId.connectionToClient , new(GameSettings.Saved));
+        NetworkIdentity netIdentity = player.GetComponent<NetworkIdentity>();
+        RpcReceiveGameSettings(netIdentity.connectionToClient, new(GameSettings.Saved));
     }
 
+
     [TargetRpc]
-    private void RpcReceiveGameSettings(NetworkConnectionToClient target, GameSettingsData data)
+    private void RpcReceiveGameSettings(NetworkConnectionToClient _, GameSettingsData data)
     {
         if (!isOwned) return;
-        
         GameSettings.Saved = new(data);
+        CmdOnReady();
+    }
+    // ------------------------------------
 
+
+    // MAP HANDSHAKE ----------------------
+    [Command]
+    private void CmdRequestMap(GameObject player)
+    {
+        GameObject map;
         if (GameSettings.Saved.GameMode == EGameMode.Puzzle)
         {
-            OnGameSceneLoaded_Puzzle();
+            int puzzleLevel = SaveData.Saved.PuzzleLevel;
+
+            map = Instantiate(Resources.Load<GameObject>($"Puzzles/Puzzle{puzzleLevel}"));
+
+            NetworkServer.Spawn(map);
         }
         else
         {
-            ClientLoadTilemaps();
+            map = Instantiate(_mapTemplate);
+
+            SetupGroundTilemap(map, Vector2Int.zero);
+            SetupWallTilemap(map, Vector2Int.zero);
+
+            NetworkServer.Spawn(map);
         }
 
-        EnableLocalPlayerMovement();
-        CmdReady();
+        map.name = "Map";
+
+        NetworkIdentity netIdentity = player.GetComponent<NetworkIdentity>();
+        RpcReceiveMap(netIdentity.connectionToClient, map);
     }
 
 
-    // Enables all player object movement components
+    [TargetRpc]
+    private void RpcReceiveMap(NetworkConnectionToClient _, GameObject map)
+    {
+        s_groundTilemap = map.transform.Find("Ground").GetComponentInChildren<Tilemap>();
+        s_wallTilemap = map.transform.Find("Wall").GetComponentInChildren<Tilemap>();
+        CmdOnReady();
+    }
+    // ------------------------------------
+
+
+    // PLAYER SCRIPT ENABLE HANDSHAKE -----
     [Client]
-    private void EnableLocalPlayerMovement()
+    private void EnablePlayerScripts()
     {
         foreach (var player in CustomNetworkManager.Instance.Players)
         {
@@ -111,161 +208,19 @@ public class GameBehaviour : NetworkBehaviour
             Camera cam = Camera.main;
             cam.GetComponent<CamBehaviour>().Player = pm;
         }
+
+        CmdOnReady();
     }
-
-    [Client]
-    private void OnGameSceneLoaded_Puzzle()
-    {
-        byte puzzleLevel = SaveData.Saved.PuzzleLevel;
-
-        GameObject puzzle = Instantiate(Resources.Load<GameObject>($"Puzzles/Puzzle{puzzleLevel}"));
-        puzzle.name = $"Puzzle{puzzleLevel}";
-
-        s_groundTilemap = puzzle.transform.Find("Ground").GetComponent<Tilemap>();
-        s_wallTilemap = puzzle.transform.Find("Wall").GetComponent<Tilemap>();
-    }
+    // ------------------------------------
 
 
-    [Client]
-    protected void ClientLoadTilemaps()
-    {
-        s_groundTilemap = CreateAndReturnTilemap(gridName: "Ground", hasCollider: false);
-        s_wallTilemap = CreateAndReturnTilemap(gridName: "Wall", hasCollider: true);
-
-        CreateGroundTilemap(s_groundTilemap, Vector2Int.zero);
-        CreateWallTilemap(s_wallTilemap, Vector2Int.zero);
-    }
-
-
-    [Client]
-    protected Tilemap CreateAndReturnTilemap(string gridName, bool hasCollider)
-    {
-        GameObject gridObject = new GameObject(gridName);
-        gridObject.AddComponent<Grid>();
-
-        GameObject tilemapObject = new GameObject("Tilemap");
-        tilemapObject.AddComponent<Tilemap>();
-        tilemapObject.AddComponent<TilemapRenderer>();
-
-        if (hasCollider)
-        {
-            tilemapObject.AddComponent<TilemapCollider2D>();
-            tilemapObject.GetComponent<TilemapCollider2D>().isTrigger = true;
-            tilemapObject.AddComponent<DeathTrigger>();
-        }
-
-        tilemapObject.transform.parent = gridObject.transform;
-
-        Tilemap tilemap = tilemapObject.GetComponent<Tilemap>();
-
-        return tilemap;
-    }
-
-
-    [Client]
-    private void CreateGroundTilemap(Tilemap groundTilemap, Vector2Int bl)
-    {
-        int groundSize = GameSettings.Saved.GameSize;
-
-        // Bounds are an inner square of the 51x51 wall bounds starting at 0,0
-        BoundsInt bounds = new(
-            (Vector3Int)(bl + Vector2Int.one),
-            (Vector3Int)(groundSize * Vector2Int.one) + Vector3Int.forward);
-        Tile[] tiles = new Tile[groundSize * groundSize];
-        for (int i = 0; i < groundSize; i++)
-        {
-            for (int j = 0; j < groundSize; j++)
-            {
-                if (i % 2 == 0)
-                {
-                    // Even row -> starts with light (i.e. Even cols are light)
-                    if (j % 2 == 0)
-                        tiles[groundSize * i + j] = _lightTile;
-                    else
-                        tiles[groundSize * i + j] = _darkTile;
-                }
-                else
-                {
-                    // Odd row -> starts with dark (i.e. Odd cols are light)
-                    if (j % 2 == 0)
-                        tiles[groundSize * i + j] = _darkTile;
-                    else
-                        tiles[groundSize * i + j] = _lightTile;
-                }
-            }
-        }
-        groundTilemap.SetTilesBlock(bounds, tiles);
-    }
-
-
-    [Client]
-    private void CreateWallTilemap(Tilemap wallTilemap, Vector2Int bl)
-    {
-        int groundSize = GameSettings.Saved.GameSize;
-
-        // This square is (int)GroundSize + 2 squared, since it is one bigger on each side of the x and y edges of the inner square
-        BoundsInt bounds = new(
-            (Vector3Int)bl,
-            (Vector3Int)((groundSize + 2) * Vector2Int.one) + Vector3Int.forward);
-        Tile[] tiles = new Tile[(groundSize + 2) * (groundSize + 2)];
-        for (int i = 0; i < groundSize + 2; i++)
-        {
-            for (int j = 0; j < groundSize + 2; j++)
-            {
-                if (i == 0 || i == groundSize + 1)
-                {
-                    // We are on the top or bottom row, so guaranteed placement of wall
-                    tiles[(groundSize + 2) * i + j] = _wallTile;
-                }
-                else if (j == 0 || j == groundSize + 1)
-                {
-                    // We are on the leftmost or rightmost column, so place wall
-                    tiles[(groundSize + 2) * i + j] = _wallTile;
-                }
-            }
-        }
-
-        wallTilemap.SetTilesBlock(bounds, tiles);
-    }
-
-
-    [Command]
-    private void CmdReady()
-    {
-        // Needs to be static, as every GameBehaviour calling this command will have its OWN
-        // s_numPlayersReady incremented otherwise.
-        numPlayersReady++;
-        if (numPlayersReady == CustomNetworkManager.Instance.Players.Count)
-        {
-            ServerLoadGame();
-        }
-    }
-
-
+    // (Server) GAME SETUP HANDSHAKE ------
     [Server]
-    private void ServerLoadGame()
+    private void ServerSetupGame()
     {
+        // --- Food ---
         int groundSize = GameSettings.Saved.GameSize;
-
         s_objects = new GameObject[groundSize * groundSize];
-
-        if (GameSettings.Saved.GameMode == EGameMode.Puzzle)
-        {
-            ServerLoadGame_Puzzle();
-        }
-        else if (GameSettings.Saved.GameMode == EGameMode.SnakeRoyale)
-        {
-            ServerLoadGame_SnakeRoyale();
-        }
-        GameObject.FindWithTag("HUD").GetComponent<PlayerHUDElementsHandler>().LoadHUD();
-    }
-    private void ServerLoadGame_Puzzle()
-    {
-        PlacePlayers();
-    }
-    private void ServerLoadGame_SnakeRoyale()
-    {
-        PlacePlayers();
 
         // Unload food items which were removed in settings
         for (int i = 0; i < _foodTemplates.Count; i++)
@@ -278,19 +233,22 @@ public class GameBehaviour : NetworkBehaviour
             }
         }
 
-        List<Vector2> positions = new(CustomNetworkManager.Instance.Players.Count);
-        List<float> rotation_zs = new(CustomNetworkManager.Instance.Players.Count);
-        for (int i = 0; i < CustomNetworkManager.Instance.Players.Count; i++)
-        {
-            positions.Add(CustomNetworkManager.Instance.Players[i].transform.position);
-            rotation_zs.Add(CustomNetworkManager.Instance.Players[i].transform.rotation.eulerAngles.z);
-        }
-        PlacePlayersClientRpc(positions, rotation_zs);
+        GenerateStartingFood();
+
+        // --- Players ---
+        PlacePlayers();
         ActivatePlayersClientRpc();
 
-        GenerateStartingFood();
+        // IF Snake Royale
+        //List<Vector2> positions = new(CustomNetworkManager.Instance.Players.Count);
+        //List<float> rotation_zs = new(CustomNetworkManager.Instance.Players.Count);
+        //for (int i = 0; i < CustomNetworkManager.Instance.Players.Count; i++)
+        //{
+        //    positions.Add(CustomNetworkManager.Instance.Players[i].transform.position);
+        //    rotation_zs.Add(CustomNetworkManager.Instance.Players[i].transform.rotation.eulerAngles.z);
+        //}
+        //PlacePlayersClientRpc(positions, rotation_zs);
     }
-
 
     [Server]
     public void PlacePlayers()
@@ -352,23 +310,14 @@ public class GameBehaviour : NetworkBehaviour
         }
     }
 
-
-    [ClientRpc]
-    public void PlacePlayersClientRpc(List<Vector2> positions, List<float> rotation_zs)
+    [Server]
+    private void GenerateStartingFood()
     {
-        if (positions.Count != rotation_zs.Count)
+        for (int i = 0; i < CustomNetworkManager.Instance.Players.Count; i++)
         {
-            Debug.LogError("Positions and rotations have mismatching lengths!");
-            return;
-        }
-
-        for (int i = 0; i < positions.Count; i++)
-        {
-            PlayerObjectController poc = CustomNetworkManager.Instance.Players[i];
-            poc.transform.SetPositionAndRotation(positions[i], Quaternion.Euler(Vector3.forward * rotation_zs[i]));
+            GenerateFood();
         }
     }
-
 
     [ClientRpc]
     private void ActivatePlayersClientRpc()
@@ -378,17 +327,100 @@ public class GameBehaviour : NetworkBehaviour
             PlayerMovement pm = player.PM;
             pm.bodyPartContainer.SetActive(true);
         }
+
+        CmdOnReady();
     }
+    // ------------------------------------
 
 
-    [Server]
-    private void GenerateStartingFood()
+    // Additional Functions ---------------
+    [Client]
+    private void SetupGroundTilemap(GameObject map, Vector2Int bl)
     {
-        for (int i = 0; i < CustomNetworkManager.Instance.Players.Count; i++)
+        Tilemap tilemap = map.transform.Find("Ground").GetComponentInChildren<Tilemap>();
+
+        int groundSize = GameSettings.Saved.GameSize;
+
+        // Bounds are an inner square of the 51x51 wall bounds starting at 0,0
+        BoundsInt bounds = new(
+            (Vector3Int)(bl + Vector2Int.one),
+            (Vector3Int)(groundSize * Vector2Int.one) + Vector3Int.forward);
+        Tile[] tiles = new Tile[groundSize * groundSize];
+        for (int i = 0; i < groundSize; i++)
         {
-            GenerateFood();
+            for (int j = 0; j < groundSize; j++)
+            {
+                if (i % 2 == 0)
+                {
+                    // Even row -> starts with light (i.e. Even cols are light)
+                    if (j % 2 == 0)
+                        tiles[groundSize * i + j] = _lightTile;
+                    else
+                        tiles[groundSize * i + j] = _darkTile;
+                }
+                else
+                {
+                    // Odd row -> starts with dark (i.e. Odd cols are light)
+                    if (j % 2 == 0)
+                        tiles[groundSize * i + j] = _darkTile;
+                    else
+                        tiles[groundSize * i + j] = _lightTile;
+                }
+            }
         }
+        tilemap.SetTilesBlock(bounds, tiles);
     }
+
+
+    [Client]
+    private void SetupWallTilemap(GameObject map, Vector2Int bl)
+    {
+        Tilemap tilemap = map.transform.Find("Wall").GetComponentInChildren<Tilemap>();
+
+        int groundSize = GameSettings.Saved.GameSize;
+
+        // This square is (int)GroundSize + 2 squared, since it is one bigger on each side of the x and y edges of the inner square
+        BoundsInt bounds = new(
+            (Vector3Int)bl,
+            (Vector3Int)((groundSize + 2) * Vector2Int.one) + Vector3Int.forward);
+        Tile[] tiles = new Tile[(groundSize + 2) * (groundSize + 2)];
+        for (int i = 0; i < groundSize + 2; i++)
+        {
+            for (int j = 0; j < groundSize + 2; j++)
+            {
+                if (i == 0 || i == groundSize + 1)
+                {
+                    // We are on the top or bottom row, so guaranteed placement of wall
+                    tiles[(groundSize + 2) * i + j] = _wallTile;
+                }
+                else if (j == 0 || j == groundSize + 1)
+                {
+                    // We are on the leftmost or rightmost column, so place wall
+                    tiles[(groundSize + 2) * i + j] = _wallTile;
+                }
+            }
+        }
+
+        tilemap.SetTilesBlock(bounds, tiles);
+    }
+
+
+
+    //[ClientRpc]
+    //public void PlacePlayersClientRpc(List<Vector2> positions, List<float> rotation_zs)
+    //{
+    //    if (positions.Count != rotation_zs.Count)
+    //    {
+    //        Debug.LogError("Positions and rotations have mismatching lengths!");
+    //        return;
+    //    }
+
+    //    for (int i = 0; i < positions.Count; i++)
+    //    {
+    //        PlayerObjectController poc = CustomNetworkManager.Instance.Players[i];
+    //        poc.transform.SetPositionAndRotation(positions[i], Quaternion.Euler(Vector3.forward * rotation_zs[i]));
+    //    }
+    //}
 
 
     [Server]

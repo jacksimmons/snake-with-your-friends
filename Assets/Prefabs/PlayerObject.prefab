@@ -305,6 +305,7 @@ MonoBehaviour:
   syncMode: 0
   syncInterval: 0
   availablePuzzles: 0
+  _mapTemplate: {fileID: 2967618649542669978, guid: df8d9b3069467cb47bc7fd27a2c372f7, type: 3}
   _lightTile: {fileID: 11400000, guid: 044c243fd2a30a348a78044e5f4906a5, type: 2}
   _darkTile: {fileID: 11400000, guid: 07b747c9dcfc66f4db45e88c86928a9c, type: 2}
   _wallTile: {fileID: 11400000, guid: 2a1c06836de000d4bb5cdb4ca8f49847, type: 2}
