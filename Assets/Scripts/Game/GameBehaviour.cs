@@ -361,7 +361,6 @@ public class GameBehaviour : NetworkBehaviour
         }
 
         print("hi4");
-        CmdOnReady();
     }
     // ------------------------------------
 
