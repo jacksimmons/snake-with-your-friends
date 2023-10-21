@@ -127,6 +127,7 @@ public class GameBehaviour : NetworkBehaviour
     /// <summary>
     /// The progression through game loading is handled through a series of handshakes.
     /// Each handshake increments the loading stage and calls this function.
+    /// They are all called on the host GameBehaviour object, which exists on all clients.
     /// </summary>
     [ClientRpc]
     private void RpcLoadingStageUpdate(LoadingStage newValue)
@@ -136,13 +137,13 @@ public class GameBehaviour : NetworkBehaviour
             case LoadingStage.Unloaded:
                 break;
             case LoadingStage.SceneLoaded:
-                CmdRequestGameSettings(transform.parent.gameObject);
+                Instance.CmdRequestGameSettings(transform.parent.gameObject);
                 break;
             case LoadingStage.GameSettingsSynced:
-                CmdRequestMap(transform.parent.gameObject);
+                Instance.CmdRequestMap(transform.parent.gameObject);
                 break;
             case LoadingStage.MapLoaded:
-                EnablePlayerScripts();
+                Instance.EnablePlayerScripts();
                 break;
         }
     }
