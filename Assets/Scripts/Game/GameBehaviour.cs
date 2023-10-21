@@ -72,7 +72,7 @@ public class GameBehaviour : NetworkBehaviour
         if (NetworkServer.active)
         {
             numPlayersReady = 0;
-            _playersLoadingStage = LoadingStage.Unloaded;
+            playersLoadingStage = LoadingStage.Unloaded;
         }
     }
 
