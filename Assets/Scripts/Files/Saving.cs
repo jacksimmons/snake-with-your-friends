@@ -16,12 +16,12 @@ public static class Saving
     /// <summary>
     /// Serialises objects and saves them to a given file location.
     /// </summary>
-    public static void SaveToFile<T>(T serializable, string filename) where T : class, ICached
+    public static void SaveToFile<T>(T serializable, string filename) where T : class
     {
         LoadingIcon.Instance.Toggle(true);
 
-        if (serializable != null)
-            serializable.Cache();
+        if (serializable is ICached cached)
+            cached.Cache();
 
         string dest = Application.persistentDataPath + "/" + filename;
         FileStream fs;
@@ -42,7 +42,7 @@ public static class Saving
     /// Deserialises saved objects into usable objects.
     /// Returns plain "object" type, so casting is necessary.
     /// </summary>
-    public static T LoadFromFile<T>(string filename) where T : class, ICached, new()
+    public static T LoadFromFile<T>(string filename) where T : class, new()
     {
         LoadingIcon.Instance.Toggle(true);
 
@@ -60,8 +60,8 @@ public static class Saving
             T val = (T)bf.Deserialize(fs);
             fs.Close();
 
-            if (val != null)
-                val.Cache();
+            if (val is ICached cached)
+                cached.Cache();
             return val;
         }
         else

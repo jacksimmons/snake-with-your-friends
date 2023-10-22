@@ -1,6 +1,7 @@
 using Mirror;
 using UnityEngine;
 
+
 public class GridObject : NetworkBehaviour
 {
     [SyncVar]

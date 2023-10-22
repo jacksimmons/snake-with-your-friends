@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using TMPro;
 using UnityEditor;
 using UnityEngine;
@@ -250,10 +251,8 @@ public class EditorMenu : MonoBehaviour
 
     public void SaveMapToFile()
     {
-        if (!Directory.Exists("Assets/Prefabs/Maps"))
-        {
-            AssetDatabase.CreateFolder("Assets/Prefabs", "Maps");
-        }
+        if (!Directory.Exists(Application.persistentDataPath + "/Maps"))
+            Directory.CreateDirectory(Application.persistentDataPath + "/Maps");
 
         float ground_a = GetLayerOpacity(m_groundLayer);
         float wall_a = GetLayerOpacity(m_wallLayer);
@@ -267,10 +266,10 @@ public class EditorMenu : MonoBehaviour
             // "{chosenName} [numDuplicates].prefab" that hasn't been taken in the maps folder.
             while (true)
             {
-                savePath = $"Assets/Prefabs/Maps/{m_saveInfo.text}";
+                savePath = "Maps/";
                 if (numDuplicates > 0)
                     savePath += $"({numDuplicates})";
-                savePath += ".prefab";
+                savePath += ".map";
 
                 if (File.Exists(savePath))
                 {
@@ -282,11 +281,12 @@ public class EditorMenu : MonoBehaviour
         }
         else
         {
-            savePath = $"Assets/Prefabs/Maps/{m_saveInfo.text}.prefab";
+            savePath = "Maps/" + m_saveInfo.text + ".map";
         }
 
-        PrefabUtility.SaveAsPrefabAsset(m_groundLayer.transform.parent.parent.gameObject,
-            savePath);
+        MapData map = new(m_groundLayer, m_wallLayer, m_objectLayer);
+        Saving.SaveToFile(map, savePath);
+
         m_savedName = m_saveInfo.text;
 
         EventSystem.current.SetSelectedGameObject(null);
@@ -295,18 +295,5 @@ public class EditorMenu : MonoBehaviour
 
         SetLayerOpacity(m_groundLayer, ground_a);
         SetLayerOpacity(m_wallLayer, wall_a);
-
-        //long fileLength = 0;
-        //try
-        //{
-        //    FileInfo mapFileInfo = new FileInfo("Assets/Prefabs/Maps/Map.prefab");
-        //    fileLength = mapFileInfo.Length;
-
-        //    m_saveInfo.text = $"Map.prefab ({fileLength / 1_000_000}MB)";
-        //}
-        //catch
-        //{
-        //    m_saveInfo.text = $"Maps/Map.prefab";
-        //}
     }
 }

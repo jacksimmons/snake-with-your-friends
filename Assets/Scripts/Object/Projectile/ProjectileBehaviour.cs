@@ -2,6 +2,17 @@ using System.Collections;
 using TMPro;
 using UnityEngine;
 
+
+public enum EProjectileType
+{
+    Shit,
+    Fireball,
+    Orange,
+    
+    None
+}
+
+
 public class ProjectileBehaviour : ObjectBehaviour
 {
     [SerializeField]

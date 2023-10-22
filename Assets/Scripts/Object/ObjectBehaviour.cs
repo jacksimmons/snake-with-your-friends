@@ -3,8 +3,21 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
+
+public enum EObjectType
+{
+    None, // 0
+
+    Food, // EFoodType
+    Projectile, // EProjectileType
+}
+
+
 public class ObjectBehaviour : MonoBehaviour
 {
+    [SerializeField]
+    public EObjectType Type { get; private set; }
+
     [SerializeField]
     private int m_hardToMoveness;
     public int HardToMoveness

@@ -1,11 +1,5 @@
 using UnityEngine;
 
-public enum EProjectileType
-{
-    Shit,
-    Fireball,
-    Orange
-}
 
 public struct Projectile
 {
