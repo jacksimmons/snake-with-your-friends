@@ -64,6 +64,17 @@ public class GameBehaviour : NetworkBehaviour
     [SerializeField]
     private List<GameObject> _foodTemplates = new();
 
+    public enum EGameLoadStage
+    {
+        Unloaded,
+        SceneLoaded,
+        GameSettingsSynced,
+        MapLoaded,
+        PlayerScriptsEnabled,
+        PlayerHUDEnabled,
+        GameStarted,
+    }
+
 
     // SERVER VARIABLES --------------------
     // These are only accurate on the server; hence do NOT use them on a client.
@@ -120,6 +131,9 @@ public class GameBehaviour : NetworkBehaviour
             case EGameLoadStage.PlayerScriptsEnabled:
                 ServerSetupGame();
                 break;
+            case EGameLoadStage.PlayerHUDEnabled:
+                StartGameClientRpc();
+                break;
         }
     }
 
@@ -167,7 +181,6 @@ public class GameBehaviour : NetworkBehaviour
     {
         if (!isOwned) return;
         GameSettings.Saved = new(data);
-        print("hi");
         CmdOnReady();
     }
     // ------------------------------------
@@ -214,7 +227,6 @@ public class GameBehaviour : NetworkBehaviour
 
         s_groundTilemap = map.transform.Find("Ground").GetComponentInChildren<Tilemap>();
         s_wallTilemap = map.transform.Find("Wall").GetComponentInChildren<Tilemap>();
-        print("hi2");
         CmdOnReady();
     }
     // ------------------------------------
@@ -276,7 +288,7 @@ public class GameBehaviour : NetworkBehaviour
             PlacePlayersClientRpc(positions, rotation_zs);
         }
 
-        ActivatePlayersClientRpc();
+        LoadHUDClientRpc();
     }
 
     [Server]
@@ -349,18 +361,26 @@ public class GameBehaviour : NetworkBehaviour
     }
 
     [ClientRpc]
-    private void ActivatePlayersClientRpc()
+    private void LoadHUDClientRpc()
+    {
+        PlayerHUDElementsHandler hud = GameObject.FindWithTag("HUD").GetComponent<PlayerHUDElementsHandler>();
+        hud.LoadHUD();
+
+        CmdOnReady();
+    }
+    // ------------------------------------
+
+    // Start Game -------------------------
+    [ClientRpc]
+    private void StartGameClientRpc()
     {
         foreach (var player in CustomNetworkManager.Instance.Players)
         {
             PlayerMovement pm = player.PM;
             pm.bodyPartContainer.SetActive(true);
         }
-
-        PlayerHUDElementsHandler hud = GameObject.FindWithTag("HUD").GetComponent<PlayerHUDElementsHandler>();
-        hud.LoadHUD();
     }
-    // ------------------------------------
+
 
 
     // Additional Functions ---------------

@@ -203,7 +203,8 @@ public class PlayerObjectController : NetworkBehaviour
                 PM.BodyParts.Add(newBP);
             }
 
-            CustomNetworkManager.Instance.Players[victimPlayerNo-1].PlayerOnHUD.SetNumParts(bodyPartDatas.Count);
+            PlayerObjectController player = CustomNetworkManager.Instance.Players[victimPlayerNo - 1];
+            player.PlayerOnHUD.SetNumParts(bodyPartDatas.Count);
         }));
     }
 
