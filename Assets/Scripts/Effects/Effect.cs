@@ -1,34 +1,6 @@
 using UnityEngine;
 
 
-public enum EEffect
-{
-    None,
-
-    // Apple
-    CureAll,
-
-    // Dragonfruit
-    BreathingFire,
-
-    // Booze
-    Drunk,
-    Pissing,
-
-    // Balti
-    SpeedBoost,
-    RocketShitting,
-
-    // Doughnut
-    Sleeping,
-
-    SoberUp,
-    Hallucination,
-    Unicorn,
-    BrainFreeze,
-    Buff
-}
-
 public class Effect
 {
     public EEffect EffectName { get; private set; }

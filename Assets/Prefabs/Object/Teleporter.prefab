@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 4836323877669340577}
   - component: {fileID: 3393910904533609798}
   - component: {fileID: 3026784573240636256}
-  - component: {fileID: 6098217516742828708}
+  - component: {fileID: 3775215725956602878}
   m_Layer: 0
   m_Name: Teleporter
   m_TagString: Untagged
@@ -102,7 +102,7 @@ CircleCollider2D:
   m_Offset: {x: 0, y: 0}
   serializedVersion: 2
   m_Radius: 0.4
---- !u!114 &6098217516742828708
+--- !u!114 &3775215725956602878
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -111,9 +111,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 6658084179586439345}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b31a9649ab0f738439fe9aa5ad6fb166, type: 3}
+  m_Script: {fileID: 11500000, guid: 2385c199c6a425143b1152beb7dd3f82, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  A: {fileID: 0}
-  B: {fileID: 0}
-  rotationSpeed: 0
+  collidingObjects: []

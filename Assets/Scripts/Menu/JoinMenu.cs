@@ -19,27 +19,6 @@ public class JoinMenu : MonoBehaviour
     private CallResult<LobbyMatchList_t> m_LobbyMatchList;
     private CallResult<LobbyEnter_t> m_LobbyEnter;
 
-    public enum Security
-    {
-        Private,
-        Friends,
-        Public,
-        Invisible
-    }
-
-    public enum Distance
-    {
-        Worldwide,
-        Far,
-        Regional,
-        Close
-    }
-
-    public enum Slots
-    {
-        Available,
-        Any
-    }
 
     private void Start()
     {

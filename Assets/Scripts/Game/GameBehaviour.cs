@@ -64,21 +64,12 @@ public class GameBehaviour : NetworkBehaviour
     [SerializeField]
     private List<GameObject> _foodTemplates = new();
 
+
     // SERVER VARIABLES --------------------
     // These are only accurate on the server; hence do NOT use them on a client.
     // They are static because they belong to no particular GameBehaviour.
     // How "loaded" the game currently is for the furthest behind player.
-    public enum LoadingStage
-    {
-        Unloaded,
-        SceneLoaded,
-        GameSettingsSynced,
-        MapLoaded,
-        PlayerScriptsEnabled,
-        GameStarted,
-    }
-
-    private static LoadingStage serverPlayersLoadingStage;
+    private static EGameLoadStage serverPlayersLoadingStage;
     private static int serverNumPlayersReady;
 
 
@@ -89,7 +80,7 @@ public class GameBehaviour : NetworkBehaviour
         if (NetworkServer.active)
         {
             serverNumPlayersReady = 0;
-            serverPlayersLoadingStage = LoadingStage.Unloaded;
+            serverPlayersLoadingStage = EGameLoadStage.Unloaded;
         }
     }
 
@@ -126,7 +117,7 @@ public class GameBehaviour : NetworkBehaviour
 
         switch (serverPlayersLoadingStage)
         {
-            case LoadingStage.PlayerScriptsEnabled:
+            case EGameLoadStage.PlayerScriptsEnabled:
                 ServerSetupGame();
                 break;
         }
@@ -138,7 +129,7 @@ public class GameBehaviour : NetworkBehaviour
     /// They are all called on the host GameBehaviour object, which exists on all clients.
     /// </summary>
     [ClientRpc]
-    private void RpcLoadingStageUpdate(LoadingStage newValue)
+    private void RpcLoadingStageUpdate(EGameLoadStage newValue)
     {
         // Navigate from Host's GB locally -> Your GB locally
         // Call commands from Your GB locally for authority
@@ -146,15 +137,15 @@ public class GameBehaviour : NetworkBehaviour
         // of Your GB locally.
         switch (newValue)
         {
-            case LoadingStage.Unloaded:
+            case EGameLoadStage.Unloaded:
                 break;
-            case LoadingStage.SceneLoaded:
+            case EGameLoadStage.SceneLoaded:
                 Instance.CmdRequestGameSettings(Instance.transform.parent.gameObject);
                 break;
-            case LoadingStage.GameSettingsSynced:
+            case EGameLoadStage.GameSettingsSynced:
                 Instance.CmdRequestMap(Instance.transform.parent.gameObject);
                 break;
-            case LoadingStage.MapLoaded:
+            case EGameLoadStage.MapLoaded:
                 Instance.EnablePlayerScripts();
                 break;
         }
@@ -367,7 +358,8 @@ public class GameBehaviour : NetworkBehaviour
             pm.bodyPartContainer.SetActive(true);
         }
 
-        print("hi4");
+        PlayerHUDElementsHandler hud = GameObject.FindWithTag("HUD").GetComponent<PlayerHUDElementsHandler>();
+        hud.LoadHUD();
     }
     // ------------------------------------
 
@@ -492,6 +484,7 @@ public class GameBehaviour : NetworkBehaviour
         Vector2 foodPos = new((objectPos % groundSize) + (1.5f), (objectPos / groundSize) + (1.5f));
 
         GameObject obj = Instantiate(_foodTemplates[foodIndex], foodPos, Quaternion.Euler(Vector3.forward * 0));
+        obj.transform.parent = GameObject.Find("Objects").transform;
         obj.GetComponent<GridObject>().gridPos = objectPos;
 
         if (AddObjectToGrid(objectPos, obj) != -1)

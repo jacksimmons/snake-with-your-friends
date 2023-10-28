@@ -8,8 +8,7 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>10.0.20506</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <RootNamespace>
-    </RootNamespace>
+    <RootNamespace></RootNamespace>
     <ProjectGuid>{02A1D8AB-7066-746D-0152-080D65C02CC8}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
@@ -59,10 +58,12 @@
   <ItemGroup>
     <Compile Include="Assets\Scripts\UI\DebugLabels.cs" />
     <Compile Include="Assets\Scripts\Extensions\BitField.cs" />
+    <Compile Include="Assets\Scripts\Object\Projectile\Projectile.cs" />
     <Compile Include="Assets\SaveButtonGridBehaviour.cs" />
     <Compile Include="Assets\Scripts\Object\PlayerSpawner.cs" />
     <Compile Include="Assets\Scripts\Game\Puzzle\GoalBehaviour.cs" />
     <Compile Include="Assets\Scripts\Menu\Lobby\PowerupToggleContainer.cs" />
+    <Compile Include="Assets\Scripts\Object\Grid\TeleporterPair.cs" />
     <Compile Include="Assets\Scripts\Game\GameBehaviour.cs" />
     <Compile Include="Assets\Scripts\Extensions\Extensions.cs" />
     <Compile Include="Assets\Scripts\Menu\Lobby\PlayerListItem.cs" />
@@ -79,7 +80,6 @@
     <Compile Include="Assets\Scripts\Object\ForegroundObject.cs" />
     <Compile Include="Assets\Scripts\Player\Player.cs" />
     <Compile Include="Assets\Scripts\Object\ForegroundBehaviour.cs" />
-    <Compile Include="Assets\Scripts\Object\ProjectileBehaviour.cs" />
     <Compile Include="Assets\Scripts\Files\Saving.cs" />
     <Compile Include="Assets\Scripts\Files\MapData.cs" />
     <Compile Include="Assets\Scripts\Cutscene\SceneTransitionHandler.cs" />
@@ -97,16 +97,18 @@
     <Compile Include="Assets\Scripts\Camera\CamBehaviour.cs" />
     <Compile Include="Assets\Scripts\Menu\MainMenu.cs" />
     <Compile Include="Assets\Scripts\Extensions\Wait.cs" />
+    <Compile Include="Assets\Scripts\Menu\Customisation\Customisation.cs" />
+    <Compile Include="Assets\Scripts\Map\Map.cs" />
     <Compile Include="Assets\Scripts\UI\SpectateNameLabel.cs" />
     <Compile Include="Assets\Scripts\UI\SliderWithStep.cs" />
     <Compile Include="Assets\Scripts\UI\HUD\PlayerHUDElementsHandler.cs" />
+    <Compile Include="Assets\Scripts\Game\GameSetup.cs" />
     <Compile Include="Assets\Scripts\Menu\Customisation\CustomisationMenu.cs" />
     <Compile Include="Assets\Scripts\Player\PlayerControls.cs" />
     <Compile Include="Assets\Scripts\Object\Grid\FoodObject.cs" />
     <Compile Include="Assets\Scripts\Cutscene\CanvasSnakeSpawner.cs" />
     <Compile Include="Assets\Scripts\Files\OutfitSettings.cs" />
     <Compile Include="Assets\Scripts\Camera\TooManyPints.cs" />
-    <Compile Include="Assets\Scripts\Object\Grid\TeleporterPair.cs" />
     <Compile Include="Assets\Scripts\Cutscene\SceneTransitionSnakeSpawner.cs" />
     <Compile Include="Assets\Scripts\Player\PlayerMovement.cs" />
     <Compile Include="Assets\Scripts\Cutscene\IntroCutsceneHandler.cs" />
@@ -116,27 +118,30 @@
     <Compile Include="Assets\Scripts\Cutscene\SceneTransitionCanvas.cs" />
     <Compile Include="Assets\Scripts\Misc\LoadingIcon.cs" />
     <Compile Include="Assets\Scripts\UI\DebugBehaviour.cs" />
+    <Compile Include="Assets\Scripts\Object\Projectile\ProjectileBehaviour.cs" />
     <Compile Include="Assets\Scripts\Menu\Main\MainMenuSnakeSpawner.cs" />
     <Compile Include="Assets\Scripts\Menu\Lobby\HostSettingsHandler.cs" />
+    <Compile Include="Assets\Scripts\Menu\Lobby\Lobby.cs" />
+    <Compile Include="Assets\Scripts\Menu\Creator\Creator.cs" />
     <Compile Include="Assets\Scripts\Unused\FollowPlayer.cs" />
     <Compile Include="Assets\Scripts\Files\GameSettings.cs" />
     <Compile Include="Assets\Scripts\UI\MainMenuButton.cs" />
+    <Compile Include="Assets\Scripts\Powerup\Powerup.cs" />
     <Compile Include="Assets\Scripts\Menu\Creator\MapCreatorZoomBehaviour.cs" />
     <Compile Include="Assets\Scripts\Menu\Main\SentenceBehaviour.cs" />
     <Compile Include="Assets\Scripts\Steamworks.NET\SteamManager.cs" />
     <Compile Include="Assets\Scripts\Game\SnakeRoyaleBehaviour.cs" />
     <Compile Include="Assets\Scripts\Player\BodyPartType.cs" />
     <Compile Include="Assets\Scripts\Menu\LobbyMenu.cs" />
+    <Compile Include="Assets\Scripts\Object\Grid\Teleporter.cs" />
     <Compile Include="Assets\Scripts\Player\BodyPart.cs" />
     <Compile Include="Assets\Scripts\Object\Tilemap\ColliderToggleTilemap.cs" />
     <Compile Include="Assets\Scripts\Object\DeathTrigger.cs" />
     <Compile Include="Assets\Scripts\Menu\Main\WordBehaviour.cs" />
-    <Compile Include="Assets\Scripts\Object\Grid\Teleporter.cs" />
     <Compile Include="Assets\Scripts\Player\BodyPartStatus.cs" />
     <Compile Include="Assets\Scripts\Misc\Chungus.cs" />
     <Compile Include="Assets\Scripts\Networking\SteamLobby.cs" />
     <Compile Include="Assets\Scripts\Networking\PlayerObjectController.cs" />
-    <Compile Include="Assets\Scripts\Object\Projectile.cs" />
     <Compile Include="Assets\Scripts\Menu\Creator\MapCreatorUIHandler.cs" />
     <Compile Include="Assets\Scripts\Object\Shooter.cs" />
   </ItemGroup>
@@ -979,9 +984,6 @@
       <Project>{FA1B8717-0A45-EA22-8192-70CA06B493F6}</Project>
       <Name>Mirror.Components</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Assets\Scripts\Object\Projectile\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="GenerateTargetFrameworkMonikerAttribute" />

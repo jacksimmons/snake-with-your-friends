@@ -44,7 +44,7 @@ public class MapCreatorUIHandler : MonoBehaviour
     {
         m_toolValue.text = m_editor.ToolInUse.ToString();
         m_layerValue.text = m_editor.CurrentLayer.ToString();
-        m_objectCount.text = $"({m_painter.numObjects}/{MapCreatorPaintBehaviour.MAX_OBJECTS})";
+        m_objectCount.text = $"({m_painter.NumObjects}/{MapCreatorPaintBehaviour.MAX_OBJECTS})";
     }
 
 

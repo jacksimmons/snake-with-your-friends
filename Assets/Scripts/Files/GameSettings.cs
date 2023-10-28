@@ -3,12 +3,6 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-public enum EGameMode
-{
-    SnakeRoyale,
-    Puzzle
-}
-
 
 /// <summary>
 /// Struct form of the below class, used to transfer data between clients.

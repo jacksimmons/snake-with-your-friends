@@ -1,6 +1,16 @@
 using UnityEngine;
 
 
+public enum EProjectileType
+{
+    Shit,
+    Fireball,
+    Orange,
+
+    None
+}
+
+
 public struct Projectile
 {
     public float LifetimeMax { get; private set; }

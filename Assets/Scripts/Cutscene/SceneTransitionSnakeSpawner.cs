@@ -35,7 +35,6 @@ public class SceneTransitionSnakeSpawner : CanvasSnakeSpawner
         if (BigSnake)
         {
             Transform head = BigSnake.transform.GetChild(0);
-            print((Vector2)head.position);
             if (comparison.CompareVector2((Vector2)head.position))
             {
                 transitionHandler.SetReady(true);

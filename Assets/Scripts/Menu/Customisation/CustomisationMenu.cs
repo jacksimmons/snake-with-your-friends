@@ -4,37 +4,22 @@ using UnityEngine;
 
 public class CustomisationMenu : MonoBehaviour
 {
-    public enum OutfitComponent
-    {
-        Head,
-        Torso,
-        Tail,
-        Corner,
-        Colour,
-        Hat
-    }
-
-    public enum SnakeColourScheme
-    {
-        RedPurple,
-    }
-
-    public SnakeColourScheme currentColourScheme;
-    public Dictionary<SnakeColourScheme, Dictionary<OutfitComponent, Sprite[]>> spriteDictionary;
+    public ESnakeColourType currentColourScheme;
+    public Dictionary<ESnakeColourType, Dictionary<ECustomisationPart, Sprite[]>> spriteDictionary;
 
     private void Awake()
     {
-        Dictionary<OutfitComponent, Sprite[]> redPurple = new()
+        Dictionary<ECustomisationPart, Sprite[]> redPurple = new()
         {
-            { OutfitComponent.Head, GetPartSprites("RedPurple", "Heads") },
-            { OutfitComponent.Torso, GetPartSprites("RedPurple", "Torsos") },
-            { OutfitComponent.Tail, GetPartSprites("RedPurple", "Tails") },
-            { OutfitComponent.Corner, GetPartSprites("RedPurple", "Corners") }
+            { ECustomisationPart.Head, GetPartSprites("RedPurple", "Heads") },
+            { ECustomisationPart.Torso, GetPartSprites("RedPurple", "Torsos") },
+            { ECustomisationPart.Tail, GetPartSprites("RedPurple", "Tails") },
+            { ECustomisationPart.Corner, GetPartSprites("RedPurple", "Corners") }
         };
 
         spriteDictionary = new()
         {
-            { SnakeColourScheme.RedPurple, redPurple }
+            { ESnakeColourType.RedPurple, redPurple }
         };
     }
 

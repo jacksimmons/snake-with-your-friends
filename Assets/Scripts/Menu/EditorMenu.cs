@@ -8,23 +8,6 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.Tilemaps;
-using UnityEngine.UI;
-using UnityEngine.UIElements;
-
-
-public enum CreatorTool
-{
-    None,
-    Draw,
-    Fill,
-}
-
-public enum CreatorLayer
-{
-    Ground,
-    Wall,
-    Object
-}
 
 
 public class EditorMenu : MonoBehaviour
@@ -46,10 +29,10 @@ public class EditorMenu : MonoBehaviour
     private TMP_InputField m_saveInfo;
     private string m_savedName = null;
 
-    public CreatorTool ToolInUse { get; private set; }
+    public ECreatorTool ToolInUse { get; private set; }
 
-    private CreatorLayer m_currentLayer;
-    public CreatorLayer CurrentLayer
+    private ECreatorLayer m_currentLayer;
+    public ECreatorLayer CurrentLayer
     {
         get { return m_currentLayer; }
         private set
@@ -76,13 +59,13 @@ public class EditorMenu : MonoBehaviour
             SetAllLayerOpacities(DISABLED_LAYER_OPACITY);
             switch (value)
             {
-                case CreatorLayer.Ground:
+                case ECreatorLayer.Ground:
                     SetLayerToTilemap(m_groundLayer);
                     break;
-                case CreatorLayer.Wall:
+                case ECreatorLayer.Wall:
                     SetLayerToTilemap(m_wallLayer);
                     break;
-                case CreatorLayer.Object:
+                case ECreatorLayer.Object:
                     SetLayerToObject();
                     break;
             }
@@ -93,7 +76,7 @@ public class EditorMenu : MonoBehaviour
     private Vector3Int GridPos { get; set; }
 
     [SerializeField]
-    private Tile[] m_tiles;
+    private Tile[] m_tiles = new Tile[3];
     private int m_tileIndex;
 
     [SerializeField]
@@ -101,6 +84,12 @@ public class EditorMenu : MonoBehaviour
     private int m_objectIndex;
 
     private bool m_objectMode = false;
+
+
+    private void Start()
+    {
+        LoadMapFromFile();
+    }
 
 
     // Update is called once per frame
@@ -134,11 +123,11 @@ public class EditorMenu : MonoBehaviour
     private void HandleLayerInput()
     {
         if (Input.GetKeyDown(KeyCode.Alpha1))
-            CurrentLayer = CreatorLayer.Ground;
+            CurrentLayer = ECreatorLayer.Ground;
         else if (Input.GetKeyDown(KeyCode.Alpha2))
-            CurrentLayer = CreatorLayer.Wall;
+            CurrentLayer = ECreatorLayer.Wall;
         else if (Input.GetKeyDown(KeyCode.Alpha3))
-            CurrentLayer = CreatorLayer.Object;
+            CurrentLayer = ECreatorLayer.Object;
     }
 
 
@@ -153,6 +142,7 @@ public class EditorMenu : MonoBehaviour
             ChangeIndex(ref m_tileIndex, m_tiles.Length, 1);
 
         m_painter.selectedTile = m_tiles[m_tileIndex];
+        m_painter.selectedType = (ETileType)m_tileIndex;
         GetComponent<MapCreatorUIHandler>().UpdateTileIcon(m_painter.selectedTile.sprite);
     }
 
@@ -161,11 +151,11 @@ public class EditorMenu : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.P))
         {
-            ToolInUse = CreatorTool.Draw;
+            ToolInUse = ECreatorTool.Draw;
         }
         if (Input.GetKeyDown(KeyCode.F))
         {
-            ToolInUse = CreatorTool.Fill;
+            ToolInUse = ECreatorTool.Fill;
         }
     }
 
@@ -180,10 +170,10 @@ public class EditorMenu : MonoBehaviour
         {
             switch (ToolInUse)
             {
-                case CreatorTool.Draw:
+                case ECreatorTool.Draw:
                     draw(GridPos);
                     break;
-                case CreatorTool.Fill:
+                case ECreatorTool.Fill:
                     fill(GridPos, true);
                     break;
             }
@@ -192,10 +182,10 @@ public class EditorMenu : MonoBehaviour
         {
             switch (ToolInUse)
             {
-                case CreatorTool.Draw:
+                case ECreatorTool.Draw:
                     erase(GridPos);
                     break;
-                case CreatorTool.Fill:
+                case ECreatorTool.Fill:
                     fill(GridPos, false);
                     break;
             }
@@ -212,7 +202,7 @@ public class EditorMenu : MonoBehaviour
             ChangeIndex(ref m_objectIndex, m_objects.Length, -1);
         else if (Input.GetKeyDown(KeyCode.RightBracket))
             ChangeIndex(ref m_objectIndex, m_objects.Length, 1);
-    
+
         m_painter.selectedObject = m_objects[m_objectIndex];
         GetComponent<MapCreatorUIHandler>().UpdateObjectIcon(m_painter.selectedObject);
     }
@@ -251,6 +241,42 @@ public class EditorMenu : MonoBehaviour
 
     public void SaveMapToFile()
     {
+        MapTileData[] GetTileDataArray(Tilemap tilemap)
+        {
+            List<MapTileData> data = new();
+            for (int i = tilemap.cellBounds.xMin; i <= tilemap.cellBounds.xMax; i++)
+            {
+                for (int j = tilemap.cellBounds.yMin; j <= tilemap.cellBounds.yMax; j++)
+                {
+                    Vector3Int pos = new(i, j, 0);
+                    Sprite sprite = tilemap.GetSprite(pos);
+                    MapTileData mtd = GetTileData(i, j, sprite);
+
+                    if (mtd != null)
+                        data.Add(mtd);
+                }
+            }
+
+            Debug.Log(data.Count);
+            return data.ToArray();
+        }
+
+        MapTileData GetTileData(int x, int y, Sprite sprite)
+        {
+            if (sprite == null) return null;
+
+            // Find index of matching tile; this is the ETileType in int form.
+            for (int k = 0; k < m_tiles.Length; k++)
+            {
+                if (m_tiles[k].sprite == sprite)
+                {
+                    return new((short)x, (short)y, (ETileType)k);
+                }
+            }
+
+            return null;
+        }
+
         if (!Directory.Exists(Application.persistentDataPath + "/Maps"))
             Directory.CreateDirectory(Application.persistentDataPath + "/Maps");
 
@@ -284,7 +310,12 @@ public class EditorMenu : MonoBehaviour
             savePath = "Maps/" + m_saveInfo.text + ".map";
         }
 
-        MapData map = new(m_groundLayer, m_wallLayer, m_objectLayer);
+        MapTileData[] groundData = GetTileDataArray(m_groundLayer);
+        MapTileData[] wallData = GetTileDataArray(m_wallLayer);
+        MapObjectData[] objData = m_painter.GetObjectData();
+
+        MapData map = new(groundData, wallData, objData);
+
         Saving.SaveToFile(map, savePath);
 
         m_savedName = m_saveInfo.text;
@@ -295,5 +326,33 @@ public class EditorMenu : MonoBehaviour
 
         SetLayerOpacity(m_groundLayer, ground_a);
         SetLayerOpacity(m_wallLayer, wall_a);
+    }
+
+
+    public void LoadMapFromFile()
+    {
+        MapData map = Saving.LoadFromFile<MapData>("Maps/.map");
+
+        MapTileData[] groundData = map.groundData;
+        MapTileData[] wallData = map.wallData;
+        MapObjectData[] objectData = map.objectData;
+
+        void AddTileToTilemap(MapTileData tile, Tilemap tilemap)
+        {
+            tilemap.SetTile(new Vector3Int(tile.x, tile.y, 0), m_tiles[(int)tile.type]); 
+        }
+
+        void AddObjectToObjmap(MapObjectData obj, GameObject objmap)
+        {
+            GameObject go = Instantiate(m_objects[(int)obj.type], objmap.transform);
+            go.transform.localPosition = new(obj.x, obj.y);
+            go.transform.localRotation = Quaternion.Euler(Vector3.forward * obj.rotation);
+        }
+
+        for (int i = 0; i < groundData.Length; i++) { AddTileToTilemap(groundData[i], m_groundLayer); }
+        for (int i = 0; i < wallData.Length; i++) { AddTileToTilemap(wallData[i], m_wallLayer); }
+        for (int i = 0; i < objectData.Length; i++) { AddObjectToObjmap(objectData[i], m_objectLayer); }
+
+        m_painter.LoadChildrenIntoMapping(m_objectLayer.transform);
     }
 }

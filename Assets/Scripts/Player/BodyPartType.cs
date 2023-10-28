@@ -1,5 +1,6 @@
 using UnityEngine;
 
+
 public enum EBodyPartType
 {
     None,
@@ -8,6 +9,7 @@ public enum EBodyPartType
     Tail,
     Corner
 }
+
 
 public static class BodyPartType
 {

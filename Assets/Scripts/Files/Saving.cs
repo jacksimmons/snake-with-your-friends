@@ -55,19 +55,20 @@ public static class Saving
             fs = File.OpenRead(dest);
             BinaryFormatter bf = new();
 
-            LoadingIcon.Instance.Toggle(false);
-
             T val = (T)bf.Deserialize(fs);
             fs.Close();
 
             if (val is ICached cached)
                 cached.Cache();
+
+            LoadingIcon.Instance.Toggle(false);
             return val;
         }
         else
         {
             // Restart the function after creating a new T save
             SaveToFile(new T(), filename);
+            Debug.LogError("File does NOT exist! Returning empty object");
             return LoadFromFile<T>(filename);
         }
     }

@@ -1,12 +1,15 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
 public class MapCreatorPaintBehaviour : MonoBehaviour
 {
     public Tile selectedTile;
+    public ETileType selectedType;
+
     public GameObject selectedObject;
 
     [SerializeField]
@@ -14,14 +17,27 @@ public class MapCreatorPaintBehaviour : MonoBehaviour
     [SerializeField]
     private GameObject objectLayer;
 
-    public Dictionary<Vector3Int, GameObject> m_objectMapping = new();
+    private Dictionary<Vector3Int, GameObject> m_objectMapping = new();
 
     public const int MAX_OBJECTS = 100;
-    public int numObjects { get; private set; } = 0;
+    public int NumObjects { get; private set; } = 0;
 
     public const int MAX_FILL_DEPTH = 1000;
     private int currentFillDepth = 0;
     private Queue<Vector3Int> fillQueue = new();
+
+
+    public void LoadChildrenIntoMapping(Transform parent)
+    {
+        foreach (Transform transform in parent)
+        {
+            m_objectMapping.Add(
+            new((int)transform.localPosition.x, 
+                (int)transform.localPosition.y),
+            transform.gameObject);
+            NumObjects++;
+        }
+    }
 
 
     private bool CheckIfTileAtPos(Vector3Int pos)
@@ -35,11 +51,11 @@ public class MapCreatorPaintBehaviour : MonoBehaviour
     }
 
 
-    public void Paint(CreatorTool tool, Vector3Int pos)
+    public void Paint(ECreatorTool tool, Vector3Int pos)
     {
         switch (tool)
         {
-            case CreatorTool.Draw:
+            case ECreatorTool.Draw:
                 Draw(pos);
                 break;
         }
@@ -112,19 +128,19 @@ public class MapCreatorPaintBehaviour : MonoBehaviour
 
     public void DrawObject(Vector3Int pos)
     {
-        if (numObjects >= MAX_OBJECTS)
+        if (NumObjects >= MAX_OBJECTS)
             return;
 
         GameObject go = Instantiate(selectedObject, objectLayer.transform);
 
         // Add an offset for the object's actual position, equivalent to the tilemap's offset from
         // the origin.
-        go.transform.position = (Vector3)pos + new Vector3(0.5f, 0.5f, 0);
+        go.transform.localPosition = (Vector3)pos;
         go.GetComponent<SpriteRenderer>().sortingOrder = 0;
 
         EraseObject(pos);
         m_objectMapping[pos] = go;
-        numObjects++;
+        NumObjects++;
     }
 
 
@@ -134,7 +150,7 @@ public class MapCreatorPaintBehaviour : MonoBehaviour
 
         Destroy(m_objectMapping[pos]);
         m_objectMapping.Remove(pos);
-        numObjects--;
+        NumObjects--;
     }
 
 
@@ -143,5 +159,21 @@ public class MapCreatorPaintBehaviour : MonoBehaviour
         StartCoroutine(FillCoro(start, 
             draw ? CheckIfObjectAtPos : (Vector3Int pos) => !CheckIfObjectAtPos(pos),
             draw ? DrawObject : EraseObject));
+    }
+
+
+    public MapObjectData[] GetObjectData()
+    {
+        GameObject[] objs = m_objectMapping.Values.ToArray();
+        MapObjectData[] objData = new MapObjectData[m_objectMapping.Values.Count];
+        for (int i = 0; i < objData.Length; i++)
+        {
+            ObjectBehaviour ob = objs[i].GetComponent<ObjectBehaviour>();
+            objData[i] = new(ob.Type,
+                (short)Mathf.FloorToInt(ob.transform.localPosition.x),
+                (short)Mathf.FloorToInt(ob.transform.localPosition.y));
+        }
+
+        return objData;
     }
 }

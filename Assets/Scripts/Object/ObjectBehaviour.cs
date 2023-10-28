@@ -4,15 +4,6 @@ using TMPro;
 using UnityEngine;
 
 
-public enum EObjectType
-{
-    None, // 0
-
-    Food, // EFoodType
-    Projectile, // EProjectileType
-}
-
-
 public class ObjectBehaviour : MonoBehaviour
 {
     [SerializeField]

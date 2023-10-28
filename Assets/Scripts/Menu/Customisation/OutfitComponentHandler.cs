@@ -9,7 +9,7 @@ public class OutfitComponentHandler : MonoBehaviour
     private int m_currentIndex;
 
     [SerializeField]
-    private CustomisationMenu.OutfitComponent m_outfitComponent;
+    private ECustomisationPart m_outfitComponent;
     private CustomisationMenu m_menu;
     private Image m_outfitComponentImage;
     [SerializeField]
@@ -25,16 +25,16 @@ public class OutfitComponentHandler : MonoBehaviour
 
         switch (m_outfitComponent)
         {
-            case CustomisationMenu.OutfitComponent.Head:
+            case ECustomisationPart.Head:
                 LoadOutfitComponentSprite("Heads", OutfitSettings.Saved.HeadSpriteName);
                 break;
-            case CustomisationMenu.OutfitComponent.Torso:
+            case ECustomisationPart.Torso:
                 LoadOutfitComponentSprite("Torsos", OutfitSettings.Saved.TorsoSpriteName);
                 break;
-            case CustomisationMenu.OutfitComponent.Tail:
+            case ECustomisationPart.Tail:
                 LoadOutfitComponentSprite("Tails", OutfitSettings.Saved.TailSpriteName);
                 break;
-            case CustomisationMenu.OutfitComponent.Corner:
+            case ECustomisationPart.Corner:
                 LoadOutfitComponentSprite("Corners", OutfitSettings.Saved.CornerSpriteName);
                 break;
         }
@@ -86,19 +86,19 @@ public class OutfitComponentHandler : MonoBehaviour
 
         switch (m_outfitComponent)
         {
-            case CustomisationMenu.OutfitComponent.Head:
+            case ECustomisationPart.Head:
                 OutfitSettings.Saved.HeadSpriteName = sprite.name;
                 pm.m_bpHead = sprite;
                 break;
-            case CustomisationMenu.OutfitComponent.Torso:
+            case ECustomisationPart.Torso:
                 OutfitSettings.Saved.TorsoSpriteName = sprite.name;
                 pm.m_bpTorso = sprite;
                 break;
-            case CustomisationMenu.OutfitComponent.Tail:
+            case ECustomisationPart.Tail:
                 OutfitSettings.Saved.TailSpriteName = sprite.name;
                 pm.m_bpTail = sprite;
                 break;
-            case CustomisationMenu.OutfitComponent.Corner:
+            case ECustomisationPart.Corner:
                 OutfitSettings.Saved.CornerSpriteName = sprite.name;
                 pm.m_bpCornerL = sprite;
                 break;

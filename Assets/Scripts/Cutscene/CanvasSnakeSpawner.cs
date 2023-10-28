@@ -74,9 +74,9 @@ public class CanvasSnakeSpawner : MonoBehaviour
     }
 
 
-    private Sprite GetRandomSprite(string outfitComponent)
+    private Sprite GetRandomSprite(string ECustomisationPart)
     {
-        Sprite[] torsoSprites = Resources.LoadAll<Sprite>($"Snake/RedPurple/{outfitComponent}");
+        Sprite[] torsoSprites = Resources.LoadAll<Sprite>($"Snake/RedPurple/{ECustomisationPart}");
         int randIndex = Random.Range(0, torsoSprites.Length);
         return torsoSprites[randIndex];
     }
