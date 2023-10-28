@@ -209,7 +209,7 @@ public class PlayerObjectController : NetworkBehaviour
 
     public void LogDeath()
     { 
-        CmdLogDeath(playerNo-1);
+        CmdLogDeath(playerNo);
         if (PlayerOnHUD)
             PlayerOnHUD.AppearDead();
     }

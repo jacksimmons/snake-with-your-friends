@@ -234,7 +234,6 @@ public class GameBehaviour : NetworkBehaviour
             cam.GetComponent<CamBehaviour>().Player = pm;
         }
 
-        print("hi3");
         CmdOnReady();
     }
     // ------------------------------------
