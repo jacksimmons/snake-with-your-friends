@@ -30,6 +30,18 @@ public class CustomNetworkManager : NetworkManager
     }
 
 
+    public PlayerObjectController GetPlayer(ulong steamID)
+    {
+        foreach (var player in Instance.Players)
+        {
+            if (player.playerSteamID == steamID)
+                return player;
+        }
+        Debug.LogError("No player with that ID was found!");
+        return null;
+    }
+
+
     public void AddPlayer(PlayerObjectController player)
     {
         Players.Add(player);

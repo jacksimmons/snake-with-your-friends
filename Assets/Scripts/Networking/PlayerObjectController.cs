@@ -151,73 +151,78 @@ public class PlayerObjectController : NetworkBehaviour
             bodyPartDatas.Add(BodyPart.ToData(part));
         }
 
-        if (PlayerOnHUD) // Patient update - can wait if the HUD isn't ready.
+        if (PlayerOnHUD) // Ensure the HUD is ready.
             PlayerOnHUD.SetNumParts(bodyPartDatas.Count);
-        CmdUpdateBodyParts(bodyPartDatas, playerSteamID);
+        CmdUpdateBodyParts(bodyPartDatas, playerNo);
     }
 
     [Command]
-    public void CmdUpdateBodyParts(List<BodyPartData> bodyPartDatas, ulong victimPlayerSteamID)
+    public void CmdUpdateBodyParts(List<BodyPartData> bodyPartDatas, int victimPlayerNo)
     {
-        ClientUpdateBodyParts(bodyPartDatas, victimPlayerSteamID);
+        ClientUpdateBodyParts(bodyPartDatas, victimPlayerNo);
     }
 
     [ClientRpc]
-    public void ClientUpdateBodyParts(List<BodyPartData> bodyPartDatas, ulong victimPlayerSteamID)
+    public void ClientUpdateBodyParts(List<BodyPartData> bodyPartDatas, int victimPlayerNo)
     {
         StartCoroutine(Wait.WaitForConditionThen(() => PM.enabled, 0.1f, () =>
         {
-            if (playerSteamID == victimPlayerSteamID && !isOwned)
+            if (!(playerNo == victimPlayerNo && !isOwned)) return;
+
+            PM.BodyParts.Clear();
+            for (int i = 0; i < bodyPartDatas.Count; i++)
             {
-                PM.BodyParts.Clear();
-                for (int i = 0; i < bodyPartDatas.Count; i++)
+                Transform bodyPartParent = PM.bodyPartContainer.transform;
+                int diff = bodyPartDatas.Count - bodyPartParent.childCount;
+
+                // Ensure all clients have the same number of BodyPart gameobjects (it doesn't
+                // matter which gameobject we remove when diff < 0)
+                // This seems computationally less expensive than destroying and reconstructing
+                // all the necessary gameobjects every move frame.
+
+                if (diff > 0)
                 {
-                    Transform bodyPartParent = PM.bodyPartContainer.transform;
-                    int diff = bodyPartDatas.Count - bodyPartParent.childCount;
-
-                    // Ensure all clients have the same number of BodyPart gameobjects (it doesn't
-                    // matter which gameobject we remove when diff < 0)
-                    // This seems computationally less expensive than destroying and reconstructing
-                    // all the necessary gameobjects every move frame.
-
-                    if (diff > 0)
+                    for (int _ = 0; _ < diff; _++)
                     {
-                        for (int _j = 0; _j < diff; _j++)
-                        {
-                            Instantiate(m_bodyPartTemplate, bodyPartParent);
-                        }
+                        Instantiate(m_bodyPartTemplate, bodyPartParent);
                     }
-                    else if (diff < 0)
-                    {
-                        for (int _j = 0; _j > diff; _j--)
-                        {
-                            Destroy(bodyPartParent.GetChild(bodyPartParent.childCount - 2).gameObject);
-                        }
-                    }
-
-                    BodyPart newBP = BodyPart.FromData(
-                        bodyPartDatas[i],
-                        PM.bodyPartContainer.transform.GetChild(i)
-                    );
-
-                    PM.BodyParts.Add(newBP);
                 }
+                else if (diff < 0)
+                {
+                    for (int _ = 0; _ > diff; _--)
+                    {
+                        Destroy(bodyPartParent.GetChild(bodyPartParent.childCount - 2).gameObject);
+                    }
+                }
+
+                BodyPart newBP = BodyPart.FromData(
+                    bodyPartDatas[i],
+                    PM.bodyPartContainer.transform.GetChild(i)
+                );
+
+                PM.BodyParts.Add(newBP);
             }
+
+            CustomNetworkManager.Instance.Players[playerNo].PlayerOnHUD.SetNumParts(bodyPartDatas.Count);
         }));
     }
 
     public void LogDeath()
     { 
-        CmdLogDeath(Manager.Players.IndexOf(this));
+        CmdLogDeath(playerNo);
         if (PlayerOnHUD)
             PlayerOnHUD.AppearDead();
     }
 
     [Command]
-    private void CmdLogDeath(int index) { LogDeathClientRpc(index); }
+    private void CmdLogDeath(int playerNo) { LogDeathClientRpc(playerNo); }
 
     [ClientRpc]
-    private void LogDeathClientRpc(int index) { Manager.KillPlayer(index); }
+    private void LogDeathClientRpc(int playerNo)
+    {
+        CustomNetworkManager.Instance.Players[playerNo].PlayerOnHUD.AppearDead();
+        Manager.KillPlayer(playerNo);
+    }
 
     [ClientRpc]
     public void RpcDisableComponents()
