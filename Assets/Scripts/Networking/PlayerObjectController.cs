@@ -203,13 +203,13 @@ public class PlayerObjectController : NetworkBehaviour
                 PM.BodyParts.Add(newBP);
             }
 
-            CustomNetworkManager.Instance.Players[playerNo].PlayerOnHUD.SetNumParts(bodyPartDatas.Count);
+            CustomNetworkManager.Instance.Players[victimPlayerNo-1].PlayerOnHUD.SetNumParts(bodyPartDatas.Count);
         }));
     }
 
     public void LogDeath()
     { 
-        CmdLogDeath(playerNo);
+        CmdLogDeath(playerNo-1);
         if (PlayerOnHUD)
             PlayerOnHUD.AppearDead();
     }
@@ -220,8 +220,8 @@ public class PlayerObjectController : NetworkBehaviour
     [ClientRpc]
     private void LogDeathClientRpc(int playerNo)
     {
-        CustomNetworkManager.Instance.Players[playerNo].PlayerOnHUD.AppearDead();
-        Manager.KillPlayer(playerNo);
+        CustomNetworkManager.Instance.Players[playerNo-1].PlayerOnHUD.AppearDead();
+        Manager.KillPlayer(playerNo-1);
     }
 
     [ClientRpc]
