@@ -71,7 +71,8 @@ public class GameBehaviour : NetworkBehaviour
         GameSettingsSynced,
         MapLoaded,
         PlayerScriptsEnabled,
-        PlayerHUDEnabled,
+        GameSetup,
+        UIElementsEnabled,
         GameStarted,
     }
 
@@ -159,7 +160,10 @@ public class GameBehaviour : NetworkBehaviour
             case EGameLoadStage.MapLoaded:
                 Instance.EnablePlayerScripts();
                 break;
-            case EGameLoadStage.PlayerHUDEnabled:
+            case EGameLoadStage.GameSetup:
+                Instance.LoadUIElements();
+                break;
+            case EGameLoadStage.UIElementsEnabled:
                 Instance.StartGame();
                 break;
         }
@@ -287,8 +291,6 @@ public class GameBehaviour : NetworkBehaviour
             }
             PlacePlayersClientRpc(positions, rotation_zs);
         }
-
-        Instance.LoadUIElements();
     }
 
     [Server]
