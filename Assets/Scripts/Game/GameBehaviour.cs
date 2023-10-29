@@ -71,8 +71,6 @@ public class GameBehaviour : NetworkBehaviour
         GameSettingsSynced,
         MapLoaded,
         PlayerScriptsEnabled,
-        FoodGenerated,
-        PlayersPlaced,
         UIElementsEnabled,
         GameStarted,
     }
@@ -123,12 +121,7 @@ public class GameBehaviour : NetworkBehaviour
 
         print($"Ready: {serverNumPlayersReady}/{CustomNetworkManager.Instance.numPlayers}");
         if (serverNumPlayersReady >= CustomNetworkManager.Instance.numPlayers)
-        {
-            serverNumPlayersReady = 0;
-
-            serverPlayersLoadingStage++;
-            RpcLoadingStageUpdate(serverPlayersLoadingStage);
-        }
+            ServerOnAllReady();
 
         if (serverNumPlayersReady != 0) return;
         // ^ Following code executes directly after the last readier, every handshake
@@ -137,12 +130,21 @@ public class GameBehaviour : NetworkBehaviour
         {
             case EGameLoadStage.PlayerScriptsEnabled:
                 ServerGenerateFood();
-                break;
-            case EGameLoadStage.FoodGenerated:
                 ServerPlacePlayers();
                 break;
         }
     }
+
+
+    [Server]
+    private void ServerOnAllReady()
+    {
+        serverNumPlayersReady = 0;
+
+        serverPlayersLoadingStage++;
+        RpcLoadingStageUpdate(serverPlayersLoadingStage);
+    }
+
 
     /// <summary>
     /// The progression through game loading is handled through a series of handshakes.
@@ -169,7 +171,7 @@ public class GameBehaviour : NetworkBehaviour
             case EGameLoadStage.MapLoaded:
                 Instance.EnablePlayerScripts();
                 break;
-            case EGameLoadStage.PlayersPlaced:
+            case EGameLoadStage.PlayerScriptsEnabled:
                 Instance.LoadUIElements();
                 break;
             case EGameLoadStage.UIElementsEnabled:
@@ -293,7 +295,6 @@ public class GameBehaviour : NetworkBehaviour
         }
 
         GenerateStartingFood();
-        ServerOnReady();
     }
 
 
@@ -316,8 +317,6 @@ public class GameBehaviour : NetworkBehaviour
         {
             ServerPlacePlayers_SnakeRoyale(depth: 1, playersStartIndex: 0, Vector2Int.zero);
         }
-
-        ServerOnReady();
     }
 
 
