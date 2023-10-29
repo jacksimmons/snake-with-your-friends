@@ -131,9 +131,6 @@ public class GameBehaviour : NetworkBehaviour
             case EGameLoadStage.PlayerScriptsEnabled:
                 ServerSetupGame();
                 break;
-            case EGameLoadStage.PlayerHUDEnabled:
-                Instance.StartGame();
-                break;
         }
     }
 
@@ -161,6 +158,9 @@ public class GameBehaviour : NetworkBehaviour
                 break;
             case EGameLoadStage.MapLoaded:
                 Instance.EnablePlayerScripts();
+                break;
+            case EGameLoadStage.PlayerHUDEnabled:
+                Instance.StartGame();
                 break;
         }
     }
@@ -453,7 +453,6 @@ public class GameBehaviour : NetworkBehaviour
 
         tilemap.SetTilesBlock(bounds, tiles);
     }
-
 
 
     [ClientRpc]
