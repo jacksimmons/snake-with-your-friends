@@ -246,8 +246,7 @@ public class LobbyMenu : MonoBehaviour
         {
             if (LocalPlayerController && LocalPlayerController.playerNo == 1)
             {
-                if (Manager.Players.Count > 1 || Manager.singleplayer)
-                    startGameButton.interactable = true;
+                startGameButton.interactable = true;
             }
         }
     }

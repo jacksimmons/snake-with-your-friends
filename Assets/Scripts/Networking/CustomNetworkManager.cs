@@ -59,12 +59,21 @@ public class CustomNetworkManager : NetworkManager
     public void KillPlayer(PlayerObjectController player)
     {
         AlivePlayers.Remove(player);
-        if (AlivePlayers.Count == 1)
-        {
-            print("Game Over! " + AlivePlayers[0].playerName + " wins the game.");
 
-            if (NetworkServer.active) // [Server]
-                StartCoroutine(Wait.WaitThen(5f, EndGame));
+        bool gameOver = true;
+        string gameOverMessage = "";
+
+        if (AlivePlayers.Count == 1)
+            gameOverMessage = $"Game Over! {AlivePlayers[0].playerName} wins the game.";
+        else if (AlivePlayers.Count == 0)
+            gameOverMessage = $"Game Over! All players died - noone wins the game.";
+        else
+            gameOver = false;
+
+        if (gameOver && NetworkServer.active)
+        {
+            print(gameOverMessage);
+            StartCoroutine(Wait.WaitThen(3f, ServerEndGame));
         }
     }
 
@@ -133,8 +142,9 @@ public class CustomNetworkManager : NetworkManager
         }
     }
 
+
     [Server]
-    public void EndGame()
+    public void ServerEndGame()
     {
         GameBehaviour.Instance.enabled = false;
         GameObject.Find("LocalPlayerObject").GetComponent<PlayerObjectController>().RpcDisableComponents();
