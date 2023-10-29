@@ -288,7 +288,7 @@ public class GameBehaviour : NetworkBehaviour
             PlacePlayersClientRpc(positions, rotation_zs);
         }
 
-        LoadUIElements();
+        Instance.LoadUIElements();
     }
 
     [Server]
