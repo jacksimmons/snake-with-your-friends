@@ -291,6 +291,8 @@ public class GameBehaviour : NetworkBehaviour
             }
             PlacePlayersClientRpc(positions, rotation_zs);
         }
+
+        Instance.CmdOnReady();
     }
 
     [Server]
