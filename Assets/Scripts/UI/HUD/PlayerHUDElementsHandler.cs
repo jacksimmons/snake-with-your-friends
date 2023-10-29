@@ -29,11 +29,11 @@ public class PlayerHUDElementsHandler : MonoBehaviour
                         item.transform.Find("Tail").GetComponent<Image>().sprite = poc.PM.m_bpTail;
                         item.transform.Find("Torso").GetComponent<Image>().sprite = poc.PM.m_bpTorso;
                         item.transform.Find("Head").GetComponent<Image>().sprite = poc.PM.m_bpHead;
+
+                        m_mapSteamIDToHUDElement[poc.playerSteamID] = item;
                     }
                 )
             );
-
-            m_mapSteamIDToHUDElement[poc.playerSteamID] = item;
         }
     }
 
@@ -43,6 +43,7 @@ public class PlayerHUDElementsHandler : MonoBehaviour
     /// </summary>
     public PlayerHUDElement GetHUDElementOrNull(ulong steamID)
     {
+        print(m_mapSteamIDToHUDElement.Values.Count);
         if (!m_mapSteamIDToHUDElement.ContainsKey(steamID)) return null;
         return m_mapSteamIDToHUDElement[steamID];
     }

@@ -4,6 +4,7 @@ using UnityEngine;
 using Mirror;
 using Steamworks;
 using UnityEditor;
+using System;
 
 public class PlayerObjectController : NetworkBehaviour
 {
@@ -204,7 +205,10 @@ public class PlayerObjectController : NetworkBehaviour
             }
 
             PlayerObjectController player = CustomNetworkManager.Instance.Players[victimPlayerNo - 1];
-            player.PlayerOnHUD.SetNumParts(bodyPartDatas.Count);
+            StartCoroutine(Wait.WaitForConditionThen(() => player.PlayerOnHUD, 0.1f, () =>
+            {
+                player.PlayerOnHUD.SetNumParts(bodyPartDatas.Count);
+            }));
         }));
     }
 
@@ -219,9 +223,13 @@ public class PlayerObjectController : NetworkBehaviour
     private void CmdLogDeath(int playerNo) { LogDeathClientRpc(playerNo); }
 
     [ClientRpc]
-    private void LogDeathClientRpc(int playerNo)
+    private void LogDeathClientRpc(int victimPlayerNo)
     {
-        CustomNetworkManager.Instance.Players[playerNo-1].PlayerOnHUD.AppearDead();
+        PlayerObjectController player = CustomNetworkManager.Instance.Players[victimPlayerNo - 1];
+        StartCoroutine(Wait.WaitForConditionThen(() => player.PlayerOnHUD, 0.1f, () =>
+        {
+            player.PlayerOnHUD.AppearDead();
+        }));
         Manager.KillPlayer(playerNo-1);
     }
 
