@@ -288,7 +288,7 @@ public class GameBehaviour : NetworkBehaviour
             PlacePlayersClientRpc(positions, rotation_zs);
         }
 
-        LoadHUDClientRpc();
+        LoadUIElements();
     }
 
     [Server]
@@ -360,8 +360,8 @@ public class GameBehaviour : NetworkBehaviour
         }
     }
 
-    [ClientRpc]
-    private void LoadHUDClientRpc()
+    [Client]
+    private void LoadUIElements()
     {
         PlayerHUDElementsHandler hud = GameObject.FindWithTag("HUD").GetComponent<PlayerHUDElementsHandler>();
         hud.LoadHUD();
