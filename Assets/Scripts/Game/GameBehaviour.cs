@@ -24,6 +24,23 @@ public class GameBehaviour : NetworkBehaviour
         }
     }
 
+    private struct PlayerSpawnInfo
+    {
+        // Used as a check; ensures the list of players has not changed.
+        public ulong SteamID;
+
+        public Vector3 Position;
+        public float Rotation_z;
+
+
+        public PlayerSpawnInfo(ulong steamID, Vector3 position, float rotation_z)
+        {
+            SteamID = steamID;
+            Position = position;
+            Rotation_z = rotation_z;
+        }
+    }
+
     public static readonly string[] GAME_SCENES =
     { "Game" };
 
@@ -119,6 +136,7 @@ public class GameBehaviour : NetworkBehaviour
     {
         serverNumPlayersReady++;
 
+        print($"Stage: {serverPlayersLoadingStage}");
         print($"Ready: {serverNumPlayersReady}/{CustomNetworkManager.Instance.numPlayers}");
         if (serverNumPlayersReady >= CustomNetworkManager.Instance.numPlayers)
             ServerOnAllReady();
@@ -317,6 +335,17 @@ public class GameBehaviour : NetworkBehaviour
         {
             ServerPlacePlayers_SnakeRoyale(depth: 1, playersStartIndex: 0, Vector2Int.zero);
         }
+
+
+        int length = CustomNetworkManager.Instance.Players.Count;
+        PlayerSpawnInfo[] spawnInfo = new PlayerSpawnInfo[length];
+        for (int i = 0; i < length; i++)
+        {
+            PlayerObjectController player = CustomNetworkManager.Instance.Players[i];
+            spawnInfo[i] = new(player.playerSteamID, player.transform.position, player.transform.rotation.eulerAngles.z);
+        }
+
+        PlacePlayersClientRpc(spawnInfo);
     }
 
 
@@ -373,6 +402,7 @@ public class GameBehaviour : NetworkBehaviour
     }
     // ------------------------------------
 
+
     // UI HANDSHAKE------------------------
     [Client]
     private void LoadUIElements()
@@ -384,6 +414,7 @@ public class GameBehaviour : NetworkBehaviour
     }
     // ------------------------------------
 
+
     // Start Game -------------------------
     [Client]
     private void StartGame()
@@ -394,7 +425,7 @@ public class GameBehaviour : NetworkBehaviour
             pm.bodyPartContainer.SetActive(true);
         }
     }
-
+    // ------------------------------------
 
 
     // Additional Functions ---------------
@@ -470,18 +501,19 @@ public class GameBehaviour : NetworkBehaviour
 
 
     [ClientRpc]
-    public void PlacePlayersClientRpc(List<Vector2> positions, List<float> rotation_zs)
+    private void PlacePlayersClientRpc(PlayerSpawnInfo[] allSpawnInfo)
     {
-        if (positions.Count != rotation_zs.Count)
+        for (int i = 0; i < allSpawnInfo.Length; i++)
         {
-            Debug.LogError("Positions and rotations have mismatching lengths!");
-            return;
-        }
-
-        for (int i = 0; i < positions.Count; i++)
-        {
+            PlayerSpawnInfo spawnInfo = allSpawnInfo[i];
             PlayerObjectController poc = CustomNetworkManager.Instance.Players[i];
-            poc.transform.SetPositionAndRotation(positions[i], Quaternion.Euler(Vector3.forward * rotation_zs[i]));
+
+            if (poc.playerSteamID != spawnInfo.SteamID)
+            {
+                Debug.LogError("Failed to place players - The Players list was altered during this!");
+            }
+
+            poc.transform.SetPositionAndRotation(spawnInfo.Position, Quaternion.Euler(Vector3.forward * spawnInfo.Rotation_z));
         }
     }
 
