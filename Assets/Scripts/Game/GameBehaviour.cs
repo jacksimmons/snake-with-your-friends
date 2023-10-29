@@ -132,7 +132,7 @@ public class GameBehaviour : NetworkBehaviour
                 ServerSetupGame();
                 break;
             case EGameLoadStage.PlayerHUDEnabled:
-                StartGameClientRpc();
+                Instance.StartGame();
                 break;
         }
     }
@@ -371,8 +371,8 @@ public class GameBehaviour : NetworkBehaviour
     // ------------------------------------
 
     // Start Game -------------------------
-    [ClientRpc]
-    private void StartGameClientRpc()
+    [Client]
+    private void StartGame()
     {
         foreach (var player in CustomNetworkManager.Instance.Players)
         {
