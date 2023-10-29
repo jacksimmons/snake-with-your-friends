@@ -657,8 +657,8 @@ public class GameBehaviour : NetworkBehaviour
         if (!isOwned)
             return;
 
-        GameObject canvas = GameObject.Find("Canvas");
-        Transform bg = canvas.transform.GetChild(0);
+        GameObject hud = GameObject.Find("HUD");
+        Transform bg = hud.transform.GetChild(0);
         GameObject gameOver = bg.Find("GameOver").gameObject;
         GameObject spectateUI = bg.Find("SpectateUI").gameObject;
         gameOver.SetActive(active);

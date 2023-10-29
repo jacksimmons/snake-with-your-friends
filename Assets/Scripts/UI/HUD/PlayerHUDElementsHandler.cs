@@ -43,7 +43,6 @@ public class PlayerHUDElementsHandler : MonoBehaviour
     /// </summary>
     public PlayerHUDElement GetHUDElementOrNull(ulong steamID)
     {
-        print(m_mapSteamIDToHUDElement.Values.Count);
         if (!m_mapSteamIDToHUDElement.ContainsKey(steamID)) return null;
         return m_mapSteamIDToHUDElement[steamID];
     }
