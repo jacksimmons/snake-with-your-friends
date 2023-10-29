@@ -71,7 +71,8 @@ public class GameBehaviour : NetworkBehaviour
         GameSettingsSynced,
         MapLoaded,
         PlayerScriptsEnabled,
-        GameSetup,
+        FoodGenerated,
+        PlayersPlaced,
         UIElementsEnabled,
         GameStarted,
     }
@@ -106,12 +107,17 @@ public class GameBehaviour : NetworkBehaviour
         CmdOnReady();
     }
 
+
+    [Command]
+    private void CmdOnReady() { ServerOnReady(); }
+
+
     /// <summary>
     /// Increments the number of players that are ready in this stage.
     /// All players must be ready before the loading stage is incremented.
     /// </summary>
-    [Command]
-    private void CmdOnReady()
+    [Server]
+    private void ServerOnReady()
     {
         serverNumPlayersReady++;
 
@@ -130,7 +136,10 @@ public class GameBehaviour : NetworkBehaviour
         switch (serverPlayersLoadingStage)
         {
             case EGameLoadStage.PlayerScriptsEnabled:
-                ServerSetupGame();
+                ServerGenerateFood();
+                break;
+            case EGameLoadStage.FoodGenerated:
+                ServerPlacePlayers();
                 break;
         }
     }
@@ -160,7 +169,7 @@ public class GameBehaviour : NetworkBehaviour
             case EGameLoadStage.MapLoaded:
                 Instance.EnablePlayerScripts();
                 break;
-            case EGameLoadStage.GameSetup:
+            case EGameLoadStage.PlayersPlaced:
                 Instance.LoadUIElements();
                 break;
             case EGameLoadStage.UIElementsEnabled:
@@ -183,7 +192,11 @@ public class GameBehaviour : NetworkBehaviour
     [TargetRpc]
     private void RpcReceiveGameSettings(NetworkConnectionToClient _, GameSettingsData data)
     {
-        if (!isOwned) return;
+        if (!isOwned)
+        {
+            Debug.LogError("Client with authority was recipient of GameSettings.");
+            return;
+        }
         GameSettings.Saved = new(data);
         CmdOnReady();
     }
@@ -223,6 +236,12 @@ public class GameBehaviour : NetworkBehaviour
     [TargetRpc]
     private void RpcReceiveMap(NetworkConnectionToClient _, GameObject map)
     {
+        if (!isOwned)
+        {
+            Debug.LogError("Client with authority was recipient of Map.");
+            return;
+        }
+
         if (GameSettings.Saved.GameMode == EGameMode.SnakeRoyale)
         {
             SetupGroundTilemap(map, Vector2Int.zero);
@@ -255,11 +274,10 @@ public class GameBehaviour : NetworkBehaviour
     // ------------------------------------
 
 
-    // (Server) GAME SETUP HANDSHAKE ------
+    // GENERATE FOOD HANDSHAKE ------------
     [Server]
-    private void ServerSetupGame()
+    private void ServerGenerateFood()
     {
-        // --- Food ---
         int groundSize = GameSettings.Saved.GameSize;
         s_objects = new GameObject[groundSize * groundSize];
 
@@ -275,36 +293,36 @@ public class GameBehaviour : NetworkBehaviour
         }
 
         GenerateStartingFood();
-
-        // --- Players ---
-        PlacePlayers();
-
-        // IF Snake Royale
-        if (GameSettings.Saved.GameMode == EGameMode.SnakeRoyale)
-        {
-            List<Vector2> positions = new(CustomNetworkManager.Instance.Players.Count);
-            List<float> rotation_zs = new(CustomNetworkManager.Instance.Players.Count);
-            for (int i = 0; i < CustomNetworkManager.Instance.Players.Count; i++)
-            {
-                positions.Add(CustomNetworkManager.Instance.Players[i].transform.position);
-                rotation_zs.Add(CustomNetworkManager.Instance.Players[i].transform.rotation.eulerAngles.z);
-            }
-            PlacePlayersClientRpc(positions, rotation_zs);
-        }
-
-        Instance.CmdOnReady();
+        ServerOnReady();
     }
 
+
     [Server]
-    public void PlacePlayers()
+    private void GenerateStartingFood()
+    {
+        for (int i = 0; i < CustomNetworkManager.Instance.Players.Count; i++)
+        {
+            GenerateFood();
+        }
+    }
+    // ------------------------------------
+
+
+    // PLACE PLAYERS HANDSHAKE ------------
+    [Server]
+    public void ServerPlacePlayers()
     {
         if (GameSettings.Saved.GameMode == EGameMode.SnakeRoyale)
         {
-            PlacePlayers_SnakeRoyale(depth: 1, playersStartIndex: 0, Vector2Int.zero);
+            ServerPlacePlayers_SnakeRoyale(depth: 1, playersStartIndex: 0, Vector2Int.zero);
         }
+
+        ServerOnReady();
     }
+
+
     [Server]
-    private void PlacePlayers_SnakeRoyale(int depth, int playersStartIndex, Vector2Int bl)
+    private void ServerPlacePlayers_SnakeRoyale(int depth, int playersStartIndex, Vector2Int bl)
     {
         // Outer snakes (along the walls)
         // Calculate the maximum distance between snakes.
@@ -349,21 +367,14 @@ public class GameBehaviour : NetworkBehaviour
                 }
                 else
                 {
-                    PlacePlayers_SnakeRoyale(newDepth, playersStartIndex + 4, bl);
+                    ServerPlacePlayers_SnakeRoyale(newDepth, playersStartIndex + 4, bl);
                 }
             }
         }
     }
+    // ------------------------------------
 
-    [Server]
-    private void GenerateStartingFood()
-    {
-        for (int i = 0; i < CustomNetworkManager.Instance.Players.Count; i++)
-        {
-            GenerateFood();
-        }
-    }
-
+    // UI HANDSHAKE------------------------
     [Client]
     private void LoadUIElements()
     {
