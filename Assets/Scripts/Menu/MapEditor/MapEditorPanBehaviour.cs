@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Security.Cryptography;
 using UnityEngine;
 
-public class MapCreatorPanBehaviour : MonoBehaviour
+public class MapEditorPanBehaviour : MonoBehaviour
 {
     private const float speed = 0.01f;
 

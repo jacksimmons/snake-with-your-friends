@@ -56,10 +56,12 @@
     <Analyzer Include="C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\Extensions\Microsoft\Visual Studio Tools for Unity\Analyzers\Microsoft.Unity.Analyzers.dll" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assets\MapPreviewBehaviour.cs" />
     <Compile Include="Assets\Scripts\UI\DebugLabels.cs" />
     <Compile Include="Assets\Scripts\Extensions\BitField.cs" />
     <Compile Include="Assets\Scripts\Object\Projectile\Projectile.cs" />
     <Compile Include="Assets\SaveButtonGridBehaviour.cs" />
+    <Compile Include="Assets\MapEditorLoadBehaviour.cs" />
     <Compile Include="Assets\Scripts\Object\PlayerSpawner.cs" />
     <Compile Include="Assets\Scripts\Game\Puzzle\GoalBehaviour.cs" />
     <Compile Include="Assets\Scripts\Menu\Lobby\PowerupToggleContainer.cs" />
@@ -70,7 +72,7 @@
     <Compile Include="Assets\Scripts\UI\HUD\PlayerHUDElement.cs" />
     <Compile Include="Assets\Scripts\Menu\SettingsMenu.cs" />
     <Compile Include="Assets\Scripts\UI\SpectateBehaviour.cs" />
-    <Compile Include="Assets\Scripts\Menu\Creator\MapCreatorPanBehaviour.cs" />
+    <Compile Include="Assets\Scripts\Menu\MapEditor\MapEditorPanBehaviour.cs" />
     <Compile Include="Assets\Scripts\Menu\EditorMenu.cs" />
     <Compile Include="Assets\Scripts\Menu\JoinMenu.cs" />
     <Compile Include="Assets\Scripts\Player\PlayerStatus.cs" />
@@ -86,7 +88,7 @@
     <Compile Include="Assets\Scripts\Extensions\Vector2Comparison.cs" />
     <Compile Include="Assets\Scripts\UI\StatusEffectUI.cs" />
     <Compile Include="Assets\Scripts\Menu\Main\SentenceChangerButton.cs" />
-    <Compile Include="Assets\Scripts\Menu\Creator\MapCreatorPaintBehaviour.cs" />
+    <Compile Include="Assets\Scripts\Menu\MapEditor\MapEditorPaintBehaviour.cs" />
     <Compile Include="Assets\Scripts\Cutscene\SnakeActor.cs" />
     <Compile Include="Assets\Scripts\Object\Grid\GridObject.cs" />
     <Compile Include="Assets\Scripts\Extensions\RandomDistribution.cs" />
@@ -122,12 +124,12 @@
     <Compile Include="Assets\Scripts\Menu\Main\MainMenuSnakeSpawner.cs" />
     <Compile Include="Assets\Scripts\Menu\Lobby\HostSettingsHandler.cs" />
     <Compile Include="Assets\Scripts\Menu\Lobby\Lobby.cs" />
-    <Compile Include="Assets\Scripts\Menu\Creator\Creator.cs" />
+    <Compile Include="Assets\Scripts\Menu\MapEditor\MapEditor.cs" />
     <Compile Include="Assets\Scripts\Unused\FollowPlayer.cs" />
     <Compile Include="Assets\Scripts\Files\GameSettings.cs" />
     <Compile Include="Assets\Scripts\UI\MainMenuButton.cs" />
     <Compile Include="Assets\Scripts\Powerup\Powerup.cs" />
-    <Compile Include="Assets\Scripts\Menu\Creator\MapCreatorZoomBehaviour.cs" />
+    <Compile Include="Assets\Scripts\Menu\MapEditor\MapEditorZoomBehaviour.cs" />
     <Compile Include="Assets\Scripts\Menu\Main\SentenceBehaviour.cs" />
     <Compile Include="Assets\Scripts\Steamworks.NET\SteamManager.cs" />
     <Compile Include="Assets\Scripts\Game\SnakeRoyaleBehaviour.cs" />
@@ -142,7 +144,7 @@
     <Compile Include="Assets\Scripts\Misc\Chungus.cs" />
     <Compile Include="Assets\Scripts\Networking\SteamLobby.cs" />
     <Compile Include="Assets\Scripts\Networking\PlayerObjectController.cs" />
-    <Compile Include="Assets\Scripts\Menu\Creator\MapCreatorUIHandler.cs" />
+    <Compile Include="Assets\Scripts\Menu\MapEditor\MapEditorUIHandler.cs" />
     <Compile Include="Assets\Scripts\Object\Shooter.cs" />
   </ItemGroup>
   <ItemGroup>

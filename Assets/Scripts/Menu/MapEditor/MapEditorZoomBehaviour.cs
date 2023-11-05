@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 
-public class MapCreatorZoomBehaviour : MonoBehaviour
+public class MapEditorZoomBehaviour : MonoBehaviour
 {
     private const float MOUSE_ZOOM_MIN = 1f;
     private const float MOUSE_ZOOM_MAX = 10f;
@@ -14,9 +14,13 @@ public class MapCreatorZoomBehaviour : MonoBehaviour
     private float previousMouseZoom;
     private float currentMouseZoom = 1f;
 
+    private MapEditorUIHandler m_UI;
+
 
     private void Start()
     {
+        m_UI = GetComponent<MapEditorUIHandler>();
+
         previousMouseZoom = currentMouseZoom = startingMouseZoom = Camera.main.orthographicSize;
     }
 
@@ -32,7 +36,7 @@ public class MapCreatorZoomBehaviour : MonoBehaviour
         Camera.main.fieldOfView = currentMouseZoom;
 
         Camera.main.orthographicSize = currentMouseZoom;
-        GetComponent<MapCreatorUIHandler>().UpdateZoom(startingMouseZoom / currentMouseZoom);
+        m_UI.UpdateZoom(startingMouseZoom / currentMouseZoom);
 
         previousMouseZoom = currentMouseZoom;
     }

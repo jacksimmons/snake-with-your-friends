@@ -5,7 +5,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
-public class MapCreatorPaintBehaviour : MonoBehaviour
+public class MapEditorPaintBehaviour : MonoBehaviour
 {
     public Tile selectedTile;
     public ETileType selectedType;
@@ -29,6 +29,8 @@ public class MapCreatorPaintBehaviour : MonoBehaviour
 
     public void LoadChildrenIntoMapping(Transform parent)
     {
+        m_objectMapping.Clear();
+        NumObjects = 0;
         foreach (Transform transform in parent)
         {
             m_objectMapping.Add(

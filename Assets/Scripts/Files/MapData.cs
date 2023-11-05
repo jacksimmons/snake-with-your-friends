@@ -65,13 +65,15 @@ public class MapData
     public readonly MapTileData[] groundData;
     public readonly MapTileData[] wallData;
     public readonly MapObjectData[] objectData;
+    public readonly int bgIndex;
 
 
-    public MapData(MapTileData[] groundData, MapTileData[] wallData, MapObjectData[] objectData)
+    public MapData(MapTileData[] groundData, MapTileData[] wallData, MapObjectData[] objectData, int bgIndex)
     {
         this.groundData = groundData;
         this.wallData = wallData;
         this.objectData = objectData;
+        this.bgIndex = bgIndex;
     }
 
 

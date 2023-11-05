@@ -17,13 +17,13 @@ public class EditorMenu : MonoBehaviour
     [SerializeField]
     private Camera m_cam;
     [SerializeField]
-    private MapCreatorPaintBehaviour m_painter;
-    [SerializeField]
     private Tilemap m_groundLayer;
     [SerializeField]
     private Tilemap m_wallLayer;
     [SerializeField]
     private GameObject m_objectLayer;
+    [SerializeField]
+    private GameObject m_backgroundLayer;
 
     [SerializeField]
     private TMP_InputField m_saveInfo;
@@ -44,16 +44,16 @@ public class EditorMenu : MonoBehaviour
                 m_painter.currentTilemap = tilemap;
                 SetLayerOpacity(m_painter.currentTilemap, 1);
 
-                GetComponent<MapCreatorUIHandler>().ToggleTileUI(true);
-                GetComponent<MapCreatorUIHandler>().ToggleObjectUI(false);
+                m_UI.ToggleTileUI(true);
+                m_UI.ToggleObjectUI(false);
             }
 
             void SetLayerToObject()
             {
                 m_objectMode = true;
 
-                GetComponent<MapCreatorUIHandler>().ToggleTileUI(false);
-                GetComponent<MapCreatorUIHandler>().ToggleObjectUI(true);
+                m_UI.ToggleTileUI(false);
+                m_UI.ToggleObjectUI(true);
             }
 
             SetAllLayerOpacities(DISABLED_LAYER_OPACITY);
@@ -81,14 +81,22 @@ public class EditorMenu : MonoBehaviour
 
     [SerializeField]
     private GameObject[] m_objects;
-    private int m_objectIndex;
 
+    private int m_objectIndex;
     private bool m_objectMode = false;
+
+    [SerializeField]
+    private Sprite[] m_backgrounds;
+    private int m_bgIndex = 0;
+
+    private MapEditorUIHandler m_UI;
+    [SerializeField]
+    private MapEditorPaintBehaviour m_painter;
 
 
     private void Start()
     {
-        LoadMapFromFile();
+        m_UI = GetComponent<MapEditorUIHandler>();
     }
 
 
@@ -100,10 +108,14 @@ public class EditorMenu : MonoBehaviour
         {
             GridPos = currentGridPos;
 
-            GetComponent<MapCreatorUIHandler>().UpdateGridPos(GridPos);
+            m_UI.UpdateGridPos(GridPos);
         }
 
         HandleLayerInput();
+        HandleBackgroundInput();
+
+        if (Input.GetKeyDown(KeyCode.LeftControl))
+            ToolInUse = ECreatorTool.None;
 
         if (!m_objectMode)
             HandleTileInput();
@@ -131,6 +143,16 @@ public class EditorMenu : MonoBehaviour
     }
 
 
+    private void HandleBackgroundInput()
+    {
+        if (Input.GetKeyDown(KeyCode.Minus))
+            ChangeIndex(ref m_bgIndex, m_backgrounds.Length, -1);
+        else if (Input.GetKeyDown(KeyCode.Equals))
+            ChangeIndex(ref m_bgIndex, m_backgrounds.Length, 1);
+        UpdateBackgroundSprite();
+    }
+
+
     private void HandleTileInput()
     {
         HandleToolInput();
@@ -143,20 +165,16 @@ public class EditorMenu : MonoBehaviour
 
         m_painter.selectedTile = m_tiles[m_tileIndex];
         m_painter.selectedType = (ETileType)m_tileIndex;
-        GetComponent<MapCreatorUIHandler>().UpdateTileIcon(m_painter.selectedTile.sprite);
+        m_UI.UpdateTileIcon(m_painter.selectedTile.sprite);
     }
 
 
     private void HandleToolInput()
     {
         if (Input.GetKeyDown(KeyCode.P))
-        {
             ToolInUse = ECreatorTool.Draw;
-        }
-        if (Input.GetKeyDown(KeyCode.F))
-        {
+        else if (Input.GetKeyDown(KeyCode.F))
             ToolInUse = ECreatorTool.Fill;
-        }
     }
 
 
@@ -204,7 +222,14 @@ public class EditorMenu : MonoBehaviour
             ChangeIndex(ref m_objectIndex, m_objects.Length, 1);
 
         m_painter.selectedObject = m_objects[m_objectIndex];
-        GetComponent<MapCreatorUIHandler>().UpdateObjectIcon(m_painter.selectedObject);
+        m_UI.UpdateObjectIcon(m_painter.selectedObject);
+    }
+
+
+    private void UpdateBackgroundSprite()
+    {
+        SpriteRenderer sr = m_backgroundLayer.GetComponent<SpriteRenderer>();
+        sr.sprite = m_backgrounds[m_bgIndex];
     }
 
 
@@ -257,7 +282,6 @@ public class EditorMenu : MonoBehaviour
                 }
             }
 
-            Debug.Log(data.Count);
             return data.ToArray();
         }
 
@@ -313,8 +337,7 @@ public class EditorMenu : MonoBehaviour
         MapTileData[] groundData = GetTileDataArray(m_groundLayer);
         MapTileData[] wallData = GetTileDataArray(m_wallLayer);
         MapObjectData[] objData = m_painter.GetObjectData();
-
-        MapData map = new(groundData, wallData, objData);
+        MapData map = new(groundData, wallData, objData, m_bgIndex);
 
         Saving.SaveToFile(map, savePath);
 
@@ -329,13 +352,23 @@ public class EditorMenu : MonoBehaviour
     }
 
 
-    public void LoadMapFromFile()
+    public void LoadMapFromFile(string filename)
     {
-        MapData map = Saving.LoadFromFile<MapData>("Maps/.map");
+        MapData map = Saving.LoadFromFile<MapData>($"Maps/{filename}");
 
         MapTileData[] groundData = map.groundData;
         MapTileData[] wallData = map.wallData;
         MapObjectData[] objectData = map.objectData;
+        int bgIndex = map.bgIndex;
+
+        m_groundLayer.ClearAllTiles();
+        m_wallLayer.ClearAllTiles();
+
+        // Clear any existing objects
+        Transform objLayerParent = m_objectLayer.transform.parent;
+        Destroy(m_objectLayer);
+        m_objectLayer = Instantiate(new GameObject("Object"), objLayerParent);
+        m_objectLayer.transform.position = new Vector3(0.5f, 0.5f, 0);
 
         void AddTileToTilemap(MapTileData tile, Tilemap tilemap)
         {
@@ -352,6 +385,8 @@ public class EditorMenu : MonoBehaviour
         for (int i = 0; i < groundData.Length; i++) { AddTileToTilemap(groundData[i], m_groundLayer); }
         for (int i = 0; i < wallData.Length; i++) { AddTileToTilemap(wallData[i], m_wallLayer); }
         for (int i = 0; i < objectData.Length; i++) { AddObjectToObjmap(objectData[i], m_objectLayer); }
+        m_bgIndex = map.bgIndex;
+        UpdateBackgroundSprite();
 
         m_painter.LoadChildrenIntoMapping(m_objectLayer.transform);
     }
