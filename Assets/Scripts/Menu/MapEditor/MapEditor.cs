@@ -1,7 +1,7 @@
 public enum ECreatorTool
 {
     None,
-    Draw,
+    Brush,
     Fill,
 }
 public enum ECreatorLayer

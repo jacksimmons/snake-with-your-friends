@@ -21,7 +21,8 @@ public static class Saving
     /// </summary>
     public static void SaveToFile<T>(T serializable, string filename) where T : class
     {
-        LoadingIcon.Instance.Toggle(true);
+        if (LoadingIcon.Instance)
+            LoadingIcon.Instance.Toggle(true);
 
         if (serializable is ICached cached)
             cached.Cache();
@@ -38,7 +39,8 @@ public static class Saving
 
         Debug.Log(filename);
 
-        LoadingIcon.Instance.Toggle(false);
+        if (LoadingIcon.Instance)
+            LoadingIcon.Instance.Toggle(false);
     }
 
     /// <summary>
@@ -47,7 +49,8 @@ public static class Saving
     /// </summary>
     public static T LoadFromFile<T>(string filename) where T : class, new()
     {
-        LoadingIcon.Instance.Toggle(true);
+        if (LoadingIcon.Instance)
+            LoadingIcon.Instance.Toggle(true);
 
         string dest = Application.persistentDataPath + "/" + filename;
         FileStream fs;
@@ -64,7 +67,8 @@ public static class Saving
             if (val is ICached cached)
                 cached.Cache();
 
-            LoadingIcon.Instance.Toggle(false);
+            if (LoadingIcon.Instance)
+                LoadingIcon.Instance.Toggle(false);
             return val;
         }
         else

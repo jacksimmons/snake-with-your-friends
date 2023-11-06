@@ -146,6 +146,7 @@
     <Compile Include="Assets\Scripts\Networking\PlayerObjectController.cs" />
     <Compile Include="Assets\Scripts\Menu\MapEditor\MapEditorUIHandler.cs" />
     <Compile Include="Assets\Scripts\Object\Shooter.cs" />
+    <Compile Include="Assets\Scripts\Menu\MapEditor\MapLoader.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Mirror\Plugins\Mono.Cecil\Mono.CecilX.dll" />

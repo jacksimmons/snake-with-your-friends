@@ -12,8 +12,10 @@ public class LoadingIcon : MonoBehaviour
         get
         {
             if (_instance != null) return _instance;
-            return _instance = GameObject.FindWithTag("LoadingIcon")
-                .GetComponent<LoadingIcon>();
+
+            GameObject go = GameObject.FindWithTag("LoadingIcon");
+            if (go == null) return null;
+            return _instance = go.GetComponent<LoadingIcon>();
         }
     }
 

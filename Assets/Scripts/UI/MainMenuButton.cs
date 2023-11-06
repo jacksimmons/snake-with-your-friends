@@ -15,7 +15,8 @@ public class MainMenuButton : MonoBehaviour
             cnm.StopHost();
         }
 
-        LoadingIcon.Instance.Toggle(true);
+        if (LoadingIcon.Instance)
+            LoadingIcon.Instance.Toggle(true);
         SceneManager.LoadScene("MainMenu");
     }
 }

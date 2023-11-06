@@ -24,6 +24,15 @@ public static class Extensions
         return (-1 == prev) ? Arr[Arr.Length - 1] : Arr[prev];
     }
 
+    public static void ChangeIndex(ref int index, int length, int increment)
+    {
+        index += increment;
+        if (index < 0)
+            index = length - 1;
+        else if (index > length - 1)
+            index = 0;
+    }
+
     public static class Vectors
     {
         public static Vector2 mod(Vector2 vec, int mod)

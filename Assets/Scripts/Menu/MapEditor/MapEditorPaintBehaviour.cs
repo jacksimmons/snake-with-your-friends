@@ -19,11 +19,10 @@ public class MapEditorPaintBehaviour : MonoBehaviour
 
     private Dictionary<Vector3Int, GameObject> m_objectMapping = new();
 
-    public const int MAX_OBJECTS = 100;
+    public const int MAX_OBJECTS = 200;
     public int NumObjects { get; private set; } = 0;
 
-    public const int MAX_FILL_DEPTH = 1000;
-    private int currentFillDepth = 0;
+    public const int MAX_FILL_DEPTH = 100;
     private Queue<Vector3Int> fillQueue = new();
 
 
@@ -57,7 +56,7 @@ public class MapEditorPaintBehaviour : MonoBehaviour
     {
         switch (tool)
         {
-            case ECreatorTool.Draw:
+            case ECreatorTool.Brush:
                 Draw(pos);
                 break;
         }
@@ -97,11 +96,12 @@ public class MapEditorPaintBehaviour : MonoBehaviour
 
         TryAddToQueue(start);
 
+        int currentFillDepth = 0;
         while (fillQueue.Count > 0)
         {
             if (currentFillDepth >= MAX_FILL_DEPTH)
             {
-                print("Depth reached!");
+                print($"Max fill depth reached. {MAX_FILL_DEPTH}");
                 break;
             }
 
@@ -121,9 +121,7 @@ public class MapEditorPaintBehaviour : MonoBehaviour
             yield return new WaitForEndOfFrame();
         }
 
-        currentFillDepth = 0;
         fillQueue.Clear();
-
         yield return null;
     }
 

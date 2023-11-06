@@ -29,33 +29,19 @@ public class EditorMenu : MonoBehaviour
     private TMP_InputField m_saveInfo;
     private string m_savedName = null;
 
-    public ECreatorTool ToolInUse { get; private set; }
+    private ECreatorTool m_toolInUse = ECreatorTool.Brush;
+    public ECreatorTool ToolInUse
+    {
+        get { return m_toolInUse; }
+        private set { m_toolInUse = value; }
+    }
 
-    private ECreatorLayer m_currentLayer;
+    private ECreatorLayer m_currentLayer = ECreatorLayer.Ground;
     public ECreatorLayer CurrentLayer
     {
         get { return m_currentLayer; }
         private set
         {
-            void SetLayerToTilemap(Tilemap tilemap)
-            {
-                m_objectMode = false;
-
-                m_painter.currentTilemap = tilemap;
-                SetLayerOpacity(m_painter.currentTilemap, 1);
-
-                m_UI.ToggleTileUI(true);
-                m_UI.ToggleObjectUI(false);
-            }
-
-            void SetLayerToObject()
-            {
-                m_objectMode = true;
-
-                m_UI.ToggleTileUI(false);
-                m_UI.ToggleObjectUI(true);
-            }
-
             SetAllLayerOpacities(DISABLED_LAYER_OPACITY);
             switch (value)
             {
@@ -75,21 +61,16 @@ public class EditorMenu : MonoBehaviour
 
     private Vector3Int GridPos { get; set; }
 
-    [SerializeField]
-    private Tile[] m_tiles = new Tile[3];
-    private int m_tileIndex;
-
-    [SerializeField]
-    private GameObject[] m_objects;
+    private int m_tileIndex = 0;
 
     private int m_objectIndex;
     private bool m_objectMode = false;
 
-    [SerializeField]
-    private Sprite[] m_backgrounds;
-    private int m_bgIndex = 0;
-
     private MapEditorUIHandler m_UI;
+
+    [SerializeField]
+    public MapLoader Map;
+
     [SerializeField]
     private MapEditorPaintBehaviour m_painter;
 
@@ -97,6 +78,10 @@ public class EditorMenu : MonoBehaviour
     private void Start()
     {
         m_UI = GetComponent<MapEditorUIHandler>();
+
+        ApplyTileInput();
+        ApplyObjectInput();
+        SetLayerToTilemap(m_groundLayer);
     }
 
 
@@ -112,7 +97,7 @@ public class EditorMenu : MonoBehaviour
         }
 
         HandleLayerInput();
-        HandleBackgroundInput();
+        Map.HandleBackgroundInput();
 
         if (Input.GetKeyDown(KeyCode.LeftControl))
             ToolInUse = ECreatorTool.None;
@@ -143,27 +128,25 @@ public class EditorMenu : MonoBehaviour
     }
 
 
-    private void HandleBackgroundInput()
-    {
-        if (Input.GetKeyDown(KeyCode.Minus))
-            ChangeIndex(ref m_bgIndex, m_backgrounds.Length, -1);
-        else if (Input.GetKeyDown(KeyCode.Equals))
-            ChangeIndex(ref m_bgIndex, m_backgrounds.Length, 1);
-        UpdateBackgroundSprite();
-    }
-
-
     private void HandleTileInput()
     {
         HandleToolInput();
         HandleClickInput(false);
 
         if (Input.GetKeyDown(KeyCode.LeftBracket))
-            ChangeIndex(ref m_tileIndex, m_tiles.Length, -1);
+            Extensions.ChangeIndex(ref m_tileIndex, Map.Tiles.Length, -1);
         else if (Input.GetKeyDown(KeyCode.RightBracket))
-            ChangeIndex(ref m_tileIndex, m_tiles.Length, 1);
+            Extensions.ChangeIndex(ref m_tileIndex, Map.Tiles.Length, 1);
+        else
+            return;
 
-        m_painter.selectedTile = m_tiles[m_tileIndex];
+        ApplyTileInput();
+    }
+
+
+    private void ApplyTileInput()
+    {
+        m_painter.selectedTile = Map.Tiles[m_tileIndex];
         m_painter.selectedType = (ETileType)m_tileIndex;
         m_UI.UpdateTileIcon(m_painter.selectedTile.sprite);
     }
@@ -171,8 +154,8 @@ public class EditorMenu : MonoBehaviour
 
     private void HandleToolInput()
     {
-        if (Input.GetKeyDown(KeyCode.P))
-            ToolInUse = ECreatorTool.Draw;
+        if (Input.GetKeyDown(KeyCode.B))
+            ToolInUse = ECreatorTool.Brush;
         else if (Input.GetKeyDown(KeyCode.F))
             ToolInUse = ECreatorTool.Fill;
     }
@@ -188,7 +171,7 @@ public class EditorMenu : MonoBehaviour
         {
             switch (ToolInUse)
             {
-                case ECreatorTool.Draw:
+                case ECreatorTool.Brush:
                     draw(GridPos);
                     break;
                 case ECreatorTool.Fill:
@@ -196,11 +179,11 @@ public class EditorMenu : MonoBehaviour
                     break;
             }
         }
-        if (Input.GetMouseButton(1))
+        else if (Input.GetMouseButton(1))
         {
             switch (ToolInUse)
             {
-                case ECreatorTool.Draw:
+                case ECreatorTool.Brush:
                     erase(GridPos);
                     break;
                 case ECreatorTool.Fill:
@@ -217,29 +200,40 @@ public class EditorMenu : MonoBehaviour
         HandleClickInput(true);
 
         if (Input.GetKeyDown(KeyCode.LeftBracket))
-            ChangeIndex(ref m_objectIndex, m_objects.Length, -1);
+            Extensions.ChangeIndex(ref m_objectIndex, Map.Objects.Length, -1);
         else if (Input.GetKeyDown(KeyCode.RightBracket))
-            ChangeIndex(ref m_objectIndex, m_objects.Length, 1);
+            Extensions.ChangeIndex(ref m_objectIndex, Map.Objects.Length, 1);
+        else
+            return;
 
-        m_painter.selectedObject = m_objects[m_objectIndex];
+        ApplyObjectInput();
+    }
+
+
+    private void ApplyObjectInput()
+    {
+        m_painter.selectedObject = Map.Objects[m_objectIndex];
         m_UI.UpdateObjectIcon(m_painter.selectedObject);
     }
 
 
-    private void UpdateBackgroundSprite()
+    void SetLayerToTilemap(Tilemap tilemap)
     {
-        SpriteRenderer sr = m_backgroundLayer.GetComponent<SpriteRenderer>();
-        sr.sprite = m_backgrounds[m_bgIndex];
+        m_objectMode = false;
+
+        m_painter.currentTilemap = tilemap;
+        SetLayerOpacity(m_painter.currentTilemap, 1);
+
+        m_UI.ToggleTileUI(true);
+        m_UI.ToggleObjectUI(false);
     }
 
-
-    private void ChangeIndex(ref int index, int length, int increment)
+    void SetLayerToObject()
     {
-        index += increment;
-        if (index < 0)
-            index = length - 1;
-        else if (index > length - 1)
-            index = 0;
+        m_objectMode = true;
+
+        m_UI.ToggleTileUI(false);
+        m_UI.ToggleObjectUI(true);
     }
 
 
@@ -262,7 +256,6 @@ public class EditorMenu : MonoBehaviour
         SetLayerOpacity(m_groundLayer, opacity);
         SetLayerOpacity(m_wallLayer, opacity);
     }
-
 
     public void SaveMapToFile()
     {
@@ -290,9 +283,9 @@ public class EditorMenu : MonoBehaviour
             if (sprite == null) return null;
 
             // Find index of matching tile; this is the ETileType in int form.
-            for (int k = 0; k < m_tiles.Length; k++)
+            for (int k = 0; k < Map.Tiles.Length; k++)
             {
-                if (m_tiles[k].sprite == sprite)
+                if (Map.Tiles[k].sprite == sprite)
                 {
                     return new((short)x, (short)y, (ETileType)k);
                 }
@@ -337,7 +330,7 @@ public class EditorMenu : MonoBehaviour
         MapTileData[] groundData = GetTileDataArray(m_groundLayer);
         MapTileData[] wallData = GetTileDataArray(m_wallLayer);
         MapObjectData[] objData = m_painter.GetObjectData();
-        MapData map = new(groundData, wallData, objData, m_bgIndex);
+        MapData map = new(groundData, wallData, objData, Map.BackgroundIndex);
 
         Saving.SaveToFile(map, savePath);
 
@@ -349,45 +342,5 @@ public class EditorMenu : MonoBehaviour
 
         SetLayerOpacity(m_groundLayer, ground_a);
         SetLayerOpacity(m_wallLayer, wall_a);
-    }
-
-
-    public void LoadMapFromFile(string filename)
-    {
-        MapData map = Saving.LoadFromFile<MapData>($"Maps/{filename}");
-
-        MapTileData[] groundData = map.groundData;
-        MapTileData[] wallData = map.wallData;
-        MapObjectData[] objectData = map.objectData;
-        int bgIndex = map.bgIndex;
-
-        m_groundLayer.ClearAllTiles();
-        m_wallLayer.ClearAllTiles();
-
-        // Clear any existing objects
-        Transform objLayerParent = m_objectLayer.transform.parent;
-        Destroy(m_objectLayer);
-        m_objectLayer = Instantiate(new GameObject("Object"), objLayerParent);
-        m_objectLayer.transform.position = new Vector3(0.5f, 0.5f, 0);
-
-        void AddTileToTilemap(MapTileData tile, Tilemap tilemap)
-        {
-            tilemap.SetTile(new Vector3Int(tile.x, tile.y, 0), m_tiles[(int)tile.type]); 
-        }
-
-        void AddObjectToObjmap(MapObjectData obj, GameObject objmap)
-        {
-            GameObject go = Instantiate(m_objects[(int)obj.type], objmap.transform);
-            go.transform.localPosition = new(obj.x, obj.y);
-            go.transform.localRotation = Quaternion.Euler(Vector3.forward * obj.rotation);
-        }
-
-        for (int i = 0; i < groundData.Length; i++) { AddTileToTilemap(groundData[i], m_groundLayer); }
-        for (int i = 0; i < wallData.Length; i++) { AddTileToTilemap(wallData[i], m_wallLayer); }
-        for (int i = 0; i < objectData.Length; i++) { AddObjectToObjmap(objectData[i], m_objectLayer); }
-        m_bgIndex = map.bgIndex;
-        UpdateBackgroundSprite();
-
-        m_painter.LoadChildrenIntoMapping(m_objectLayer.transform);
     }
 }

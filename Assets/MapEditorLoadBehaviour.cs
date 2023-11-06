@@ -74,7 +74,7 @@ public class MapEditorLoadBehaviour : MonoBehaviour
 
     public void OnLoadMapPressed(string filename)
     {
-        m_menu.LoadMapFromFile(filename);
+        m_menu.Map.LoadMapFromFile(filename);
         OnBackButtonPressed();
     }
 }
