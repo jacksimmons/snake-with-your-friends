@@ -6,7 +6,9 @@ using UnityEngine;
 
 public interface ICached
 {
-    // Caching happens on Saves and Loads, can be used to save a static instance to reduce file use
+    /// <summary>
+    /// Saves the instance as the .Saved static member variable for its class.
+    /// </summary>
     void Cache();
 }
 
@@ -15,6 +17,7 @@ public static class Saving
 {
     /// <summary>
     /// Serialises objects and saves them to a given file location.
+    /// Also calls .Cache() on the object beforehand if it : ICached.
     /// </summary>
     public static void SaveToFile<T>(T serializable, string filename) where T : class
     {
@@ -39,8 +42,8 @@ public static class Saving
     }
 
     /// <summary>
-    /// Deserialises saved objects into usable objects.
-    /// Returns plain "object" type, so casting is necessary.
+    /// Deserialises a serialised object stored in a file.
+    /// Calls .Cache() on the object if it : ICached.
     /// </summary>
     public static T LoadFromFile<T>(string filename) where T : class, new()
     {
