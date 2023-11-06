@@ -28,22 +28,27 @@ public class HostSettingsHandler : MonoBehaviour
     [SerializeField]
     private GameObject[] m_powerupToggleContainers;
 
-    private GameSettings m_currentGameSettings = new();
+    private GameSettings m_currentGameSettings;
 
 
     private void Start()
     {
-        m_speedSlider.value = GameSettings.Saved.TimeToMove;
+        if (GameSettings.Saved == null)
+            m_currentGameSettings = new GameSettings();
+        else
+            m_currentGameSettings = GameSettings.Saved;
+
+        m_speedSlider.value = m_currentGameSettings.TimeToMove;
         m_speedLast = m_speedSlider.value;
         UpdateSpeedLabels();
 
-        m_friendlyFireToggle.isOn = GameSettings.Saved.FriendlyFire;
+        m_friendlyFireToggle.isOn = m_currentGameSettings.FriendlyFire;
         m_friendlyFireToggle.onValueChanged.AddListener(OnFriendlyFireTogglePressed);
         SetFriendlyFireLabel(m_friendlyFireToggle.isOn);
 
         m_gameModeDropdown.onValueChanged.AddListener(OnGameModeUpdate);
 
-        m_mapSizeSlider.value = GameSettings.Saved.GameSize;
+        m_mapSizeSlider.value = m_currentGameSettings.GameSize;
         m_mapSizeSlider.onValueChanged.AddListener(OnMapSizeUpdate);
         SetMapSizeLabel(m_mapSizeSlider.value);
 
@@ -51,7 +56,7 @@ public class HostSettingsHandler : MonoBehaviour
         {
             EFoodType foodType = go.GetComponent<PowerupToggleContainer>().foodType;
             go.GetComponentInChildren<Toggle>().onValueChanged.AddListener((pressed) => OnPowerupTogglePressed(pressed, foodType));
-            go.GetComponentInChildren<Toggle>().isOn = GameSettings.Saved.foodSettings.GetFoodEnabled(foodType);
+            go.GetComponentInChildren<Toggle>().isOn = m_currentGameSettings.foodSettings.GetFoodEnabled(foodType);
         }
     }
 
@@ -71,7 +76,7 @@ public class HostSettingsHandler : MonoBehaviour
 
         m_speedVerbose.text = $"Snakes move every {m_speedSlider.value} seconds";
 
-        string speed = "";
+        string speed;
         if (m_speedSlider.value <= 0.25f) speed = ": BAG GUY";
         else if (m_speedSlider.value <= 0.5f) speed = ": FAST";
         else if (m_speedSlider.value <= 0.75f) speed = ": SLOW";

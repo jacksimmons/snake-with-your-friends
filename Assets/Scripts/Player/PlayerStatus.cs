@@ -229,8 +229,6 @@ public class PlayerStatus : NetworkBehaviour
     private void Update()
     {
         HandleTime();
-
-        HandleVisualEffects();
         HandlePassiveEffects();
     }
 
@@ -256,20 +254,6 @@ public class PlayerStatus : NetworkBehaviour
                 i--;
             }
             effect.SubtractCooldown(Time.deltaTime);
-        }
-    }
-
-    private void HandleVisualEffects()
-    {
-        Transform tooManyPints = transform.Find("TooManyPints");
-        if (NumPints > 0 && tooManyPints != null)
-        {
-            // Add the effect as a child
-            GameObject go = new GameObject("TooManyPints");
-            go.transform.parent = transform;
-            go.layer = LayerMask.NameToLayer("Effects");
-            go.AddComponent<TooManyPints>();
-            go.GetComponent<TooManyPints>();
         }
     }
 
@@ -515,7 +499,7 @@ public class PlayerStatus : NetworkBehaviour
                 Effect internalProcessing = new Effect(EEffect.None, lifetime: 20, causes:
                     new Effect[] { pissing });
 
-                Effect drunk = new Effect(EEffect.Drunk);
+                Effect drunk = new Effect(EEffect.Drunk, lifetime: 0, isOneOff: true);
 
                 ItemSlotEffect = new Effect(EEffect.None, lifetime: 0, causes:
                     new Effect[] { drunk, internalProcessing });
