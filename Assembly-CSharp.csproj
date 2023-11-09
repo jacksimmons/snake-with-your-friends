@@ -63,6 +63,7 @@
     <Compile Include="Assets\SaveButtonGridBehaviour.cs" />
     <Compile Include="Assets\MapEditorLoadBehaviour.cs" />
     <Compile Include="Assets\Scripts\Object\PlayerSpawner.cs" />
+    <Compile Include="Assets\Scripts\Menu\MapEditor\MapLoader.cs" />
     <Compile Include="Assets\Scripts\Game\Puzzle\GoalBehaviour.cs" />
     <Compile Include="Assets\Scripts\Menu\Lobby\PowerupToggleContainer.cs" />
     <Compile Include="Assets\Scripts\Object\Grid\TeleporterPair.cs" />
@@ -146,7 +147,6 @@
     <Compile Include="Assets\Scripts\Networking\PlayerObjectController.cs" />
     <Compile Include="Assets\Scripts\Menu\MapEditor\MapEditorUIHandler.cs" />
     <Compile Include="Assets\Scripts\Object\Shooter.cs" />
-    <Compile Include="Assets\Scripts\Menu\MapEditor\MapLoader.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Mirror\Plugins\Mono.Cecil\Mono.CecilX.dll" />

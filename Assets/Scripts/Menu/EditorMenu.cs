@@ -59,6 +59,7 @@ public class EditorMenu : MonoBehaviour
         }
     }
 
+    private Vector3 MouseWorldPos { get; set; }
     private Vector3Int GridPos { get; set; }
 
     private int m_tileIndex = 0;
@@ -92,7 +93,6 @@ public class EditorMenu : MonoBehaviour
         if (currentGridPos != GridPos)
         {
             GridPos = currentGridPos;
-
             m_UI.UpdateGridPos(GridPos);
         }
 
@@ -111,9 +111,8 @@ public class EditorMenu : MonoBehaviour
 
     private Vector3Int GetGridPos()
     {
-        Vector3 worldMousePos =
-            Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        return m_painter.currentTilemap.WorldToCell(worldMousePos);
+        Vector3 mouseWorld = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        return m_painter.currentTilemap.WorldToCell(mouseWorld);
     }
 
 
@@ -158,6 +157,8 @@ public class EditorMenu : MonoBehaviour
             ToolInUse = ECreatorTool.Brush;
         else if (Input.GetKeyDown(KeyCode.F))
             ToolInUse = ECreatorTool.Fill;
+        else if (Input.GetKeyDown(KeyCode.O))
+            ToolInUse = ECreatorTool.SelectObject;
     }
 
 
@@ -172,10 +173,15 @@ public class EditorMenu : MonoBehaviour
             switch (ToolInUse)
             {
                 case ECreatorTool.Brush:
+                    m_painter.DeselectObject();
                     draw(GridPos);
                     break;
                 case ECreatorTool.Fill:
+                    m_painter.DeselectObject();
                     fill(GridPos, true);
+                    break;
+                case ECreatorTool.SelectObject:
+                    m_painter.SelectObject(GridPos);
                     break;
             }
         }
@@ -212,8 +218,8 @@ public class EditorMenu : MonoBehaviour
 
     private void ApplyObjectInput()
     {
-        m_painter.selectedObject = Map.Objects[m_objectIndex];
-        m_UI.UpdateObjectIcon(m_painter.selectedObject);
+        m_painter.chosenObjectPrefab = Map.Objects[m_objectIndex];
+        m_UI.UpdateObjectIcon(m_painter.chosenObjectPrefab);
     }
 
 

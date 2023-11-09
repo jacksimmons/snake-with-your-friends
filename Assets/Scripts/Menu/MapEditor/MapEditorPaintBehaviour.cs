@@ -2,20 +2,31 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using TMPro;
 using UnityEngine;
 using UnityEngine.Tilemaps;
+using UnityEngine.UI;
 
 public class MapEditorPaintBehaviour : MonoBehaviour
 {
     public Tile selectedTile;
     public ETileType selectedType;
 
-    public GameObject selectedObject;
+    public GameObject chosenObjectPrefab;
+    private GameObject selectedObject;
 
     [SerializeField]
     public Tilemap currentTilemap;
     [SerializeField]
     private GameObject objectLayer;
+    [SerializeField]
+    private GameObject m_selectedObjectPanel;
+    [SerializeField]
+    private TextMeshProUGUI m_selectedObjectNameLabel;
+    [SerializeField]
+    private TextMeshProUGUI m_selectedObjectPosLabel;
+    [SerializeField]
+    private TextMeshProUGUI m_selectedObjectIDLabel;
 
     private Dictionary<Vector3Int, GameObject> m_objectMapping = new();
 
@@ -24,6 +35,27 @@ public class MapEditorPaintBehaviour : MonoBehaviour
 
     public const int MAX_FILL_DEPTH = 100;
     private Queue<Vector3Int> fillQueue = new();
+
+
+    private void Update()
+    {
+        if (selectedObject)
+        {
+            print("HI");
+            Vector3Int dir = Vector3Int.zero;
+            if (Input.GetKeyDown(KeyCode.UpArrow))
+                dir = Vector3Int.up;
+            else if (Input.GetKeyDown(KeyCode.DownArrow))
+                dir = Vector3Int.down;
+            else if (Input.GetKeyDown(KeyCode.LeftArrow))
+                dir = Vector3Int.left;
+            else if (Input.GetKeyDown(KeyCode.RightArrow))
+                dir = Vector3Int.right;
+
+            if (dir != Vector3Int.zero)
+                MoveSelectedObject(dir);
+        }
+    }
 
 
     public void LoadChildrenIntoMapping(Transform parent)
@@ -131,7 +163,7 @@ public class MapEditorPaintBehaviour : MonoBehaviour
         if (NumObjects >= MAX_OBJECTS)
             return;
 
-        GameObject go = Instantiate(selectedObject, objectLayer.transform);
+        GameObject go = Instantiate(chosenObjectPrefab, objectLayer.transform);
 
         // Add an offset for the object's actual position, equivalent to the tilemap's offset from
         // the origin.
@@ -159,6 +191,43 @@ public class MapEditorPaintBehaviour : MonoBehaviour
         StartCoroutine(FillCoro(start, 
             draw ? CheckIfObjectAtPos : (Vector3Int pos) => !CheckIfObjectAtPos(pos),
             draw ? DrawObject : EraseObject));
+    }
+
+
+    public void DeselectObject()
+    {
+        m_selectedObjectPanel.SetActive(false);
+    }
+
+
+    public void SelectObject(Vector3Int objGridPos)
+    {
+        if (!m_objectMapping.ContainsKey(objGridPos))
+            return;
+
+        m_selectedObjectPanel.SetActive(true);
+        m_selectedObjectPanel.transform.position = objGridPos;
+
+        selectedObject = m_objectMapping[objGridPos];
+        m_selectedObjectNameLabel.text = selectedObject.name;
+        m_selectedObjectPosLabel.text = $"({objGridPos.x}, {objGridPos.y}, {objGridPos.z})";
+        m_selectedObjectIDLabel.text = $"Not implemented lol";
+    }
+
+
+    private void MoveSelectedObject(Vector3Int dir)
+    {
+        Vector3Int selObjGridPos = currentTilemap.WorldToCell(selectedObject.transform.position);
+
+        if (m_objectMapping.ContainsKey(selObjGridPos + dir))
+        {
+            // Object already in movement place - do naught
+            return;
+        }
+
+        m_objectMapping.Remove(selObjGridPos);
+        m_objectMapping.Add(selObjGridPos + dir, selectedObject);
+        selectedObject.transform.position += dir;
     }
 
 
