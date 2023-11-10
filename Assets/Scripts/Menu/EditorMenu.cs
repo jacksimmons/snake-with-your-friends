@@ -25,18 +25,20 @@ public class EditorMenu : MonoBehaviour
     [SerializeField]
     private GameObject m_backgroundLayer;
 
-    [SerializeField]
-    private TMP_InputField m_saveInfo;
     private string m_savedName = null;
 
-    private ECreatorTool m_toolInUse = ECreatorTool.Brush;
+    private ECreatorTool m_toolInUse = ECreatorTool.None;
     public ECreatorTool ToolInUse
     {
         get { return m_toolInUse; }
-        private set { m_toolInUse = value; }
+        private set
+        { 
+            m_toolInUse = value;
+            m_UI.UIToolText = m_toolInUse.ToString();
+        }
     }
 
-    private ECreatorLayer m_currentLayer = ECreatorLayer.Ground;
+    private ECreatorLayer m_currentLayer = ECreatorLayer.None;
     public ECreatorLayer CurrentLayer
     {
         get { return m_currentLayer; }
@@ -56,22 +58,18 @@ public class EditorMenu : MonoBehaviour
                     break;
             }
             m_currentLayer = value;
+            m_UI.UILayerText = m_currentLayer.ToString();
         }
     }
 
-    private Vector3 MouseWorldPos { get; set; }
     private Vector3Int GridPos { get; set; }
 
-    private int m_tileIndex = 0;
-
-    private int m_objectIndex;
     private bool m_objectMode = false;
-
-    private MapEditorUIHandler m_UI;
 
     [SerializeField]
     public MapLoader Map;
 
+    private MapEditorUIHandler m_UI;
     [SerializeField]
     private MapEditorPaintBehaviour m_painter;
 
@@ -80,9 +78,8 @@ public class EditorMenu : MonoBehaviour
     {
         m_UI = GetComponent<MapEditorUIHandler>();
 
-        ApplyTileInput();
-        ApplyObjectInput();
-        SetLayerToTilemap(m_groundLayer);
+        ToolInUse = ECreatorTool.Brush;
+        CurrentLayer = ECreatorLayer.Ground;
     }
 
 
@@ -102,10 +99,8 @@ public class EditorMenu : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.LeftControl))
             ToolInUse = ECreatorTool.None;
 
-        if (!m_objectMode)
-            HandleTileInput();
-        else
-            HandleObjectInput();
+        HandleToolInput();
+        HandleClickInput(m_objectMode);
     }
 
 
@@ -124,30 +119,8 @@ public class EditorMenu : MonoBehaviour
             CurrentLayer = ECreatorLayer.Wall;
         else if (Input.GetKeyDown(KeyCode.Alpha3))
             CurrentLayer = ECreatorLayer.Object;
-    }
-
-
-    private void HandleTileInput()
-    {
-        HandleToolInput();
-        HandleClickInput(false);
-
-        if (Input.GetKeyDown(KeyCode.LeftBracket))
-            Extensions.ChangeIndex(ref m_tileIndex, Map.Tiles.Length, -1);
-        else if (Input.GetKeyDown(KeyCode.RightBracket))
-            Extensions.ChangeIndex(ref m_tileIndex, Map.Tiles.Length, 1);
         else
             return;
-
-        ApplyTileInput();
-    }
-
-
-    private void ApplyTileInput()
-    {
-        m_painter.selectedTile = Map.Tiles[m_tileIndex];
-        m_painter.selectedType = (ETileType)m_tileIndex;
-        m_UI.UpdateTileIcon(m_painter.selectedTile.sprite);
     }
 
 
@@ -159,11 +132,17 @@ public class EditorMenu : MonoBehaviour
             ToolInUse = ECreatorTool.Fill;
         else if (Input.GetKeyDown(KeyCode.O))
             ToolInUse = ECreatorTool.SelectObject;
+        else
+            return;
     }
 
 
     private void HandleClickInput(bool objMode)
     {
+        // If the pointer is over UI, we don't want it to draw, that would be annoying.
+        if (EventSystem.current.IsPointerOverGameObject())
+            return;
+
         Action<Vector3Int> draw = objMode ? m_painter.DrawObject : m_painter.Draw;
         Action<Vector3Int> erase = objMode ? m_painter.EraseObject : m_painter.Erase;
         Action<Vector3Int, bool> fill = objMode ? m_painter.FillObject : m_painter.Fill;
@@ -197,29 +176,6 @@ public class EditorMenu : MonoBehaviour
                     break;
             }
         }
-    }
-
-
-    private void HandleObjectInput()
-    {
-        HandleToolInput();
-        HandleClickInput(true);
-
-        if (Input.GetKeyDown(KeyCode.LeftBracket))
-            Extensions.ChangeIndex(ref m_objectIndex, Map.Objects.Length, -1);
-        else if (Input.GetKeyDown(KeyCode.RightBracket))
-            Extensions.ChangeIndex(ref m_objectIndex, Map.Objects.Length, 1);
-        else
-            return;
-
-        ApplyObjectInput();
-    }
-
-
-    private void ApplyObjectInput()
-    {
-        m_painter.chosenObjectPrefab = Map.Objects[m_objectIndex];
-        m_UI.UpdateObjectIcon(m_painter.chosenObjectPrefab);
     }
 
 
@@ -297,6 +253,7 @@ public class EditorMenu : MonoBehaviour
                 }
             }
 
+            Debug.LogError("This tile cannot be saved - it is not in the tiles list!");
             return null;
         }
 
@@ -309,7 +266,7 @@ public class EditorMenu : MonoBehaviour
 
         string savePath;
         int numDuplicates = 0;
-        if (m_savedName != m_saveInfo.text)
+        if (m_savedName != m_UI.ChosenMapName)
         {
             // If {chosenName}.prefab exists, Increase numDuplicates until we find an unused filename of the format
             // "{chosenName} [numDuplicates].prefab" that hasn't been taken in the maps folder.
@@ -330,21 +287,21 @@ public class EditorMenu : MonoBehaviour
         }
         else
         {
-            savePath = "Maps/" + m_saveInfo.text + ".map";
+            savePath = "Maps/" + m_UI.ChosenMapName + ".map";
         }
 
         MapTileData[] groundData = GetTileDataArray(m_groundLayer);
         MapTileData[] wallData = GetTileDataArray(m_wallLayer);
-        MapObjectData[] objData = m_painter.GetObjectData();
+        MapObjectData[] objData = MapEditor.GridObjDict.GetObjectData();
         MapData map = new(groundData, wallData, objData, Map.BackgroundIndex);
 
         Saving.SaveToFile(map, savePath);
 
-        m_savedName = m_saveInfo.text;
+        m_savedName = m_UI.ChosenMapName;
 
         EventSystem.current.SetSelectedGameObject(null);
         if (numDuplicates > 0)
-            m_saveInfo.text += $"({numDuplicates})";
+            m_UI.ChosenMapName += $"({numDuplicates})";
 
         SetLayerOpacity(m_groundLayer, ground_a);
         SetLayerOpacity(m_wallLayer, wall_a);

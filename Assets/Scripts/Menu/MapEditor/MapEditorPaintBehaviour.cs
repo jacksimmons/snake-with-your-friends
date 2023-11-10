@@ -9,29 +9,37 @@ using UnityEngine.UI;
 
 public class MapEditorPaintBehaviour : MonoBehaviour
 {
-    public Tile selectedTile;
-    public ETileType selectedType;
+    private Tile _chosenTilePaint;
+    public Tile ChosenTilePaint
+    {
+        get { return _chosenTilePaint; }
+        set
+        {
+            _chosenTilePaint = value;
+            m_UI.UpdateTileIcon(_chosenTilePaint.sprite);
+        }
+    }
 
-    public GameObject chosenObjectPrefab;
+    private GameObject _chosenObjectPaint;
+    public GameObject ChosenObjectPaint
+    {
+        get { return _chosenObjectPaint; }
+        set
+        {
+            _chosenObjectPaint = value;
+            m_UI.UpdateObjectIcon(_chosenObjectPaint);
+        }
+    }
+
     private GameObject selectedObject;
 
     [SerializeField]
     public Tilemap currentTilemap;
     [SerializeField]
     private GameObject objectLayer;
-    [SerializeField]
-    private GameObject m_selectedObjectPanel;
-    [SerializeField]
-    private TextMeshProUGUI m_selectedObjectNameLabel;
-    [SerializeField]
-    private TextMeshProUGUI m_selectedObjectPosLabel;
-    [SerializeField]
-    private TextMeshProUGUI m_selectedObjectIDLabel;
 
-    private Dictionary<Vector3Int, GameObject> m_objectMapping = new();
-
-    public const int MAX_OBJECTS = 200;
-    public int NumObjects { get; private set; } = 0;
+    [SerializeField]
+    private MapEditorUIHandler m_UI;
 
     public const int MAX_FILL_DEPTH = 100;
     private Queue<Vector3Int> fillQueue = new();
@@ -41,7 +49,6 @@ public class MapEditorPaintBehaviour : MonoBehaviour
     {
         if (selectedObject)
         {
-            print("HI");
             Vector3Int dir = Vector3Int.zero;
             if (Input.GetKeyDown(KeyCode.UpArrow))
                 dir = Vector3Int.up;
@@ -58,29 +65,9 @@ public class MapEditorPaintBehaviour : MonoBehaviour
     }
 
 
-    public void LoadChildrenIntoMapping(Transform parent)
-    {
-        m_objectMapping.Clear();
-        NumObjects = 0;
-        foreach (Transform transform in parent)
-        {
-            m_objectMapping.Add(
-            new((int)transform.localPosition.x, 
-                (int)transform.localPosition.y),
-            transform.gameObject);
-            NumObjects++;
-        }
-    }
-
-
     private bool CheckIfTileAtPos(Vector3Int pos)
     {
         return currentTilemap.HasTile(pos);
-    }
-
-    private bool CheckIfObjectAtPos(Vector3Int pos)
-    {
-        return m_objectMapping.ContainsKey(pos);
     }
 
 
@@ -97,7 +84,7 @@ public class MapEditorPaintBehaviour : MonoBehaviour
 
     public void Draw(Vector3Int pos)
     {
-        currentTilemap.SetTile(pos, selectedTile);
+        currentTilemap.SetTile(pos, ChosenTilePaint);
     }
 
 
@@ -160,89 +147,71 @@ public class MapEditorPaintBehaviour : MonoBehaviour
 
     public void DrawObject(Vector3Int pos)
     {
-        if (NumObjects >= MAX_OBJECTS)
+        if (MapEditor.GridObjDict.IsFull())
             return;
 
-        GameObject go = Instantiate(chosenObjectPrefab, objectLayer.transform);
+        if (MapEditor.GridObjDict.IsPositionEmpty(pos))
+            return;
+
+        GameObject go = Instantiate(ChosenObjectPaint, objectLayer.transform);
 
         // Add an offset for the object's actual position, equivalent to the tilemap's offset from
         // the origin.
         go.transform.localPosition = (Vector3)pos;
         go.GetComponent<SpriteRenderer>().sortingOrder = 0;
 
-        EraseObject(pos);
-        m_objectMapping[pos] = go;
-        NumObjects++;
+        MapEditor.GridObjDict.AddObject(pos, go);
+        m_UI.UpdateObjectCountLabel();
     }
 
 
     public void EraseObject(Vector3Int pos)
     {
-        if (!CheckIfObjectAtPos(pos)) return;
+        if (MapEditor.GridObjDict.IsEmpty())
+            return;
 
-        Destroy(m_objectMapping[pos]);
-        m_objectMapping.Remove(pos);
-        NumObjects--;
+        GameObject removed = MapEditor.GridObjDict.RemoveObject(pos);
+        Destroy(removed);
+        m_UI.UpdateObjectCountLabel();
     }
 
 
     public void FillObject(Vector3Int start, bool draw)
     {
         StartCoroutine(FillCoro(start, 
-            draw ? CheckIfObjectAtPos : (Vector3Int pos) => !CheckIfObjectAtPos(pos),
+            draw ? MapEditor.GridObjDict.IsPositionEmpty : (Vector3Int pos) => !MapEditor.GridObjDict.IsPositionEmpty(pos),
             draw ? DrawObject : EraseObject));
     }
 
 
     public void DeselectObject()
     {
-        m_selectedObjectPanel.SetActive(false);
+        m_UI.ToggleSelectedObjectPanel(false);
     }
 
 
     public void SelectObject(Vector3Int objGridPos)
     {
-        if (!m_objectMapping.ContainsKey(objGridPos))
+        if (MapEditor.GridObjDict.IsEmpty())
             return;
 
-        m_selectedObjectPanel.SetActive(true);
-        m_selectedObjectPanel.transform.position = objGridPos;
+        m_UI.ToggleSelectedObjectPanel(true);
 
-        selectedObject = m_objectMapping[objGridPos];
-        m_selectedObjectNameLabel.text = selectedObject.name;
-        m_selectedObjectPosLabel.text = $"({objGridPos.x}, {objGridPos.y}, {objGridPos.z})";
-        m_selectedObjectIDLabel.text = $"Not implemented lol";
+        selectedObject = MapEditor.GridObjDict.SelectObject(objGridPos);
+        m_UI.UpdateSelectedObjectPanel(objGridPos, selectedObject.name);
     }
 
 
     private void MoveSelectedObject(Vector3Int dir)
     {
-        Vector3Int selObjGridPos = currentTilemap.WorldToCell(selectedObject.transform.position);
+        Vector3Int oldObjGridPos = currentTilemap.WorldToCell(selectedObject.transform.position);
+        Vector3Int newObjGridPos = oldObjGridPos + dir;
 
-        if (m_objectMapping.ContainsKey(selObjGridPos + dir))
+        if (MapEditor.GridObjDict.AddObject(newObjGridPos, selectedObject))
         {
-            // Object already in movement place - do naught
-            return;
+            MapEditor.GridObjDict.RemoveObject(oldObjGridPos);
         }
 
-        m_objectMapping.Remove(selObjGridPos);
-        m_objectMapping.Add(selObjGridPos + dir, selectedObject);
         selectedObject.transform.position += dir;
-    }
-
-
-    public MapObjectData[] GetObjectData()
-    {
-        GameObject[] objs = m_objectMapping.Values.ToArray();
-        MapObjectData[] objData = new MapObjectData[m_objectMapping.Values.Count];
-        for (int i = 0; i < objData.Length; i++)
-        {
-            ObjectBehaviour ob = objs[i].GetComponent<ObjectBehaviour>();
-            objData[i] = new(ob.Type,
-                (short)Mathf.FloorToInt(ob.transform.localPosition.x),
-                (short)Mathf.FloorToInt(ob.transform.localPosition.y));
-        }
-
-        return objData;
     }
 }

@@ -85,10 +85,8 @@ public class MapLoader : MonoBehaviour
         m_backgroundIndex = map.bgIndex;
         UpdateBackgroundSprite();
 
-        if (m_painter)
-        {
-            m_painter.LoadChildrenIntoMapping(ObjectLayer.transform);
-        }
+        MapEditor.GridObjDict.ClearObjects();
+        MapEditor.GridObjDict.AddChildObjects(ObjectLayer.transform);
     }
 
 
