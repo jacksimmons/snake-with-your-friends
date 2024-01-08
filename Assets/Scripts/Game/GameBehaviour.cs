@@ -227,34 +227,13 @@ public class GameBehaviour : NetworkBehaviour
     [Command]
     private void CmdRequestMap(GameObject player)
     {
-        GameObject map = GameObject.Find("Map");
-        if (!map)
-        {
-            if (GameSettings.Saved.GameMode == EGameMode.Puzzle)
-            {
-                int puzzleLevel = SaveData.Saved.PuzzleLevel;
-
-                map = Instantiate(Resources.Load<GameObject>($"Puzzles/Puzzle{puzzleLevel}"));
-
-                NetworkServer.Spawn(map);
-            }
-            else
-            {
-                map = Instantiate(_mapTemplate);
-
-                NetworkServer.Spawn(map);
-            }
-
-            map.name = "Map";
-        }
-
         NetworkIdentity netIdentity = player.GetComponent<NetworkIdentity>();
-        RpcReceiveMap(netIdentity.connectionToClient, map);
+        RpcReceiveMap(netIdentity.connectionToClient, GameSettings.Saved.Map);
     }
 
 
     [TargetRpc]
-    private void RpcReceiveMap(NetworkConnectionToClient _, GameObject map)
+    private void RpcReceiveMap(NetworkConnectionToClient _, MapData mapData)
     {
         if (!isOwned)
         {
@@ -262,11 +241,8 @@ public class GameBehaviour : NetworkBehaviour
             return;
         }
 
-        if (GameSettings.Saved.GameMode == EGameMode.SnakeRoyale)
-        {
-            SetupGroundTilemap(map, Vector2Int.zero);
-            SetupWallTilemap(map, Vector2Int.zero);
-        }
+        GameObject map = GameObject.Find("Map");
+        map.GetComponent<MapLoader>().LoadMap(mapData);
 
         s_groundTilemap = map.transform.Find("Ground").GetComponentInChildren<Tilemap>();
         s_wallTilemap = map.transform.Find("Wall").GetComponentInChildren<Tilemap>();

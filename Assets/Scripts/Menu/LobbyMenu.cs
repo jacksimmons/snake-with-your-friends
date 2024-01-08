@@ -80,8 +80,9 @@ public class LobbyMenu : MonoBehaviour
                 Saving.LoadFromFile<GameSettings>("GameSettings.dat");
         }
 
-        lobbyID = Manager.GetComponent<SteamLobby>().LobbyID;
+        lobbyID = Manager.GetComponent<Steam>().LobbyID;
     }
+
 
     private void Start()
     {
@@ -91,15 +92,18 @@ public class LobbyMenu : MonoBehaviour
             GameBehaviour.Instance.enabled = true;
     }
 
+
     public void OnHostSettingsButtonPressed()
     {
         m_hostSettingsPanel.SetActive(true);
     }
 
+
     public void OnHostSettingsCloseButtonPressed()
     {
         m_hostSettingsPanel.SetActive(false);
     }
+
 
     public void UpdateLobbyName()
     {

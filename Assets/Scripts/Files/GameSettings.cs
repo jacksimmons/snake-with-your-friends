@@ -4,21 +4,6 @@ using System.Collections.Generic;
 using UnityEngine;
 
 
-/// <summary>
-/// Struct form of the below class, used to transfer data between clients.
-/// </summary>
-[Serializable]
-public readonly struct FoodSettingsData
-{
-    public readonly int FoodsEnabled;
-
-    public FoodSettingsData(FoodSettings settings)
-    {
-        FoodsEnabled = settings.FoodsEnabled.Data;
-    }
-}
-
-
 [Serializable]
 public class FoodSettings
 {
@@ -26,12 +11,14 @@ public class FoodSettings
 
     public FoodSettings()
     {
-        FoodsEnabled = new(int.MaxValue); // All enabled
+        // Enable all foods by default
+        FoodsEnabled = new(int.MaxValue);
     }
 
-    public FoodSettings(FoodSettingsData data)
+    public FoodSettings(BitField foodsEnabled)
     {
-        FoodsEnabled = new(data.FoodsEnabled);
+        // Copy by value
+        FoodsEnabled = new(foodsEnabled.Data);
     }
 
     public void SetFoodEnabled(EFoodType type, bool val)
@@ -53,7 +40,8 @@ public readonly struct GameSettingsData
     public readonly int GameSize;
     public readonly float TimeToMove;
     public readonly bool FriendlyFire;
-    public readonly FoodSettingsData FoodSettings;
+    public readonly FoodSettings FoodSettings;
+    public readonly MapData Map;
 
     public GameSettingsData(GameSettings settings)
     {
@@ -61,7 +49,8 @@ public readonly struct GameSettingsData
         GameSize = settings.GameSize;
         TimeToMove = settings.TimeToMove;
         FriendlyFire = settings.FriendlyFire;
-        FoodSettings = new(settings.foodSettings);
+        FoodSettings = settings.foodSettings;
+        Map = settings.Map;
     }
 }
 
@@ -78,6 +67,7 @@ public class GameSettings : ICached
     public int GameSize;
     public float TimeToMove;
     public bool FriendlyFire;
+    public MapData Map;
 
     public FoodSettings foodSettings;
 
@@ -100,6 +90,7 @@ public class GameSettings : ICached
         GameSize = other.GameSize;
 
         foodSettings = other.foodSettings;
+        Map = other.Map;
     }
 
 
@@ -110,7 +101,8 @@ public class GameSettings : ICached
         GameMode = data.GameMode;
         GameSize = data.GameSize;
 
-        foodSettings = new(data.FoodSettings);
+        foodSettings = data.FoodSettings;
+        Map = data.Map;
     }
 
     public void Cache() { Saved = this; }

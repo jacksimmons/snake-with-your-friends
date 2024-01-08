@@ -43,7 +43,7 @@ public class JoinMenu : MonoBehaviour
     {
         ulong.TryParse(lobbyEntry.name, out ulong id);
 
-        GameObject.Find("NetworkManager").GetComponent<SteamLobby>().JoinLobby((CSteamID)id);
+        Steam.Instance.JoinLobby((CSteamID)id);
     }
 
     public void OnDistanceDropdownUpdated(int distance)

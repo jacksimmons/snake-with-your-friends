@@ -18,7 +18,7 @@ public class Teleporter : MonoBehaviour
 
         // Any objects which move discretely MUST use the teleport counter system.
         // Because objects get stuck in teleporting loops if they 
-        if ((playerTransform = Player.TryGetPlayerTransformFromBodyPart(obj)) != null)
+        if ((playerTransform = PlayerBehaviour.TryGetPlayerTransformFromBodyPart(obj)) != null)
         {
             PlayerMovement player = playerTransform.GetComponentInParent<PlayerMovement>();
             BodyPart bp = player.BodyParts[obj.transform.GetSiblingIndex()];

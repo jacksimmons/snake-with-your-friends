@@ -37,7 +37,7 @@ public class Settings : ICached
         resY = 1080;
         resHz = 60;
 
-        bf = new();
+        bf = new(1);
         Fullscreen = false;
         Borderless = true;
         HelpMotionSickness = false;
@@ -51,7 +51,7 @@ public class Settings : ICached
         resY = other.resY;
         resHz = other.resHz;
 
-        bf = new();
+        bf = new(1);
         Fullscreen = other.Fullscreen;
         Borderless = other.Borderless;
         HelpMotionSickness = other.HelpMotionSickness;
@@ -66,7 +66,7 @@ public class Settings : ICached
         this.resY = resY;
         this.resHz = resHz;
 
-        bf = new();
+        bf = new(1);
         Fullscreen = fullscreen;
         Borderless = borderless;
         HelpMotionSickness = helpMotionSickness;

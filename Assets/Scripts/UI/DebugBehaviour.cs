@@ -44,8 +44,8 @@ public class DebugBehaviour : MonoBehaviour
         switch (Display)
         {
             case e_Display.Status:
-                Dictionary<string, string> stringStatuses = _player.status.GetStatusDebug();
-                UpdateDisplay(stringStatuses);
+                //! Dictionary<string, string> stringStatuses = _player.status.GetStatusDebug();
+                //! UpdateDisplay(stringStatuses);
                 break;
             case e_Display.Player:
                 Dictionary<string, string> stringPlayerValues = _player.GetPlayerDebug();

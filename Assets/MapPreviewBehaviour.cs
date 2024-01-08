@@ -28,10 +28,12 @@ public class MapPreviewBehaviour : MonoBehaviour
         m_name.text = name;
     }
 
+
     public void SetFileSize(long fileSize)
     {
         m_fileSize.text = fileSize.ToString() + "B";
     }
+
 
     public void SetLastModified(DateTime lastModified)
     {

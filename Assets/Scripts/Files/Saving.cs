@@ -19,7 +19,7 @@ public static class Saving
     /// Serialises objects and saves them to a given file location.
     /// Also calls .Cache() on the object beforehand if it : ICached.
     /// </summary>
-    public static void SaveToFile<T>(T serializable, string filename) where T : class
+    public static void SaveToFile<T>(T serializable, string filename)
     {
         if (LoadingIcon.Instance)
             LoadingIcon.Instance.Toggle(true);
@@ -47,7 +47,7 @@ public static class Saving
     /// Deserialises a serialised object stored in a file.
     /// Calls .Cache() on the object if it : ICached.
     /// </summary>
-    public static T LoadFromFile<T>(string filename) where T : class, new()
+    public static T LoadFromFile<T>(string filename) where T : new()
     {
         if (LoadingIcon.Instance)
             LoadingIcon.Instance.Toggle(true);

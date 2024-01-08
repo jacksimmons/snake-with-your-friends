@@ -2,14 +2,12 @@ using UnityEngine;
 
 public enum ECreatorTool
 {
-    None,
     Brush,
     Fill,
-    SelectObject,
+    Pick,
 }
 public enum ECreatorLayer
 {
-    None,
     Ground,
     Wall,
     Object

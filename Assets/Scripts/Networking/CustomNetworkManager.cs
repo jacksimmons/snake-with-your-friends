@@ -95,7 +95,7 @@ public class CustomNetworkManager : NetworkManager
             playerInstance.connectionID = conn.connectionId;
             playerInstance.playerNo = Players.Count + 1;
 
-            CSteamID lobbyID = new(SteamLobby.instance.LobbyID);
+            CSteamID lobbyID = new(Steam.Instance.LobbyID);
             playerInstance.playerSteamID = 
                 (ulong)SteamMatchmaking.GetLobbyMemberByIndex(lobbyID, Players.Count);
 

@@ -11,8 +11,8 @@ GameObject:
   - component: {fileID: 7352757642862548609}
   - component: {fileID: 2066123293128193221}
   - component: {fileID: 170510854465871907}
-  - component: {fileID: 5652520070569291531}
   - component: {fileID: 2845921151887752940}
+  - component: {fileID: 9217467304955572550}
   m_Layer: 0
   m_Name: TileIcon
   m_TagString: Untagged
@@ -78,19 +78,6 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!114 &5652520070569291531
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5542188563251169348}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 274eadb16ce205544be6dc767628e6d1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_tile: {fileID: 0}
 --- !u!114 &2845921151887752940
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -135,7 +122,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 5652520070569291531}
+      - m_Target: {fileID: 9217467304955572550}
         m_TargetAssemblyTypeName: MapEditorTileIcon, Assembly-CSharp
         m_MethodName: OnButtonPressed
         m_Mode: 1
@@ -147,3 +134,15 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+--- !u!114 &9217467304955572550
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5542188563251169348}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 57adf0ebae318024ab4898436636fe95, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

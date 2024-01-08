@@ -2,26 +2,57 @@
 // Any bool value used with this defaults to false.
 using System;
 using System.Collections;
+using System.Linq;
+using UnityEngine;
+
 
 [Serializable]
 public class BitField
 {
-    // 32 bit integer (32 fields)
-    // Undefined behaviour if !(0 <= index <= 31)
-    public int Data { get; private set; }
+    // Can store any number of bytes, where each byte stores 8 booleans.
+    // Saves memory for lots of objects with lots of booleans, but has a CPU overhead for r/w.
+    public byte[] Data { get; private set; }
 
-    public BitField(int data) { Data = data; }
-    public BitField() { Data = 0; }
+    // [Length * 8]-bit bitfield.
+    public BitField(int length)
+    {
+        Data = new byte[length];
+    }
+
+    // [data.Length * 8]-bit bitfield.
+    public BitField(byte[] data)
+    {
+        Data = data;
+    }
 
     public void SetBit(int index, bool value)
     {
-        int mask = 1 << index;
-        Data = value ? (int)(Data | mask) : (int)(Data & ~mask);
+        // Index // 8 gives which byte
+        int byteIndex = index / 8;
+        // Index mod 8 gives which bit in the byte, use this to make a mask
+        int bitMask = 1 << index % 8;
+
+        if (byteIndex >= Data.Length)
+            Debug.LogError($"Invalid bit {index} => byte index {byteIndex}/{Data.Length}.");
+        else if (byteIndex < 0)
+            Debug.LogError($"Invalid bit {index} => byte index {byteIndex}. Negative bit.");
+
+        Data[byteIndex] = (byte)(value ? (Data[byteIndex] | bitMask) : (Data[byteIndex] & ~bitMask));
     }
 
     public bool GetBit(int index)
     {
-        int mask = 1 << index;
-        return (Data & mask) != 0;
+        if (index < 0 || index > 7)
+        {
+            Debug.LogError($"Invalid bit index. {index}");
+            return false;
+        }
+
+        // Index // 8 gives which byte
+        int byteIndex = index / 8;
+        // Index mod 8 gives which bit in the byte, use this to make a mask
+        int bitMask = 1 << index % 8;
+
+        return (Data[byteIndex] & bitMask) != 0;
     }
 }

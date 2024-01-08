@@ -14,7 +14,7 @@ public class Effect
     public float CooldownMax { get; private set; }
     public Effect[] Causes { get; private set; }
 
-    private BitField bf = new();
+    private BitField bf = new(1);
     public bool IsInputEffect
     {
         get { return bf.GetBit(0); }

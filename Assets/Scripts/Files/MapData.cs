@@ -15,7 +15,7 @@ public enum ETileType : byte
 
 
 [Serializable]
-public class MapTileData
+public struct MapTileData
 {
     public readonly short x, y;
     public readonly ETileType type;
@@ -40,9 +40,9 @@ public enum EObjectType : byte
 
 
 [Serializable]
-public class MapObjectData
+public struct MapObjectData
 {
-    public readonly EObjectType type;
+    public readonly byte type;
 
     public readonly short x;
     public readonly short y;
@@ -50,17 +50,18 @@ public class MapObjectData
     public readonly float rotation;
 
 
-    public MapObjectData(EObjectType type, short x, short y)
+    public MapObjectData(byte type, short x, short y, float rotation)
     {
         this.type = type;
         this.x = x;
         this.y = y;
+        this.rotation = rotation;
     }
 }
 
 
 [Serializable]
-public class MapData
+public struct MapData
 {
     public readonly MapTileData[] groundData;
     public readonly MapTileData[] wallData;
@@ -75,7 +76,4 @@ public class MapData
         this.objectData = objectData;
         this.bgIndex = bgIndex;
     }
-
-
-    public MapData() { }
 }

@@ -9,7 +9,7 @@ public class FoodObject : GridObject
     private void OnTriggerEnter2D(Collider2D other)
     {
         GameObject obj = other.gameObject;
-        Transform player = Player.TryGetPlayerTransformFromBodyPart(obj);
+        Transform player = PlayerBehaviour.TryGetPlayerTransformFromBodyPart(obj);
 
         bool removeAndReplaceFood = false;
 
@@ -24,7 +24,7 @@ public class FoodObject : GridObject
             if (playerMovementController != null)
             {
                 playerMovementController.QAddBodyPart();
-                playerMovementController.status.Eat(food);
+                //! playerMovementController.status.Eat(food);
 
                 GameObject.FindWithTag("AudioHandler").GetComponent<AudioHandler>().eatAudioSource.Play();
             }

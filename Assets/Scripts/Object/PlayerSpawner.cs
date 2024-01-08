@@ -6,8 +6,11 @@ public class PlayerSpawner : MonoBehaviour
     private int playerNumber;
 
 
-    private void Awake()
+    private void OnEnable()
     {
+        if (!CustomNetworkManager.Instance)
+            return;
+
         PlayerObjectController player = null;
         if (playerNumber <= CustomNetworkManager.Instance.Players.Count)
             player = CustomNetworkManager.Instance.Players[playerNumber];

@@ -46,7 +46,7 @@ public class DebugLabels : MonoBehaviour
         GameObject localPlayerObj = GameObject.Find("LocalPlayerObject");
         if (localPlayerObj == null) return;
         
-        PlayerStatus playerStatus = localPlayerObj.GetComponentInChildren<PlayerStatus>();
-        playerStatus.Eat(foodType);
+        //! PlayerStatus playerStatus = localPlayerObj.GetComponentInChildren<PlayerStatus>();
+        //! playerStatus.Eat(foodType);
     }
 }

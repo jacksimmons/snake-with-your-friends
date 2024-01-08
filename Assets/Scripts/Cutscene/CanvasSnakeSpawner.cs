@@ -23,14 +23,13 @@ public class CanvasSnakeSpawner : MonoBehaviour
     }
 
 
-    public GameObject SpawnSnake(int numParts, float snakeScale, float moveTime,
-        int continuousSpeed = 0)
+    public GameObject SpawnSnake(int numParts, float snakeScale, float moveTime, int speed = 1)
     {
         GameObject spawned = Instantiate(m_snakeActorTemplate, transform);
 
         SnakeActor actor = spawned.GetComponent<SnakeActor>();
         actor.moveTime = moveTime;
-        actor.continuousSpeed = continuousSpeed;
+        actor.speed = speed;
 
         spawned.transform.GetChild(0).GetComponent<Image>().sprite =
             GetRandomSprite("Heads");

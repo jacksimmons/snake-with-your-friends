@@ -145,9 +145,13 @@ MonoBehaviour:
   - {fileID: 4172892663148079258, guid: 3241545d13c414747989894365991614, type: 3}
   - {fileID: 4172892663148079258, guid: d0f4a771b5523a44886fe074dd7c76b5, type: 3}
   - {fileID: 1203239055732108450, guid: 820b472cf1125ba4ebd512e3cd1f42cd, type: 3}
+  - {fileID: 1811277632581417538, guid: 920b6fd1063826540a70bb28b6852271, type: 3}
+  - {fileID: 2299691956577040895, guid: 4636a9d55eb53954a9ecd27e7c1f8228, type: 3}
   m_backgrounds:
+  - {fileID: 0}
   - {fileID: 21300000, guid: cde3109d1a3085044831e051fb1d9ef3, type: 3}
   m_painter: {fileID: 0}
+  m_UI: {fileID: 0}
 --- !u!1 &5146086163299430329
 GameObject:
   m_ObjectHideFlags: 0

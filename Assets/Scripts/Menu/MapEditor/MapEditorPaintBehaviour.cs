@@ -31,38 +31,16 @@ public class MapEditorPaintBehaviour : MonoBehaviour
         }
     }
 
-    private GameObject selectedObject;
-
     [SerializeField]
     public Tilemap currentTilemap;
-    [SerializeField]
-    private GameObject objectLayer;
 
     [SerializeField]
     private MapEditorUIHandler m_UI;
+    [SerializeField]
+    private MapLoader m_loader;
 
     public const int MAX_FILL_DEPTH = 100;
     private Queue<Vector3Int> fillQueue = new();
-
-
-    private void Update()
-    {
-        if (selectedObject)
-        {
-            Vector3Int dir = Vector3Int.zero;
-            if (Input.GetKeyDown(KeyCode.UpArrow))
-                dir = Vector3Int.up;
-            else if (Input.GetKeyDown(KeyCode.DownArrow))
-                dir = Vector3Int.down;
-            else if (Input.GetKeyDown(KeyCode.LeftArrow))
-                dir = Vector3Int.left;
-            else if (Input.GetKeyDown(KeyCode.RightArrow))
-                dir = Vector3Int.right;
-
-            if (dir != Vector3Int.zero)
-                MoveSelectedObject(dir);
-        }
-    }
 
 
     private bool CheckIfTileAtPos(Vector3Int pos)
@@ -71,25 +49,23 @@ public class MapEditorPaintBehaviour : MonoBehaviour
     }
 
 
-    public void Paint(ECreatorTool tool, Vector3Int pos)
-    {
-        switch (tool)
-        {
-            case ECreatorTool.Brush:
-                Draw(pos);
-                break;
-        }
-    }
-
-
     public void Draw(Vector3Int pos)
     {
+        // Only increment tile count if not an overwrite && a tile is selected
+        if (!currentTilemap.GetTile(pos) && ChosenTilePaint)
+            m_UI.ChangeTileCount(true);
+
+        print(currentTilemap.name);
         currentTilemap.SetTile(pos, ChosenTilePaint);
     }
 
 
     public void Erase(Vector3Int pos)
     {
+        // Only decrement tile count if an overwrite
+        if (currentTilemap.GetTile(pos))
+            m_UI.ChangeTileCount(false);
+
         currentTilemap.SetTile(pos, null);
     }
 
@@ -153,15 +129,28 @@ public class MapEditorPaintBehaviour : MonoBehaviour
         if (MapEditor.GridObjDict.IsPositionEmpty(pos))
             return;
 
-        GameObject go = Instantiate(ChosenObjectPaint, objectLayer.transform);
+        // No object was chosen for painting
+        if (!ChosenObjectPaint)
+            return;
+
+        GameObject go = Instantiate(ChosenObjectPaint, m_loader.ObjectLayer.transform);
 
         // Add an offset for the object's actual position, equivalent to the tilemap's offset from
         // the origin.
         go.transform.localPosition = (Vector3)pos;
-        go.GetComponent<SpriteRenderer>().sortingOrder = 0;
+
+        // Ensure object won't be destroyed even if it disappears
+        ObjectBehaviour ob = go.GetComponent<ObjectBehaviour>();
+        ob.DontDestroyOnExplosion();
+        ob.Type = (byte)Array.IndexOf(m_loader.Objects, ChosenObjectPaint);
+
+        if (go.transform.childCount == 2) // Teleporter
+        {
+            go.transform.GetChild(1).position += Vector3.right;
+        }
 
         MapEditor.GridObjDict.AddObject(pos, go);
-        m_UI.UpdateObjectCountLabel();
+        m_UI.ChangeObjectCount(true);
     }
 
 
@@ -172,7 +161,7 @@ public class MapEditorPaintBehaviour : MonoBehaviour
 
         GameObject removed = MapEditor.GridObjDict.RemoveObject(pos);
         Destroy(removed);
-        m_UI.UpdateObjectCountLabel();
+        m_UI.ChangeObjectCount(false);
     }
 
 
@@ -184,34 +173,16 @@ public class MapEditorPaintBehaviour : MonoBehaviour
     }
 
 
-    public void DeselectObject()
-    {
-        m_UI.ToggleSelectedObjectPanel(false);
-    }
+    //private void MoveSelectedObject(Vector3Int dir)
+    //{
+    //    Vector3Int oldObjGridPos = currentTilemap.WorldToCell(selectedObject.transform.position);
+    //    Vector3Int newObjGridPos = oldObjGridPos + dir;
 
+    //    if (MapEditor.GridObjDict.AddObject(newObjGridPos, selectedObject))
+    //    {
+    //        MapEditor.GridObjDict.RemoveObject(oldObjGridPos);
+    //    }
 
-    public void SelectObject(Vector3Int objGridPos)
-    {
-        if (MapEditor.GridObjDict.IsEmpty())
-            return;
-
-        m_UI.ToggleSelectedObjectPanel(true);
-
-        selectedObject = MapEditor.GridObjDict.SelectObject(objGridPos);
-        m_UI.UpdateSelectedObjectPanel(objGridPos, selectedObject.name);
-    }
-
-
-    private void MoveSelectedObject(Vector3Int dir)
-    {
-        Vector3Int oldObjGridPos = currentTilemap.WorldToCell(selectedObject.transform.position);
-        Vector3Int newObjGridPos = oldObjGridPos + dir;
-
-        if (MapEditor.GridObjDict.AddObject(newObjGridPos, selectedObject))
-        {
-            MapEditor.GridObjDict.RemoveObject(oldObjGridPos);
-        }
-
-        selectedObject.transform.position += dir;
-    }
+    //    selectedObject.transform.position += dir;
+    //}
 }

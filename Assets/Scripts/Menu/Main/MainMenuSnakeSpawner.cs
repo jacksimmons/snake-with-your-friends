@@ -42,18 +42,18 @@ public class MainMenuSnakeSpawner : CanvasSnakeSpawner
         timeSinceLastBigSpawn += Time.deltaTime;
 
         // Spawn a normal snake
-        if (timeSinceLastSpawn >= spawnTime)
-        {
-            timeSinceLastSpawn = 0;
+        //if (timeSinceLastSpawn >= spawnTime)
+        //{
+        //    timeSinceLastSpawn = 0;
 
-            float snakeScale = spawnTime;
-            GetRandomSpawnTime();
+        //    float snakeScale = spawnTime;
+        //    GetRandomSpawnTime();
 
-            // Exclusive (MIN_PARTS to MAX_PARTS - 1)
-            int numParts = Random.Range(MIN_PARTS, MAX_PARTS);
+        //    // Exclusive (MIN_PARTS to MAX_PARTS - 1)
+        //    int numParts = Random.Range(MIN_PARTS, MAX_PARTS);
 
-            SpawnSnake(numParts, snakeScale, Random.Range(MIN_MOVE_TIME, MAX_MOVE_TIME));
-        }
+        //    SpawnSnake(numParts, snakeScale, Random.Range(MIN_MOVE_TIME, MAX_MOVE_TIME));
+        //}
 
         // Spawn a BIG snake
         if (timeSinceLastBigSpawn >= bigSpawnTime && !BigSnake)

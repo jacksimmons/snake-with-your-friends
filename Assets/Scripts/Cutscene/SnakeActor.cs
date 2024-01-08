@@ -8,7 +8,7 @@ public class SnakeActor : MonoBehaviour
     private float timeSinceLastMove = 0;
     private float bpWidth;
     public float moveTime;
-    public int continuousSpeed;
+    public float speed;
 
     private void Start()
     {
@@ -19,29 +19,17 @@ public class SnakeActor : MonoBehaviour
     // Update is called once per frame
     private void Update()
     {
-        if (continuousSpeed != 0)
-        {
-            MoveContinuous();
-        }
-        else
-        {
-            MoveDiscrete();
-        }
+        Move();
     }
 
-    private void MoveContinuous()
+    private void Move()
     {
-        transform.localPosition += Vector3.right * continuousSpeed * Time.fixedDeltaTime;
-    }
-
-    private void MoveDiscrete()
-    {
-        timeSinceLastMove += Time.deltaTime;
+        timeSinceLastMove += Time.fixedDeltaTime;
 
         if (timeSinceLastMove >= moveTime)
         {
             timeSinceLastMove = 0;
-            transform.localPosition += Vector3.right;
+            transform.localPosition += Vector3.right * speed;
         }
 
         if (CalculateTailEndPos() > 250)

@@ -1,5 +1,7 @@
 using UnityEngine.Tilemaps;
 using UnityEngine;
+using System.Runtime.Serialization.Formatters.Binary;
+using System;
 
 public class MapLoader : MonoBehaviour
 {
@@ -28,7 +30,7 @@ public class MapLoader : MonoBehaviour
     }
 
     [SerializeField]
-    private SpriteRenderer m_backgroundLayer;
+    private SpriteRenderer m_backgroundLayer = null;
 
     [SerializeField]
     private Tile[] m_tiles;
@@ -47,17 +49,25 @@ public class MapLoader : MonoBehaviour
 
     [SerializeField]
     private MapEditorPaintBehaviour m_painter;
+    [SerializeField]
+    private MapEditorUIHandler m_UI;
 
 
     public void LoadMapFromFile(string filename)
     {
         MapData map = Saving.LoadFromFile<MapData>($"Maps/{filename}");
+        LoadMap(map);
+    }
 
+
+    public void LoadMap(MapData map)
+    {
         MapTileData[] groundData = map.groundData;
         MapTileData[] wallData = map.wallData;
         MapObjectData[] objectData = map.objectData;
 
-        WallLayer.ClearAllTiles();
+        // Clear any existing tiles
+        GroundLayer.ClearAllTiles();
         WallLayer.ClearAllTiles();
 
         // Clear any existing objects
@@ -87,6 +97,12 @@ public class MapLoader : MonoBehaviour
 
         MapEditor.GridObjDict.ClearObjects();
         MapEditor.GridObjDict.AddChildObjects(ObjectLayer.transform);
+
+        if (m_UI)
+        {
+            m_UI.UpdateTileCountLabel(new Tilemap[] { m_groundLayer, m_wallLayer });
+            m_UI.UpdateObjectCountLabel();
+        }
     }
 
 

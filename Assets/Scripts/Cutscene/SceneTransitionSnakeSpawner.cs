@@ -24,8 +24,8 @@ public class SceneTransitionSnakeSpawner : CanvasSnakeSpawner
         BigSnake = SpawnSnake(
             2,
             125f,
-            0.1f,
-            75
+            0f,
+            5
         );
     }
 

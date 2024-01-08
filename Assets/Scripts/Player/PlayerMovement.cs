@@ -9,7 +9,7 @@ using System;
 // Is Destroyed when the player dies, but other components are kept.
 public class PlayerMovement : NetworkBehaviour
 {
-    private BitField bf = new();
+    private BitField bf = new(1);
     public bool Frozen
     {
         get { return bf.GetBit(0); }
@@ -35,8 +35,8 @@ public class PlayerMovement : NetworkBehaviour
     [SerializeField]
     private GameBehaviour _gameBehaviour;
 
-    [SerializeField]
-    public PlayerStatus status;
+    //[SerializeField]
+    //public PlayerStatus status;
 
     [SerializeField]
     private PlayerObjectController m_poc;
@@ -104,6 +104,8 @@ public class PlayerMovement : NetworkBehaviour
         controls = new();
         controls.Gameplay.Move.performed += ctx => direction = Extensions.Vectors.StickToDPad(ctx.ReadValue<Vector2>());
         controls.Gameplay.Move.canceled += ctx => direction = Vector2.zero;
+
+        controls.Gameplay.Enable();
     }
 
 
@@ -112,8 +114,6 @@ public class PlayerMovement : NetworkBehaviour
         TimeToMove = GameSettings.Saved.TimeToMove;
         direction = Vector2.zero;
         movement = Vector2.zero;
-
-        controls.Gameplay.Enable();
 
         bodyPartContainer.SetActive(false);
 

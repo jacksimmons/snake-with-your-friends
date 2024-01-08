@@ -39,6 +39,12 @@ public class ProjectileBehaviour : ObjectBehaviour
     {
         base.Start();
 
+        if (GameSettings.Saved == null)
+        {
+            Debug.LogWarning("No GameSettings applied. Ensure you are in editor.");
+            return;
+        }
+
         if (GameSettings.Saved.FriendlyFire)
             StartCoroutine(HandleImmunity(Proj.ImmunityDuration));
         else
@@ -76,13 +82,14 @@ public class ProjectileBehaviour : ObjectBehaviour
         // --- Wall Collisions
         if (other.TryGetComponent(out DeathTrigger _))
         {
+            StartCoroutine(Explode());
             return;
         }
 
 
         // --- Player Collisions
         bool isPlayer = true;
-        Transform player = Player.TryGetOwnedPlayerTransformFromBodyPart(other.gameObject);
+        Transform player = PlayerBehaviour.TryGetOwnedPlayerTransformFromBodyPart(other.gameObject);
         if (player == null) return;
         if (PlayerImmune) return;
 

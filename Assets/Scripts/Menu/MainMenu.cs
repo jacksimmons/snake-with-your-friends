@@ -77,10 +77,8 @@ public class MainMenu : SceneTransitionHandler
 
     public void OnNoFriendsButtonPressed()
     {
-        GameObject go = GameObject.Find("NetworkManager");
-
-        if (go != null)
-            go.GetComponent<SteamLobby>().HostLobby(singleplayer: true);
+        LoadingIcon.Instance.Toggle(true);
+        Steam.Instance.HostLobby(singleplayer: true);
     }
 
     public void OnCreateLobbyButtonPressed()
@@ -92,11 +90,7 @@ public class MainMenu : SceneTransitionHandler
         }
 
         LoadingIcon.Instance.Toggle(true);
-
-        GameObject go = GameObject.Find("NetworkManager");
-
-        if (go != null)
-            go.GetComponent<SteamLobby>().HostLobby(singleplayer: false);
+        Steam.Instance.HostLobby(singleplayer: false);
     }
 
     public void OnJoinLobbyButtonPressed()
@@ -130,5 +124,7 @@ public class MainMenu : SceneTransitionHandler
     {
         LoadingIcon.Instance.Toggle(true);
         Application.Quit();
+
+        Steam.Instance.GiveAchievement("ACH_TEST");
     }
 }

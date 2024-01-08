@@ -46,7 +46,7 @@ public sealed class GridObjectDictionary
     /// </summary>
     /// <param name="objGridPos">The selected object's position on the grid.</param>
     /// <returns>The selected object, or null if there was no object at `objGridPos`.</returns>
-    public GameObject SelectObject(Vector3Int objGridPos)
+    public GameObject PickObject(Vector3Int objGridPos)
     {
         if (!m_ds.ContainsKey(objGridPos))
             return null;
@@ -61,7 +61,7 @@ public sealed class GridObjectDictionary
     /// <returns>The removed object, or null if one was not removed.</returns>
     public GameObject RemoveObject(Vector3Int objGridPos)
     {
-        GameObject toBeRemoved = SelectObject(objGridPos);
+        GameObject toBeRemoved = PickObject(objGridPos);
         if (toBeRemoved == null)
             return null;
 
@@ -118,7 +118,9 @@ public sealed class GridObjectDictionary
             ObjectBehaviour ob = objs[i].GetComponent<ObjectBehaviour>();
             objData[i] = new(ob.Type,
                 (short)Mathf.FloorToInt(ob.transform.localPosition.x),
-                (short)Mathf.FloorToInt(ob.transform.localPosition.y));
+                (short)Mathf.FloorToInt(ob.transform.localPosition.y),
+                ob.transform.localRotation.z
+            );
         }
 
         return objData;
