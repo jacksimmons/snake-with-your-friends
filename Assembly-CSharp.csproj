@@ -127,6 +127,7 @@
     <Compile Include="Assets\Scripts\Effects\Effect.cs" />
     <Compile Include="Assets\Scripts\Cutscene\SceneTransitionCanvas.cs" />
     <Compile Include="Assets\Scripts\Misc\LoadingIcon.cs" />
+    <Compile Include="Assets\Scripts\Networking\Steam_Achievements.cs" />
     <Compile Include="Assets\Scripts\UI\DebugBehaviour.cs" />
     <Compile Include="Assets\Scripts\Object\Projectile\ProjectileBehaviour.cs" />
     <Compile Include="Assets\Scripts\Menu\Main\MainMenuSnakeSpawner.cs" />
@@ -160,7 +161,7 @@
     <Compile Include="Assets\Scripts\Menu\MapEditor\MapEditorUIHandler.cs" />
     <Compile Include="Assets\Scripts\Menu\MapEditor\GridObjectDictionary.cs" />
     <Compile Include="Assets\Scripts\Object\Shooter.cs" />
-    <Compile Include="Assets\Scripts\Networking\Steam_Achievements.cs" />
+    <Compile Include="Assets\Scripts\Networking\Steam.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Mirror\Plugins\Mono.Cecil\Mono.CecilX.dll" />

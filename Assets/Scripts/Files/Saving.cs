@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
@@ -26,6 +27,14 @@ public static class Saving
 
         if (serializable is ICached cached)
             cached.Cache();
+
+        Type type = serializable.GetType();
+        if (!type.IsSerializable)
+        {
+            Debug.LogError("Provided object is not serializable, so cannot be" +
+                "saved.");
+            return;
+        }
 
         string dest = Application.persistentDataPath + "/" + filename;
         FileStream fs;
