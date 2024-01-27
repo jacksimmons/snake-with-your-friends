@@ -61,6 +61,12 @@ public class LobbyMenu : MonoBehaviour
     private GameObject m_hostSettingsButton;
     [SerializeField]
     private GameObject m_hostSettingsPanel;
+    [SerializeField]
+    private GameObject m_mapSelectButton;
+    [SerializeField]
+    private GameObject m_mapSelectPanel;
+    [SerializeField]
+    private GameObject m_customisePanel;
 
 
     private void Awake()
@@ -74,6 +80,7 @@ public class LobbyMenu : MonoBehaviour
         if (NetworkServer.active)
         {
             m_hostSettingsButton.SetActive(true);
+            m_mapSelectButton.SetActive(true);
 
             // Load any previous host settings (if there are any)
             if (GameSettings.Saved == null)
@@ -93,15 +100,32 @@ public class LobbyMenu : MonoBehaviour
     }
 
 
+    private void HideAllTabPanels()
+    {
+        m_hostSettingsPanel.SetActive(false);
+        m_customisePanel.SetActive(false);
+        m_mapSelectPanel.SetActive(false);
+    }
+
+
     public void OnHostSettingsButtonPressed()
     {
+        HideAllTabPanels();
         m_hostSettingsPanel.SetActive(true);
     }
 
 
-    public void OnHostSettingsCloseButtonPressed()
+    public void OnCustomiseButtonPressed()
     {
-        m_hostSettingsPanel.SetActive(false);
+        HideAllTabPanels();
+        m_customisePanel.SetActive(true);
+    }
+
+
+    public void OnMapSelectButtonPressed()
+    {
+        HideAllTabPanels();
+        m_mapSelectPanel.SetActive(true);
     }
 
 

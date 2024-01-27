@@ -312,7 +312,6 @@ public class GameBehaviour : NetworkBehaviour
             ServerPlacePlayers_SnakeRoyale(depth: 1, playersStartIndex: 0, Vector2Int.zero);
         }
 
-
         int length = CustomNetworkManager.Instance.Players.Count;
         PlayerSpawnInfo[] spawnInfo = new PlayerSpawnInfo[length];
         for (int i = 0; i < length; i++)

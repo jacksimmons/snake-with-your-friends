@@ -66,9 +66,6 @@ public class PlayerMovement : NetworkBehaviour
     // The last `movement` which was used
     public Vector2 PrevMovement { get; private set; }
 
-    [SerializeField]
-    private float _freeMovementSpeedMod = 1.0f;
-
     // Forced movement
     // The movement vector to be moved along every frame
     // When the player is in forced movement state

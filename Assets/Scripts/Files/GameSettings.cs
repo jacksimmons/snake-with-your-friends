@@ -11,8 +11,8 @@ public class FoodSettings
 
     public FoodSettings()
     {
-        // Enable all foods by default
-        FoodsEnabled = new(int.MaxValue);
+        // Create a bitfield with valid length
+        FoodsEnabled = new(Enum.GetValues(typeof(EFoodType)).Length);
     }
 
     public FoodSettings(BitField foodsEnabled)

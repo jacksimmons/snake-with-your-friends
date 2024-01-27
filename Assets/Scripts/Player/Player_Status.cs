@@ -57,9 +57,6 @@ public partial class PlayerBehaviour
         }
     }
 
-    private float _passiveEffectCooldownMax = 0f;
-    private float _passiveEffectCooldown = 0f;
-
     // Counters
     private int _numPints = 0;
     public int NumPints
@@ -272,8 +269,6 @@ public partial class PlayerBehaviour
         else
         {
             ActivePassiveEffects.Add(effect);
-            _passiveEffectCooldown = 0;
-            _passiveEffectCooldownMax = 0;
         }
     }
 

@@ -101,6 +101,7 @@
     <Compile Include="Assets\Scripts\Camera\CamBehaviour.cs" />
     <Compile Include="Assets\Scripts\Player\Player_Collisions.cs" />
     <Compile Include="Assets\Scripts\Menu\MainMenu.cs" />
+    <Compile Include="Assets\Scripts\Networking\Steam.cs" />
     <Compile Include="Assets\Scripts\Extensions\Wait.cs" />
     <Compile Include="Assets\Scripts\Menu\Customisation\Customisation.cs" />
     <Compile Include="Assets\Scripts\Map\Map.cs" />
@@ -161,7 +162,6 @@
     <Compile Include="Assets\Scripts\Menu\MapEditor\MapEditorUIHandler.cs" />
     <Compile Include="Assets\Scripts\Menu\MapEditor\GridObjectDictionary.cs" />
     <Compile Include="Assets\Scripts\Object\Shooter.cs" />
-    <Compile Include="Assets\Scripts\Networking\Steam.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Mirror\Plugins\Mono.Cecil\Mono.CecilX.dll" />
