@@ -93,19 +93,19 @@ public sealed class GridObjectDictionary
 
     public bool IsFull()
     {
-        return (NumObjects >= MAX_OBJECTS);
+        return NumObjects >= MAX_OBJECTS;
     }
 
 
     public bool IsEmpty()
     {
-        return (NumObjects <= 0);
+        return NumObjects == 0;
     }
 
 
     public bool IsPositionEmpty(Vector3Int gridPos)
     {
-        return m_ds.ContainsKey(gridPos);
+        return !m_ds.ContainsKey(gridPos);
     }
 
 

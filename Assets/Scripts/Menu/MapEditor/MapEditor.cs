@@ -10,7 +10,8 @@ public enum ECreatorLayer
 {
     Ground,
     Wall,
-    Object
+    Object,
+    Food
 }
 
 

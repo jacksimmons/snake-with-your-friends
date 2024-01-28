@@ -126,7 +126,7 @@ public class MapEditorPaintBehaviour : MonoBehaviour
         if (MapEditor.GridObjDict.IsFull())
             return;
 
-        if (MapEditor.GridObjDict.IsPositionEmpty(pos))
+        if (!MapEditor.GridObjDict.IsPositionEmpty(pos))
             return;
 
         // No object was chosen for painting
@@ -156,7 +156,7 @@ public class MapEditorPaintBehaviour : MonoBehaviour
 
     public void EraseObject(Vector3Int pos)
     {
-        if (MapEditor.GridObjDict.IsEmpty())
+        if (MapEditor.GridObjDict.IsPositionEmpty(pos))
             return;
 
         GameObject removed = MapEditor.GridObjDict.RemoveObject(pos);

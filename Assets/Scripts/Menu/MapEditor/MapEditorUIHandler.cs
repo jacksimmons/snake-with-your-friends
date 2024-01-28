@@ -19,20 +19,16 @@ public class MapEditorUIHandler : MonoBehaviour
     private TextMeshProUGUI m_layerValue;
     public string UILayerText
     {
-        set
-        {
-            m_layerValue.text = value;
-        }
+        get { return m_layerValue.text; }
+        set { m_layerValue.text = value; }
     }
 
     [SerializeField]
     private TextMeshProUGUI m_nameValue;
     public string UINameText
     {
-        set
-        {
-            m_nameValue.text = value;
-        }
+        get { return m_nameValue.text; }
+        set { m_nameValue.text = value; }
     }
 
     [SerializeField]
