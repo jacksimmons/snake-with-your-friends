@@ -52,9 +52,12 @@ public class MapLoader : MonoBehaviour
     [SerializeField]
     private MapEditorUIHandler m_UI;
 
+    public string CurrentFilename { get; private set; } = null;
+
 
     public void LoadMapFromFile(string filename)
     {
+        CurrentFilename = filename;
         MapData map = Saving.LoadFromFile<MapData>($"Maps/{filename}");
         LoadMap(map);
     }

@@ -270,6 +270,17 @@ public class EditorMenu : MonoBehaviour
         SetLayerOpacity(m_wallLayer, opacity);
     }
 
+
+    public void OverwriteMap()
+    {
+        if (Map.CurrentFilename == null)
+        {
+            // ! Not implemented
+        }
+        SaveMapToFile(Map.CurrentFilename);
+    }
+
+
     public void SaveMapToFile(string name)
     {
         MapTileData[] GetTileDataArray(Tilemap tilemap)

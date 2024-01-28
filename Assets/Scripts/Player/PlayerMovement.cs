@@ -231,6 +231,15 @@ public class PlayerMovement : NetworkBehaviour
     }
 
 
+    private void FixedUpdate()
+    {
+        if (!isOwned) return;
+
+
+        HandleMovementLoop();
+    }
+
+
     /// <summary>
     /// Handles movement for all body parts, and the frequency of movement ticks.
     /// Called by the lobby every synced moveframe.
