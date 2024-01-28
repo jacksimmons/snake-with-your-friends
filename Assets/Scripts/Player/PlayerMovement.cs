@@ -1,14 +1,40 @@
 using System.Collections.Generic;
 using UnityEngine;
 using Mirror;
-using UnityEngine.SceneManagement;
-using UnityEngine.InputSystem;
 using System;
 
 // Class which controls the Body Parts of a Player object.
 // Is Destroyed when the player dies, but other components are kept.
 public class PlayerMovement : NetworkBehaviour
 {
+    /// <summary>
+    /// Body Parts
+    /// </summary>
+    public List<BodyPart> BodyParts;
+    [SerializeField]
+    private GameObject m_bodyPartContainer;
+    public GameObject BodyPartContainer
+    {
+        get { return m_bodyPartContainer; }
+    }
+    [SerializeField]
+    private GameObject m_bodyPartTemplate;
+
+
+    /// <summary>
+    /// Components
+    /// </summary>
+    private PlayerControls m_pc;
+    private PlayerObjectController m_poc;
+    [SerializeField]
+    private GameBehaviour m_gameBehaviour;
+    [SerializeField]
+    public List<Sprite> DefaultSprites; // Head, Torso, Tail, Corner
+
+
+    /// <summary>
+    /// Player settings
+    /// </summary>
     private BitField bf = new(1);
     public bool Frozen
     {
@@ -24,7 +50,7 @@ public class PlayerMovement : NetworkBehaviour
     {
         get
         {
-            if (!bf.GetBit(2) && movement != Vector2.zero)
+            if (!bf.GetBit(2) && m_direction != Vector2.zero)
                 bf.SetBit(2, true);
 
             return bf.GetBit(2);
@@ -32,128 +58,66 @@ public class PlayerMovement : NetworkBehaviour
         set { bf.SetBit(2, value); }
     }
 
-    [SerializeField]
-    private GameBehaviour _gameBehaviour;
 
-    //[SerializeField]
-    //public PlayerStatus status;
+    /// <summary>
+    /// Movement variables
+    /// </summary>
+    private Vector2 m_direction;
+    private Vector2 m_prevDirection;
+    private Vector2 m_forcedDirection; // Where player cannot stop/change dir
 
-    [SerializeField]
-    private PlayerObjectController m_poc;
-
-    [SerializeField]
-    public GameObject bodyPartContainer;
-
-    // Templates and sprites
-    [SerializeField]
-    private GameObject _bodyPartTemplate;
-
-    [SerializeField]
-    public Sprite m_bpHead;
-    [SerializeField]
-    public Sprite m_bpTail;
-    [SerializeField]
-    public Sprite m_bpTorso;
-    [SerializeField]
-    public Sprite m_bpCornerL;
-
-    // Directions and movement
-    public Vector2 startingDirection = Vector2.up;
-    // Simple boolean which gets set to false after the starting direction is set
-    public Vector2 direction;
-    // The last valid, non-zero direction vector
-    public Vector2 movement;
-    // The last `movement` which was used
-    public Vector2 PrevMovement { get; private set; }
-
-    // Forced movement
-    // The movement vector to be moved along every frame
-    // When the player is in forced movement state
-    private Vector2 _forcedMovement = Vector2.zero;
-    // Restored after forced movement ends
-
-    private List<Vector2> _storedBodyPartDirections = new List<Vector2>();
-
-    public float TimeToMove { get; set; }
-    private float m_timeSinceLastMove = 0;
-
-    // Body Parts
-    public List<BodyPart> BodyParts { get; set; }
-
-    // All actions are executed after the next movement frame
-    private List<Action> _queuedActions;
-
-    private PlayerControls controls;
+    private float m_timeBetweenMoves;
+    private float m_timeTillMove;
 
 
-    public void RecreateStartingParts(int count)
-    {
-        for (int i = 0; i < count; i++)
-        {
-            GameObject bp = Instantiate(_bodyPartTemplate, bodyPartContainer.transform);
-            bp.transform.position += Vector3.up * (count - i);
-        }
-    }
+    /// <summary>
+    /// Queued actions
+    /// </summary>
+    private List<Action> m_queuedActions; // Executed after the next movement frame
+    private List<Vector2> m_storedBodyPartDirections;
 
 
     private void Awake()
     {
-        controls = new();
-        controls.Gameplay.Move.performed += ctx => direction = Extensions.Vectors.StickToDPad(ctx.ReadValue<Vector2>());
-        controls.Gameplay.Move.canceled += ctx => direction = Vector2.zero;
+        // Input setup
+        m_pc = new();
+        m_pc.Gameplay.Move.performed += ctx => HandleDirectionInput(Extensions.Vectors.StickToDPad(ctx.ReadValue<Vector2>()));
+        m_pc.Gameplay.Move.canceled += ctx => HandleDirectionInput(Vector2.zero);
 
-        controls.Gameplay.Enable();
+        //m_pn = GetComponent<PlayerNetwork>();
+        m_poc = GetComponent<PlayerObjectController>();
+        BodyParts = new();
     }
 
 
     private void OnEnable()
     {
-        TimeToMove = GameSettings.Saved.TimeToMove;
-        direction = Vector2.zero;
-        movement = Vector2.zero;
+        m_pc.Gameplay.Enable();
+        Init();
+    }
 
-        bodyPartContainer.SetActive(false);
 
-        // Generate BodyParts structure & starting body parts
-        BodyParts = new List<BodyPart>();
-        Transform containerTransform = bodyPartContainer.transform;
+    private void OnDisable()
+    {
+        m_pc.Gameplay.Disable();
+    }
 
-        int bodyPartCount = containerTransform.childCount;
-        if (bodyPartCount == 0)
-        {
-            RecreateStartingParts(2);
-            bodyPartCount = containerTransform.childCount;
-        }
 
-        for (int i = 0; i < bodyPartCount; i++)
-        {
-            Transform _transform = containerTransform.GetChild(i);
-            BodyPart bp = new
-            (
-                _transform,
-                startingDirection,
+    private void Init()
+    {
+        // Initialise game settings
+        if (GameSettings.Saved != null)
+            m_timeBetweenMoves = GameSettings.Saved.TimeToMove;
 
-                // if (i == 0) => Head
-                i == 0 ? 
-                EBodyPartType.Head :
-                // else if (i is not the final index) => Straight
-                // else => Tail
-                i < containerTransform.childCount - 1 ?
-                EBodyPartType.Straight :
-                EBodyPartType.Tail
-            );
-            BodyParts.Add(bp);
+        // Initialise other variables
+        m_direction = Vector2.zero;
+        m_prevDirection = Vector2.zero;
+        m_timeTillMove = m_timeBetweenMoves;
 
-            _transform.GetComponent<SpriteRenderer>().sprite =
-                bp.CurrentType == EBodyPartType.Head ? m_bpHead :
-                bp.CurrentType == EBodyPartType.Straight ? m_bpTorso :
-                bp.CurrentType == EBodyPartType.Tail ? m_bpTail :
-                bp.CurrentType == EBodyPartType.Corner ? m_bpCornerL :
-                null;
-        }
+        SetupBodyParts();
 
         // Generate QueuedActions structure
-        _queuedActions = new List<Action>();
+        m_queuedActions = new List<Action>();
 
         //List<BodyPartStatus> bpss = new List<BodyPartStatus>();
         //for (int i = 0; i < BodyParts.Count; i++)
@@ -171,72 +135,101 @@ public class PlayerMovement : NetworkBehaviour
     }
 
 
-    private void OnDisable()
+    private void SetupBodyParts()
     {
-        controls.Gameplay.Disable();
+        RecreateStartingParts(2);
+        BodyPartContainer.SetActive(false);
+        BodyParts = PlayerSetup.SetupBodyParts(BodyPartContainer.transform, 0, DefaultSprites);
+        m_poc.UpdateBodyParts();
+        BodyPartContainer.SetActive(true);
     }
 
 
-    private void FixedUpdate()
+    private void HandleDirectionInput(Vector2 dir)
     {
-        if (Array.IndexOf(GameBehaviour.GAME_SCENES, SceneManager.GetActiveScene().name) == -1)
-            return;
-
         if (!isOwned)
             return;
 
-        if (!bodyPartContainer.activeSelf)
-        {
-            bodyPartContainer.SetActive(true);
-        }
-
-        // So that we only move a player if we have authority over it
-        if (isOwned)
-        {
-            HandleInput();
-            HandleMovementLoop();
-
-            BodyPart head = BodyParts[0];
-            Debug.DrawRay(head.Position, head.Direction);
-        }
-    }
-
-    private void HandleInput()
-    {
         // Forced movement
-        if (Frozen)
-        {
-            movement = _forcedMovement;
-            return;
-        }
+        //if (Frozen)
+        //{
+        //    m_direction = m_forcedDirection;
+        //    return;
+        //}
 
         // Prevent snakes going back on themselves
-        // Snake can only go back on itself if FreeMovement is enabled and BodyParts.Count <= 2.
         bool canGoBackOnItself = FreeMovement && BodyParts.Count <= 2;
         if (!canGoBackOnItself)
         {
-            if (direction == -PrevMovement)
-                direction = Vector2.zero;
-        }
-
-        // Free Movement update
-        // - Instant if changing direction
-        // - Time delay if not
-        if (FreeMovement)
-        {
-            print($"Direction {direction}, Movement {movement}");
-            if (direction != movement)
+            if (dir == -m_prevDirection)
             {
-                movement = direction;
-                m_timeSinceLastMove = TimeToMove;
+                dir = Vector2.zero;
             }
         }
-        // Movement update
-        else if (direction != Vector2.zero && direction != movement)
+
+        // Free movement
+        if (FreeMovement)
         {
-            movement = direction;
+            if (dir != m_direction)
+            {
+                m_direction = dir;
+                m_timeTillMove = m_timeBetweenMoves;
+            }
+        }
+        else if (dir != Vector2.zero)
+        {
+            m_direction = dir;
         }
     }
+
+
+    //private void HandleInput()
+    //{
+    //    // Forced movement
+    //    if (Frozen)
+    //    {
+    //        movement = _forcedMovement;
+    //        return;
+    //    }
+
+    //    // Prevent snakes going back on themselves
+    //    // Snake can only go back on itself if FreeMovement is enabled and BodyParts.Count <= 2.
+    //    bool canGoBackOnItself = FreeMovement && BodyParts.Count <= 2;
+    //    if (!canGoBackOnItself)
+    //    {
+    //        if (direction == -PrevMovement)
+    //            direction = Vector2.zero;
+    //    }
+
+    //    // Free Movement update
+    //    // - Instant if changing direction
+    //    // - Time delay if not
+    //    if (FreeMovement)
+    //    {
+    //        print($"Direction {direction}, Movement {movement}");
+    //        if (direction != movement)
+    //        {
+    //            movement = direction;
+    //            m_timeSinceLastMove = TimeToMove;
+    //        }
+    //    }
+    //    // Movement update
+    //    else if (direction != Vector2.zero && direction != movement)
+    //    {
+    //        movement = direction;
+    //    }
+    //}
+
+
+    public void RecreateStartingParts(int count)
+    {
+        for (int i = 0; i < count; i++)
+        {
+            GameObject bp = Instantiate(m_bodyPartTemplate, m_bodyPartContainer.transform);
+            bp.transform.position += Vector3.up * (count - i - 1);
+        }
+    }
+
 
     /// <summary>
     /// Handles movement for all body parts, and the frequency of movement ticks.
@@ -245,28 +238,28 @@ public class PlayerMovement : NetworkBehaviour
     public void HandleMovementLoop()
     {
         // Counter logic
-        m_timeSinceLastMove += Time.fixedDeltaTime;
-        if (m_timeSinceLastMove < TimeToMove)
+        m_timeTillMove -= Time.fixedDeltaTime;
+        if (m_timeTillMove > 0)
             return;
 
-        m_timeSinceLastMove = 0;
+        m_timeTillMove = m_timeBetweenMoves;
 
         // Queued actions wait until the next move frame before being called.
-        for (int i = 0; i < _queuedActions.Count; i++)
+        for (int i = 0; i < m_queuedActions.Count; i++)
         {
-            _queuedActions[0]();
-            _queuedActions.RemoveAt(0);
+            m_queuedActions[0]();
+            m_queuedActions.RemoveAt(0);
         }
 
         // Prevents an extra move occurring before death
         if (CheckForInternalCollisions()) return;
 
-        if (HasMoved && movement != Vector2.zero)
+        if (HasMoved && m_direction != Vector2.zero)
         {
-            if (CheckForExternalCollisions(movement)) return;
+            if (CheckForExternalCollisions(m_direction)) return;
 
             // `PrevMovement` should only be updated if `movement` causes no external collisions.
-            PrevMovement = movement;
+            m_prevDirection = m_direction;
 
             // Iterate backwards through the body parts, from tail to head
             // so every part inherits its direction from the part before it.
@@ -286,7 +279,7 @@ public class PlayerMovement : NetworkBehaviour
             }
 
             // Head
-            BodyParts[0].HandleMovement(movement, BodyParts[1]);
+            BodyParts[0].HandleMovement(m_direction, BodyParts[1]);
 
             // Update to server
             m_poc.UpdateBodyParts();
@@ -356,8 +349,8 @@ public class PlayerMovement : NetworkBehaviour
         if (!HasMoved)
             return;
 
-        GameObject newBodyPartObj = Instantiate(_bodyPartTemplate);
-        newBodyPartObj.transform.parent = bodyPartContainer.transform;
+        GameObject newBodyPartObj = Instantiate(m_bodyPartTemplate);
+        newBodyPartObj.transform.parent = BodyPartContainer.transform;
 
         BodyPart tail = BodyParts[^1];
         BodyPart newBodyPart = new(tail, newBodyPartObj.transform)
@@ -437,7 +430,7 @@ public class PlayerMovement : NetworkBehaviour
     /// <param name="action">An action (call).</param>
     public void Q(Action action)
     {
-        _queuedActions.Add(action);
+        m_queuedActions.Add(action);
     }
 
     /// <summary>
@@ -445,7 +438,7 @@ public class PlayerMovement : NetworkBehaviour
     /// </summary>
     public void QAddBodyPart()
     {
-        _queuedActions.Add(new Action(AddBodyPart));
+        m_queuedActions.Add(new Action(AddBodyPart));
     }
 
     public void QRemoveBodyPart(int collisionIndex = -1)
@@ -453,7 +446,7 @@ public class PlayerMovement : NetworkBehaviour
         if (collisionIndex == 0)
             HandleDeath();
         else
-            _queuedActions.Add(() => RemoveBodyPart());
+            m_queuedActions.Add(() => RemoveBodyPart());
     }
 
     /// <summary>
@@ -463,15 +456,15 @@ public class PlayerMovement : NetworkBehaviour
     /// <param name="timeToMove">The number of seconds between each movement.</param>
     public void QBeginForcedMovement(Vector2 direction, float timeToMove)
     {
-        _queuedActions.Add(new Action(() =>
+        m_queuedActions.Add(new Action(() =>
         {
             Frozen = true;
-            TimeToMove = timeToMove;
-            _forcedMovement = direction;
+            m_timeBetweenMoves = timeToMove;
+            m_forcedDirection = direction;
             foreach (var part in BodyParts)
             {
-                _storedBodyPartDirections.Add(part.Direction);
-                part.Direction = _forcedMovement;
+                m_storedBodyPartDirections.Add(part.Direction);
+                part.Direction = m_forcedDirection;
             }
         }));
     }
@@ -482,20 +475,20 @@ public class PlayerMovement : NetworkBehaviour
     /// </summary>
     public void QEndForcedMovement()
     {
-        _queuedActions.Add(new Action(() =>
+        m_queuedActions.Add(new Action(() =>
         {
             Frozen = false;
 
             // ! Limitation - the snake must continue,
             // this means if the snake starts on a scootile,
             // they start without input.
-            TimeToMove = GameSettings.Saved.TimeToMove;
-            _forcedMovement = Vector2.zero;
+            m_timeBetweenMoves = GameSettings.Saved.TimeToMove;
+            m_forcedDirection = Vector2.zero;
             for (int i = 0; i < BodyParts.Count; i++)
             {
-                BodyParts[i].Direction = _storedBodyPartDirections[i];
+                BodyParts[i].Direction = m_storedBodyPartDirections[i];
             }
-            _storedBodyPartDirections.Clear();
+            m_storedBodyPartDirections.Clear();
         }));
     }
 
@@ -507,16 +500,15 @@ public class PlayerMovement : NetworkBehaviour
     {
         Dictionary<string, string> playerValues = new Dictionary<string, string>
         {
-            { "direction", direction.ToString() },
-            { "movement", movement.ToString() },
-            { "PrevMovement", PrevMovement.ToString() },
-            { "CounterMax", TimeToMove.ToString() }
+            { "direction", m_direction.ToString() },
+            { "prevDirection", m_prevDirection.ToString() },
+            { "timeBetweenMoves", m_timeBetweenMoves.ToString() }
         };
-        for (int i = 0; i < _queuedActions.Count; i++)
-            playerValues.Add("queuedActions [" + i.ToString() + "]", _queuedActions[i].Target.ToString());
-        playerValues.Add("forcedMovement", _forcedMovement.ToString());
-        for (int i = 0; i < _storedBodyPartDirections.Count; i++)
-            playerValues.Add("storedBpDirections [" + i.ToString() + "]", _storedBodyPartDirections[i].ToString());
+        for (int i = 0; i < m_queuedActions.Count; i++)
+            playerValues.Add("queuedActions [" + i.ToString() + "]", m_queuedActions[i].Target.ToString());
+        playerValues.Add("forcedMovement", m_forcedDirection.ToString());
+        for (int i = 0; i < m_storedBodyPartDirections.Count; i++)
+            playerValues.Add("storedBpDirections [" + i.ToString() + "]", m_storedBodyPartDirections[i].ToString());
         return playerValues;
     }
 }

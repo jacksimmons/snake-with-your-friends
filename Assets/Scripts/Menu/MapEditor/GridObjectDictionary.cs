@@ -116,10 +116,18 @@ public sealed class GridObjectDictionary
         for (int i = 0; i < NumObjects; i++)
         {
             ObjectBehaviour ob = objs[i].GetComponent<ObjectBehaviour>();
+
+            int spawnIndex = -1;
+            if (objs[i].TryGetComponent(out SpawnPointBehaviour spb))
+            {
+                spawnIndex = spb.PlayerIndex;
+            }
+
             objData[i] = new(ob.Type,
                 (short)Mathf.FloorToInt(ob.transform.localPosition.x),
                 (short)Mathf.FloorToInt(ob.transform.localPosition.y),
-                ob.transform.localRotation.z
+                ob.transform.localRotation.z,
+                spawnIndex
             );
         }
 

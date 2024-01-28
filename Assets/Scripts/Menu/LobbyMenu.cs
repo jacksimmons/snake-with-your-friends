@@ -100,7 +100,7 @@ public class LobbyMenu : MonoBehaviour
     }
 
 
-    private void HideAllTabPanels()
+    public void HideAllTabPanels()
     {
         m_hostSettingsPanel.SetActive(false);
         m_customisePanel.SetActive(false);
@@ -119,13 +119,6 @@ public class LobbyMenu : MonoBehaviour
     {
         HideAllTabPanels();
         m_customisePanel.SetActive(true);
-    }
-
-
-    public void OnMapSelectButtonPressed()
-    {
-        HideAllTabPanels();
-        m_mapSelectPanel.SetActive(true);
     }
 
 

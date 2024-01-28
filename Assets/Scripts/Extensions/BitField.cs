@@ -2,12 +2,13 @@
 // Any bool value used with this defaults to false.
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
 
 [Serializable]
-public class BitField
+public struct BitField
 {
     // Can store any number of bytes, where each byte stores 8 booleans.
     // Saves memory for lots of objects with lots of booleans, but has a CPU overhead for r/w.

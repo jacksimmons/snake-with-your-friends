@@ -54,10 +54,25 @@ public partial class PlayerBehaviour : MonoBehaviour
 
         m_pn = GetComponent<PlayerNetwork>();
         m_poc = GetComponent<PlayerObjectController>();
+
+        Init();
     }
 
 
     private void OnEnable()
+    {
+        m_pc.Gameplay.Enable();
+        Init();
+    }
+
+
+    private void OnDisable()
+    {
+        m_pc.Gameplay.Disable();
+    }
+
+
+    private void Init()
     {
         // Initialise game settings
         if (GameSettings.Saved != null)
@@ -66,17 +81,12 @@ public partial class PlayerBehaviour : MonoBehaviour
         // Initialise other variables
         m_direction = Vector2.zero;
         m_prevDirection = Vector2.zero;
-        m_timeTillMove = 0;
+        m_timeTillMove = m_timeBetweenMoves;
 
         m_pc.Gameplay.Enable();
 
         SetupBodyParts(m_defaultSprites[0], m_defaultSprites[1], m_defaultSprites[2], m_defaultSprites[3]);
-    }
-
-
-    private void OnDisable()
-    {
-        m_pc.Gameplay.Disable();
+        print(BodyParts[0].Position);
     }
 
 

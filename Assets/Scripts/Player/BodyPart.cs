@@ -230,7 +230,7 @@ public class BodyPart
 
         CurrentType = EBodyPartType.Corner;
         CornerAngle = cornerRot;
-        SetSprite(Player.m_bpCornerL);
+        SetSprite(Player.DefaultSprites[3]);
     }
 
     /// <summary>

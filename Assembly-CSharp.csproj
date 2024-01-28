@@ -61,9 +61,10 @@
     <Compile Include="Assets\Scripts\Extensions\BitField.cs" />
     <Compile Include="Assets\Scripts\Object\Projectile\Projectile.cs" />
     <Compile Include="Assets\SaveButtonGridBehaviour.cs" />
-    <Compile Include="Assets\Scripts\Object\PlayerSpawner.cs" />
+    <Compile Include="Assets\Scripts\Object\SpawnPointBehaviour.cs" />
     <Compile Include="Assets\Scripts\Menu\MapEditor\MapLoader.cs" />
     <Compile Include="Assets\Scripts\Player\PlayerNetwork_Item.cs" />
+    <Compile Include="Assets\Scripts\Player\PlayerSetup.cs" />
     <Compile Include="Assets\Scripts\Game\Puzzle\GoalBehaviour.cs" />
     <Compile Include="Assets\Scripts\Menu\Lobby\PowerupToggleContainer.cs" />
     <Compile Include="Assets\Scripts\Object\Grid\TeleporterPair.cs" />

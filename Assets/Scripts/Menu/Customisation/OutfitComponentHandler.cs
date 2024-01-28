@@ -17,7 +17,7 @@ public class OutfitComponentHandler : MonoBehaviour
 
     private void Start()
     {
-        m_menu = GameObject.FindWithTag("CustomisationMenu").GetComponent<CustomisationMenu>();
+        m_menu = transform.parent.parent.GetComponent<CustomisationMenu>();
         m_outfitComponentImage = transform.Find("Part").GetComponent<Image>();
 
         if (OutfitSettings.Saved.ColourName == string.Empty)
@@ -88,19 +88,19 @@ public class OutfitComponentHandler : MonoBehaviour
         {
             case ECustomisationPart.Head:
                 OutfitSettings.Saved.HeadSpriteName = sprite.name;
-                pm.m_bpHead = sprite;
+                pm.DefaultSprites[0] = sprite;
                 break;
             case ECustomisationPart.Torso:
                 OutfitSettings.Saved.TorsoSpriteName = sprite.name;
-                pm.m_bpTorso = sprite;
+                pm.DefaultSprites[1] = sprite;
                 break;
             case ECustomisationPart.Tail:
                 OutfitSettings.Saved.TailSpriteName = sprite.name;
-                pm.m_bpTail = sprite;
+                pm.DefaultSprites[2] = sprite;
                 break;
             case ECustomisationPart.Corner:
                 OutfitSettings.Saved.CornerSpriteName = sprite.name;
-                pm.m_bpCornerL = sprite;
+                pm.DefaultSprites[3] = sprite;
                 break;
         }
     }

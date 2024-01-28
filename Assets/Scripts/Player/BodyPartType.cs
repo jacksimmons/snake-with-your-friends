@@ -18,17 +18,17 @@ public static class BodyPartType
         Sprite sprite = null;
         switch (type)
         {
-            case EBodyPartType.Straight:
-                sprite = player.m_bpTorso;
-                break;
             case EBodyPartType.Head:
-                sprite = player.m_bpHead;
+                sprite = player.DefaultSprites[0];
+                break;
+            case EBodyPartType.Straight:
+                sprite = player.DefaultSprites[1];
                 break;
             case EBodyPartType.Tail:
-                sprite = player.m_bpTail;
+                sprite = player.DefaultSprites[2];
                 break;
             case EBodyPartType.Corner:
-                sprite = player.m_bpCornerL;
+                sprite = player.DefaultSprites[3];
                 break;
         }
         return sprite;

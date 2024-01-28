@@ -48,14 +48,16 @@ public struct MapObjectData
     public readonly short y;
 
     public readonly float rotation;
+    public readonly int spawnIndex;
 
 
-    public MapObjectData(byte type, short x, short y, float rotation)
+    public MapObjectData(byte type, short x, short y, float rotation, int spawnIndex)
     {
         this.type = type;
         this.x = x;
         this.y = y;
         this.rotation = rotation;
+        this.spawnIndex = spawnIndex;
     }
 }
 

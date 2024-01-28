@@ -35,8 +35,7 @@ public partial class PlayerBehaviour
         int bodyPartCount = containerTransform.childCount;
         if (bodyPartCount == 0)
         {
-            //! RecreateStartingParts(2);
-            bodyPartCount = containerTransform.childCount;
+            RecreateStartingParts(2);
         }
 
         for (int i = 0; i < bodyPartCount; i++)
@@ -104,7 +103,7 @@ public partial class PlayerBehaviour
         for (int i = 0; i < count; i++)
         {
             GameObject bp = Instantiate(m_bodyPartTemplate, BodyPartContainer.transform);
-            bp.transform.position += Vector3.up * (count - i);
+            bp.transform.position += Vector3.up * (count - i - 1);
         }
     }
 

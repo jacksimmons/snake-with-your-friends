@@ -173,7 +173,7 @@ public class PlayerObjectController : NetworkBehaviour
             PM.BodyParts.Clear();
             for (int i = 0; i < bodyPartDatas.Count; i++)
             {
-                Transform bodyPartParent = PM.bodyPartContainer.transform;
+                Transform bodyPartParent = PM.BodyPartContainer.transform;
                 int diff = bodyPartDatas.Count - bodyPartParent.childCount;
 
                 // Ensure all clients have the same number of BodyPart gameobjects (it doesn't
@@ -198,7 +198,7 @@ public class PlayerObjectController : NetworkBehaviour
 
                 BodyPart newBP = BodyPart.FromData(
                     bodyPartDatas[i],
-                    PM.bodyPartContainer.transform.GetChild(i)
+                    PM.BodyPartContainer.transform.GetChild(i)
                 );
 
                 PM.BodyParts.Add(newBP);
@@ -237,7 +237,7 @@ public class PlayerObjectController : NetworkBehaviour
     public void RpcDisableComponents()
     {
         PlayerMovement pm = GetComponent<PlayerMovement>();
-        pm.bodyPartContainer.SetActive(false);
+        pm.BodyPartContainer.SetActive(false);
         pm.enabled = false;
     }
 }

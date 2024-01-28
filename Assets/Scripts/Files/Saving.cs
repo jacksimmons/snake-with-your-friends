@@ -46,7 +46,7 @@ public static class Saving
         bf.Serialize(fs, serializable);
         fs.Close();
 
-        Debug.Log(filename);
+        //Debug.Log(filename);
 
         if (LoadingIcon.Instance)
             LoadingIcon.Instance.Toggle(false);
@@ -66,7 +66,7 @@ public static class Saving
 
         if (File.Exists(dest))
         {
-            Debug.Log(dest);
+            //Debug.Log(dest);
             fs = File.OpenRead(dest);
             BinaryFormatter bf = new();
 

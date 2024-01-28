@@ -32,6 +32,7 @@ public class ObjectBehaviour : MonoBehaviour
     private ParticleSystem m_explosionEffect;
     protected Sprite m_sprite; // Assigned to once in Awake
 
+
     private BitField bf = new(1);
     protected bool Ready
     {

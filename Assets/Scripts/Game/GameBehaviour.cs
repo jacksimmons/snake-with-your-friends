@@ -136,8 +136,8 @@ public class GameBehaviour : NetworkBehaviour
     {
         serverNumPlayersReady++;
 
-        print($"Stage: {serverPlayersLoadingStage}");
-        print($"Ready: {serverNumPlayersReady}/{CustomNetworkManager.Instance.numPlayers}");
+        //print($"Stage: {serverPlayersLoadingStage}");
+        //print($"Ready: {serverNumPlayersReady}/{CustomNetworkManager.Instance.numPlayers}");
         if (serverNumPlayersReady >= CustomNetworkManager.Instance.numPlayers)
             ServerOnAllReady();
 
@@ -309,7 +309,7 @@ public class GameBehaviour : NetworkBehaviour
     {
         if (GameSettings.Saved.GameMode == EGameMode.SnakeRoyale)
         {
-            ServerPlacePlayers_SnakeRoyale(depth: 1, playersStartIndex: 0, Vector2Int.zero);
+            ServerPlacePlayers_SnakeRoyale();
         }
 
         int length = CustomNetworkManager.Instance.Players.Count;
@@ -325,54 +325,90 @@ public class GameBehaviour : NetworkBehaviour
 
 
     [Server]
-    private void ServerPlacePlayers_SnakeRoyale(int depth, int playersStartIndex, Vector2Int bl)
+    private void ServerPlacePlayers_SnakeRoyale()
     {
-        // Outer snakes (along the walls)
-        // Calculate the maximum distance between snakes.
-        // If this distance is too small, spawn inner snakes.
+        // ! This can be optimised with a position stored in the MapData struct
+        int playerCount = CustomNetworkManager.Instance.Players.Count;
+        List<PlayerObjectController> players = CustomNetworkManager.Instance.Players.GetRange(0, playerCount);
 
-        int groundSize = GameSettings.Saved.GameSize;
-
-        int playersCount = 0;
-        if (CustomNetworkManager.Instance.Players.Count - playersStartIndex > 0)
+        foreach (MapObjectData obj in GameSettings.Saved.Map.objectData)
         {
-            playersCount = CustomNetworkManager.Instance.Players.Count - playersStartIndex;
+            // If the spawn point is necessary (i.e. 4 players only necessitates spawn points up to P4)
+            if (obj.spawnIndex >= 0 && obj.spawnIndex < players.Count)
+            {
+                players[obj.spawnIndex].transform.position = new Vector3(obj.x, obj.y) + s_groundTilemap.cellSize / 2;
+            }
         }
-        List<PlayerObjectController> players = CustomNetworkManager.Instance.Players.GetRange(playersStartIndex, playersCount);
+    }
 
-        float minDist = groundSize * SOFT_MIN_DIST_WORLD_SIZE_RATIO;
-        if (minDist < HARD_MIN_DIST)
-            minDist = HARD_MIN_DIST;
 
-        Vector3 BL = s_groundTilemap.CellToWorld((Vector3Int)(bl + (depth + 1) * Vector2Int.one));
-        Vector3 BR = s_groundTilemap.CellToWorld((Vector3Int)(bl + new Vector2Int(groundSize - depth + 1, depth + 1)));
-        Vector3 TL = s_groundTilemap.CellToWorld((Vector3Int)(bl + new Vector2Int(depth + 1, groundSize - depth + 1)));
-        Vector3 TR = s_groundTilemap.CellToWorld((Vector3Int)(bl + (groundSize - depth + 1) * Vector2Int.one));
+    //[Server]
+    //private void ServerPlacePlayers_SnakeRoyale(int depth, int playersStartIndex, Vector2Int bl)
+    //{
+    //    // Outer snakes (along the walls)
+    //    // Calculate the maximum distance between snakes.
+    //    // If this distance is too small, spawn inner snakes.
 
-        Vector3[] corners = { BL, BR, TL, TR };
-        Vector2[] directions = { Vector2.one, new Vector2(-1, 1), new Vector2(1, -1), -Vector2.one };
+    //    int groundSize = GameSettings.Saved.GameSize;
 
-        for (int i = 0; i < players.Count; i++)
+    //    int playersCount = 0;
+    //    if (CustomNetworkManager.Instance.Players.Count - playersStartIndex > 0)
+    //    {
+    //        playersCount = CustomNetworkManager.Instance.Players.Count - playersStartIndex;
+    //    }
+    //    List<PlayerObjectController> players = CustomNetworkManager.Instance.Players.GetRange(playersStartIndex, playersCount);
+
+    //    float minDist = groundSize * SOFT_MIN_DIST_WORLD_SIZE_RATIO;
+    //    if (minDist < HARD_MIN_DIST)
+    //        minDist = HARD_MIN_DIST;
+
+    //    Vector3 BL = s_groundTilemap.CellToWorld((Vector3Int)(bl + (depth + 1) * Vector2Int.one));
+    //    Vector3 BR = s_groundTilemap.CellToWorld((Vector3Int)(bl + new Vector2Int(groundSize - depth + 1, depth + 1)));
+    //    Vector3 TL = s_groundTilemap.CellToWorld((Vector3Int)(bl + new Vector2Int(depth + 1, groundSize - depth + 1)));
+    //    Vector3 TR = s_groundTilemap.CellToWorld((Vector3Int)(bl + (groundSize - depth + 1) * Vector2Int.one));
+
+    //    Vector3[] corners = { BL, BR, TL, TR };
+    //    Vector2[] directions = { Vector2.one, new Vector2(-1, 1), new Vector2(1, -1), -Vector2.one };
+
+    //    for (int i = 0; i < players.Count; i++)
+    //    {
+    //        if (players[i].transform.position == Vector3.zero)
+    //        {
+    //            players[i].transform.position = corners[i % 4]
+    //            + (Vector3)(Vector2.one * directions[i % 4] * s_groundTilemap.cellSize / 2);
+    //        }
+
+    //        // If i were 0 then it might enter this, causing -4 as length to be provided (in the PlacePlayers line).
+    //        if (i != 0 && i % 4 == 0 && i < players.Count - 1)
+    //        {
+    //            int newDepth = depth + (int)Mathf.Floor(minDist);
+    //            if (newDepth >= groundSize / 2)
+    //            {
+    //                Debug.LogError("The players do not fit in the map provided.");
+    //            }
+    //            else
+    //            {
+    //                ServerPlacePlayers_SnakeRoyale(newDepth, playersStartIndex + 4, bl);
+    //            }
+    //        }
+    //    }
+    //}
+
+
+    [ClientRpc]
+    private void PlacePlayersClientRpc(PlayerSpawnInfo[] allSpawnInfo)
+    {
+        for (int i = 0; i < allSpawnInfo.Length; i++)
         {
-            if (players[i].transform.position == Vector3.zero)
+            PlayerSpawnInfo spawnInfo = allSpawnInfo[i];
+            PlayerObjectController poc = CustomNetworkManager.Instance.Players[i];
+
+            if (poc.playerSteamID != spawnInfo.SteamID)
             {
-                players[i].transform.position = corners[i % 4]
-                + (Vector3)(Vector2.one * directions[i % 4] * s_groundTilemap.cellSize / 2);
+                Debug.LogError("Failed to place players - The Players list was altered during this!");
             }
 
-            // If i were 0 then it might enter this, causing -4 as length to be provided (in the PlacePlayers line).
-            if (i != 0 && i % 4 == 0 && i < players.Count - 1)
-            {
-                int newDepth = depth + (int)Mathf.Floor(minDist);
-                if (newDepth >= groundSize / 2)
-                {
-                    Debug.LogError("The players do not fit in the map provided.");
-                }
-                else
-                {
-                    ServerPlacePlayers_SnakeRoyale(newDepth, playersStartIndex + 4, bl);
-                }
-            }
+            poc.transform.SetPositionAndRotation(spawnInfo.Position, Quaternion.Euler(Vector3.forward * spawnInfo.Rotation_z));
         }
     }
     // ------------------------------------
@@ -397,7 +433,7 @@ public class GameBehaviour : NetworkBehaviour
         foreach (var player in CustomNetworkManager.Instance.Players)
         {
             PlayerMovement pm = player.PM;
-            pm.bodyPartContainer.SetActive(true);
+            pm.BodyPartContainer.SetActive(true);
         }
     }
     // ------------------------------------
@@ -472,24 +508,6 @@ public class GameBehaviour : NetworkBehaviour
         }
 
         tilemap.SetTilesBlock(bounds, tiles);
-    }
-
-
-    [ClientRpc]
-    private void PlacePlayersClientRpc(PlayerSpawnInfo[] allSpawnInfo)
-    {
-        for (int i = 0; i < allSpawnInfo.Length; i++)
-        {
-            PlayerSpawnInfo spawnInfo = allSpawnInfo[i];
-            PlayerObjectController poc = CustomNetworkManager.Instance.Players[i];
-
-            if (poc.playerSteamID != spawnInfo.SteamID)
-            {
-                Debug.LogError("Failed to place players - The Players list was altered during this!");
-            }
-
-            poc.transform.SetPositionAndRotation(spawnInfo.Position, Quaternion.Euler(Vector3.forward * spawnInfo.Rotation_z));
-        }
     }
 
 

@@ -46,9 +46,9 @@ public class MainMenu : SceneTransitionHandler
         FullScreenMode fsm = Settings.GetWindowMode(Settings.Saved.Fullscreen, Settings.Saved.Borderless);
         Screen.SetResolution(Settings.Saved.resX, Settings.Saved.resY, fsm, Settings.Saved.resHz);
 
-        print($"Resolution: {Settings.Saved.resX}x{Settings.Saved.resY}@{Settings.Saved.resHz}");
-        print($"Fullscreen: {Settings.Saved.Fullscreen} Borderless: {Settings.Saved.Borderless}");
-        print($"Volume: MENU[{Settings.Saved.menuVolume}], SFX[{Settings.Saved.sfxVolume}]");
+        //print($"Resolution: {Settings.Saved.resX}x{Settings.Saved.resY}@{Settings.Saved.resHz}");
+        //print($"Fullscreen: {Settings.Saved.Fullscreen} Borderless: {Settings.Saved.Borderless}");
+        //print($"Volume: MENU[{Settings.Saved.menuVolume}], SFX[{Settings.Saved.sfxVolume}]");
     }
 
     public void TestSteamConnection()
