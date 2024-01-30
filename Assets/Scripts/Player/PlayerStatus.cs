@@ -1,10 +1,22 @@
-using System.Collections.Generic;
+using Mirror;
 using System;
-using UnityEditor;
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
-public class PlayerStatus : MonoBehaviour
+using Random = UnityEngine.Random;
+
+public class PlayerStatus : NetworkBehaviour
 {
+    // Constants
+    private const float PROJ_SPEED_FAST = 0.25f;
+    private const float PROJ_SPEED_SLOW = 0.1f;
+
+    [Range(0f, 360f)]
+    // An angle either side of the player defining the random range of RocketShitting.
+    // Recommended range: 0-90. Past 90 will give very shitty results.
+    private const float SHIT_EXPLOSIVENESS = 45;
+
     [SerializeField]
     private Sprite _spriteApple;
     [SerializeField]
@@ -38,7 +50,11 @@ public class PlayerStatus : MonoBehaviour
 
     private Dictionary<EFoodType, Sprite> _foodSprites;
 
-    private List<BodyPartStatus> _bodyPartStatuses;
+    private PlayerMovement m_pm;
+    [SerializeField]
+    private GameObject _fireball;
+    [SerializeField]
+    private GameObject _staticShit;
 
     public Effect ActiveInputEffect { get; private set; } = null;
     public List<Effect> ActivePassiveEffects { get; private set; } = new List<Effect>();
@@ -74,13 +90,14 @@ public class PlayerStatus : MonoBehaviour
     public float SpeedIncrease { get; private set; } = 0f;
     public int PotassiumLevels { get; private set; } = 0;
 
+    private PlayerControls controls;
 
-    
 
-
-    private void Start()
+    private void Awake()
     {
-        m_pc.Gameplay.Powerup.performed += ctx => UsePowerup();
+        m_pm = GetComponent<PlayerMovement>();
+        controls = new();
+        controls.Gameplay.Powerup.performed += ctx => UsePowerup();
 
         _foodSprites = new()
         {
@@ -99,6 +116,66 @@ public class PlayerStatus : MonoBehaviour
             { EFoodType.PineapplePizza, _spritePineapplePizza },
             { EFoodType.Pizza, _spritePizza },
         };
+    }
+
+
+    private void OnEnable() { controls.Gameplay.Enable(); }
+
+
+    private void OnDisable() { controls.Gameplay.Disable(); }
+
+
+    /// <summary>
+    /// Handles spawning of projectiles, determined by the effect enum passed.
+    /// Some objects are synced with the server, some just have synced spawn times.
+    /// </summary>
+    /// <param name="effect">The projectile is based on the effect.</param>
+    [Command]
+    private void CmdSpawn(EEffect effect)
+    {
+        switch (effect)
+        {
+            case EEffect.RocketShitting:
+                ClientSpawnUnsynced(effect);
+                break;
+            case EEffect.BreathingFire:
+                BodyPart head = m_pm.BodyParts[0];
+
+                GameObject fireball = Instantiate(_fireball, GameObject.Find("Projectiles").transform);
+                fireball.transform.position = head.Position + (Vector3)head.Direction;
+                fireball.GetComponent<ProjectileBehaviour>()
+                .Proj = Projectiles.ConstructFireball(
+                    head.Direction * PROJ_SPEED_FAST,
+                    head.RegularAngle);
+                
+                NetworkServer.Spawn(fireball);
+                break;
+        }
+    }
+
+    /// <summary>
+    /// Spawns an unsynced object, at a synced time (as every client does the same
+    /// thing).
+    /// </summary>
+    /// <param name="effect">The projectile is based on the effect.</param>
+    [ClientRpc]
+    private void ClientSpawnUnsynced(EEffect effect)
+    {
+        switch (effect)
+        {
+            case EEffect.RocketShitting:
+                float randomRotation = Random.Range(-SHIT_EXPLOSIVENESS, SHIT_EXPLOSIVENESS);
+
+                GameObject shit = Instantiate(_staticShit, GameObject.Find("Projectiles").transform);
+                shit.transform.position = m_pm.BodyParts[^1].Position - (Vector3)m_pm.BodyParts[^1].Direction;
+                shit.transform.Rotate(Vector3.forward * randomRotation);
+
+                shit.GetComponent<ProjectileBehaviour>()
+                .Proj = Projectiles.ConstructShit(
+                    Extensions.Vectors.Rotate(-m_pm.BodyParts[^1].Direction, randomRotation) * PROJ_SPEED_SLOW,
+                    m_pm.BodyParts[^1].RegularAngle);
+                break;
+        }
     }
 
 
@@ -148,6 +225,8 @@ public class PlayerStatus : MonoBehaviour
     private void Update()
     {
         HandleTime();
+
+        HandleVisualEffects();
         HandlePassiveEffects();
     }
 
@@ -176,6 +255,20 @@ public class PlayerStatus : MonoBehaviour
         }
     }
 
+    private void HandleVisualEffects()
+    {
+        Transform tooManyPints = transform.Find("TooManyPints");
+        if (NumPints > 0 && tooManyPints != null)
+        {
+            // Add the effect as a child
+            GameObject go = new GameObject("TooManyPints");
+            go.transform.parent = transform;
+            go.layer = LayerMask.NameToLayer("Effects");
+            go.AddComponent<TooManyPints>();
+            go.GetComponent<TooManyPints>();
+        }
+    }
+
     public void UseInputEffect()
     {
         Effect effect = ActiveInputEffect;
@@ -185,7 +278,7 @@ public class PlayerStatus : MonoBehaviour
             switch (effect.EffectName)
             {
                 case EEffect.BreathingFire:
-                    m_pn.Spawn(EEffect.BreathingFire);
+                    CmdSpawn(EEffect.BreathingFire);
                     break;
             }
             // Execute a OneOff effect only once its cooldown (which it typically won't have) reaches 0.
@@ -217,8 +310,7 @@ public class PlayerStatus : MonoBehaviour
                         break;
 
                     case EEffect.SpeedBoost:
-                        m_timeBetweenMoves = GameSettings.Saved.Data.TimeToMove /
-                            Effect.GetSpeedMultFromSignedLevel(effect.EffectLevel);
+                        m_pm.ApplySpeedMultiplier(Effect.GetSpeedMultFromSignedLevel(effect.EffectLevel));
 
                         statusUI.DisableAllSpeedIcons();
                         if (effect.EffectLevel >= 0)
@@ -232,7 +324,7 @@ public class PlayerStatus : MonoBehaviour
                         break;
 
                     case EEffect.RocketShitting:
-                        m_pn.Spawn(EEffect.RocketShitting);
+                        CmdSpawn(EEffect.RocketShitting);
                         statusUI.ToggleShitIcon(true);
                         break;
 
@@ -245,7 +337,7 @@ public class PlayerStatus : MonoBehaviour
                         break;
 
                     case EEffect.Sleeping:
-                        Frozen = true;
+                        m_pm.Frozen = true;
                         statusUI.ToggleSleepingIcon(true);
                         break;
                 }
@@ -262,7 +354,7 @@ public class PlayerStatus : MonoBehaviour
         if (effect.IsInputEffect)
         {
             // Clear the old effect for the new one
-            m_timeBetweenMoves = GameSettings.Saved.Data.TimeToMove;
+            m_pm.ResetSpeedModifier();
             if (ActiveInputEffect != null)
                 ClearInputEffects();
             ActiveInputEffect = effect;
@@ -312,14 +404,14 @@ public class PlayerStatus : MonoBehaviour
         switch (effect.EffectName)
         {
             case EEffect.SpeedBoost:
-                m_timeBetweenMoves = GameSettings.Saved.Data.TimeToMove;
+                m_pm.ResetSpeedModifier();
                 statusUI.DisableAllSpeedIcons();
                 break;
             case EEffect.RocketShitting:
                 statusUI.ToggleShitIcon(false);
                 break;
             case EEffect.Sleeping:
-                Frozen = false;
+                m_pm.Frozen = false;
                 statusUI.ToggleSleepingIcon(false);
                 break;
         }
@@ -350,7 +442,7 @@ public class PlayerStatus : MonoBehaviour
         NumPints = 0;
         PotassiumLevels = 0;
 
-        m_timeBetweenMoves = GameSettings.Saved.Data.TimeToMove;
+        m_pm.ResetSpeedModifier();
     }
 
     public Dictionary<string, string> GetStatusDebug()
@@ -369,7 +461,7 @@ public class PlayerStatus : MonoBehaviour
 
         statuses["numPints"] = NumPints.ToString();
         statuses["potassiumLevels"] = PotassiumLevels.ToString();
-        statuses["NumPieces"] = BodyParts.Count.ToString();
+        statuses["NumPieces"] = m_pm.BodyParts.Count.ToString();
         return statuses;
     }
 
@@ -416,7 +508,7 @@ public class PlayerStatus : MonoBehaviour
                 Effect internalProcessing = new Effect(EEffect.None, lifetime: 20, causes:
                     new Effect[] { pissing });
 
-                Effect drunk = new Effect(EEffect.Drunk, lifetime: 0, isOneOff: true);
+                Effect drunk = new Effect(EEffect.Drunk);
 
                 ItemSlotEffect = new Effect(EEffect.None, lifetime: 0, causes:
                     new Effect[] { drunk, internalProcessing });
@@ -430,7 +522,7 @@ public class PlayerStatus : MonoBehaviour
 
             case EFoodType.Dragonfruit:
                 ItemSlotEffect =
-                    new(EEffect.BreatingFire, isInputEffect: true, isOneOff: true);
+                    new(EEffect.BreathingFire, isInputEffect: true, isOneOff: true);
                 break;
         }
     }

@@ -15,6 +15,7 @@ GameObject:
   - component: {fileID: 8602527917271153699}
   - component: {fileID: 5691343852970272198}
   - component: {fileID: 4440790568858733751}
+  - component: {fileID: 7833330327321974543}
   m_Layer: 6
   m_Name: PlayerObject
   m_TagString: Player
@@ -181,6 +182,39 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 5dbd08e1b155aad469cbcf43e9563923, type: 3}
   - {fileID: 21300000, guid: 895c58017397a7a47b7c31c8ebe71234, type: 3}
   - {fileID: 21300000, guid: d9aa5ab9caf99a54db513b335fc29ede, type: 3}
+--- !u!114 &7833330327321974543
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3315957918798202727}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ba21dea7e7ee9b646a204cf1da5cdc02, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
+  _spriteApple: {fileID: 21300000, guid: 0e2a9133a1e406b49a184e3541e8c928, type: 3}
+  _spriteBalti: {fileID: 21300000, guid: 42969d740ee613646930a13d4bf0b299, type: 3}
+  _spriteBanana: {fileID: 0}
+  _spriteBone: {fileID: 0}
+  _spriteBooze: {fileID: 21300000, guid: 3e8950d30a6f0b746b3b4f4e69012a6c, type: 3}
+  _spriteCheese: {fileID: 0}
+  _spriteCoffee: {fileID: 0}
+  _spriteDoughnut: {fileID: 21300000, guid: 09a1a6268160fcb41a493197fc5dbcb4, type: 3}
+  _spriteDragonfruit: {fileID: 21300000, guid: cc0c599d216355c458a9c2502a74424c, type: 3}
+  _spriteDrumstick: {fileID: 21300000, guid: 46237619613771f449525ab3b0647479, type: 3}
+  _spriteIceCream: {fileID: 0}
+  _spriteOrange: {fileID: 21300000, guid: 60dde592f2246e54691df1ba74d0c9d3, type: 3}
+  _spritePineapple: {fileID: 0}
+  _spritePineapplePizza: {fileID: 0}
+  _spritePizza: {fileID: 21300000, guid: 2094db1395fb0a948b77b3c6d39c8dbb, type: 3}
+  _player: {fileID: 0}
+  _fireball: {fileID: 0}
+  _staticShit: {fileID: 0}
 --- !u!1 &3727899065049902522
 GameObject:
   m_ObjectHideFlags: 0
@@ -240,7 +274,6 @@ MonoBehaviour:
   _wallTile: {fileID: 11400000, guid: 2a1c06836de000d4bb5cdb4ca8f49847, type: 2}
   _gameOverTemplate: {fileID: 5693628947570318495, guid: 7f037517319c66e41b1000faa200740e, type: 3}
   _menuSelectTemplate: {fileID: 0}
-  _spawnPoint: {x: 0, y: 0}
   _foodTemplates:
   - {fileID: 5883453940578565158, guid: cd3a9a6b98ddefa49920c11ef7761050, type: 3}
   - {fileID: 282451142020418660, guid: 0275836c03688364b84c9c8124927bf3, type: 3}

@@ -63,7 +63,6 @@
     <Compile Include="Assets\SaveButtonGridBehaviour.cs" />
     <Compile Include="Assets\Scripts\Object\SpawnPointBehaviour.cs" />
     <Compile Include="Assets\Scripts\Menu\MapEditor\MapLoader.cs" />
-    <Compile Include="Assets\Scripts\Player\PlayerNetwork_Item.cs" />
     <Compile Include="Assets\Scripts\Player\PlayerSetup.cs" />
     <Compile Include="Assets\Scripts\Game\Puzzle\GoalBehaviour.cs" />
     <Compile Include="Assets\Scripts\Menu\Lobby\PowerupToggleContainer.cs" />
