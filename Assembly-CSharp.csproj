@@ -67,6 +67,7 @@
     <Compile Include="Assets\Scripts\Player\PlayerSetup.cs" />
     <Compile Include="Assets\Scripts\Game\Puzzle\GoalBehaviour.cs" />
     <Compile Include="Assets\Scripts\Menu\Lobby\PowerupToggleContainer.cs" />
+    <Compile Include="Assets\FoodSpawner.cs" />
     <Compile Include="Assets\Scripts\Object\Grid\TeleporterPair.cs" />
     <Compile Include="Assets\Scripts\Game\GameBehaviour.cs" />
     <Compile Include="Assets\Scripts\Extensions\Extensions.cs" />
@@ -81,7 +82,6 @@
     <Compile Include="Assets\Scripts\Networking\CustomNetworkManager.cs" />
     <Compile Include="Assets\Scripts\Audio\AudioHandler.cs" />
     <Compile Include="Assets\Scripts\Object\ForegroundObject.cs" />
-    <Compile Include="Assets\Scripts\Player\PlayerBehaviour.cs" />
     <Compile Include="Assets\Scripts\Object\ForegroundBehaviour.cs" />
     <Compile Include="Assets\Scripts\Files\Saving.cs" />
     <Compile Include="Assets\Scripts\Files\MapData.cs" />
@@ -99,7 +99,6 @@
     <Compile Include="Assets\Scripts\Object\ObjectBehaviour.cs" />
     <Compile Include="Assets\Scripts\Menu\Customisation\OutfitComponentHandler.cs" />
     <Compile Include="Assets\Scripts\Camera\CamBehaviour.cs" />
-    <Compile Include="Assets\Scripts\Player\Player_Collisions.cs" />
     <Compile Include="Assets\Scripts\Menu\MainMenu.cs" />
     <Compile Include="Assets\Scripts\Networking\Steam.cs" />
     <Compile Include="Assets\Scripts\Extensions\Wait.cs" />
@@ -150,7 +149,6 @@
     <Compile Include="Assets\Scripts\Player\BodyPartType.cs" />
     <Compile Include="Assets\Scripts\Menu\LobbyMenu.cs" />
     <Compile Include="Assets\Scripts\Object\Grid\Teleporter.cs" />
-    <Compile Include="Assets\Scripts\Player\Player_BodyParts.cs" />
     <Compile Include="Assets\Scripts\Player\BodyPart.cs" />
     <Compile Include="Assets\Scripts\Object\Tilemap\ColliderToggleTilemap.cs" />
     <Compile Include="Assets\Scripts\Object\DeathTrigger.cs" />
@@ -162,7 +160,7 @@
     <Compile Include="Assets\Scripts\Menu\MapEditor\MapEditorUIHandler.cs" />
     <Compile Include="Assets\Scripts\Menu\MapEditor\GridObjectDictionary.cs" />
     <Compile Include="Assets\Scripts\Object\Shooter.cs" />
-    <Compile Include="Assets\FoodSpawner.cs" />
+    <Compile Include="Assets\Scripts\Player\PlayerStatus.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Mirror\Plugins\Mono.Cecil\Mono.CecilX.dll" />
