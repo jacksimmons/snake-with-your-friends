@@ -52,9 +52,9 @@ public class PlayerStatus : NetworkBehaviour
 
     private PlayerMovement m_pm;
     [SerializeField]
-    private GameObject _fireball;
+    private GameObject m_fireball;
     [SerializeField]
-    private GameObject _staticShit;
+    private GameObject m_staticShit;
 
     public Effect ActiveInputEffect { get; private set; } = null;
     public List<Effect> ActivePassiveEffects { get; private set; } = new List<Effect>();
@@ -141,7 +141,7 @@ public class PlayerStatus : NetworkBehaviour
             case EEffect.BreathingFire:
                 BodyPart head = m_pm.BodyParts[0];
 
-                GameObject fireball = Instantiate(_fireball, GameObject.Find("Projectiles").transform);
+                GameObject fireball = Instantiate(m_fireball, GameObject.Find("Projectiles").transform);
                 fireball.transform.position = head.Position + (Vector3)head.Direction;
                 fireball.GetComponent<ProjectileBehaviour>()
                 .Proj = Projectiles.ConstructFireball(
@@ -166,7 +166,7 @@ public class PlayerStatus : NetworkBehaviour
             case EEffect.RocketShitting:
                 float randomRotation = Random.Range(-SHIT_EXPLOSIVENESS, SHIT_EXPLOSIVENESS);
 
-                GameObject shit = Instantiate(_staticShit, GameObject.Find("Projectiles").transform);
+                GameObject shit = Instantiate(m_staticShit, GameObject.Find("Projectiles").transform);
                 shit.transform.position = m_pm.BodyParts[^1].Position - (Vector3)m_pm.BodyParts[^1].Direction;
                 shit.transform.Rotate(Vector3.forward * randomRotation);
 
@@ -465,8 +465,14 @@ public class PlayerStatus : NetworkBehaviour
         return statuses;
     }
 
+
+    /// <summary>
+    /// When the player eats a food, store its powerup properties in the item slot, etc.
+    /// </summary>
+    /// <param name="food"></param>
     public void Eat(EFoodType food)
     {
+        // If there already is a powerup in the slot, do not overwrite it.
         if (ItemSlotEffect != null) return;
 
         Image powerupImg = GameObject.FindWithTag("PowerupUI").GetComponent<Image>();
@@ -475,6 +481,7 @@ public class PlayerStatus : NetworkBehaviour
         powerupImg.sprite = _foodSprites[food];
         powerupImg.color = Color.white;
 
+        // Set the item slot effect property (store in a variable until the powerup is used)
         switch (food)
         {
             case EFoodType.Apple:

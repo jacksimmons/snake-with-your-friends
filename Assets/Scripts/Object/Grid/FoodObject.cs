@@ -24,7 +24,7 @@ public class FoodObject : MonoBehaviour
             if (playerMovementController != null)
             {
                 playerMovementController.QAddBodyPart();
-                //! playerMovementController.status.Eat(food);
+                playerMovementController.GetComponent<PlayerStatus>().Eat(food);
 
                 GameObject.FindWithTag("AudioHandler").GetComponent<AudioHandler>().eatAudioSource.Play();
             }
@@ -47,7 +47,6 @@ public class FoodObject : MonoBehaviour
         {
             GameObject playerObj = GameObject.Find("LocalPlayerObject");
             GameBehaviour game = playerObj.GetComponentInChildren<GameBehaviour>();
-
             game.CmdRemoveFood(gameObject);
         }
     }
