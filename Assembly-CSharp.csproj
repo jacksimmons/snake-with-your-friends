@@ -92,7 +92,6 @@
     <Compile Include="Assets\Scripts\Menu\Main\SentenceChangerButton.cs" />
     <Compile Include="Assets\Scripts\Menu\MapEditor\MapEditorPaintBehaviour.cs" />
     <Compile Include="Assets\Scripts\Cutscene\SnakeActor.cs" />
-    <Compile Include="Assets\Scripts\Object\Grid\GridObject.cs" />
     <Compile Include="Assets\Scripts\Extensions\RandomDistribution.cs" />
     <Compile Include="Assets\Scripts\Menu\MapEditor\MapEditorObjectSelect.cs" />
     <Compile Include="Assets\Scripts\Files\SaveData.cs" />
@@ -163,6 +162,7 @@
     <Compile Include="Assets\Scripts\Menu\MapEditor\MapEditorUIHandler.cs" />
     <Compile Include="Assets\Scripts\Menu\MapEditor\GridObjectDictionary.cs" />
     <Compile Include="Assets\Scripts\Object\Shooter.cs" />
+    <Compile Include="Assets\FoodSpawner.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Mirror\Plugins\Mono.Cecil\Mono.CecilX.dll" />

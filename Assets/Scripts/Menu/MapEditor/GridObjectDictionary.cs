@@ -123,7 +123,7 @@ public sealed class GridObjectDictionary
                 spawnIndex = spb.PlayerIndex;
             }
 
-            objData[i] = new(ob.Type,
+            objData[i] = new(ob.ObjId,
                 (short)Mathf.FloorToInt(ob.transform.localPosition.x),
                 (short)Mathf.FloorToInt(ob.transform.localPosition.y),
                 ob.transform.localRotation.z,

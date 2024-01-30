@@ -37,8 +37,6 @@ public class EditorMenu : MonoBehaviour
     [SerializeField]
     private GameObject m_objectLayer;
     [SerializeField]
-    private Tilemap m_foodLayer;
-    [SerializeField]
     private GameObject m_backgroundLayer;
 
     private ECreatorTool m_toolInUse = ECreatorTool.Brush;
@@ -70,9 +68,6 @@ public class EditorMenu : MonoBehaviour
                     break;
                 case ECreatorLayer.Object:
                     SetLayerToObject();
-                    break;
-                case ECreatorLayer.Food:
-                    SetLayerToTilemap(m_foodLayer);
                     break;
             }
             m_currentLayer = value;

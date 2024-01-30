@@ -1,7 +1,7 @@
 using UnityEngine;
 
 
-public class FoodObject : GridObject
+public class FoodObject : MonoBehaviour
 {
     [SerializeField]
     public EFoodType food;
@@ -48,7 +48,7 @@ public class FoodObject : GridObject
             GameObject playerObj = GameObject.Find("LocalPlayerObject");
             GameBehaviour game = playerObj.GetComponentInChildren<GameBehaviour>();
 
-            game.CmdRemoveFood(gridPos);
+            game.CmdRemoveFood(gameObject);
         }
     }
 }

@@ -78,7 +78,7 @@ public class MapEditorLoadBehaviour : MonoBehaviour
         // If there is not a map, save the map to GameSettings for future use in networking
         else
         {
-            GameSettings.Saved.Map = Saving.LoadFromFile<MapData>($"Maps/{filename}");
+            GameSettings.Saved.Data.Map = Saving.LoadFromFile<MapData>($"Maps/{filename}");
             Saving.SaveToFile(GameSettings.Saved, "GameSettings.dat");
         }
     }

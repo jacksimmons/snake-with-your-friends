@@ -9,14 +9,14 @@ public class ObjectBehaviour : MonoBehaviour
 {
     private bool m_dontDestroyOnExplosion = false;
 
-    private byte m_type;
-    public byte Type
+    private byte m_objId;
+    public byte ObjId
     {
-        get { return m_type; }
+        get { return m_objId; }
         set 
         {
-            if (m_type == 0)
-                m_type = value;
+            if (m_objId == 0)
+                m_objId = value;
             else
                 Debug.LogWarning("Type already set.");
         }
@@ -100,7 +100,7 @@ public class ObjectBehaviour : MonoBehaviour
 
 
     /// <summary>
-    /// To be used in the editor - prevents objects getting removed from the map.
+    /// To be used in the editor - prevents objects getting removed from the map by projectiles.
     /// </summary>
     public void DontDestroyOnExplosion()
     {

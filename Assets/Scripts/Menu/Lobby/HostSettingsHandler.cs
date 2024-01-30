@@ -34,29 +34,27 @@ public class HostSettingsHandler : MonoBehaviour
     private void Start()
     {
         if (GameSettings.Saved == null)
-            m_currentGameSettings = new GameSettings();
+        {
+            m_currentGameSettings = new();
+        }
         else
             m_currentGameSettings = GameSettings.Saved;
 
-        m_speedSlider.value = m_currentGameSettings.TimeToMove;
+        m_speedSlider.value = m_currentGameSettings.Data.TimeToMove;
         m_speedLast = m_speedSlider.value;
         UpdateSpeedLabels();
 
-        m_friendlyFireToggle.isOn = m_currentGameSettings.FriendlyFire;
+        m_friendlyFireToggle.isOn = m_currentGameSettings.Data.FriendlyFire;
         m_friendlyFireToggle.onValueChanged.AddListener(OnFriendlyFireTogglePressed);
         SetFriendlyFireLabel(m_friendlyFireToggle.isOn);
 
         m_gameModeDropdown.onValueChanged.AddListener(OnGameModeUpdate);
 
-        m_mapSizeSlider.value = m_currentGameSettings.GameSize;
-        m_mapSizeSlider.onValueChanged.AddListener(OnMapSizeUpdate);
-        SetMapSizeLabel(m_mapSizeSlider.value);
-
         foreach (GameObject go in m_powerupToggleContainers)
         {
             EFoodType foodType = go.GetComponent<PowerupToggleContainer>().foodType;
             go.GetComponentInChildren<Toggle>().onValueChanged.AddListener((pressed) => OnPowerupTogglePressed(pressed, foodType));
-            go.GetComponentInChildren<Toggle>().isOn = m_currentGameSettings.foodSettings.GetFoodEnabled(foodType);
+            go.GetComponentInChildren<Toggle>().isOn = m_currentGameSettings.GetFoodBit(foodType);
         }
     }
 
@@ -84,25 +82,14 @@ public class HostSettingsHandler : MonoBehaviour
 
         m_speedLabel.text = $"Time Between Moves ({m_speedSlider.value}{speed})";
 
-        m_currentGameSettings.TimeToMove = m_speedSlider.value;
-    }
-
-
-    public void OnMapSizeUpdate(float value)
-    {
-        SetMapSizeLabel(value);
-        m_currentGameSettings.GameSize = (int)value;
-    }
-    private void SetMapSizeLabel(float value)
-    {
-        m_mapSizeLabel.text = $"Map Size ({(int)value})";
+        m_currentGameSettings.Data.TimeToMove = m_speedSlider.value;
     }
 
 
     public void OnFriendlyFireTogglePressed(bool pressed)
     {
         SetFriendlyFireLabel(pressed);
-        m_currentGameSettings.FriendlyFire = pressed;
+        m_currentGameSettings.Data.FriendlyFire = pressed;
     }
     private void SetFriendlyFireLabel(bool pressed)
     {
@@ -113,14 +100,14 @@ public class HostSettingsHandler : MonoBehaviour
 
     public void OnGameModeUpdate(int index)
     {
-        m_currentGameSettings.GameMode = 
+        m_currentGameSettings.Data.GameMode = 
         (EGameMode)Enum.GetValues(typeof(EGameMode)).GetValue(index);
     }
 
 
     public void OnPowerupTogglePressed(bool pressed, EFoodType food)
     {
-        m_currentGameSettings.foodSettings.SetFoodEnabled(food, pressed);
+        m_currentGameSettings.SetFoodBit(food, pressed);
     }
 
 

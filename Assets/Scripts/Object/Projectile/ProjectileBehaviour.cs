@@ -45,7 +45,7 @@ public class ProjectileBehaviour : ObjectBehaviour
             return;
         }
 
-        if (GameSettings.Saved.FriendlyFire)
+        if (GameSettings.Saved.Data.FriendlyFire)
             StartCoroutine(HandleImmunity(Proj.ImmunityDuration));
         else
             PlayerImmune = true;

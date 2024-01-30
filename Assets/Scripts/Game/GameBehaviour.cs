@@ -3,27 +3,12 @@ using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Pool;
 using UnityEngine.Tilemaps;
 using Random = UnityEngine.Random;
 
 public class GameBehaviour : NetworkBehaviour
 {
-    private static GameBehaviour _instance;
-    public static GameBehaviour Instance
-    {
-        get
-        {
-            if (!_instance)
-            {
-                GameObject lpo = GameObject.Find("LocalPlayerObject");
-                if (!lpo)
-                    return null;
-                _instance = lpo.GetComponentInChildren<GameBehaviour>();
-            }
-            return _instance;
-        }
-    }
-
     private struct PlayerSpawnInfo
     {
         // Used as a check; ensures the list of players has not changed.
@@ -41,14 +26,46 @@ public class GameBehaviour : NetworkBehaviour
         }
     }
 
+    public enum EGameLoadStage
+    {
+        Unloaded,
+        SceneLoaded,
+        GameSettingsSynced,
+        MapLoaded,
+        PlayerScriptsEnabled,
+        UIElementsEnabled,
+        GameStarted,
+    }
+
+    /// <summary>
+    /// ====================================
+    /// Attribs ----------------------------
+    /// ====================================
+    /// </summary>
+    private static GameBehaviour _instance;
+    public static GameBehaviour Instance
+    {
+        get
+        {
+            if (!_instance)
+            {
+                GameObject lpo = GameObject.Find("LocalPlayerObject");
+                if (!lpo)
+                    return null;
+                _instance = lpo.GetComponentInChildren<GameBehaviour>();
+            }
+            return _instance;
+        }
+    }
+
     public static readonly string[] GAME_SCENES =
     { "Game" };
 
     // --- Puzzle
     public int availablePuzzles = 0;
 
-    // An array of child indices for objects (all objects in this go under the s_objects game object parent)
-    public static GameObject[] s_objects { get; protected set; }
+    // An array of food GameObjects (all foods in this go under the Objects game object parent)
+    private static GameObject[] s_foods;
 
     protected static Tilemap s_groundTilemap;
     protected static Tilemap s_wallTilemap;
@@ -71,26 +88,10 @@ public class GameBehaviour : NetworkBehaviour
     private GameObject _menuSelectTemplate;
 
     [SerializeField]
-    private Vector2 _spawnPoint;
-
-    // Soft limit is preferred, but if it is too small, the hard limit is used (1 tile).
-    // The minimum ratio between the distance between two snakes, and the WORLD_SIZE, before an inner square must be established.
-    private const float SOFT_MIN_DIST_WORLD_SIZE_RATIO = 0.2f;
-    private const float HARD_MIN_DIST = 2f;
-
-    [SerializeField]
     private List<GameObject> _foodTemplates = new();
 
-    public enum EGameLoadStage
-    {
-        Unloaded,
-        SceneLoaded,
-        GameSettingsSynced,
-        MapLoaded,
-        PlayerScriptsEnabled,
-        UIElementsEnabled,
-        GameStarted,
-    }
+    // A list containing every food spawn point location (these are defined by the position of FoodSpawner objects)
+    private List<Vector2> m_foodSpawnPoints = new();
 
 
     // SERVER VARIABLES --------------------
@@ -101,6 +102,11 @@ public class GameBehaviour : NetworkBehaviour
     private static int serverNumPlayersReady;
 
 
+    /// <summary>
+    /// ====================================
+    /// Methods ----------------------------
+    /// ====================================
+    /// </summary>
     private void OnEnable()
     {
         if (!isOwned) return;
@@ -147,7 +153,7 @@ public class GameBehaviour : NetworkBehaviour
         switch (serverPlayersLoadingStage)
         {
             case EGameLoadStage.PlayerScriptsEnabled:
-                ServerGenerateFood();
+                ServerInitFood();
                 ServerPlacePlayers();
                 break;
         }
@@ -205,7 +211,7 @@ public class GameBehaviour : NetworkBehaviour
     private void CmdRequestGameSettings(GameObject player)
     {
         NetworkIdentity netIdentity = player.GetComponent<NetworkIdentity>();
-        RpcReceiveGameSettings(netIdentity.connectionToClient, new(GameSettings.Saved));
+        RpcReceiveGameSettings(netIdentity.connectionToClient, new(GameSettings.Saved.Data));
     }
 
 
@@ -228,7 +234,7 @@ public class GameBehaviour : NetworkBehaviour
     private void CmdRequestMap(GameObject player)
     {
         NetworkIdentity netIdentity = player.GetComponent<NetworkIdentity>();
-        RpcReceiveMap(netIdentity.connectionToClient, GameSettings.Saved.Map);
+        RpcReceiveMap(netIdentity.connectionToClient, GameSettings.Saved.Data.Map);
     }
 
 
@@ -242,7 +248,7 @@ public class GameBehaviour : NetworkBehaviour
         }
 
         GameObject map = GameObject.Find("Map");
-        map.GetComponent<MapLoader>().LoadMap(mapData);
+        m_foodSpawnPoints = map.GetComponent<MapLoader>().LoadMap(mapData);
 
         s_groundTilemap = map.transform.Find("Ground").GetComponentInChildren<Tilemap>();
         s_wallTilemap = map.transform.Find("Wall").GetComponentInChildren<Tilemap>();
@@ -272,33 +278,24 @@ public class GameBehaviour : NetworkBehaviour
 
     // GENERATE FOOD HANDSHAKE ------------
     [Server]
-    private void ServerGenerateFood()
+    private void ServerInitFood()
     {
-        int groundSize = GameSettings.Saved.GameSize;
-        s_objects = new GameObject[groundSize * groundSize];
+        s_foods = new GameObject[m_foodSpawnPoints.Count];
 
         // Unload food items which were removed in settings
         for (int i = 0; i < _foodTemplates.Count; i++)
         {
             GameObject food = _foodTemplates[i];
-            if (!GameSettings.Saved.foodSettings.GetFoodEnabled(food.GetComponent<FoodObject>().food))
+            if (!GameSettings.Saved.GetFoodBit(food.GetComponent<FoodObject>().food))
             {
                 _foodTemplates.Remove(food);
                 i--;
             }
         }
 
-        GenerateStartingFood();
-    }
-
-
-    [Server]
-    private void GenerateStartingFood()
-    {
-        for (int i = 0; i < CustomNetworkManager.Instance.Players.Count; i++)
-        {
-            GenerateFood();
-        }
+        // Generate a food for each player
+        foreach (var _ in CustomNetworkManager.Instance.Players)
+            ServerGenerateFood();
     }
     // ------------------------------------
 
@@ -307,7 +304,7 @@ public class GameBehaviour : NetworkBehaviour
     [Server]
     public void ServerPlacePlayers()
     {
-        if (GameSettings.Saved.GameMode == EGameMode.SnakeRoyale)
+        if (GameSettings.Saved.Data.GameMode == EGameMode.SnakeRoyale)
         {
             ServerPlacePlayers_SnakeRoyale();
         }
@@ -331,68 +328,16 @@ public class GameBehaviour : NetworkBehaviour
         int playerCount = CustomNetworkManager.Instance.Players.Count;
         List<PlayerObjectController> players = CustomNetworkManager.Instance.Players.GetRange(0, playerCount);
 
-        foreach (MapObjectData obj in GameSettings.Saved.Map.objectData)
+        foreach (MapObjectData obj in GameSettings.Saved.Data.Map.objectData)
         {
             // If the spawn point is necessary (i.e. 4 players only necessitates spawn points up to P4)
+
             if (obj.spawnIndex >= 0 && obj.spawnIndex < players.Count)
             {
                 players[obj.spawnIndex].transform.position = new Vector3(obj.x, obj.y) + s_groundTilemap.cellSize / 2;
             }
         }
     }
-
-
-    //[Server]
-    //private void ServerPlacePlayers_SnakeRoyale(int depth, int playersStartIndex, Vector2Int bl)
-    //{
-    //    // Outer snakes (along the walls)
-    //    // Calculate the maximum distance between snakes.
-    //    // If this distance is too small, spawn inner snakes.
-
-    //    int groundSize = GameSettings.Saved.GameSize;
-
-    //    int playersCount = 0;
-    //    if (CustomNetworkManager.Instance.Players.Count - playersStartIndex > 0)
-    //    {
-    //        playersCount = CustomNetworkManager.Instance.Players.Count - playersStartIndex;
-    //    }
-    //    List<PlayerObjectController> players = CustomNetworkManager.Instance.Players.GetRange(playersStartIndex, playersCount);
-
-    //    float minDist = groundSize * SOFT_MIN_DIST_WORLD_SIZE_RATIO;
-    //    if (minDist < HARD_MIN_DIST)
-    //        minDist = HARD_MIN_DIST;
-
-    //    Vector3 BL = s_groundTilemap.CellToWorld((Vector3Int)(bl + (depth + 1) * Vector2Int.one));
-    //    Vector3 BR = s_groundTilemap.CellToWorld((Vector3Int)(bl + new Vector2Int(groundSize - depth + 1, depth + 1)));
-    //    Vector3 TL = s_groundTilemap.CellToWorld((Vector3Int)(bl + new Vector2Int(depth + 1, groundSize - depth + 1)));
-    //    Vector3 TR = s_groundTilemap.CellToWorld((Vector3Int)(bl + (groundSize - depth + 1) * Vector2Int.one));
-
-    //    Vector3[] corners = { BL, BR, TL, TR };
-    //    Vector2[] directions = { Vector2.one, new Vector2(-1, 1), new Vector2(1, -1), -Vector2.one };
-
-    //    for (int i = 0; i < players.Count; i++)
-    //    {
-    //        if (players[i].transform.position == Vector3.zero)
-    //        {
-    //            players[i].transform.position = corners[i % 4]
-    //            + (Vector3)(Vector2.one * directions[i % 4] * s_groundTilemap.cellSize / 2);
-    //        }
-
-    //        // If i were 0 then it might enter this, causing -4 as length to be provided (in the PlacePlayers line).
-    //        if (i != 0 && i % 4 == 0 && i < players.Count - 1)
-    //        {
-    //            int newDepth = depth + (int)Mathf.Floor(minDist);
-    //            if (newDepth >= groundSize / 2)
-    //            {
-    //                Debug.LogError("The players do not fit in the map provided.");
-    //            }
-    //            else
-    //            {
-    //                ServerPlacePlayers_SnakeRoyale(newDepth, playersStartIndex + 4, bl);
-    //            }
-    //        }
-    //    }
-    //}
 
 
     [ClientRpc]
@@ -439,80 +384,8 @@ public class GameBehaviour : NetworkBehaviour
     // ------------------------------------
 
 
-    // Additional Functions ---------------
-    [Client]
-    private void SetupGroundTilemap(GameObject map, Vector2Int bl)
-    {
-        Tilemap tilemap = map.transform.Find("Ground").GetComponentInChildren<Tilemap>();
-
-        int groundSize = GameSettings.Saved.GameSize;
-
-        // Bounds are an inner square of the 51x51 wall bounds starting at 0,0
-        BoundsInt bounds = new(
-            (Vector3Int)(bl + Vector2Int.one),
-            (Vector3Int)(groundSize * Vector2Int.one) + Vector3Int.forward);
-        Tile[] tiles = new Tile[groundSize * groundSize];
-        for (int i = 0; i < groundSize; i++)
-        {
-            for (int j = 0; j < groundSize; j++)
-            {
-                if (i % 2 == 0)
-                {
-                    // Even row -> starts with light (i.e. Even cols are light)
-                    if (j % 2 == 0)
-                        tiles[groundSize * i + j] = _lightTile;
-                    else
-                        tiles[groundSize * i + j] = _darkTile;
-                }
-                else
-                {
-                    // Odd row -> starts with dark (i.e. Odd cols are light)
-                    if (j % 2 == 0)
-                        tiles[groundSize * i + j] = _darkTile;
-                    else
-                        tiles[groundSize * i + j] = _lightTile;
-                }
-            }
-        }
-        tilemap.SetTilesBlock(bounds, tiles);
-    }
-
-
-    [Client]
-    private void SetupWallTilemap(GameObject map, Vector2Int bl)
-    {
-        Tilemap tilemap = map.transform.Find("Wall").GetComponentInChildren<Tilemap>();
-
-        int groundSize = GameSettings.Saved.GameSize;
-
-        // This square is (int)GroundSize + 2 squared, since it is one bigger on each side of the x and y edges of the inner square
-        BoundsInt bounds = new(
-            (Vector3Int)bl,
-            (Vector3Int)((groundSize + 2) * Vector2Int.one) + Vector3Int.forward);
-        Tile[] tiles = new Tile[(groundSize + 2) * (groundSize + 2)];
-        for (int i = 0; i < groundSize + 2; i++)
-        {
-            for (int j = 0; j < groundSize + 2; j++)
-            {
-                if (i == 0 || i == groundSize + 1)
-                {
-                    // We are on the top or bottom row, so guaranteed placement of wall
-                    tiles[(groundSize + 2) * i + j] = _wallTile;
-                }
-                else if (j == 0 || j == groundSize + 1)
-                {
-                    // We are on the leftmost or rightmost column, so place wall
-                    tiles[(groundSize + 2) * i + j] = _wallTile;
-                }
-            }
-        }
-
-        tilemap.SetTilesBlock(bounds, tiles);
-    }
-
-
     [Server]
-    private void GenerateFood()
+    private void ServerGenerateFood()
     {
         // If no foods are enabled, quick exit.
         // This is not necessarily erroneous, as players can disable all foods.
@@ -522,112 +395,112 @@ public class GameBehaviour : NetworkBehaviour
             return;
         }
 
-        int objectPos = Random.Range(0, s_objects.Length);
+        int randomIndex = Random.Range(0, s_foods.Length);
 
-        // Overwrite s_objects[objectPos] with -1 (if there are any vacancies)
-        // This effectively acts as a test to see if there are any vacancies,
-        // which also happens to locate the vacancy, while leaving its value
-        // as -1.
-        objectPos = AddObjectToGrid(objectPos, null);
-        if (objectPos == -1)
+        if (s_foods[randomIndex] != null)
         {
-            // No vacancies.
-            return;
+            int freeIndex = -1;
+            for (int i = 0; i < s_foods.Length; i++)
+            {
+                if (s_foods[i] == null)
+                    freeIndex = i;
+            }
+
+            if (freeIndex == -1)
+            {
+                Debug.LogWarning("No free slots for food to spawn in!");
+                return;
+            }
+
+            randomIndex = freeIndex;
         }
+
+        Vector2 objPos = m_foodSpawnPoints[randomIndex];
+        objPos.x += 0.5f;
+        objPos.y += 0.5f;
 
         int foodIndex = Random.Range(0, _foodTemplates.Count);
-        int groundSize = GameSettings.Saved.GameSize;
 
-        Vector2 foodPos = new((objectPos % groundSize) + (1.5f), (objectPos / groundSize) + (1.5f));
-
-        GameObject obj = Instantiate(_foodTemplates[foodIndex], foodPos, Quaternion.Euler(Vector3.forward * 0));
+        GameObject obj = Instantiate(_foodTemplates[foodIndex], objPos, Quaternion.Euler(Vector3.forward * 0));
         obj.transform.parent = GameObject.Find("Objects").transform;
-        obj.GetComponent<GridObject>().gridPos = objectPos;
 
-        if (AddObjectToGrid(objectPos, obj) != -1)
-        {
-            NetworkServer.Spawn(obj);
-        }
-    }
-
-
-    /// <summary>
-    /// Finds the first free slot in s_objects(null slot), populates it with obj, and returns the
-    /// index. Linear Search = O(n)
-    [Server]
-    public int AddObjectToGrid(GameObject obj)
-    {
-        // Linear search for the first empty slot
-        int objPos = 0;
-        while (objPos < s_objects.Length)
-        {
-            if (s_objects[objPos] == null)
-            {
-                s_objects[objPos] = obj;
-                return objPos;
-            }
-            objPos++;
-        }
-        Debug.LogError("Grid filled with objects!");
-        return -1;
-    }
-
-
-    /// <summary>
-    /// Checks the given index to see if it is free. If not, searches every slot until it finds a
-    /// free slot. Then populates the slot with obj, returns the index of the slot. Recursive.
-    /// </summary>
-    [Server]
-    public int AddObjectToGrid(int objectPos, GameObject obj)
-    {
-        if (s_objects[objectPos] != null)
-        {
-            // If there already is an object at given pos, try to put
-            // the object on the first different free slot in the array.
-            for (int i = 0; (i < s_objects.Length) && (i != objectPos); i++)
-            {
-                if (s_objects[i] == null)
-                {
-                    s_objects[i] = obj;
-                    return i;
-                }
-            }
-
-            Debug.LogError("Grid filled with objects!");
-            return -1;
-        }
-        s_objects[objectPos] = obj;
-        return objectPos;
-    }
-
-
-    [Server]
-    public void RemoveObjectFromGrid(int objectPos)
-    {
-        GameObject go = s_objects[objectPos];
-
-        if (go == null)
-        {
-            Debug.LogError("GameObject was null!");
-            return;
-        }
-
-        NetworkServer.UnSpawn(go);
-        NetworkServer.Destroy(go);
-        s_objects[objectPos] = null;
+        s_foods[randomIndex] = obj;
+        NetworkServer.Spawn(obj);
     }
 
 
     [Command]
-    public void CmdRemoveFood(int objPos)
+    public void CmdRemoveFood(GameObject food)
     {
-        RemoveObjectFromGrid(objPos);
+        ServerRemoveFood(food);
 
-        if (GameSettings.Saved.GameMode == EGameMode.SnakeRoyale)
+        if (GameSettings.Saved.Data.GameMode == EGameMode.SnakeRoyale)
         {
-            GenerateFood();
+            ServerGenerateFood();
         }
     }
+
+
+    /// <summary>
+    /// Removes a given food GameObject from the food list, and despawns it from the server.
+    /// </summary>
+    /// <param name="food">The food GameObject to remove.</param>
+    [Server]
+    private void ServerRemoveFood(GameObject food)
+    {
+        s_foods[Array.IndexOf(s_foods, food)] = null;
+        NetworkServer.UnSpawn(food);
+        NetworkServer.Destroy(food);
+    }
+
+
+    ///// <summary>
+    ///// Finds the first free slot in s_objects(null slot), populates it with obj, and returns the
+    ///// index. Linear Search = O(n)
+    //[Server]
+    //public int AddObjectToGrid(GameObject obj)
+    //{
+    //    // Linear search for the first empty slot
+    //    int objPos = 0;
+    //    while (objPos < s_objects.Length)
+    //    {
+    //        if (s_objects[objPos] == null)
+    //        {
+    //            s_objects[objPos] = obj;
+    //            return objPos;
+    //        }
+    //        objPos++;
+    //    }
+    //    return -1;
+    //}
+
+
+    ///// <summary>
+    ///// Checks the given position to see if it is free. If not, searches every slot until it finds a
+    ///// free slot. Then populates the slot with obj, returns the index of the slot. Recursive.
+    ///// </summary>
+    //[Server]
+    //public int AddObjectToGrid(int objectPos, GameObject obj)
+    //{
+    //    if (s_objects[objectPos] != null)
+    //    {
+    //        // If there already is an object at given pos, try to put
+    //        // the object on the first different free slot in the array.
+    //        for (int i = 0; (i < s_objects.Length) && (i != objectPos); i++)
+    //        {
+    //            if (s_objects[i] == null)
+    //            {
+    //                s_objects[i] = obj;
+    //                return i;
+    //            }
+    //        }
+
+    //        Debug.LogError("Grid filled with objects!");
+    //        return -1;
+    //    }
+    //    s_objects[objectPos] = obj;
+    //    return objectPos;
+    //}
 
 
     //void CreateTeleportingMenuPair(

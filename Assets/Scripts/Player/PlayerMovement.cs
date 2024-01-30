@@ -107,7 +107,7 @@ public class PlayerMovement : NetworkBehaviour
     {
         // Initialise game settings
         if (GameSettings.Saved != null)
-            m_timeBetweenMoves = GameSettings.Saved.TimeToMove;
+            m_timeBetweenMoves = GameSettings.Saved.Data.TimeToMove;
 
         // Initialise other variables
         m_direction = Vector2.zero;
@@ -491,7 +491,7 @@ public class PlayerMovement : NetworkBehaviour
             // ! Limitation - the snake must continue,
             // this means if the snake starts on a scootile,
             // they start without input.
-            m_timeBetweenMoves = GameSettings.Saved.TimeToMove;
+            m_timeBetweenMoves = GameSettings.Saved.Data.TimeToMove;
             m_forcedDirection = Vector2.zero;
             for (int i = 0; i < BodyParts.Count; i++)
             {

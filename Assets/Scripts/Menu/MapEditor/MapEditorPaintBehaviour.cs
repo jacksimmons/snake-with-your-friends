@@ -42,6 +42,23 @@ public class MapEditorPaintBehaviour : MonoBehaviour
     public const int MAX_FILL_DEPTH = 100;
     private Queue<Vector3Int> fillQueue = new();
 
+    // Object IDs which can only have one present object
+    private List<int> oneOnlyObjIds = new();
+    // Object IDs which can only have one present object, which have already been placed
+    private List<int> existingOneOnlyObjIds = new();
+
+
+    private void Start()
+    {
+        for (int i = 0; i < m_loader.Objects.Length; i++)
+        {
+            if (m_loader.Objects[i].TryGetComponent<SpawnPointBehaviour>(out _))
+            {
+                oneOnlyObjIds.Add(i);
+            }
+        }
+    }
+
 
     private bool CheckIfTileAtPos(Vector3Int pos)
     {
@@ -141,8 +158,22 @@ public class MapEditorPaintBehaviour : MonoBehaviour
 
         // Ensure object won't be destroyed even if it disappears
         ObjectBehaviour ob = go.GetComponent<ObjectBehaviour>();
+        ob.ObjId = (byte)Array.IndexOf(m_loader.Objects, ChosenObjectPaint);
+
+        // If the obj id matches a one-only object type
+        if (oneOnlyObjIds.Contains(ob.ObjId))
+        {
+            // If there is already one object of obj id type, destroy the obj and exit early
+            if (existingOneOnlyObjIds.Contains(ob.ObjId))
+            {
+                Destroy(go);
+                return;
+            }
+
+            existingOneOnlyObjIds.Add(ob.ObjId);
+        }
+
         ob.DontDestroyOnExplosion();
-        ob.Type = (byte)Array.IndexOf(m_loader.Objects, ChosenObjectPaint);
 
         if (go.transform.childCount == 2) // Teleporter
         {
@@ -160,6 +191,16 @@ public class MapEditorPaintBehaviour : MonoBehaviour
             return;
 
         GameObject removed = MapEditor.GridObjDict.RemoveObject(pos);
+
+        byte objId = removed.GetComponent<ObjectBehaviour>().ObjId;
+
+        // Remove the "exists" flag for the given objId, if applicable
+        // Note: Don't need to check oneOnlyObjIds, as if it is in existingOneOnlyObjIds it must also be in oneOnlyObjIds.
+        if (existingOneOnlyObjIds.Contains(objId))
+        {
+            existingOneOnlyObjIds.Remove(objId);
+        }
+
         Destroy(removed);
         m_UI.ChangeObjectCount(false);
     }
@@ -168,7 +209,7 @@ public class MapEditorPaintBehaviour : MonoBehaviour
     public void FillObject(Vector3Int start, bool draw)
     {
         StartCoroutine(FillCoro(start, 
-            draw ? MapEditor.GridObjDict.IsPositionEmpty : (Vector3Int pos) => !MapEditor.GridObjDict.IsPositionEmpty(pos),
+            draw ? (Vector3Int pos) => !MapEditor.GridObjDict.IsPositionEmpty(pos) : MapEditor.GridObjDict.IsPositionEmpty,
             draw ? DrawObject : EraseObject));
     }
 

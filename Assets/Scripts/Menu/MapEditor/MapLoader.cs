@@ -2,6 +2,7 @@ using UnityEngine.Tilemaps;
 using UnityEngine;
 using System.Runtime.Serialization.Formatters.Binary;
 using System;
+using System.Collections.Generic;
 
 public class MapLoader : MonoBehaviour
 {
@@ -52,6 +53,14 @@ public class MapLoader : MonoBehaviour
     [SerializeField]
     private MapEditorUIHandler m_UI;
 
+    public bool InEditor
+    {
+        get
+        {
+            return m_UI || m_painter;
+            // So !InEditor == !m_UI && !m_painter
+        }
+    }
 
     public void LoadMapFromFile(string filename)
     {
@@ -60,8 +69,15 @@ public class MapLoader : MonoBehaviour
     }
 
 
-    public void LoadMap(MapData map)
+    /// <summary>
+    /// Loads a map onto the current gameObject.
+    /// </summary>
+    /// <param name="map">The data to load from.</param>
+    /// <returns>The food spawn points for the map.</returns>
+    public List<Vector2> LoadMap(MapData map)
     {
+        List<Vector2> foodSpawnPoints = new();
+
         MapTileData[] groundData = map.groundData;
         MapTileData[] wallData = map.wallData;
         MapObjectData[] objectData = map.objectData;
@@ -84,9 +100,20 @@ public class MapLoader : MonoBehaviour
 
         void AddObjectToObjmap(MapObjectData obj, GameObject objmap)
         {
-            GameObject go = Instantiate(Objects[(int)obj.type], objmap.transform);
-            go.transform.localPosition = new(obj.x, obj.y);
-            go.transform.localRotation = Quaternion.Euler(Vector3.forward * obj.rotation);
+            if (Objects[obj.objId].TryGetComponent<FoodSpawner>(out _))
+            {
+                if (!InEditor)
+                {
+                    // Add the object's position to the food spawn points
+                    foodSpawnPoints.Add(new(obj.x, obj.y));
+
+                    // Don't need to create this object if not in the editor.
+                    return;
+                }
+            }
+
+            GameObject go = Instantiate(Objects[obj.objId], objmap.transform);
+            go.transform.SetLocalPositionAndRotation(new(obj.x, obj.y), Quaternion.Euler(Vector3.forward * obj.rotation));
         }
 
         for (int i = 0; i < groundData.Length; i++) { AddTileToTilemap(groundData[i], m_groundLayer); }
@@ -103,6 +130,8 @@ public class MapLoader : MonoBehaviour
             m_UI.UpdateTileCountLabel(new Tilemap[] { m_groundLayer, m_wallLayer });
             m_UI.UpdateObjectCountLabel();
         }
+
+        return foodSpawnPoints;
     }
 
 

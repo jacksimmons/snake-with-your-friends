@@ -16,9 +16,7 @@ public enum EFoodType
     Orange,
     Pineapple,
     PineapplePizza,
-    Pizza, // 15
-
-    // !Final index must be less than 32 (for FoodSettings bitfield)
+    Pizza, // 15 (2 bytes)
 }
 public enum EEffect
 {

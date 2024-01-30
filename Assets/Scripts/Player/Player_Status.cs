@@ -216,7 +216,7 @@ public partial class PlayerBehaviour
                         break;
 
                     case EEffect.SpeedBoost:
-                        m_timeBetweenMoves = GameSettings.Saved.TimeToMove /
+                        m_timeBetweenMoves = GameSettings.Saved.Data.TimeToMove /
                             Effect.GetSpeedMultFromSignedLevel(effect.EffectLevel);
 
                         statusUI.DisableAllSpeedIcons();
@@ -261,7 +261,7 @@ public partial class PlayerBehaviour
         if (effect.IsInputEffect)
         {
             // Clear the old effect for the new one
-            m_timeBetweenMoves = GameSettings.Saved.TimeToMove;
+            m_timeBetweenMoves = GameSettings.Saved.Data.TimeToMove;
             if (ActiveInputEffect != null)
                 ClearInputEffects();
             ActiveInputEffect = effect;
@@ -311,7 +311,7 @@ public partial class PlayerBehaviour
         switch (effect.EffectName)
         {
             case EEffect.SpeedBoost:
-                m_timeBetweenMoves = GameSettings.Saved.TimeToMove;
+                m_timeBetweenMoves = GameSettings.Saved.Data.TimeToMove;
                 statusUI.DisableAllSpeedIcons();
                 break;
             case EEffect.RocketShitting:
@@ -349,7 +349,7 @@ public partial class PlayerBehaviour
         NumPints = 0;
         PotassiumLevels = 0;
 
-        m_timeBetweenMoves = GameSettings.Saved.TimeToMove;
+        m_timeBetweenMoves = GameSettings.Saved.Data.TimeToMove;
     }
 
     public Dictionary<string, string> GetStatusDebug()

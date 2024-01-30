@@ -30,30 +30,21 @@ public struct MapTileData
 }
 
 
-public enum EObjectType : byte
-{
-    None, // 0
-
-    Food, // EFoodType
-    Projectile, // EProjectileType
-}
-
-
 [Serializable]
 public struct MapObjectData
 {
-    public readonly byte type;
+    public readonly byte objId;
 
     public readonly short x;
     public readonly short y;
-
     public readonly float rotation;
+
     public readonly int spawnIndex;
 
 
-    public MapObjectData(byte type, short x, short y, float rotation, int spawnIndex)
+    public MapObjectData(byte objId, short x, short y, float rotation, int spawnIndex)
     {
-        this.type = type;
+        this.objId = objId;
         this.x = x;
         this.y = y;
         this.rotation = rotation;

@@ -115,6 +115,12 @@ public class LobbyMenu : MonoBehaviour
     }
 
 
+    public void OnHostSettingsSavePressed()
+    {
+        Saving.SaveToFile(GameSettings.Saved, "GameSettings.dat");
+    }
+
+
     public void OnCustomiseButtonPressed()
     {
         HideAllTabPanels();
