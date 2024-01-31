@@ -60,9 +60,32 @@ public class MapEditorPaintBehaviour : MonoBehaviour
     }
 
 
-    private bool CheckIfTileAtPos(Vector3Int pos)
+    private bool CheckIfTilePosCanBeFilled(Vector3Int pos, bool draw)
     {
-        return currentTilemap.HasTile(pos);
+        bool hasTile = currentTilemap.HasTile(pos);
+        // If drawing, we can fill if the pos has no tile
+        if (draw)
+            return !hasTile;
+
+        // If erasing, we can fill if the pos has a tile, and that tile shares the sprite of the tile to erase
+        // This cannot be true if we haven't chosen a tile paint.
+        if (ChosenTilePaint == null) return false;
+        return hasTile && currentTilemap.GetSprite(pos) == ChosenTilePaint.sprite;
+    }
+
+
+    private bool CheckIfObjPosCanBeFilled(Vector3Int pos, bool draw)
+    {
+        bool hasObj = !MapEditor.GridObjDict.IsPositionEmpty(pos);
+        // If drawing, we can fill if the pos has no obj
+        if (draw)
+            return !hasObj;
+
+        // If erasing, we can fill if the pos has an obj, and that obj is equal to the obj to erase
+        // This cannot be true if we haven't chosen an obj paint.
+        if (ChosenObjectPaint == null) return false;
+        byte objId = (byte)Array.IndexOf(m_loader.Objects, ChosenObjectPaint);
+        return hasObj && MapEditor.GridObjDict.PickObject(pos).GetComponent<ObjectBehaviour>().ObjId == objId;
     }
 
 
@@ -89,18 +112,19 @@ public class MapEditorPaintBehaviour : MonoBehaviour
     public void Fill(Vector3Int start, bool draw)
     {
         StartCoroutine(FillCoro(start, 
-            draw ? CheckIfTileAtPos : (Vector3Int pos) => !CheckIfTileAtPos(pos),
+            (Vector3Int pos) => CheckIfTilePosCanBeFilled(pos, draw),
             draw ? Draw : Erase));
     }
 
 
-    private IEnumerator FillCoro(Vector3Int start, Func<Vector3Int, bool> checkForElementAtPos, Action<Vector3Int> drawAction)
+    private IEnumerator FillCoro(Vector3Int start, Func<Vector3Int, bool> check, Action<Vector3Int> drawAction)
     {
         void TryAddToQueue(Vector3Int pos)
         {
-            // Only add to the queue if it is 1. Not occupied in tilemap
+            // Only add to the queue if it is
+            // 1. A valid position (to draw/erase)
             // 2. Not present in the queue.
-            if (checkForElementAtPos(pos)) return;
+            if (!check(pos)) return;
             if (fillQueue.Contains(pos)) return;
             fillQueue.Enqueue(pos);
         }
@@ -118,7 +142,7 @@ public class MapEditorPaintBehaviour : MonoBehaviour
 
             Vector3Int currentPos = fillQueue.Dequeue();
 
-            if (!checkForElementAtPos(currentPos))
+            if (check(currentPos))
             {
                 currentFillDepth++;
                 drawAction(currentPos);
@@ -208,8 +232,8 @@ public class MapEditorPaintBehaviour : MonoBehaviour
     public void FillObject(Vector3Int start, bool draw)
     {
         StartCoroutine(FillCoro(start, 
-            draw ? (Vector3Int pos) => !MapEditor.GridObjDict.IsPositionEmpty(pos) : MapEditor.GridObjDict.IsPositionEmpty,
-            draw ? DrawObject : EraseObject));
+           (Vector3Int pos) => CheckIfObjPosCanBeFilled(pos, draw),
+           draw ? DrawObject : EraseObject));
     }
 
 

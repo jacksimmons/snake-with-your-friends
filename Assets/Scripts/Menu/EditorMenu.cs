@@ -77,6 +77,7 @@ public class EditorMenu : MonoBehaviour
 
     private Vector3Int GridPos { get; set; }
     private Vector3Int SelectedGridPos { get; set; }
+    private bool m_canPaint = true;
 
     private bool m_objectMode = false;
 
@@ -110,14 +111,26 @@ public class EditorMenu : MonoBehaviour
 
         controls.Edit.Draw.performed += ctx =>
         {
+            if (!m_canPaint) return;
+
             m_isDrawing = true;
+
+            // Need to manually call this on the click, as held input only paints when
+            // the mouse position on the grid changes. Therefore, the first tile you
+            // click on will never get painted otherwise.
             HandlePaintInput();
         };
         controls.Edit.Draw.canceled += ctx => m_isDrawing = false;
 
         controls.Edit.Erase.performed += ctx =>
         {
+            if (!m_canPaint) return;
+
             m_isErasing = true;
+
+            // Need to manually call this on the click, as held input only paints when
+            // the mouse position on the grid changes. Therefore, the first tile you
+            // click on will never get painted otherwise.
             HandlePaintInput();
         };
         controls.Edit.Erase.canceled += ctx => m_isErasing = false;
@@ -159,13 +172,17 @@ public class EditorMenu : MonoBehaviour
         }
 
         Vector3Int currentGridPos = GetGridPos();
+
+        // The user can paint if NOT(mouse is over HUD)
+        m_canPaint = !EventSystem.current.IsPointerOverGameObject();
+
         if (currentGridPos != GridPos)
         {
             GridPos = currentGridPos;
             m_UI.UpdateGridPos(GridPos);
 
-            // If the pointer is over UI, we don't want it to draw, that would be annoying.
-            if (!EventSystem.current.IsPointerOverGameObject()) HandlePaintInput();
+            if (m_canPaint)
+                HandlePaintInput();
         }
 
         Map.HandleBackgroundInput();

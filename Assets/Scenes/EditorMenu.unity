@@ -369,7 +369,7 @@ GameObject:
   - component: {fileID: 35653509}
   m_Layer: 5
   m_Name: RHS
-  m_TagString: Untagged
+  m_TagString: HUD
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -586,7 +586,7 @@ GameObject:
   - component: {fileID: 95451374}
   m_Layer: 5
   m_Name: NavigationButtons
-  m_TagString: Untagged
+  m_TagString: HUD
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -3475,7 +3475,7 @@ GameObject:
   - component: {fileID: 806369806}
   m_Layer: 5
   m_Name: PopupPanel
-  m_TagString: Untagged
+  m_TagString: HUD
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -3568,7 +3568,7 @@ GameObject:
   - component: {fileID: 840592255}
   m_Layer: 5
   m_Name: SaveAsPanel
-  m_TagString: Untagged
+  m_TagString: HUD
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -5279,7 +5279,7 @@ GameObject:
   - component: {fileID: 1012501015}
   m_Layer: 5
   m_Name: ConfirmOverwritePanel
-  m_TagString: Untagged
+  m_TagString: HUD
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -6003,7 +6003,7 @@ GameObject:
   - component: {fileID: 1182583455}
   m_Layer: 5
   m_Name: Instructions
-  m_TagString: Untagged
+  m_TagString: HUD
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -8468,6 +8468,10 @@ PrefabInstance:
     - target: {fileID: 735592207220345771, guid: 72519db6025f15548b49b691a0bff1c1, type: 3}
       propertyPath: m_Name
       value: LoadMapPanel
+      objectReference: {fileID: 0}
+    - target: {fileID: 735592207220345771, guid: 72519db6025f15548b49b691a0bff1c1, type: 3}
+      propertyPath: m_TagString
+      value: HUD
       objectReference: {fileID: 0}
     - target: {fileID: 735592207304238858, guid: 72519db6025f15548b49b691a0bff1c1, type: 3}
       propertyPath: m_RootOrder
