@@ -72,7 +72,6 @@ public class MapEditorPaintBehaviour : MonoBehaviour
         if (!currentTilemap.GetTile(pos) && ChosenTilePaint)
             m_UI.ChangeTileCount(true);
 
-        print(currentTilemap.name);
         currentTilemap.SetTile(pos, ChosenTilePaint);
     }
 

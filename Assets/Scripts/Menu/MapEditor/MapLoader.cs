@@ -127,8 +127,8 @@ public class MapLoader : MonoBehaviour
 
         if (m_UI)
         {
-            m_UI.UpdateTileCountLabel(new Tilemap[] { m_groundLayer, m_wallLayer });
-            m_UI.UpdateObjectCountLabel();
+            m_UI.UpdateTileCount(new Tilemap[] { m_groundLayer, m_wallLayer });
+            m_UI.UpdateObjectCount();
         }
 
         return foodSpawnPoints;

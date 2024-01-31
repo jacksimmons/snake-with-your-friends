@@ -46,7 +46,6 @@ public class MapEditorUIHandler : MonoBehaviour
     [SerializeField]
     private GameObject m_objectSelectPanel;
 
-
     [SerializeField]
     private TextMeshProUGUI m_objectCountLabel;
     private int m_objectCount;
@@ -66,8 +65,7 @@ public class MapEditorUIHandler : MonoBehaviour
     {
         m_editor = GetComponent<EditorMenu>();
 
-        // Set the object count label
-        UpdateObjectCountLabel();
+        UpdateObjectCount();
     }
 
 
@@ -133,9 +131,10 @@ public class MapEditorUIHandler : MonoBehaviour
     }
 
 
-    public void UpdateObjectCountLabel()
+    public void UpdateObjectCount()
     {
-        m_objectCountLabel.text = $"Object Count: ({MapEditor.GridObjDict.NumObjects}/{GridObjectDictionary.MAX_OBJECTS})";
+        m_objectCount = MapEditor.GridObjDict.NumObjects - 1;
+        ChangeObjectCount(true);
     }
 
 
@@ -147,7 +146,7 @@ public class MapEditorUIHandler : MonoBehaviour
     }
 
 
-    public void UpdateTileCountLabel(Tilemap[] tilemaps)
+    public void UpdateTileCount(Tilemap[] tilemaps)
     {
         m_tileCount = 0;
         foreach (Tilemap tilemap in tilemaps)
@@ -162,7 +161,6 @@ public class MapEditorUIHandler : MonoBehaviour
             }
         }
 
-        // Code reuse
         m_tileCount--;
         ChangeTileCount(true);
     }

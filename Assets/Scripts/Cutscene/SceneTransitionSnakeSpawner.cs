@@ -5,8 +5,7 @@ using UnityEngine.SceneManagement;
 
 public class SceneTransitionSnakeSpawner : CanvasSnakeSpawner
 {
-    [SerializeField]
-    private SceneTransitionHandler transitionHandler;
+    public SceneTransitionHandler transitionHandler;
     [SerializeField]
     private Vector2Comparison comparison;
 

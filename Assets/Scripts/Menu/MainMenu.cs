@@ -14,8 +14,6 @@ public class MainMenu : SceneTransitionHandler
     private Button m_retryButton;
     [SerializeField]
     private GameObject m_networkManager;
-    [SerializeField]
-    private GameObject m_transitionSnakeSpawner;
 
 
     protected override void Start()
@@ -33,12 +31,6 @@ public class MainMenu : SceneTransitionHandler
         {
             GameObject go = Instantiate(m_networkManager);
             go.name = "NetworkManager";
-        }
-
-        if (!GameObject.Find("TransitionSnakeSpawner"))
-        {
-            GameObject go = Instantiate(m_transitionSnakeSpawner);
-            go.name = "TransitionSnakeSpawner";
         }
     }
 

@@ -164,7 +164,8 @@ public class EditorMenu : MonoBehaviour
             GridPos = currentGridPos;
             m_UI.UpdateGridPos(GridPos);
 
-            HandlePaintInput();
+            // If the pointer is over UI, we don't want it to draw, that would be annoying.
+            if (!EventSystem.current.IsPointerOverGameObject()) HandlePaintInput();
         }
 
         Map.HandleBackgroundInput();
@@ -181,10 +182,6 @@ public class EditorMenu : MonoBehaviour
 
     private void HandlePaintInput()
     {
-        // If the pointer is over UI, we don't want it to draw, that would be annoying.
-        if (EventSystem.current.IsPointerOverGameObject())
-            return;
-
         Action<Vector3Int> draw = m_objectMode ? m_painter.DrawObject : m_painter.Draw;
         Action<Vector3Int> erase = m_objectMode ? m_painter.EraseObject : m_painter.Erase;
         Action<Vector3Int, bool> fill = m_objectMode ? m_painter.FillObject : m_painter.Fill;

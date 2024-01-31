@@ -3,9 +3,11 @@ using UnityEngine;
 public class SceneTransitionHandler : MonoBehaviour
 {
     [SerializeField]
+    private GameObject m_transitionSnakeSpawner;
+
+    [SerializeField]
     protected string sceneName;
     protected bool isReady = false;
-    [SerializeField]
     protected SceneTransitionSnakeSpawner[] snakeSpawners;
 
     protected virtual void Start()
@@ -13,6 +15,21 @@ public class SceneTransitionHandler : MonoBehaviour
         if (sceneName != "")
         {
             LoadSceneInBackground(sceneName);
+        }
+
+        GameObject tsp = GameObject.Find("TransitionSnakeSpawner");
+        if (!tsp)
+        {
+            tsp = Instantiate(m_transitionSnakeSpawner);
+            tsp.name = "TransitionSnakeSpawner";
+        }
+
+        // Get all the snake spawners in the scene, and store them in the snakeSpawners array.
+        snakeSpawners = new SceneTransitionSnakeSpawner[tsp.transform.childCount];
+        for (int i = 0; i < snakeSpawners.Length; i++)
+        {
+            snakeSpawners[i] = tsp.transform.GetChild(i).GetComponent<SceneTransitionSnakeSpawner>();
+            snakeSpawners[i].transitionHandler = this;
         }
     }
 

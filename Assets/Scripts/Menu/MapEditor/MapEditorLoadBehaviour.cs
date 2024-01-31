@@ -19,6 +19,10 @@ public class MapEditorLoadBehaviour : MonoBehaviour
     private MapLoader m_map;
 
 
+    /// <summary>
+    /// Listener called when a button which loads a map-load scenario (a menu filled with maps to load)
+    /// is pressed.
+    /// </summary>
     public void OnLoadButtonPressed()
     {
         m_loadPanel.SetActive(true);
@@ -60,22 +64,29 @@ public class MapEditorLoadBehaviour : MonoBehaviour
     }
 
 
+    /// <summary>
+    /// Listener called when "Back" is pressed in a map-load scenario.
+    /// </summary>
     public void OnBackButtonPressed()
     {
         m_loadPanel.SetActive(false);
     }
 
 
+    /// <summary>
+    /// Listener called when a map is selected to be loaded in a map-load scenario.
+    /// Appears in the Lobby and Editor menus.
+    /// </summary>
     public void OnLoadMapPressed(string filename)
     {
-        // If there is a map, load the map locally
+        // If we are in the editor, load the map locally.
         if (m_map != null)
         {
             m_map.LoadMapFromFile(filename);
             OnBackButtonPressed();
         }
 
-        // If there is not a map, save the map to GameSettings for future use in networking
+        // If we are not in the editor, put the map into GameSettings for when the lobby starts.
         else
         {
             GameSettings.Saved.Data.Map = Saving.LoadFromFile<MapData>($"Maps/{filename}");
