@@ -70,13 +70,13 @@
     <Compile Include="Assets\Scripts\Object\Grid\TeleporterPair.cs" />
     <Compile Include="Assets\Scripts\Game\GameBehaviour.cs" />
     <Compile Include="Assets\Scripts\Extensions\Extensions.cs" />
+    <Compile Include="Assets\Scripts\Player\PlayerStatus.cs" />
     <Compile Include="Assets\Scripts\Menu\Lobby\PlayerListItem.cs" />
     <Compile Include="Assets\Scripts\UI\HUD\PlayerHUDElement.cs" />
     <Compile Include="Assets\Scripts\Menu\SettingsMenu.cs" />
     <Compile Include="Assets\Scripts\UI\SpectateBehaviour.cs" />
     <Compile Include="Assets\Scripts\Menu\EditorMenu.cs" />
     <Compile Include="Assets\Scripts\Menu\JoinMenu.cs" />
-    <Compile Include="Assets\Scripts\Player\Player_Status.cs" />
     <Compile Include="Assets\Scripts\UI\SnakeButton.cs" />
     <Compile Include="Assets\Scripts\Networking\CustomNetworkManager.cs" />
     <Compile Include="Assets\Scripts\Audio\AudioHandler.cs" />
@@ -135,7 +135,6 @@
     <Compile Include="Assets\Scripts\Menu\Lobby\Lobby.cs" />
     <Compile Include="Assets\Scripts\Menu\MapEditor\MapEditorObjectIcon.cs" />
     <Compile Include="Assets\Scripts\Menu\MapEditor\MapEditor.cs" />
-    <Compile Include="Assets\Scripts\Player\Player_Static.cs" />
     <Compile Include="Assets\Scripts\Unused\FollowPlayer.cs" />
     <Compile Include="Assets\Scripts\Menu\MapEditor\MapEditorTileIcon.cs" />
     <Compile Include="Assets\Scripts\Files\GameSettings.cs" />
@@ -159,7 +158,6 @@
     <Compile Include="Assets\Scripts\Menu\MapEditor\MapEditorUIHandler.cs" />
     <Compile Include="Assets\Scripts\Menu\MapEditor\GridObjectDictionary.cs" />
     <Compile Include="Assets\Scripts\Object\Shooter.cs" />
-    <Compile Include="Assets\Scripts\Player\PlayerStatus.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Mirror\Plugins\Mono.Cecil\Mono.CecilX.dll" />

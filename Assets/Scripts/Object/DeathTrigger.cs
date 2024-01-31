@@ -23,7 +23,7 @@ public class DeathTrigger : MonoBehaviour
         //    return;
         //}
 
-        Transform player = PlayerBehaviour.TryGetPlayerTransformFromBodyPart(obj);
+        Transform player = PlayerStatic.TryGetPlayerTransformFromBodyPart(obj);
         if (player == null) return;
 
         PlayerMovement pm = player.GetComponent<PlayerMovement>();

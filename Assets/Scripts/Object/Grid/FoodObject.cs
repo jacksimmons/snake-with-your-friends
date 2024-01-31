@@ -9,25 +9,21 @@ public class FoodObject : MonoBehaviour
     private void OnTriggerEnter2D(Collider2D other)
     {
         GameObject obj = other.gameObject;
-        Transform player = PlayerBehaviour.TryGetPlayerTransformFromBodyPart(obj);
+        Transform player = PlayerStatic.TryGetPlayerTransformFromBodyPart(obj);
 
         bool removeAndReplaceFood = false;
 
         // Collision with player
         if (player != null)
         {
-            PlayerMovement playerMovementController = player.GetComponent<PlayerMovement>();
+            PlayerMovement pm = player.GetComponent<PlayerMovement>();
 
             // Not our collision to handle -> return.
-            if (!playerMovementController.isOwned) return;
+            if (!pm.isOwned) return;
 
-            if (playerMovementController != null)
-            {
-                playerMovementController.QAddBodyPart();
-                playerMovementController.GetComponent<PlayerStatus>().Eat(food);
-
-                GameObject.FindWithTag("AudioHandler").GetComponent<AudioHandler>().eatAudioSource.Play();
-            }
+            pm.QAddBodyPart();
+            pm.GetComponent<PlayerStatus>().Eat(food);
+            GameObject.FindWithTag("AudioHandler").GetComponent<AudioHandler>().eatAudioSource.Play();
 
             removeAndReplaceFood = true;
         }

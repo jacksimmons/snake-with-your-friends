@@ -56,6 +56,9 @@ public class PlayerStatus : NetworkBehaviour
     [SerializeField]
     private GameObject m_staticShit;
 
+    /// <summary>
+    /// Effects
+    /// </summary>
     public Effect ActiveInputEffect { get; private set; } = null;
     public List<Effect> ActivePassiveEffects { get; private set; } = new List<Effect>();
 
@@ -183,29 +186,16 @@ public class PlayerStatus : NetworkBehaviour
     {
         void TryUseItem()
         {
-            if (!FindConflictingPassiveEffect())
+            foreach (Effect effect in FindConflictingPassiveEffects(ItemSlotEffect))
             {
-                AddEffect(ItemSlotEffect);
-
-                // For input effects, we keep the icon visible.
-                if (!ItemSlotEffect.IsInputEffect)
-                    ItemSlotEffect = null;
-            }
-        }
-
-        // false => No conflict; true => Conflict
-        bool FindConflictingPassiveEffect()
-        {
-            foreach (Effect effect in ActivePassiveEffects)
-            {
-                if (effect.EffectName == ItemSlotEffect.EffectName)
-                {
-                    if (effect.EffectName == EEffect.None) continue;
-                    return true;
-                }
+                RemovePassiveEffect(effect);
             }
 
-            return false;
+            AddEffect(ItemSlotEffect);
+
+            // For input effects, we keep the icon visible.
+            if (!ItemSlotEffect.IsInputEffect)
+                ItemSlotEffect = null;
         }
 
         // First check if we can apply the new effect.
@@ -222,12 +212,26 @@ public class PlayerStatus : NetworkBehaviour
     }
 
 
+    private List<Effect> FindConflictingPassiveEffects(Effect effect)
+    {
+        List<Effect> conflicts = new();
+        foreach (Effect other in ActivePassiveEffects)
+        {
+            if (other.EffectName == effect.EffectName)
+            {
+                if (other.EffectName == EEffect.None) continue;
+                conflicts.Add(other);
+            }
+        }
+
+        return conflicts;
+    }
+
+
     private void Update()
     {
-        HandleTime();
-
-        HandleVisualEffects();
         HandlePassiveEffects();
+        HandleTime();
     }
 
     private void HandleTime()
@@ -255,19 +259,6 @@ public class PlayerStatus : NetworkBehaviour
         }
     }
 
-    private void HandleVisualEffects()
-    {
-        Transform tooManyPints = transform.Find("TooManyPints");
-        if (NumPints > 0 && tooManyPints != null)
-        {
-            // Add the effect as a child
-            GameObject go = new GameObject("TooManyPints");
-            go.transform.parent = transform;
-            go.layer = LayerMask.NameToLayer("Effects");
-            go.AddComponent<TooManyPints>();
-            go.GetComponent<TooManyPints>();
-        }
-    }
 
     public void UseInputEffect()
     {
@@ -397,9 +388,15 @@ public class PlayerStatus : NetworkBehaviour
         ActiveInputEffect = null;
     }
 
-    private void RemovePassiveEffect(int i)
+
+    private void RemovePassiveEffect(int index)
     {
-        Effect effect = ActivePassiveEffects[i];
+        RemovePassiveEffect(ActivePassiveEffects[index]);
+    }
+
+
+    private void RemovePassiveEffect(Effect effect)
+    {
         StatusEffectUI statusUI = GameObject.FindWithTag("StatusUI").GetComponent<StatusEffectUI>();
         switch (effect.EffectName)
         {
@@ -417,8 +414,19 @@ public class PlayerStatus : NetworkBehaviour
         }
 
         UndoEffect(effect);
-        ActivePassiveEffects.RemoveAt(i);
+        ActivePassiveEffects.Remove(effect);
     }
+
+
+    /// <summary>
+    /// Nicely clears up all status data, useful for starting a new game.
+    /// </summary>
+    public void ClearAll()
+    {
+        ClearInputEffects();
+        ClearPassiveEffects();
+    }
+
 
     /// <summary>
     /// Disables all input status effects.
@@ -494,9 +502,9 @@ public class PlayerStatus : NetworkBehaviour
                 {
                     Effect speedBoost;
                     if (nextEpisode != null)
-                        speedBoost = new Effect(EEffect.SpeedBoost, level: 5, lifetime: 2, causes: new Effect[] { nextEpisode });
+                        speedBoost = new Effect(EEffect.SpeedBoost, level: 5, lifetime: 5, causes: new Effect[] { nextEpisode });
                     else
-                        speedBoost = new Effect(EEffect.SpeedBoost, level: 5, lifetime: 2);
+                        speedBoost = new Effect(EEffect.SpeedBoost, level: 5, lifetime: 5);
                     Effect rocketShit = new Effect(EEffect.RocketShitting, lifetime: 5, cooldown: 0.05f);
                     Effect episode = new Effect(EEffect.SpeedBoost, level: -2, lifetime: 2, causes: new Effect[] { rocketShit, speedBoost });
                     return episode;
@@ -510,15 +518,15 @@ public class PlayerStatus : NetworkBehaviour
                 Effect soberUp = new Effect(EEffect.SoberUp, isOneOff: true);
 
                 Effect pissing = new Effect(EEffect.Pissing, lifetime: 5,
-                    cooldown: 0.1f, isInputEffect: true, causes: new Effect[] { soberUp });
+                    cooldown: 0.1f, causes: new Effect[] { soberUp });
 
-                Effect internalProcessing = new Effect(EEffect.None, lifetime: 20, causes:
+                Effect liquidIngested = new Effect(EEffect.None, lifetime: 20, causes:
                     new Effect[] { pissing });
 
-                Effect drunk = new Effect(EEffect.Drunk);
+                Effect drunk = new Effect(EEffect.Drunk, isOneOff: true);
 
                 ItemSlotEffect = new Effect(EEffect.None, lifetime: 0, causes:
-                    new Effect[] { drunk, internalProcessing });
+                    new Effect[] { drunk, liquidIngested });
 
                 break;
 

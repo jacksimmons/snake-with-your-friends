@@ -46,7 +46,9 @@ public class PlayerMovement : NetworkBehaviour
         get { return bf.GetBit(1); }
         set { bf.SetBit(1, value); }
     }
-    public bool HasMoved
+
+    // Shorthand for m_direction != Vector2.zero
+    public bool IsMoving
     {
         get
         {
@@ -126,16 +128,6 @@ public class PlayerMovement : NetworkBehaviour
         // Generate QueuedActions structure
         m_queuedActions = new List<Action>();
 
-        //List<BodyPartStatus> bpss = new List<BodyPartStatus>();
-        //for (int i = 0; i < BodyParts.Count; i++)
-        //{
-        //    BodyPartStatus bps = new BodyPartStatus(false, false);
-        //    bpss.Add(bps);
-        //}
-
-        //if (CanMoveFreely)
-        //    _moveTime = Mathf.CeilToInt(_moveTime / _freeMovementSpeedMod);
-
         // First update, necessary for second, third etc games
         if (isOwned)
             m_poc.UpdateBodyParts();
@@ -146,7 +138,7 @@ public class PlayerMovement : NetworkBehaviour
     {
         RecreateStartingParts(2);
         BodyPartContainer.SetActive(false);
-        BodyParts = PlayerSetup.SetupBodyParts(BodyPartContainer.transform, 0, DefaultSprites);
+        BodyParts = PlayerStatic.SetupBodyParts(BodyPartContainer.transform, 0, DefaultSprites);
         m_poc.UpdateBodyParts();
         BodyPartContainer.SetActive(true);
     }
@@ -156,13 +148,6 @@ public class PlayerMovement : NetworkBehaviour
     {
         if (!isOwned)
             return;
-
-        // Forced movement
-        //if (Frozen)
-        //{
-        //    m_direction = m_forcedDirection;
-        //    return;
-        //}
 
         // Prevent snakes going back on themselves
         bool canGoBackOnItself = FreeMovement && BodyParts.Count <= 2;
@@ -242,7 +227,11 @@ public class PlayerMovement : NetworkBehaviour
     {
         if (!isOwned) return;
 
-
+        if (Frozen)
+        {
+            m_direction = Vector2.zero;
+            return;
+        }
         HandleMovementLoop();
     }
 
@@ -270,7 +259,7 @@ public class PlayerMovement : NetworkBehaviour
         // Prevents an extra move occurring before death
         if (CheckForInternalCollisions()) return;
 
-        if (HasMoved && m_direction != Vector2.zero)
+        if (m_direction != Vector2.zero)
         {
             if (CheckForExternalCollisions(m_direction)) return;
 
@@ -362,7 +351,7 @@ public class PlayerMovement : NetworkBehaviour
     /// </summary>
     private void AddBodyPart()
     {
-        if (!HasMoved)
+        if (!IsMoving)
             return;
 
         GameObject newBodyPartObj = Instantiate(m_bodyPartTemplate);
@@ -399,7 +388,7 @@ public class PlayerMovement : NetworkBehaviour
     /// </summary>
     private void RemoveBodyPart()
     {
-        if (!HasMoved)
+        if (!IsMoving)
             return;
 
         if (BodyParts.Count >= 3)
@@ -429,10 +418,11 @@ public class PlayerMovement : NetworkBehaviour
     /// </summary>
     public void HandleDeath()
     {
-        if (!HasMoved)
+        if (!IsMoving)
             return;
 
         m_poc.LogDeath();
+        GetComponent<PlayerStatus>().ClearAll();
 
         GameBehaviour game = GetComponentInChildren<GameBehaviour>();
         game.OnGameOver(score: BodyParts.Count);

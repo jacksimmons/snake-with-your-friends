@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 8602527917271153699}
   - component: {fileID: 5691343852970272198}
   - component: {fileID: 4440790568858733751}
-  - component: {fileID: 7833330327321974543}
+  - component: {fileID: 239871518356311323}
   m_Layer: 6
   m_Name: PlayerObject
   m_TagString: Player
@@ -182,7 +182,7 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 5dbd08e1b155aad469cbcf43e9563923, type: 3}
   - {fileID: 21300000, guid: 895c58017397a7a47b7c31c8ebe71234, type: 3}
   - {fileID: 21300000, guid: d9aa5ab9caf99a54db513b335fc29ede, type: 3}
---- !u!114 &7833330327321974543
+--- !u!114 &239871518356311323
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}

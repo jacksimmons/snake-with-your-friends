@@ -89,7 +89,7 @@ public class ProjectileBehaviour : ObjectBehaviour
 
         // --- Player Collisions
         bool isPlayer = true;
-        Transform player = PlayerBehaviour.TryGetOwnedPlayerTransformFromBodyPart(other.gameObject);
+        Transform player = PlayerStatic.TryGetOwnedPlayerTransformFromBodyPart(other.gameObject);
         if (player == null) return;
         if (PlayerImmune) return;
 
@@ -98,6 +98,7 @@ public class ProjectileBehaviour : ObjectBehaviour
         {
             case EProjectileType.Shit:
                 // Add a shit to the foreground overlay (blooper effect)
+                print("Hi");
                 GameObject fg = GameObject.FindWithTag("Foreground");
                 fg.GetComponent<ForegroundBehaviour>().AddToForeground(m_sprite);
                 break;

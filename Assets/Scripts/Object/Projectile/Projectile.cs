@@ -13,11 +13,11 @@ public enum EProjectileType
 
 public struct Projectile
 {
-    public float LifetimeMax { get; private set; }
-    public Vector2 Velocity { get; private set; }
-    public Quaternion Rotation { get; private set; }
+    public readonly float LifetimeMax;
+    public readonly Vector2 Velocity;
+    public readonly Quaternion Rotation;
+    public readonly float ImmunityDuration;
 
-    public float ImmunityDuration { get; private set; }
 
     public Projectile(float lifetime, Vector2 velocity, float rotation, float immunityDuration = 0)
     {
@@ -28,7 +28,8 @@ public struct Projectile
     }
 }
 
-public class Projectiles
+
+public static class Projectiles
 {
     public static Projectile ConstructShit(Vector2 velocity_vec, float rotation_z)
     {
@@ -36,7 +37,7 @@ public class Projectiles
             lifetime: 5,
             velocity: velocity_vec,
             rotation: rotation_z,
-            immunityDuration: 0.2f
+            immunityDuration: 0f
         );
     }
 
@@ -46,7 +47,7 @@ public class Projectiles
             lifetime: 5,
             velocity: velocity_vec,
             rotation: rotation_z,
-            immunityDuration: 0.5f
+            immunityDuration: 0.1f
         );
     }
 }

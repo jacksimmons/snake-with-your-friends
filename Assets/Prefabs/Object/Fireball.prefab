@@ -171,6 +171,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7023842890099726215, guid: 1d3e8221bb16de04faa51c3884811002, type: 3}
+      propertyPath: m_Offset.y
+      value: 0.35
+      objectReference: {fileID: 0}
     - target: {fileID: 9198758627952477708, guid: 1d3e8221bb16de04faa51c3884811002, type: 3}
       propertyPath: m_Size.y
       value: 2
@@ -190,22 +194,6 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 649762205103882181, guid: 1d3e8221bb16de04faa51c3884811002, type: 3}
   m_PrefabInstance: {fileID: 2436506727305587189}
   m_PrefabAsset: {fileID: 0}
---- !u!70 &8986303854883666257
-CapsuleCollider2D:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2942080626621601328}
-  m_Enabled: 1
-  m_Density: 1
-  m_Material: {fileID: 0}
-  m_IsTrigger: 1
-  m_UsedByEffector: 0
-  m_UsedByComposite: 0
-  m_Offset: {x: 0.000000029802322, y: 0.3637277}
-  m_Size: {x: 0.7009714, y: 1.1658618}
-  m_Direction: 0
 --- !u!114 &6169355911877703244
 MonoBehaviour:
   m_ObjectHideFlags: 0
