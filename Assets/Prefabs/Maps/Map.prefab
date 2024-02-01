@@ -305,7 +305,6 @@ MonoBehaviour:
   - {fileID: 4172892663148079258, guid: d0f4a771b5523a44886fe074dd7c76b5, type: 3}
   - {fileID: 1203239055732108450, guid: 820b472cf1125ba4ebd512e3cd1f42cd, type: 3}
   - {fileID: 5622249295249215054, guid: b579cf60e494783498e0adf8d258a055, type: 3}
-  - {fileID: 5622249295249215054, guid: b579cf60e494783498e0adf8d258a055, type: 3}
   m_backgrounds:
   - {fileID: 0}
   - {fileID: 21300000, guid: cde3109d1a3085044831e051fb1d9ef3, type: 3}

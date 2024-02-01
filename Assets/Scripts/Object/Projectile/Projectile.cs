@@ -37,7 +37,7 @@ public static class Projectiles
             lifetime: 5,
             velocity: velocity_vec,
             rotation: rotation_z,
-            immunityDuration: 0f
+            immunityDuration: 0.2f
         );
     }
 
@@ -47,7 +47,7 @@ public static class Projectiles
             lifetime: 5,
             velocity: velocity_vec,
             rotation: rotation_z,
-            immunityDuration: 0.1f
+            immunityDuration: 0.2f
         );
     }
 }

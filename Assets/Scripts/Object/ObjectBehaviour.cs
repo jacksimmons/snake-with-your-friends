@@ -59,26 +59,26 @@ public class ObjectBehaviour : MonoBehaviour
     }
 
 
+    /// <summary>
+    /// Handles collisions of ObjectBehaviour objects.
+    /// </summary>
+    /// <param name="other">The other collider.</param>
     protected virtual void OnTriggerEnter2D(Collider2D other)
     {
         // --- Portal Collisions
         if (other.TryGetComponent(out Teleporter _)) { return; }
 
 
-        // --- Projectile Collisions
-        // When a projectile and object collide, the one which is harder to move wins (the other
-        // explodes). If they have equal hard to moveness, they both explode.
-
-        // All objects (projectiles too) can be "exploded" by projectiles (but objects cannot be
-        // exploded by all objects)
-        // Determines if object explosion is necessary when hit by a projectile.
-        if (other.TryGetComponent(out ProjectileBehaviour pb))
+        // --- "Projectile hit me" Collisions
+        // When a projectile and object (incl. another projectile) collide, the one
+        // which is harder to move wins (the other explodes). If they have equal hard to moveness,
+        // they pass over each other.
+        if (other.TryGetComponent(out ProjectileBehaviour pbOther))
         {
-            if (pb.HardToMoveness >= HardToMoveness)
-            {
+            if (pbOther.HardToMoveness > HardToMoveness)
                 StartCoroutine(Explode());
-            }
-
+            else if (pbOther.HardToMoveness < HardToMoveness)
+                pbOther.StartCoroutine(Explode());
             return;
         }
     }

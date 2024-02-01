@@ -5219,10 +5219,6 @@ PrefabInstance:
       propertyPath: m_painter
       value: 
       objectReference: {fileID: 1069527289}
-    - target: {fileID: 7556360487036168048, guid: df8d9b3069467cb47bc7fd27a2c372f7, type: 3}
-      propertyPath: m_objects.Array.size
-      value: 13
-      objectReference: {fileID: 0}
     - target: {fileID: 8741437199466221467, guid: df8d9b3069467cb47bc7fd27a2c372f7, type: 3}
       propertyPath: m_SortingOrder
       value: -2

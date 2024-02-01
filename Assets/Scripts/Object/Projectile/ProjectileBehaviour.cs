@@ -64,21 +64,6 @@ public class ProjectileBehaviour : ObjectBehaviour
         base.OnTriggerEnter2D(other);
 
 
-        // --- Object Collisions
-
-        // All projectiles can be "exploded" by objects.
-        // Determines if projectile explosion is necessary when hitting an object.
-        if (other.TryGetComponent(out ObjectBehaviour ob))
-        {
-            if (ob.HardToMoveness >= HardToMoveness)
-            {
-                StartCoroutine(Explode());
-            }
-
-            return;
-        }
-
-
         // --- Wall Collisions
         if (other.TryGetComponent(out DeathTrigger _))
         {
@@ -98,7 +83,6 @@ public class ProjectileBehaviour : ObjectBehaviour
         {
             case EProjectileType.Shit:
                 // Add a shit to the foreground overlay (blooper effect)
-                print("Hi");
                 GameObject fg = GameObject.FindWithTag("Foreground");
                 fg.GetComponent<ForegroundBehaviour>().AddToForeground(m_sprite);
                 break;

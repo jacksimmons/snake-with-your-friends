@@ -179,7 +179,7 @@ public class MapEditorPaintBehaviour : MonoBehaviour
         // the origin.
         go.transform.localPosition = (Vector3)pos;
 
-        // Ensure object won't be destroyed even if it disappears
+        // Create object script and generate its ID
         ObjectBehaviour ob = go.GetComponent<ObjectBehaviour>();
         ob.ObjId = (byte)Array.IndexOf(m_loader.Objects, ChosenObjectPaint);
 
