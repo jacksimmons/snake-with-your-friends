@@ -91,7 +91,7 @@ public class GameBehaviour : NetworkBehaviour
     private List<GameObject> _foodTemplates = new();
 
     // A list containing every food spawn point location (these are defined by the position of FoodSpawner objects)
-    private List<Vector2> m_foodSpawnPoints = new();
+    private static List<Vector2> s_foodSpawnPoints;
 
 
     // SERVER VARIABLES --------------------
@@ -243,12 +243,12 @@ public class GameBehaviour : NetworkBehaviour
     {
         if (!isOwned)
         {
-            Debug.LogError("Client with authority was recipient of Map.");
+            Debug.LogError("Client without authority was recipient of Map.");
             return;
         }
 
         GameObject map = GameObject.Find("Map");
-        m_foodSpawnPoints = map.GetComponent<MapLoader>().LoadMap(mapData);
+        s_foodSpawnPoints = map.GetComponent<MapLoader>().LoadMap(mapData);
 
         s_groundTilemap = map.transform.Find("Ground").GetComponentInChildren<Tilemap>();
         s_wallTilemap = map.transform.Find("Wall").GetComponentInChildren<Tilemap>();
@@ -280,7 +280,7 @@ public class GameBehaviour : NetworkBehaviour
     [Server]
     private void ServerInitFood()
     {
-        s_foods = new GameObject[m_foodSpawnPoints.Count];
+        s_foods = new GameObject[s_foodSpawnPoints.Count];
 
         // Unload food items which were removed in settings
         for (int i = 0; i < _foodTemplates.Count; i++)
@@ -415,7 +415,7 @@ public class GameBehaviour : NetworkBehaviour
             randomIndex = freeIndex;
         }
 
-        Vector2 objPos = m_foodSpawnPoints[randomIndex];
+        Vector2 objPos = s_foodSpawnPoints[randomIndex];
         objPos.x += 0.5f;
         objPos.y += 0.5f;
 
