@@ -11,10 +11,10 @@ public class CustomisationMenu : MonoBehaviour
     {
         Dictionary<ECustomisationPart, Sprite[]> redPurple = new()
         {
-            { ECustomisationPart.Head, GetPartSprites("RedPurple", "Heads") },
-            { ECustomisationPart.Torso, GetPartSprites("RedPurple", "Torsos") },
-            { ECustomisationPart.Tail, GetPartSprites("RedPurple", "Tails") },
-            { ECustomisationPart.Corner, GetPartSprites("RedPurple", "Corners") }
+            { ECustomisationPart.Head, GetPartSprites("RedPurple", ECustomisationPart.Head) },
+            { ECustomisationPart.Torso, GetPartSprites("RedPurple", ECustomisationPart.Torso) },
+            { ECustomisationPart.Tail, GetPartSprites("RedPurple", ECustomisationPart.Tail) },
+            { ECustomisationPart.Corner, GetPartSprites("RedPurple", ECustomisationPart.Corner) }
         };
 
         spriteDictionary = new()
@@ -23,7 +23,7 @@ public class CustomisationMenu : MonoBehaviour
         };
     }
 
-    private Sprite[] GetPartSprites(string colour, string part)
+    private Sprite[] GetPartSprites(string colour, ECustomisationPart part)
     {
         string filePath = $"Snake/{colour}/{part}";
         return Resources.LoadAll<Sprite>(filePath);
