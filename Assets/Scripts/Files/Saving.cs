@@ -28,11 +28,16 @@ public static class Saving
         if (serializable is ICached cached)
             cached.Cache();
 
+
         string dest = Application.persistentDataPath + "/" + filename;
         FileStream fs;
 
         if (File.Exists(dest)) fs = File.OpenWrite(dest);
         else fs = File.Create(dest);
+
+        // If the provided object is null, delete the file.
+        if (serializable == null)
+            File.Delete(dest);
 
         BinaryFormatter bf = new();
         bf.Serialize(fs, serializable);

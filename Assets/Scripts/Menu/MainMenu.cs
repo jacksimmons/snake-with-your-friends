@@ -6,6 +6,10 @@ using UnityEngine.UI;
 
 public class MainMenu : SceneTransitionHandler
 {
+    private const int VERSION_MAJOR = 1;
+    private const int VERSION_MINOR = 0;
+
+
     [SerializeField]
     private Button[] m_buttonsRequiringAuth;
     [SerializeField]
@@ -33,6 +37,16 @@ public class MainMenu : SceneTransitionHandler
             go.name = "NetworkManager";
         }
     }
+
+
+    public void ResetSettings()
+    {
+        Saving.SaveToFile<Settings>(null, "Settings.dat");
+        Saving.SaveToFile<OutfitSettings>(null, "OutfitSettings.dat");
+        Saving.SaveToFile<GameSettings>(null, "GameSettings.dat");
+        Saving.SaveToFile<SaveData>(null, "SaveData.dat");
+    }
+
 
     private void LoadSettings()
     {
