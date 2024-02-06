@@ -24,8 +24,6 @@ public class MainMenu : SceneTransitionHandler
     {
         base.Start();
 
-        if (m_resetSettings)
-            ResetSettings();
         LoadAllSettings();
         TestSteamConnection();
 
@@ -47,16 +45,7 @@ public class MainMenu : SceneTransitionHandler
             Saving.LoadFromFile<OutfitSettings>("OutfitSettings.dat");
         if (GameSettings.Saved == null)
             Saving.LoadFromFile<GameSettings>("GameSettings.dat");
-    }
-
-
-    public void ResetSettings()
-    {
-        Saving.SaveToFile<Settings>(null, "Settings.dat");
-        Saving.SaveToFile<SaveData>(null, "SaveData.dat");
-        Saving.SaveToFile<OutfitSettings>(null, "OutfitSettings.dat");
-        Saving.SaveToFile<GameSettings>(null, "GameSettings.dat");
-        LoadAllSettings();
+        LoadSettings();
     }
 
 
