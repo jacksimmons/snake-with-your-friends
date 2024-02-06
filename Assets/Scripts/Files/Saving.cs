@@ -37,7 +37,10 @@ public static class Saving
 
         // If the provided object is null, delete the file.
         if (serializable == null)
+        {
             File.Delete(dest);
+            return;
+        }
 
         BinaryFormatter bf = new();
         bf.Serialize(fs, serializable);

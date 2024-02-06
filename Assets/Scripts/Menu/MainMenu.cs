@@ -24,8 +24,6 @@ public class MainMenu : SceneTransitionHandler
     {
         base.Start();
 
-        if (true)
-            ResetSettings();
         LoadAllSettings();
         TestSteamConnection();
 
