@@ -23,7 +23,9 @@ public class MainMenu : SceneTransitionHandler
     protected override void Start()
     {
         base.Start();
-        
+
+        if (true)
+            ResetSettings();
         LoadAllSettings();
         TestSteamConnection();
 
