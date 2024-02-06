@@ -8,7 +8,7 @@ using UnityEngine;
 
 
 [Serializable]
-public class BitField
+public struct BitField
 {
     // Can store any number of bytes, where each byte stores 8 booleans.
     // Saves memory for lots of objects with lots of booleans, but has a CPU overhead for r/w.
@@ -37,7 +37,7 @@ public class BitField
     {
         if (index >= 0 && index < Data.Length * 8) return;
 
-        Debug.LogError($"Invalid bit {index} is out of bounds for BitField of length {Data.Length}B");
+        Debug.LogError($"Invalid bit {index} is out of bounds for BitField of length {Data.Length} bytes.");
     }
 
 

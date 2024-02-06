@@ -10,7 +10,7 @@ public class Settings : ICached
     public float sfxVolume;
     public int resX, resY, resHz;
 
-    private BitField bf;
+    private BitField bf = new(1);
     public bool Fullscreen
     {
         get { return bf.GetBit(0); }
@@ -37,7 +37,6 @@ public class Settings : ICached
         resY = 1080;
         resHz = 60;
 
-        bf = new(1);
         Fullscreen = false;
         Borderless = true;
         HelpMotionSickness = false;

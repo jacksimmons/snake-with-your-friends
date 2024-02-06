@@ -146,6 +146,7 @@
     <Compile Include="Assets\Scripts\Game\SnakeRoyaleBehaviour.cs" />
     <Compile Include="Assets\Scripts\Player\BodyPartType.cs" />
     <Compile Include="Assets\Scripts\Menu\LobbyMenu.cs" />
+    <Compile Include="Assets\Scripts\Player\PlayerOutfit.cs" />
     <Compile Include="Assets\Scripts\Object\Grid\Teleporter.cs" />
     <Compile Include="Assets\Scripts\Player\BodyPart.cs" />
     <Compile Include="Assets\Scripts\Object\Tilemap\ColliderToggleTilemap.cs" />

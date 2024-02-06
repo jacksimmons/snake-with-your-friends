@@ -11,17 +11,31 @@ public struct GameSettingsData
     public EGameMode GameMode;
     public float TimeToMove;
     public bool FriendlyFire;
-    public byte[] FoodSettingsData;
+    public BitField FoodSettingsData;
     public MapData Map;
 
 
-    public GameSettingsData(GameSettingsData settings)
+    public GameSettingsData(BitField foodSettingsData)
     {
-        GameMode = settings.GameMode;
-        TimeToMove = settings.TimeToMove;
-        FriendlyFire = settings.FriendlyFire;
-        FoodSettingsData = settings.FoodSettingsData;
-        Map = settings.Map;
+        GameMode = EGameMode.SnakeRoyale;
+        TimeToMove = GameSettings.DEFAULT_TIME_TO_MOVE;
+        FriendlyFire = GameSettings.DEFAULT_FRIENDLY_FIRE;
+        Map = new();
+
+        FoodSettingsData = foodSettingsData;
+    }
+
+
+    public GameSettingsData(EGameMode mode, float timeToMove, bool friendlyFire, BitField foodSettingsData,
+        MapData map)
+    {
+        GameMode = mode;
+        TimeToMove = timeToMove;
+        FriendlyFire = friendlyFire;
+
+        FoodSettingsData = foodSettingsData;
+
+        Map = map;
     }
 }
 
@@ -36,12 +50,10 @@ public class GameSettings : ICached
     public static GameSettings Saved;
     public GameSettingsData Data;
 
-    private BitField m_foodSettings = new(NUM_BYTES);
-
 
     public GameSettings()
     {
-        Data = new();
+        Data = new(new(NUM_BYTES));
     }
 
 
@@ -54,20 +66,6 @@ public class GameSettings : ICached
     public GameSettings(GameSettingsData data)
     {
         Data = data;
-        m_foodSettings = new(data.FoodSettingsData);
-    }
-
-
-    public void SetFoodBit(EFoodType food, bool value)
-    {
-        m_foodSettings.SetBit((int)food, value);
-        Data.FoodSettingsData = m_foodSettings.Data;
-    }
-
-
-    public bool GetFoodBit(EFoodType food)
-    {
-        return m_foodSettings.GetBit((int)food);
     }
 
 

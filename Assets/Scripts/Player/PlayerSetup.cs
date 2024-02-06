@@ -5,7 +5,7 @@ using UnityEngine;
 
 public static class PlayerStatic
 {
-    public static List<BodyPart> SetupBodyParts(Transform container, float startingRotation, List<Sprite> defaultSprites)
+    public static List<BodyPart> SetupBodyParts(Transform container, float startingRotation, Sprite[] defaultSprites)
     {
         Vector2 startingDirection = Extensions.Vectors.Rotate(Vector2.up, startingRotation);
 

@@ -28,14 +28,6 @@ public static class Saving
         if (serializable is ICached cached)
             cached.Cache();
 
-        Type type = serializable.GetType();
-        if (!type.IsSerializable)
-        {
-            Debug.LogError("Provided object is not serializable, so cannot be" +
-                "saved.");
-            return;
-        }
-
         string dest = Application.persistentDataPath + "/" + filename;
         FileStream fs;
 
@@ -45,8 +37,6 @@ public static class Saving
         BinaryFormatter bf = new();
         bf.Serialize(fs, serializable);
         fs.Close();
-
-        //Debug.Log(filename);
 
         if (LoadingIcon.Instance)
             LoadingIcon.Instance.Toggle(false);
@@ -62,12 +52,12 @@ public static class Saving
             LoadingIcon.Instance.Toggle(true);
 
         string dest = Application.persistentDataPath + "/" + filename;
-        FileStream fs;
 
         if (File.Exists(dest))
         {
-            //Debug.Log(dest);
-            fs = File.OpenRead(dest);
+            FileStream fs = File.OpenRead(dest);
+            fs.Position = 0;
+
             BinaryFormatter bf = new();
 
             T val = (T)bf.Deserialize(fs);

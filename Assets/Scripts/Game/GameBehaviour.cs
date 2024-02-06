@@ -31,6 +31,7 @@ public class GameBehaviour : NetworkBehaviour
         Unloaded,
         SceneLoaded,
         GameSettingsSynced,
+        OutfitSettingsSynced,
         MapLoaded,
         PlayerScriptsEnabled,
         UIElementsEnabled,
@@ -102,6 +103,10 @@ public class GameBehaviour : NetworkBehaviour
     private static int serverNumPlayersReady;
 
 
+    // CLIENT VARIABLES --------------------
+    private int m_numOutfitSettingsReceived;
+
+
     /// <summary>
     /// ====================================
     /// Methods ----------------------------
@@ -115,6 +120,7 @@ public class GameBehaviour : NetworkBehaviour
         {
             serverNumPlayersReady = 0;
             serverPlayersLoadingStage = EGameLoadStage.Unloaded;
+            m_numOutfitSettingsReceived = 0;
         }
     }
 
@@ -192,6 +198,9 @@ public class GameBehaviour : NetworkBehaviour
             case EGameLoadStage.GameSettingsSynced:
                 Instance.CmdRequestMap(Instance.transform.parent.gameObject);
                 break;
+            case EGameLoadStage.OutfitSettingsSynced:
+                Instance.CmdSendOutfitSettings(Instance.transform.parent.gameObject);
+                break;
             case EGameLoadStage.MapLoaded:
                 Instance.EnablePlayerScripts();
                 break;
@@ -211,7 +220,7 @@ public class GameBehaviour : NetworkBehaviour
     private void CmdRequestGameSettings(GameObject player)
     {
         NetworkIdentity netIdentity = player.GetComponent<NetworkIdentity>();
-        RpcReceiveGameSettings(netIdentity.connectionToClient, new(GameSettings.Saved.Data));
+        RpcReceiveGameSettings(netIdentity.connectionToClient, GameSettings.Saved.Data);
     }
 
 
@@ -226,6 +235,42 @@ public class GameBehaviour : NetworkBehaviour
         GameSettings.Saved = new(data);
         CmdOnReady();
     }
+    // ------------------------------------
+
+
+    // CUSTOMISATION HANDSHAKE ------------
+    [Command]
+    private void CmdSendOutfitSettings(GameObject player)
+    {
+        int playerNo = player.GetComponent<PlayerObjectController>().playerNo;
+        RpcReceiveOutfitSettings(OutfitSettings.Saved.Data, playerNo);
+    }
+
+
+    [ClientRpc]
+    private void RpcReceiveOutfitSettings(OutfitSettingsData data, int playerNo)
+    {
+        m_numOutfitSettingsReceived++;
+
+        // Assign the settings to the player
+        CustomNetworkManager.Instance.Players[playerNo-1].GetComponent<PlayerOutfit>().UpdateOutfit(data);
+
+        if (m_numOutfitSettingsReceived == CustomNetworkManager.Instance.Players.Count)
+            CmdOnReady();
+    }
+
+
+    [TargetRpc]
+    //private void RpcReceiveGameSettings(NetworkConnectionToClient _, GameSettingsData data)
+    //{
+    //    if (!isOwned)
+    //    {
+    //        Debug.LogError("Client with authority was recipient of GameSettings.");
+    //        return;
+    //    }
+    //    GameSettings.Saved = new(data);
+    //    CmdOnReady();
+    //}
     // ------------------------------------
 
 
@@ -286,7 +331,7 @@ public class GameBehaviour : NetworkBehaviour
         for (int i = 0; i < _foodTemplates.Count; i++)
         {
             GameObject food = _foodTemplates[i];
-            if (!GameSettings.Saved.GetFoodBit(food.GetComponent<FoodObject>().food))
+            if (!GameSettings.Saved.Data.FoodSettingsData.GetBit((int)food.GetComponent<FoodObject>().food))
             {
                 _foodTemplates.Remove(food);
                 i--;

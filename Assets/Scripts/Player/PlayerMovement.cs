@@ -29,7 +29,7 @@ public class PlayerMovement : NetworkBehaviour
     [SerializeField]
     private GameBehaviour m_gameBehaviour;
     [SerializeField]
-    public List<Sprite> DefaultSprites; // Head, Torso, Tail, Corner
+    public Sprite[] DefaultSprites; // Head, Torso, Tail, Corner, Hat
 
 
     /// <summary>

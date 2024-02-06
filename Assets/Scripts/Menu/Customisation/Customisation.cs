@@ -4,7 +4,6 @@ public enum ECustomisationPart
     Torso,
     Tail,
     Corner,
-    Colour,
     Hat
 }
 public enum ESnakeColourType

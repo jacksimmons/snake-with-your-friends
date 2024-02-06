@@ -16,6 +16,7 @@ GameObject:
   - component: {fileID: 5691343852970272198}
   - component: {fileID: 4440790568858733751}
   - component: {fileID: 239871518356311323}
+  - component: {fileID: 8319943450019130825}
   m_Layer: 6
   m_Name: PlayerObject
   m_TagString: Player
@@ -182,6 +183,7 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 5dbd08e1b155aad469cbcf43e9563923, type: 3}
   - {fileID: 21300000, guid: 895c58017397a7a47b7c31c8ebe71234, type: 3}
   - {fileID: 21300000, guid: d9aa5ab9caf99a54db513b335fc29ede, type: 3}
+  - {fileID: 21300000, guid: f72eb2df6b04c024dafb093d8bf2d908, type: 3}
 --- !u!114 &239871518356311323
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -214,6 +216,18 @@ MonoBehaviour:
   _spritePizza: {fileID: 21300000, guid: 2094db1395fb0a948b77b3c6d39c8dbb, type: 3}
   m_fireball: {fileID: 2942080626621601328, guid: 04777406194d8464aa1d686d6788ebe9, type: 3}
   m_staticShit: {fileID: 860416237506986402, guid: f045dd42fe85deb4abbaf393a5043e56, type: 3}
+--- !u!114 &8319943450019130825
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3315957918798202727}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1223f0ae6af96f645af2461097754407, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &3727899065049902522
 GameObject:
   m_ObjectHideFlags: 0

@@ -32,9 +32,9 @@ public class CanvasSnakeSpawner : MonoBehaviour
         actor.speed = speed;
 
         spawned.transform.GetChild(0).GetComponent<Image>().sprite =
-            GetRandomSprite("Heads");
+            GetRandomSprite(ECustomisationPart.Head);
         spawned.transform.GetChild(1).GetComponent<Image>().sprite =
-            GetRandomSprite("Tails");
+            GetRandomSprite(ECustomisationPart.Tail);
 
         if (numParts > 2)
         {
@@ -54,7 +54,7 @@ public class CanvasSnakeSpawner : MonoBehaviour
         Transform tail = spawned.transform.GetChild(1); // The template starts as a 2 part snake
         float width = ((RectTransform)tail).rect.width;
 
-        Sprite randomTorsoSprite = GetRandomSprite("Torsos");
+        Sprite randomTorsoSprite = GetRandomSprite(ECustomisationPart.Torso);
 
         // Generate, and place correctly the right number of parts.
         for (int i = 0; i < numParts - 2; i++)
@@ -73,9 +73,9 @@ public class CanvasSnakeSpawner : MonoBehaviour
     }
 
 
-    private Sprite GetRandomSprite(string ECustomisationPart)
+    private Sprite GetRandomSprite(ECustomisationPart part)
     {
-        Sprite[] torsoSprites = Resources.LoadAll<Sprite>($"Snake/RedPurple/{ECustomisationPart}");
+        Sprite[] torsoSprites = Resources.LoadAll<Sprite>($"Snake/RedPurple/{part}");
         int randIndex = Random.Range(0, torsoSprites.Length);
         return torsoSprites[randIndex];
     }

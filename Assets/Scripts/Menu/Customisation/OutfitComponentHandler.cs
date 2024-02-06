@@ -15,29 +15,17 @@ public class OutfitComponentHandler : MonoBehaviour
     [SerializeField]
     private GameObject[] m_previewObjectsToUpdate;
 
+
     private void Start()
     {
         m_menu = transform.parent.parent.GetComponent<CustomisationMenu>();
         m_outfitComponentImage = transform.Find("Part").GetComponent<Image>();
 
-        if (OutfitSettings.Saved.ColourName == string.Empty)
-            OutfitSettings.Saved.ColourName = "RedPurple";
+        if (OutfitSettings.Saved.Data.ColourName == string.Empty)
+            OutfitSettings.Saved.Data.ColourName = "RedPurple";
 
-        switch (m_outfitComponent)
-        {
-            case ECustomisationPart.Head:
-                LoadOutfitComponentSprite("Heads", OutfitSettings.Saved.HeadSpriteName);
-                break;
-            case ECustomisationPart.Torso:
-                LoadOutfitComponentSprite("Torsos", OutfitSettings.Saved.TorsoSpriteName);
-                break;
-            case ECustomisationPart.Tail:
-                LoadOutfitComponentSprite("Tails", OutfitSettings.Saved.TailSpriteName);
-                break;
-            case ECustomisationPart.Corner:
-                LoadOutfitComponentSprite("Corners", OutfitSettings.Saved.CornerSpriteName);
-                break;
-        }
+        string filename = OutfitSettings.Saved.Data.OutfitSpriteNames[(int)m_outfitComponent];
+        LoadOutfitComponentSprite(m_outfitComponent, filename);
 
         // Get current index of the sprite in the appropriate folder in sprite dictionary.
         m_currentIndex = Array.IndexOf(
@@ -45,13 +33,15 @@ public class OutfitComponentHandler : MonoBehaviour
             m_outfitComponentImage.sprite);
     }
 
-    private void LoadOutfitComponentSprite(string outfitComponentName, string filename)
-    {
-        if (filename == "") filename = m_outfitComponentImage.sprite.name;
 
-        UpdateAllSpriteInstances(Resources.Load<Sprite>
-            ($"Snake/{OutfitSettings.Saved.ColourName}/{outfitComponentName}/{filename}"));
+    private void LoadOutfitComponentSprite(ECustomisationPart part, string filename)
+    {
+        Sprite sprite = Resources.Load<Sprite>($"Snake/{OutfitSettings.Saved.Data.ColourName}/{part}/{filename}");
+        if (sprite == null)
+            Debug.LogError($"Null resource: Snake/{OutfitSettings.Saved.Data.ColourName}/{part}/{filename}");
+        UpdateAllSpriteInstances(sprite);
     }
+
 
     private void UpdateAllSpriteInstances(Sprite sprite)
     {
@@ -68,42 +58,13 @@ public class OutfitComponentHandler : MonoBehaviour
             StartCoroutine(Wait.WaitForObjectThen(
                 () => GameObject.Find("LocalPlayerObject"),
                 0.1f,
-                (GameObject lpo) => UpdatePlayerSpriteInstance(sprite, lpo)));
+                (GameObject lpo) => lpo.GetComponent<PlayerOutfit>().UpdatePlayerSprite(m_outfitComponent, sprite, true)));
             return;
         }
 
-        UpdatePlayerSpriteInstance(sprite);
+        lpo.GetComponent<PlayerOutfit>().UpdatePlayerSprite(m_outfitComponent, sprite, true);
     }
 
-    private void UpdatePlayerSpriteInstance(Sprite sprite, GameObject lpo = null)
-    {
-        if (!lpo)
-        {
-            lpo = GameObject.Find("LocalPlayerObject");
-        }
-
-        PlayerMovement pm = lpo.GetComponent<PlayerMovement>();
-
-        switch (m_outfitComponent)
-        {
-            case ECustomisationPart.Head:
-                OutfitSettings.Saved.HeadSpriteName = sprite.name;
-                pm.DefaultSprites[0] = sprite;
-                break;
-            case ECustomisationPart.Torso:
-                OutfitSettings.Saved.TorsoSpriteName = sprite.name;
-                pm.DefaultSprites[1] = sprite;
-                break;
-            case ECustomisationPart.Tail:
-                OutfitSettings.Saved.TailSpriteName = sprite.name;
-                pm.DefaultSprites[2] = sprite;
-                break;
-            case ECustomisationPart.Corner:
-                OutfitSettings.Saved.CornerSpriteName = sprite.name;
-                pm.DefaultSprites[3] = sprite;
-                break;
-        }
-    }
 
     public void OnOutfitComponentChanged(bool isRight)
     {
@@ -139,7 +100,6 @@ public class OutfitComponentHandler : MonoBehaviour
         }
 
         UpdateAllSpriteInstances(sprites[m_currentIndex]);
-
         Saving.SaveToFile(OutfitSettings.Saved, "OutfitSettings.dat");
     }
 }
