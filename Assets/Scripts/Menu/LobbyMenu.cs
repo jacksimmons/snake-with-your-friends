@@ -73,18 +73,11 @@ public class LobbyMenu : MonoBehaviour
     {
         if (instance == null) { instance = this; }
 
-        if (OutfitSettings.Saved == null)
-            Saving.LoadFromFile<OutfitSettings>("OutfitSettings.dat");
-
         // Determine if we are the host
         if (NetworkServer.active)
         {
             m_hostSettingsButton.SetActive(true);
             m_mapSelectButton.SetActive(true);
-
-            // Load any previous host settings (if there are any)
-            if (GameSettings.Saved == null)
-                Saving.LoadFromFile<GameSettings>("GameSettings.dat");
         }
 
         lobbyID = Manager.GetComponent<Steam>().LobbyID;

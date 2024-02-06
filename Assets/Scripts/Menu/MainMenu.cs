@@ -23,14 +23,10 @@ public class MainMenu : SceneTransitionHandler
     protected override void Start()
     {
         base.Start();
-
-        if (Settings.Saved == null)
-            LoadSettings();
-
-        if (SaveData.Saved == null)
-            Saving.LoadFromFile<SaveData>("SaveData.dat");
-
+        
+        LoadAllSettings();
         TestSteamConnection();
+
         if (!GameObject.Find("NetworkManager"))
         {
             GameObject go = Instantiate(m_networkManager);
@@ -39,19 +35,35 @@ public class MainMenu : SceneTransitionHandler
     }
 
 
+    private void LoadAllSettings()
+    {
+        if (Settings.Saved == null)
+            Saving.LoadFromFile<Settings>("Settings.dat");
+        if (SaveData.Saved == null)
+            Saving.LoadFromFile<SaveData>("SaveData.dat");
+        if (OutfitSettings.Saved == null)
+            Saving.LoadFromFile<OutfitSettings>("OutfitSettings.dat");
+        if (GameSettings.Saved == null)
+            Saving.LoadFromFile<GameSettings>("GameSettings.dat");
+    }
+
+
     public void ResetSettings()
     {
-        Saving.SaveToFile<Settings>(null, "Settings.dat");
-        Saving.SaveToFile<OutfitSettings>(null, "OutfitSettings.dat");
-        Saving.SaveToFile<GameSettings>(null, "GameSettings.dat");
-        Saving.SaveToFile<SaveData>(null, "SaveData.dat");
+        if (Settings.Saved != null)
+            Saving.SaveToFile<Settings>(null, "Settings.dat");
+        if (SaveData.Saved != null)
+            Saving.SaveToFile<SaveData>(null, "SaveData.dat");
+        if (OutfitSettings.Saved != null)
+            Saving.SaveToFile<OutfitSettings>(null, "OutfitSettings.dat");
+        if (GameSettings.Saved != null)
+            Saving.SaveToFile<GameSettings>(null, "GameSettings.dat");
+        LoadAllSettings();
     }
 
 
     private void LoadSettings()
     {
-        Saving.LoadFromFile<Settings>("Settings.dat");
-
         GameObject audioParent = GameObject.FindWithTag("AudioHandler");
         audioParent.transform.Find("ClickHandler").GetComponent<AudioSource>().volume = Settings.Saved.menuVolume;
         audioParent.transform.Find("ButtonPressHandler").GetComponent<AudioSource>().volume = Settings.Saved.menuVolume;
