@@ -6,9 +6,9 @@ using UnityEngine.UI;
 
 public class MainMenu : SceneTransitionHandler
 {
-    private const int VERSION_MAJOR = 1;
-    private const int VERSION_MINOR = 0;
-
+    // Used when settings class versions change
+    [SerializeField]
+    private bool m_resetSettings = false;
 
     [SerializeField]
     private Button[] m_buttonsRequiringAuth;
@@ -24,6 +24,8 @@ public class MainMenu : SceneTransitionHandler
     {
         base.Start();
 
+        if (m_resetSettings)
+            ResetSettings();
         LoadAllSettings();
         TestSteamConnection();
 
