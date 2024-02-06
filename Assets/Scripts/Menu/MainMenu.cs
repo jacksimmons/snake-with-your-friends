@@ -52,14 +52,10 @@ public class MainMenu : SceneTransitionHandler
 
     public void ResetSettings()
     {
-        if (Settings.Saved != null)
-            Saving.SaveToFile<Settings>(null, "Settings.dat");
-        if (SaveData.Saved != null)
-            Saving.SaveToFile<SaveData>(null, "SaveData.dat");
-        if (OutfitSettings.Saved != null)
-            Saving.SaveToFile<OutfitSettings>(null, "OutfitSettings.dat");
-        if (GameSettings.Saved != null)
-            Saving.SaveToFile<GameSettings>(null, "GameSettings.dat");
+        Saving.SaveToFile<Settings>(null, "Settings.dat");
+        Saving.SaveToFile<SaveData>(null, "SaveData.dat");
+        Saving.SaveToFile<OutfitSettings>(null, "OutfitSettings.dat");
+        Saving.SaveToFile<GameSettings>(null, "GameSettings.dat");
         LoadAllSettings();
     }
 

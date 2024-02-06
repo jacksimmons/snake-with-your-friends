@@ -1008,6 +1008,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_transitionSnakeSpawner: {fileID: 6789312182407302890, guid: e0744c293e17d38479edaebeafeed5a4, type: 3}
   sceneName: 
+  m_resetSettings: 0
   m_buttonsRequiringAuth:
   - {fileID: 1101207008}
   - {fileID: 1381458036}
