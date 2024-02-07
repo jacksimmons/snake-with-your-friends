@@ -90,7 +90,7 @@ public class MapEditorLoadBehaviour : MonoBehaviour
         else
         {
             GameSettings.Saved.Data.Map = Saving.LoadFromFile<MapData>($"Maps/{filename}");
-            Saving.SaveToFile(GameSettings.Saved, "GameSettings.dat");
+            Saving.SaveToFile(GameSettings.Saved, "GameSettings.json");
         }
     }
 }

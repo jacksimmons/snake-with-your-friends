@@ -20,7 +20,7 @@ public class GoalBehaviour : MonoBehaviour
 
             // Increment highest puzzle
             SaveData.Saved.PuzzleLevel++;
-            Saving.SaveToFile(SaveData.Saved, "SaveData.dat");
+            Saving.SaveToFile(SaveData.Saved, "SaveData.json");
 
             // Load the next puzzle
             GameBehaviour.Instance.OnGameSceneLoaded("Game");

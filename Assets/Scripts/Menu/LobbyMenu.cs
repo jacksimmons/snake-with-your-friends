@@ -110,7 +110,7 @@ public class LobbyMenu : MonoBehaviour
 
     public void OnHostSettingsSavePressed()
     {
-        Saving.SaveToFile(GameSettings.Saved, "GameSettings.dat");
+        Saving.SaveToFile(GameSettings.Saved, "GameSettings.json");
     }
 
 

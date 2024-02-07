@@ -100,6 +100,6 @@ public class OutfitComponentHandler : MonoBehaviour
         }
 
         UpdateAllSpriteInstances(sprites[m_currentIndex]);
-        Saving.SaveToFile(OutfitSettings.Saved, "OutfitSettings.dat");
+        Saving.SaveToFile(OutfitSettings.Saved, "OutfitSettings.json");
     }
 }

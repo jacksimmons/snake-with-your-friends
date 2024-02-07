@@ -116,6 +116,6 @@ public class HostSettingsHandler : MonoBehaviour
     /// </summary>
     public void OnClose()
     {
-        Saving.SaveToFile(m_currentGameSettings, "GameSettings.dat");
+        Saving.SaveToFile(m_currentGameSettings, "GameSettings.json");
     }
 }

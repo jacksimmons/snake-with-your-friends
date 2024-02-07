@@ -279,6 +279,14 @@ public class GameBehaviour : NetworkBehaviour
     private void CmdRequestMap(GameObject player)
     {
         NetworkIdentity netIdentity = player.GetComponent<NetworkIdentity>();
+        MapData map = GameSettings.Saved.Data.Map;
+
+
+        if (map.groundData == null || map.wallData == null || map.objectData == null)
+        {
+            Debug.LogWarning("No map selected, or map was corrupted. Loading default map.");
+        }
+
         RpcReceiveMap(netIdentity.connectionToClient, GameSettings.Saved.Data.Map);
     }
 

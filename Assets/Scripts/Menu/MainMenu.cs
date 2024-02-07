@@ -37,14 +37,14 @@ public class MainMenu : SceneTransitionHandler
     private void LoadAllSettings()
     {
         if (Settings.Saved == null)
-            Saving.LoadFromFile<Settings>("Settings.dat");
+            Saving.LoadFromFile<Settings>("Settings.json");
         ApplySettings();
         if (SaveData.Saved == null)
-            Saving.LoadFromFile<SaveData>("SaveData.dat");
+            Saving.LoadFromFile<SaveData>("SaveData.json");
         if (OutfitSettings.Saved == null)
-            Saving.LoadFromFile<OutfitSettings>("OutfitSettings.dat");
+            Saving.LoadFromFile<OutfitSettings>("OutfitSettings.json");
         if (GameSettings.Saved == null)
-            Saving.LoadFromFile<GameSettings>("GameSettings.dat");
+            Saving.LoadFromFile<GameSettings>("GameSettings.json");
     }
 
 

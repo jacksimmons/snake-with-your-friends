@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
+using System.Reflection;
 using UnityEngine;
 
 
@@ -30,10 +31,7 @@ public static class Saving
 
 
         string dest = Application.persistentDataPath + "/" + filename;
-        FileStream fs;
-
-        if (File.Exists(dest)) fs = File.OpenWrite(dest);
-        else fs = File.Create(dest);
+        if (!File.Exists(dest)) File.Create(dest).Close();
 
         // If the provided object is null, delete the file.
         if (serializable == null)
@@ -42,9 +40,8 @@ public static class Saving
             return;
         }
 
-        BinaryFormatter bf = new();
-        bf.Serialize(fs, serializable);
-        fs.Close();
+        string json = JsonUtility.ToJson(serializable, true);
+        File.WriteAllText(dest, json);
 
         if (LoadingIcon.Instance)
             LoadingIcon.Instance.Toggle(false);
@@ -63,13 +60,8 @@ public static class Saving
 
         if (File.Exists(dest))
         {
-            FileStream fs = File.OpenRead(dest);
-            fs.Position = 0;
-
-            BinaryFormatter bf = new();
-
-            T val = (T)bf.Deserialize(fs);
-            fs.Close();
+            string json = File.ReadAllText(dest);
+            T val = (T)JsonUtility.FromJson(json, typeof(T));
 
             if (val is ICached cached)
                 cached.Cache();
