@@ -281,13 +281,16 @@ public class GameBehaviour : NetworkBehaviour
         NetworkIdentity netIdentity = player.GetComponent<NetworkIdentity>();
         MapData map = GameSettings.Saved.Data.Map;
 
-
-        if (map.groundData == null || map.wallData == null || map.objectData == null)
+        if (map.groundData.Length == 0 && map.wallData.Length == 0 && map.objectData.Length == 0)
         {
             Debug.LogWarning("No map selected, or map was corrupted. Loading default map.");
+            map = Saving.LoadFromFile<MapData>("Maps/just_a_guy_dont_delete_pls.map.json");
+
+            // Update the saved map
+            GameSettings.Saved.Data.Map = map;
         }
 
-        RpcReceiveMap(netIdentity.connectionToClient, GameSettings.Saved.Data.Map);
+        RpcReceiveMap(netIdentity.connectionToClient, map);
     }
 
 

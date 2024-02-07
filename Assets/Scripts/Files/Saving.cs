@@ -29,7 +29,6 @@ public static class Saving
         if (serializable is ICached cached)
             cached.Cache();
 
-
         string dest = Application.persistentDataPath + "/" + filename;
         if (!File.Exists(dest)) File.Create(dest).Close();
 

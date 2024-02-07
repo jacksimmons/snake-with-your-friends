@@ -17,8 +17,8 @@ public enum ETileType : byte
 [Serializable]
 public struct MapTileData
 {
-    public readonly short x, y;
-    public readonly ETileType type;
+    public short x, y;
+    public ETileType type;
 
 
     public MapTileData(short x, short y, ETileType type)
@@ -33,13 +33,13 @@ public struct MapTileData
 [Serializable]
 public struct MapObjectData
 {
-    public readonly byte objId;
+    public byte objId;
 
-    public readonly short x;
-    public readonly short y;
-    public readonly float rotation;
+    public short x;
+    public short y;
+    public float rotation;
 
-    public readonly int spawnIndex;
+    public int spawnIndex;
 
 
     public MapObjectData(byte objId, short x, short y, float rotation, int spawnIndex)
@@ -56,10 +56,10 @@ public struct MapObjectData
 [Serializable]
 public struct MapData
 {
-    public readonly MapTileData[] groundData;
-    public readonly MapTileData[] wallData;
-    public readonly MapObjectData[] objectData;
-    public readonly int bgIndex;
+    public MapTileData[] groundData;
+    public MapTileData[] wallData;
+    public MapObjectData[] objectData;
+    public int bgIndex;
 
 
     public MapData(MapTileData[] groundData, MapTileData[] wallData, MapObjectData[] objectData, int bgIndex)
