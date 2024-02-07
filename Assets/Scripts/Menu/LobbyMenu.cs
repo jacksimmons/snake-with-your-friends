@@ -230,10 +230,13 @@ public class LobbyMenu : MonoBehaviour
         }
     }
 
+
     public void TogglePlayerReady()
     {
+        startGameButton.interactable = false;
         LocalPlayerController.CmdSetPlayerReady();
     }
+
 
     public void UpdateButton()
     {
@@ -247,6 +250,7 @@ public class LobbyMenu : MonoBehaviour
         }
     }
 
+
     public void CheckIfAllReady()
     {
         bool allReady = true;
@@ -259,14 +263,21 @@ public class LobbyMenu : MonoBehaviour
             }
         }
 
-        startGameButton.interactable = false;
-
         // If everyone is ready and we are the host...
         if (allReady)
         {
             if (LocalPlayerController && LocalPlayerController.playerNo == 1)
             {
-                startGameButton.interactable = true;
+                if (GameSettings.Saved.Data.GameMode == EGameMode.Puzzle && CustomNetworkManager.Instance.Players.Count > 1)
+                {
+                    startGameButton.GetComponentInChildren<TMP_Text>().text = "Too many players for this mode.";
+                    startGameButton.interactable = false;
+                }
+                else
+                {
+                    startGameButton.GetComponentInChildren<TMP_Text>().text = "Start";
+                    startGameButton.interactable = true;
+                }
             }
         }
     }

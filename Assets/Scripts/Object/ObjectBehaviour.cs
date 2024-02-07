@@ -77,8 +77,6 @@ public class ObjectBehaviour : MonoBehaviour
         {
             if (pbOther.HardToMoveness > HardToMoveness)
                 StartCoroutine(Explode());
-            else if (pbOther.HardToMoveness < HardToMoveness)
-                pbOther.StartCoroutine(Explode());
             return;
         }
     }

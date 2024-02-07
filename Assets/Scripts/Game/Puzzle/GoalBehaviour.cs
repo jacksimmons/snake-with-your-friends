@@ -1,34 +1,21 @@
-using System.Collections;
+    using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class GoalBehaviour : MonoBehaviour
+public class GoalBehaviour : ObjectBehaviour
 {
-    private void OnTriggerEnter2D(Collider2D collision)
+    protected override void OnTriggerEnter2D(Collider2D other)
     {
-        // --- Players
-        if (GameBehaviour.Instance)
-        {
-            // Prevents infinite loading of puzzles below
-            GetComponent<Collider2D>().enabled = false;
+        // ! Note: goals can be destroyed by projectiles (is this intended?)
+        base.OnTriggerEnter2D(other);
 
-            // Convert prefab level name "PuzzleX" to X
-            //byte level = byte.Parse(transform.parent.name["Puzzle".Length..]);
+        Transform player = PlayerStatic.TryGetOwnedPlayerTransformFromBodyPart(other.gameObject);
+        if (player == null) return;
 
-            // Finished all puzzles, so early exit
-            if (SaveData.Saved.PuzzleLevel == SaveData.MaxPuzzleLevel) return;
 
-            // Increment highest puzzle
-            SaveData.Saved.PuzzleLevel++;
-            Saving.SaveToFile(SaveData.Saved, "SaveData.json");
+        // Prevents infinite loading of puzzles below
+        GetComponent<Collider2D>().enabled = false;
 
-            // Load the next puzzle
-            GameBehaviour.Instance.OnGameSceneLoaded("Game");
-            Destroy(transform.parent.gameObject);
-            return;
-        }
-
-        // --- Everything else disappears
-        Destroy(collision.gameObject);
+        GameBehaviour.Instance.OnPuzzleComplete();
     }
 }

@@ -144,6 +144,27 @@ public class PlayerMovement : NetworkBehaviour
     }
 
 
+    private void SetTimeToMove(float timeToMove)
+    {
+        // We need TimeBetweenMoves = timeToMove
+        // We have TimeBetweenMoves = baseTimeToMove/{multiplier}
+        // So multiplier = timeToMove/baseTimeToMove
+        ApplySpeedMultiplier(_baseTimeBetweenMoves / timeToMove);
+    }
+
+
+    public void ApplySpeedMultiplier(float multiplier)
+    {
+        m_speedMultiplier = multiplier;
+    }
+
+
+    public void ResetSpeedModifier()
+    {
+        m_speedMultiplier = 1;
+    }
+
+
     private void HandleDirectionInput(Vector2 dir)
     {
         if (!isOwned)
@@ -165,7 +186,7 @@ public class PlayerMovement : NetworkBehaviour
             if (dir != m_direction)
             {
                 m_direction = dir;
-                m_timeTillMove = TimeBetweenMoves;
+                m_timeTillMove = 0;
             }
         }
         else if (dir != Vector2.zero)
@@ -413,14 +434,12 @@ public class PlayerMovement : NetworkBehaviour
         }
     }
 
+
     /// <summary>
-    /// Not having moved yet grants immunity.
+    /// When the player dies. (Loses a body part when only has 2, or got hit in the head.)
     /// </summary>
     public void HandleDeath()
     {
-        if (!IsMoving)
-            return;
-
         m_poc.LogDeath();
         GetComponent<PlayerStatus>().ClearAll();
 
@@ -497,27 +516,6 @@ public class PlayerMovement : NetworkBehaviour
             }
             m_storedBodyPartDirections.Clear();
         }));
-    }
-
-
-    private void SetTimeToMove(float timeToMove)
-    {
-        // We need TimeBetweenMoves = timeToMove
-        // We have TimeBetweenMoves = baseTimeToMove/{multiplier}
-        // So multiplier = timeToMove/baseTimeToMove
-        ApplySpeedMultiplier(_baseTimeBetweenMoves / timeToMove);
-    }
-
-
-    public void ApplySpeedMultiplier(float multiplier)
-    {
-        m_speedMultiplier = multiplier;
-    }
-
-
-    public void ResetSpeedModifier()
-    {
-        m_speedMultiplier = 1;
     }
 
 

@@ -3,8 +3,8 @@ using System;
 [Serializable]
 public class SaveData : ICached
 {
-    public static SaveData Saved = null;
-    public static readonly byte MaxPuzzleLevel = 2;
+    public static SaveData Saved;
+    public static readonly byte MaxPuzzleLevel = 1;
 
     public byte PuzzleLevel { get; set; }
 
@@ -17,7 +17,7 @@ public class SaveData : ICached
 
     public SaveData()
     {
-        PuzzleLevel = 1;
+        PuzzleLevel = 0;
     }
 
 

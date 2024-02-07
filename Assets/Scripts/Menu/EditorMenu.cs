@@ -331,7 +331,7 @@ public class EditorMenu : MonoBehaviour
         float wall_a = GetLayerOpacity(m_wallLayer);
         SetAllLayerOpacities(1);
 
-        string savePath = $"Maps/{name}.map.json";
+        string savePath = $"Maps/{name}.json";
         //int numDuplicates = 0;
 
         //// If {chosenName}.prefab exists, Increase numDuplicates until we find an unused filename of the format

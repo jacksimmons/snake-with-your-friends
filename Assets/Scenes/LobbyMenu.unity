@@ -2516,7 +2516,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 2018800773}
   m_HandleRect: {fileID: 2018800772}
   m_Direction: 2
-  m_Value: -0.00000026585568
+  m_Value: -0.00000019939176
   m_Size: 0.14970368
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -7656,11 +7656,11 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1967391613033063099, guid: 9069e6ba4608cf347a46df14f2e429b7, type: 3}
       propertyPath: m_text
-      value: Start Game
+      value: Start
       objectReference: {fileID: 0}
     - target: {fileID: 1967391613033063099, guid: 9069e6ba4608cf347a46df14f2e429b7, type: 3}
       propertyPath: m_fontSize
-      value: 53.55
+      value: 72
       objectReference: {fileID: 0}
     - target: {fileID: 1967391614095193904, guid: 9069e6ba4608cf347a46df14f2e429b7, type: 3}
       propertyPath: m_Pivot.x
@@ -7744,6 +7744,10 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1967391614095193904, guid: 9069e6ba4608cf347a46df14f2e429b7, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1967391614095193905, guid: 9069e6ba4608cf347a46df14f2e429b7, type: 3}
+      propertyPath: m_Interactable
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1967391614095193905, guid: 9069e6ba4608cf347a46df14f2e429b7, type: 3}

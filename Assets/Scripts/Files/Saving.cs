@@ -58,17 +58,7 @@ public static class Saving
         string dest = Application.persistentDataPath + "/" + filename;
 
         if (File.Exists(dest))
-        {
-            string json = File.ReadAllText(dest);
-            T val = (T)JsonUtility.FromJson(json, typeof(T));
-
-            if (val is ICached cached)
-                cached.Cache();
-
-            if (LoadingIcon.Instance)
-                LoadingIcon.Instance.Toggle(false);
-            return val;
-        }
+            return LoadAndCache<T>(File.ReadAllText(dest));
         else
         {
             // Restart the function after creating a new T save
@@ -76,5 +66,39 @@ public static class Saving
             Debug.LogWarning("File does NOT exist! Returning empty object");
             return LoadFromFile<T>(filename);
         }
+    }
+
+
+    /// <summary>
+    /// Deserialised an object from the Resources folder.
+    /// </summary>
+    /// <typeparam name="T">The object type to deserialise into.</typeparam>
+    /// <param name="filename">The local filename (Resources/{filename}).</param>
+    /// <returns>The deserialised object.</returns>
+    public static T LoadFromResources<T>(string filename) where T : new()
+    {
+        if (LoadingIcon.Instance)
+            LoadingIcon.Instance.Toggle(true);
+
+        TextAsset ta = Resources.Load<TextAsset>(filename);
+        if (ta == null)
+        {
+            Debug.LogError($"No resource {filename} exists!");
+        }
+
+        return LoadAndCache<T>(ta.text);
+    }
+
+
+    public static T LoadAndCache<T>(string json)
+    {
+        T val = (T)JsonUtility.FromJson(json, typeof(T));
+
+        if (val is ICached cached)
+            cached.Cache();
+
+        if (LoadingIcon.Instance)
+            LoadingIcon.Instance.Toggle(false);
+        return val;
     }
 }

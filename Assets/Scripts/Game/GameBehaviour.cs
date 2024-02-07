@@ -5,6 +5,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.Pool;
 using UnityEngine.Tilemaps;
+using UnityEngine.UI;
 using Random = UnityEngine.Random;
 
 public class GameBehaviour : NetworkBehaviour
@@ -258,19 +259,6 @@ public class GameBehaviour : NetworkBehaviour
         if (m_numOutfitSettingsReceived == CustomNetworkManager.Instance.Players.Count)
             CmdOnReady();
     }
-
-
-    [TargetRpc]
-    //private void RpcReceiveGameSettings(NetworkConnectionToClient _, GameSettingsData data)
-    //{
-    //    if (!isOwned)
-    //    {
-    //        Debug.LogError("Client with authority was recipient of GameSettings.");
-    //        return;
-    //    }
-    //    GameSettings.Saved = new(data);
-    //    CmdOnReady();
-    //}
     // ------------------------------------
 
 
@@ -279,12 +267,18 @@ public class GameBehaviour : NetworkBehaviour
     private void CmdRequestMap(GameObject player)
     {
         NetworkIdentity netIdentity = player.GetComponent<NetworkIdentity>();
-        MapData map = GameSettings.Saved.Data.Map;
+
+        MapData map;
+        if (GameSettings.Saved.Data.GameMode == EGameMode.Puzzle)
+            map = Saving.LoadFromResources<MapData>($"Maps/Puzzle{SaveData.Saved.PuzzleLevel}");
+        else
+            map = GameSettings.Saved.Data.Map;
+
 
         if (map.groundData.Length == 0 && map.wallData.Length == 0 && map.objectData.Length == 0)
         {
             Debug.LogWarning("No map selected, or map was corrupted. Loading default map.");
-            map = Saving.LoadFromFile<MapData>("Maps/just_a_guy_dont_delete_pls.map.json");
+            map = Saving.LoadFromResources<MapData>("Maps/DefaultMap");
 
             // Update the saved map
             GameSettings.Saved.Data.Map = map;
@@ -360,11 +354,19 @@ public class GameBehaviour : NetworkBehaviour
     [Server]
     public void ServerPlacePlayers()
     {
-        if (GameSettings.Saved.Data.GameMode == EGameMode.SnakeRoyale)
+        // Place each player on their corresponding spawn point
+        List<PlayerObjectController> players = CustomNetworkManager.Instance.Players;
+
+        foreach (MapObjectData obj in GameSettings.Saved.Data.Map.objectData)
         {
-            ServerPlacePlayers_SnakeRoyale();
+            // If the spawn point is necessary (i.e. 4 players only necessitates spawn points up to P4)
+            if (obj.spawnIndex >= 0 && obj.spawnIndex < players.Count)
+            {
+                players[obj.spawnIndex].transform.position = new Vector3(obj.x, obj.y) + s_groundTilemap.cellSize / 2;
+            }
         }
 
+        // Send the spawn data to clients
         int length = CustomNetworkManager.Instance.Players.Count;
         PlayerSpawnInfo[] spawnInfo = new PlayerSpawnInfo[length];
         for (int i = 0; i < length; i++)
@@ -374,25 +376,6 @@ public class GameBehaviour : NetworkBehaviour
         }
 
         PlacePlayersClientRpc(spawnInfo);
-    }
-
-
-    [Server]
-    private void ServerPlacePlayers_SnakeRoyale()
-    {
-        // ! This can be optimised with a position stored in the MapData struct
-        int playerCount = CustomNetworkManager.Instance.Players.Count;
-        List<PlayerObjectController> players = CustomNetworkManager.Instance.Players.GetRange(0, playerCount);
-
-        foreach (MapObjectData obj in GameSettings.Saved.Data.Map.objectData)
-        {
-            // If the spawn point is necessary (i.e. 4 players only necessitates spawn points up to P4)
-
-            if (obj.spawnIndex >= 0 && obj.spawnIndex < players.Count)
-            {
-                players[obj.spawnIndex].transform.position = new Vector3(obj.x, obj.y) + s_groundTilemap.cellSize / 2;
-            }
-        }
     }
 
 
@@ -435,6 +418,12 @@ public class GameBehaviour : NetworkBehaviour
         {
             PlayerMovement pm = player.PM;
             pm.BodyPartContainer.SetActive(true);
+
+            // Enable puzzle movement if needed
+            if (GameSettings.Saved.Data.GameMode == EGameMode.Puzzle)
+            {
+                pm.FreeMovement = true;
+            }
         }
     }
     // ------------------------------------
@@ -447,9 +436,19 @@ public class GameBehaviour : NetworkBehaviour
         // This is not necessarily erroneous, as players can disable all foods.
         if (_foodTemplates.Count == 0)
         {
-            Debug.LogWarning("No foods");
+            Debug.LogWarning("No foods enabled in GameSettings.");
             return;
         }
+
+
+        // If no food spawn points exist, also quick exit.
+        // This allows maps to be created with no food spawn points.
+        if (s_foods.Length == 0)
+        {
+            Debug.LogWarning("No food spawn points.");
+            return;
+        }
+
 
         int randomIndex = Random.Range(0, s_foods.Length);
 
@@ -574,6 +573,24 @@ public class GameBehaviour : NetworkBehaviour
     //}
 
 
+    public void OnGameOver(int score)
+    {
+        if (!isOwned)
+            return;
+
+        SetGameOverScreenActivity(true, score);
+    }
+
+
+    public void OnGameOverDecision()
+    {
+        if (!isOwned)
+            return;
+
+        SetGameOverScreenActivity(false);
+    }
+
+
     private void SetGameOverScreenActivity(bool active, int score = 0)
     {
         if (!isOwned)
@@ -598,19 +615,44 @@ public class GameBehaviour : NetworkBehaviour
         }
     }
 
-    public void OnGameOver(int score)
-    {
-        if (!isOwned)
-            return;
 
-        SetGameOverScreenActivity(true, score);
+    public void OnPuzzleComplete()
+    {
+        SetPuzzleCompleteActivity(true);
     }
 
-    public void OnGameOverDecision()
+
+    private void SetPuzzleCompleteActivity(bool active)
     {
         if (!isOwned)
             return;
 
-        SetGameOverScreenActivity(false);
+        GameObject hud = GameObject.Find("HUD");
+        Transform bg = hud.transform.GetChild(0);
+        Transform puzzleComplete = bg.Find("PuzzleComplete");
+        puzzleComplete.gameObject.SetActive(active);
+
+        if (active)
+        {
+            puzzleComplete.Find("Level").GetComponent<TMP_Text>().text = $"Level: {SaveData.Saved.PuzzleLevel+1}/{SaveData.MaxPuzzleLevel}";
+            Button btn = puzzleComplete.Find("NextButton").GetComponent<Button>();
+            btn.onClick.RemoveAllListeners();
+
+            if (SaveData.Saved.PuzzleLevel + 1 == SaveData.MaxPuzzleLevel)
+            {
+                btn.onClick.AddListener(() => GetComponentInParent<PlayerMovement>().HandleDeath());
+                btn.GetComponentInChildren<TMP_Text>().text = "Click here for a pat on the back!";
+            }
+            else
+            {
+                // Increment highest puzzle and save
+                SaveData.Saved.PuzzleLevel++;
+                Saving.SaveToFile(SaveData.Saved, "SaveData.json");
+
+                // When the button is clicked, load the next puzzle
+                btn.onClick.AddListener(() => GetComponentInParent<PlayerMovement>().HandleDeath());
+                btn.GetComponentInChildren<TMP_Text>().text = "Back to lobby";
+            }
+        }
     }
 }
