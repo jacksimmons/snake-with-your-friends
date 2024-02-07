@@ -13,7 +13,11 @@ public class ConfirmOverwriteMapPanel : MonoBehaviour
     [SerializeField]
     private EditorMenu menu;
 
-    public void Setup(string mapName)
+    [SerializeField]
+    private MainMenuButton m_mmButton;
+
+
+    public void LoadPanel(bool quitAfter, string mapName)
     {
         titleLabel.text = $"Are you sure? ({mapName})";
         confirmButton.interactable = false;
@@ -21,6 +25,9 @@ public class ConfirmOverwriteMapPanel : MonoBehaviour
         confirmButton.onClick.AddListener(() => { 
             menu.SaveMapToFile(mapName);
             gameObject.SetActive(false);
+
+            if (quitAfter)
+                m_mmButton.OnMainMenuButtonPressed();
         });
 
         StartCoroutine(Wait.WaitThen(3f, () => confirmButton.interactable = true));

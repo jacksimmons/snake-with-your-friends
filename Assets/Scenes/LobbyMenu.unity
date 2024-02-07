@@ -2516,7 +2516,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 2018800773}
   m_HandleRect: {fileID: 2018800772}
   m_Direction: 2
-  m_Value: -0.00000019939176
+  m_Value: -0.00000026585568
   m_Size: 0.14970368
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -3772,6 +3772,34 @@ PrefabInstance:
     - target: {fileID: 1000019126508040000, guid: 7ba9448acf2de9a4f87f270b93b00b43, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1000019126508040001, guid: 7ba9448acf2de9a4f87f270b93b00b43, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.size
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 1000019126508040001, guid: 7ba9448acf2de9a4f87f270b93b00b43, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[2].m_Mode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1000019126508040001, guid: 7ba9448acf2de9a4f87f270b93b00b43, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[2].m_Target
+      value: 
+      objectReference: {fileID: 2090286470}
+    - target: {fileID: 1000019126508040001, guid: 7ba9448acf2de9a4f87f270b93b00b43, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[2].m_CallState
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 1000019126508040001, guid: 7ba9448acf2de9a4f87f270b93b00b43, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[2].m_MethodName
+      value: SaveGameSettings
+      objectReference: {fileID: 0}
+    - target: {fileID: 1000019126508040001, guid: 7ba9448acf2de9a4f87f270b93b00b43, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[2].m_TargetAssemblyTypeName
+      value: LobbyMenu, Assembly-CSharp
+      objectReference: {fileID: 0}
+    - target: {fileID: 1000019126508040001, guid: 7ba9448acf2de9a4f87f270b93b00b43, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[2].m_Arguments.m_ObjectArgumentAssemblyTypeName
+      value: UnityEngine.Object, UnityEngine
       objectReference: {fileID: 0}
     - target: {fileID: 1000019126508040007, guid: 7ba9448acf2de9a4f87f270b93b00b43, type: 3}
       propertyPath: m_Name
@@ -6620,8 +6648,6 @@ MonoBehaviour:
   m_friendlyFireToggle: {fileID: 1109261208}
   m_friendlyFireLabel: {fileID: 1865605513}
   m_gameModeDropdown: {fileID: 427364561}
-  m_mapSizeSlider: {fileID: 0}
-  m_mapSizeLabel: {fileID: 0}
   m_powerupToggleContainers:
   - {fileID: 1628811443}
   - {fileID: 2035098234}

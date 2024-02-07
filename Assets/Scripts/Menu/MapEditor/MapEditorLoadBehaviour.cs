@@ -39,7 +39,7 @@ public class MapEditorLoadBehaviour : MonoBehaviour
         }
         else
         {
-            string[] filepaths = Directory.GetFiles(folder, "*.map.json", SearchOption.TopDirectoryOnly);
+            string[] filepaths = Directory.GetFiles(folder, "*.json", SearchOption.TopDirectoryOnly);
             foreach (string filepath in filepaths)
             {
                 string name = Path.GetFileName(filepath);

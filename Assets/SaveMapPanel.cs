@@ -21,7 +21,6 @@ public class SaveMapPanel : MonoBehaviour
 
     public void LoadPanel(bool quitAfter)
     {
-        gameObject.SetActive(true);
         m_okButton.onClick.RemoveAllListeners();
         m_okButton.onClick.AddListener(() => OnOKPressed(quitAfter));
     }
@@ -35,16 +34,15 @@ public class SaveMapPanel : MonoBehaviour
         if (File.Exists(Application.persistentDataPath + $"/Maps/{m_input.text}.map.json"))
         {
             m_confirmPanel.SetActive(true);
-            m_confirmPanel.GetComponent<ConfirmOverwriteMapPanel>().Setup(m_input.text);
+            m_confirmPanel.GetComponent<ConfirmOverwriteMapPanel>().LoadPanel(quitAfter, m_input.text);
         }
         else
         {
             m_menu.SaveMapToFile(m_input.text);
+            if (quitAfter)
+                m_mmButton.OnMainMenuButtonPressed();
         }
 
-        if (quitAfter)
-            m_mmButton.OnMainMenuButtonPressed();
-        // If {quitAfter}, this is probably not needed, but a welcome safety precaution (i.e. DontDestroyOnLoad).
         gameObject.SetActive(false);
     }
 }

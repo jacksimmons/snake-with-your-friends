@@ -20,41 +20,29 @@ public class HostSettingsHandler : MonoBehaviour
 
     [SerializeField]
     private TMP_Dropdown m_gameModeDropdown;
-    [SerializeField]
-    private Slider m_mapSizeSlider;
-    [SerializeField]
-    private TextMeshProUGUI m_mapSizeLabel;
 
     [SerializeField]
     private GameObject[] m_powerupToggleContainers;
 
-    private GameSettings m_currentGameSettings;
-
 
     private void Start()
     {
-        if (GameSettings.Saved == null)
-        {
-            m_currentGameSettings = new();
-        }
-        else
-            m_currentGameSettings = GameSettings.Saved;
-
-        m_speedSlider.value = m_currentGameSettings.Data.TimeToMove;
+        m_speedSlider.value = GameSettings.Saved.Data.TimeToMove;
         m_speedLast = m_speedSlider.value;
         UpdateSpeedLabels();
 
-        m_friendlyFireToggle.isOn = m_currentGameSettings.Data.FriendlyFire;
+        m_friendlyFireToggle.isOn = GameSettings.Saved.Data.FriendlyFire;
         m_friendlyFireToggle.onValueChanged.AddListener(OnFriendlyFireTogglePressed);
         SetFriendlyFireLabel(m_friendlyFireToggle.isOn);
 
+        m_gameModeDropdown.value = (int)GameSettings.Saved.Data.GameMode;
         m_gameModeDropdown.onValueChanged.AddListener(OnGameModeUpdate);
 
         foreach (GameObject go in m_powerupToggleContainers)
         {
             EFoodType foodType = go.GetComponent<PowerupToggleContainer>().foodType;
             go.GetComponentInChildren<Toggle>().onValueChanged.AddListener((pressed) => OnPowerupTogglePressed(pressed, foodType));
-            go.GetComponentInChildren<Toggle>().isOn = m_currentGameSettings.FoodSettings.GetBit((int)foodType);
+            go.GetComponentInChildren<Toggle>().isOn = GameSettings.Saved.FoodSettings.GetBit((int)foodType);
         }
     }
 
@@ -82,14 +70,14 @@ public class HostSettingsHandler : MonoBehaviour
 
         m_speedLabel.text = $"Time Between Moves ({m_speedSlider.value}{speed})";
 
-        m_currentGameSettings.Data.TimeToMove = m_speedSlider.value;
+        GameSettings.Saved.Data.TimeToMove = m_speedSlider.value;
     }
 
 
     public void OnFriendlyFireTogglePressed(bool pressed)
     {
         SetFriendlyFireLabel(pressed);
-        m_currentGameSettings.Data.FriendlyFire = pressed;
+        GameSettings.Saved.Data.FriendlyFire = pressed;
     }
     private void SetFriendlyFireLabel(bool pressed)
     {
@@ -100,22 +88,13 @@ public class HostSettingsHandler : MonoBehaviour
 
     public void OnGameModeUpdate(int index)
     {
-        m_currentGameSettings.Data.GameMode = 
+        GameSettings.Saved.Data.GameMode = 
         (EGameMode)Enum.GetValues(typeof(EGameMode)).GetValue(index);
     }
 
 
     public void OnPowerupTogglePressed(bool pressed, EFoodType food)
     {
-        m_currentGameSettings.FoodSettings.SetBit((int)food, pressed);
-    }
-
-
-    /// <summary>
-    /// When host Settings is closed, save GameSettings to file, making it the player's new default.
-    /// </summary>
-    public void OnClose()
-    {
-        Saving.SaveToFile(m_currentGameSettings, "GameSettings.json");
+        GameSettings.Saved.FoodSettings.SetBit((int)food, pressed);
     }
 }
