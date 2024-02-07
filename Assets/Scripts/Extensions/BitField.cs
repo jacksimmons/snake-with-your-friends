@@ -8,11 +8,17 @@ using UnityEngine;
 
 
 [Serializable]
-public struct BitField
+public class BitField
 {
     // Can store any number of bytes, where each byte stores 8 booleans.
     // Saves memory for lots of objects with lots of booleans, but has a CPU overhead for r/w.
     public byte[] Data { get; private set; }
+
+
+    public BitField()
+    {
+        Data = new byte[1];
+    }
 
 
     // [Length * 8]-bit bitfield.

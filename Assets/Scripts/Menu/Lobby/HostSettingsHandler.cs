@@ -54,7 +54,7 @@ public class HostSettingsHandler : MonoBehaviour
         {
             EFoodType foodType = go.GetComponent<PowerupToggleContainer>().foodType;
             go.GetComponentInChildren<Toggle>().onValueChanged.AddListener((pressed) => OnPowerupTogglePressed(pressed, foodType));
-            go.GetComponentInChildren<Toggle>().isOn = m_currentGameSettings.Data.FoodSettingsData.GetBit((int)foodType);
+            go.GetComponentInChildren<Toggle>().isOn = m_currentGameSettings.FoodSettings.GetBit((int)foodType);
         }
     }
 
@@ -107,7 +107,7 @@ public class HostSettingsHandler : MonoBehaviour
 
     public void OnPowerupTogglePressed(bool pressed, EFoodType food)
     {
-        m_currentGameSettings.Data.FoodSettingsData.SetBit((int)food, pressed);
+        m_currentGameSettings.FoodSettings.SetBit((int)food, pressed);
     }
 
 

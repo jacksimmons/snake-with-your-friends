@@ -6,10 +6,6 @@ using UnityEngine.UI;
 
 public class MainMenu : SceneTransitionHandler
 {
-    // Used when settings class versions change
-    [SerializeField]
-    private bool m_resetSettings = false;
-
     [SerializeField]
     private Button[] m_buttonsRequiringAuth;
     [SerializeField]
@@ -35,21 +31,27 @@ public class MainMenu : SceneTransitionHandler
     }
 
 
+    /// <summary>
+    /// Load all settings from file which haven't already been loaded (i.e. saved as null).
+    /// </summary>
     private void LoadAllSettings()
     {
         if (Settings.Saved == null)
             Saving.LoadFromFile<Settings>("Settings.dat");
+        ApplySettings();
         if (SaveData.Saved == null)
             Saving.LoadFromFile<SaveData>("SaveData.dat");
         if (OutfitSettings.Saved == null)
             Saving.LoadFromFile<OutfitSettings>("OutfitSettings.dat");
         if (GameSettings.Saved == null)
             Saving.LoadFromFile<GameSettings>("GameSettings.dat");
-        LoadSettings();
     }
 
 
-    private void LoadSettings()
+    /// <summary>
+    /// Applies standard settings to the game.
+    /// </summary>
+    private void ApplySettings()
     {
         GameObject audioParent = GameObject.FindWithTag("AudioHandler");
         audioParent.transform.Find("ClickHandler").GetComponent<AudioSource>().volume = Settings.Saved.menuVolume;

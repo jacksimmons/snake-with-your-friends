@@ -11,7 +11,7 @@ public struct GameSettingsData
     public EGameMode GameMode;
     public float TimeToMove;
     public bool FriendlyFire;
-    public BitField FoodSettingsData;
+    public byte[] FoodSettingsData;
     public MapData Map;
 
 
@@ -22,7 +22,7 @@ public struct GameSettingsData
         FriendlyFire = GameSettings.DEFAULT_FRIENDLY_FIRE;
         Map = new();
 
-        FoodSettingsData = foodSettingsData;
+        FoodSettingsData = foodSettingsData.Data;
     }
 
 
@@ -33,7 +33,7 @@ public struct GameSettingsData
         TimeToMove = timeToMove;
         FriendlyFire = friendlyFire;
 
-        FoodSettingsData = foodSettingsData;
+        FoodSettingsData = foodSettingsData.Data;
 
         Map = map;
     }
@@ -49,23 +49,39 @@ public class GameSettings : ICached
 
     public static GameSettings Saved;
     public GameSettingsData Data;
+    public BitField FoodSettings;
 
 
     public GameSettings()
     {
         Data = new(new(NUM_BYTES));
+
+        // Link the FoodSettings to the byte[] array in FoodSettingsData.
+        FoodSettings = new(Data.FoodSettingsData);
     }
 
 
     public GameSettings(GameSettings other)
     {
         Data = other.Data;
+
+        // Need to copy all reference types contained in Data
+        other.Data.FoodSettingsData.CopyTo(Data.FoodSettingsData, 0);
+
+        // Now link the FoodSettings to the byte[] array in FoodSettingsData.
+        FoodSettings = new(Data.FoodSettingsData);
     }
 
 
     public GameSettings(GameSettingsData data)
     {
         Data = data;
+
+        // Need to copy all reference types contained in this data
+        data.FoodSettingsData.CopyTo(Data.FoodSettingsData, 0);
+
+        // Now link the FoodSettings to the byte[] array in FoodSettingsData.
+        FoodSettings = new(Data.FoodSettingsData);
     }
 
 

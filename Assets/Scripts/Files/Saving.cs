@@ -82,7 +82,7 @@ public static class Saving
         {
             // Restart the function after creating a new T save
             SaveToFile(new T(), filename);
-            Debug.LogError("File does NOT exist! Returning empty object");
+            Debug.LogWarning("File does NOT exist! Returning empty object");
             return LoadFromFile<T>(filename);
         }
     }

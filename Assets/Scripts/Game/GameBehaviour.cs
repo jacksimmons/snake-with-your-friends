@@ -331,7 +331,7 @@ public class GameBehaviour : NetworkBehaviour
         for (int i = 0; i < _foodTemplates.Count; i++)
         {
             GameObject food = _foodTemplates[i];
-            if (!GameSettings.Saved.Data.FoodSettingsData.GetBit((int)food.GetComponent<FoodObject>().food))
+            if (!GameSettings.Saved.FoodSettings.GetBit((int)food.GetComponent<FoodObject>().food))
             {
                 _foodTemplates.Remove(food);
                 i--;
