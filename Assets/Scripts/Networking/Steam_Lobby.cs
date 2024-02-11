@@ -5,6 +5,7 @@ using UnityEngine;
 
 public partial class Steam : MonoBehaviour
 {
+    #region Server Callbacks
     // Constants
     private const string HOST_ADDRESS_KEY = "hostAddress";
 
@@ -22,6 +23,7 @@ public partial class Steam : MonoBehaviour
     protected Callback<GameLobbyJoinRequested_t> gameLobbyJoinRequested;
     private CallResult<LobbyEnter_t> _lobbyEnter;
     private CallResult<LobbyCreated_t> _lobbyCreated;
+    #endregion
 
 
     private void Awake()

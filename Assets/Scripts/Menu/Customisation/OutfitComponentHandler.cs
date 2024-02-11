@@ -18,11 +18,8 @@ public class OutfitComponentHandler : MonoBehaviour
 
     private void Start()
     {
-        m_menu = transform.parent.parent.GetComponent<CustomisationMenu>();
+        m_menu = GameObject.FindWithTag("CustomisationMenu").GetComponent<CustomisationMenu>();
         m_outfitComponentImage = transform.Find("Part").GetComponent<Image>();
-
-        if (OutfitSettings.Saved.Data.ColourName == string.Empty)
-            OutfitSettings.Saved.Data.ColourName = "RedPurple";
 
         string filename = OutfitSettings.Saved.Data.OutfitSpriteNames[(int)m_outfitComponent];
         LoadOutfitComponentSprite(m_outfitComponent, filename);
@@ -68,6 +65,8 @@ public class OutfitComponentHandler : MonoBehaviour
 
     public void OnOutfitComponentChanged(bool isRight)
     {
+        print(m_menu.currentColourScheme);
+        print(m_menu.spriteDictionary);
         Sprite[] sprites = m_menu.spriteDictionary[m_menu.currentColourScheme][m_outfitComponent];
 
         if (sprites.Length == 0)
