@@ -12,7 +12,6 @@ public class GoalBehaviour : ObjectBehaviour
         Transform player = PlayerStatic.TryGetOwnedPlayerTransformFromBodyPart(other.gameObject);
         if (player == null) return;
 
-
         // Prevents infinite loading of puzzles below
         GetComponent<Collider2D>().enabled = false;
 

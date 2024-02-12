@@ -32,12 +32,11 @@ public struct GameSettingsData
         GameMode = mode;
         TimeToMove = timeToMove;
         FriendlyFire = friendlyFire;
+        Map = map;
 
         FoodSettingsData = foodSettingsData.Data;
-
-        Map = map;
     }
-}
+} 
 
 
 [Serializable]
@@ -56,8 +55,14 @@ public class GameSettings : ICached
     {
         Data = new(new(NUM_BYTES));
 
-        // Link the FoodSettings to the byte[] array in FoodSettingsData.
+        // Set FoodSettings.Data to be a reference to the byte[] array in FoodSettingsData.
         FoodSettings = new(Data.FoodSettingsData);
+
+        for (int i = 0; i < Enum.GetValues(typeof(EFoodType)).Length; i++)
+        {
+            FoodSettings.SetBit(i, true);
+        }
+
     }
 
 

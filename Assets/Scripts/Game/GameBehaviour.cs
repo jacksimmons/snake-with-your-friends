@@ -36,7 +36,7 @@ public class GameBehaviour : NetworkBehaviour
         MapLoaded,
         PlayerScriptsEnabled,
         UIElementsEnabled,
-        GameStarted,
+        Loaded,
     }
 
     /// <summary>
@@ -100,8 +100,11 @@ public class GameBehaviour : NetworkBehaviour
     // These are only accurate on the server; hence do NOT use them on a client.
     // They are static because they belong to no particular GameBehaviour.
     // How "loaded" the game currently is for the furthest behind player.
-    private static EGameLoadStage serverPlayersLoadingStage;
-    private static int serverNumPlayersReady;
+    private static EGameLoadStage s_serverPlayersLoadingStage;
+    private static int s_serverNumPlayersReady;
+    // Global clock system so players move at the same time
+    private static float s_timeSinceLastTick;
+    private const float TICK_SPACING = 0.5f; // 10 ticks per second
 
 
     // CLIENT VARIABLES --------------------
@@ -119,10 +122,43 @@ public class GameBehaviour : NetworkBehaviour
 
         if (NetworkServer.active)
         {
-            serverNumPlayersReady = 0;
-            serverPlayersLoadingStage = EGameLoadStage.Unloaded;
+            s_serverNumPlayersReady = 0;
+            s_serverPlayersLoadingStage = EGameLoadStage.Unloaded;
             m_numOutfitSettingsReceived = 0;
+            s_timeSinceLastTick = 0;
         }
+    }
+
+
+    private void FixedUpdate()
+    {
+        if (!isOwned) return;
+
+
+        if (s_serverPlayersLoadingStage == EGameLoadStage.Loaded)
+            ServerFixedUpdate();
+    }
+
+
+    [Server]
+    private void ServerFixedUpdate()
+    {
+        s_timeSinceLastTick += Time.fixedDeltaTime;
+
+        if (s_timeSinceLastTick < TICK_SPACING)
+            return;
+
+        // Perform tick
+        s_timeSinceLastTick = 0;
+
+        RpcExecuteTick();
+    }
+
+
+    [ClientRpc]
+    private void RpcExecuteTick()
+    {
+        GetComponentInParent<PlayerMovement>().HandleMovementLoop();
     }
 
 
@@ -147,17 +183,17 @@ public class GameBehaviour : NetworkBehaviour
     [Server]
     private void ServerOnReady()
     {
-        serverNumPlayersReady++;
+        s_serverNumPlayersReady++;
 
         //print($"Stage: {serverPlayersLoadingStage}");
         //print($"Ready: {serverNumPlayersReady}/{CustomNetworkManager.Instance.numPlayers}");
-        if (serverNumPlayersReady >= CustomNetworkManager.Instance.numPlayers)
+        if (s_serverNumPlayersReady >= CustomNetworkManager.Instance.numPlayers)
             ServerOnAllReady();
 
-        if (serverNumPlayersReady != 0) return;
+        if (s_serverNumPlayersReady != 0) return;
         // ^ Following code executes directly after the last readier, every handshake
 
-        switch (serverPlayersLoadingStage)
+        switch (s_serverPlayersLoadingStage)
         {
             case EGameLoadStage.PlayerScriptsEnabled:
                 ServerInitFood();
@@ -170,10 +206,10 @@ public class GameBehaviour : NetworkBehaviour
     [Server]
     private void ServerOnAllReady()
     {
-        serverNumPlayersReady = 0;
+        s_serverNumPlayersReady = 0;
 
-        serverPlayersLoadingStage++;
-        RpcLoadingStageUpdate(serverPlayersLoadingStage);
+        s_serverPlayersLoadingStage++;
+        RpcLoadingStageUpdate(s_serverPlayersLoadingStage);
     }
 
 
@@ -425,6 +461,8 @@ public class GameBehaviour : NetworkBehaviour
                 pm.FreeMovement = true;
             }
         }
+
+        CmdOnReady();
     }
     // ------------------------------------
 
@@ -450,37 +488,83 @@ public class GameBehaviour : NetworkBehaviour
         }
 
 
+        int randomIndex = PickRandomFoodSpawnIndex();
+        bool enterStalemate = true;
+        for (int i = 0; i < s_foodSpawnPoints.Count; i++)
+        {
+            int nextSnakeFreeIndex = (randomIndex + i) % s_foodSpawnPoints.Count;
+
+            Vector2 objPos = s_foodSpawnPoints[nextSnakeFreeIndex];
+            objPos.x += 0.5f;
+            objPos.y += 0.5f;
+
+            // Go to next index (if snake is on the spawn point)
+            // If this happens for every index, `enterStalemate` is true
+            if (IsSnakeOnFoodSpawn(objPos)) continue;
+
+            int foodIndex = Random.Range(0, _foodTemplates.Count);
+
+            GameObject obj = Instantiate(_foodTemplates[foodIndex], objPos, Quaternion.Euler(Vector3.forward * 0));
+            s_foods[nextSnakeFreeIndex] = obj;
+            obj.transform.parent = GameObject.Find("Objects").transform;
+
+            NetworkServer.Spawn(obj);
+            enterStalemate = false;
+            break;
+        }
+
+        if (enterStalemate)
+            print("STALEMATE");
+    }
+
+
+    /// <summary>
+    /// Attempts to pick a random food spawn point index to spawn food in.
+    /// If the spawn point is already occupied by a food, return the next available slot.
+    /// If there are no available slots, then STALEMATE mode begins.
+    /// </summary>
+    /// <returns></returns>
+    private int PickRandomFoodSpawnIndex()
+    {
         int randomIndex = Random.Range(0, s_foods.Length);
 
+        // If the food spawn point is already occupied by a food...
         if (s_foods[randomIndex] != null)
         {
-            int freeIndex = -1;
+            int nextFreeIndex = -1;
             for (int i = 0; i < s_foods.Length; i++)
             {
                 if (s_foods[i] == null)
-                    freeIndex = i;
+                    nextFreeIndex = i;
             }
 
-            if (freeIndex == -1)
+            if (nextFreeIndex == -1)
             {
+                // ! This shouldn't happen unless I have fucked up
                 Debug.LogWarning("No free slots for food to spawn in!");
-                return;
+                return -1;
             }
 
-            randomIndex = freeIndex;
+            randomIndex = nextFreeIndex;
         }
 
-        Vector2 objPos = s_foodSpawnPoints[randomIndex];
-        objPos.x += 0.5f;
-        objPos.y += 0.5f;
+        return randomIndex;
+    }
 
-        int foodIndex = Random.Range(0, _foodTemplates.Count);
 
-        GameObject obj = Instantiate(_foodTemplates[foodIndex], objPos, Quaternion.Euler(Vector3.forward * 0));
-        obj.transform.parent = GameObject.Find("Objects").transform;
-
-        s_foods[randomIndex] = obj;
-        NetworkServer.Spawn(obj);
+    private bool IsSnakeOnFoodSpawn(Vector2 spawnPos)
+    {
+        foreach (PlayerObjectController poc in CustomNetworkManager.Instance.Players)
+        {
+            foreach (BodyPart bp in poc.PM.BodyParts)
+            {
+                if (Extensions.Vectors.Approximately(bp.Position, spawnPos))
+                {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
 

@@ -6,6 +6,7 @@ public class FoodObject : MonoBehaviour
     [SerializeField]
     public EFoodType food;
 
+
     private void OnTriggerEnter2D(Collider2D other)
     {
         GameObject obj = other.gameObject;
@@ -22,7 +23,7 @@ public class FoodObject : MonoBehaviour
             if (!pm.isOwned) return;
 
             pm.QAddBodyPart();
-            pm.GetComponent<PlayerStatus>().Eat(food);
+            pm.GetComponent<PlayerStatus>().Eat(food, GetComponent<SpriteRenderer>().sprite);
             GameObject.FindWithTag("AudioHandler").GetComponent<AudioHandler>().eatAudioSource.Play();
 
             removeAndReplaceFood = true;

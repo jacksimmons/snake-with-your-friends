@@ -82,6 +82,7 @@
     <Compile Include="Assets\Scripts\Audio\AudioHandler.cs" />
     <Compile Include="Assets\Scripts\Object\ForegroundObject.cs" />
     <Compile Include="Assets\Scripts\Object\ForegroundBehaviour.cs" />
+    <Compile Include="Assets\Scripts\Object\BuffArms.cs" />
     <Compile Include="Assets\Scripts\Files\Saving.cs" />
     <Compile Include="Assets\Scripts\Files\MapData.cs" />
     <Compile Include="Assets\Scripts\Menu\MapEditor\MapEditorLoadBehaviour.cs" />

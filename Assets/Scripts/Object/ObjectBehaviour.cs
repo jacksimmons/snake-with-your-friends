@@ -79,6 +79,22 @@ public class ObjectBehaviour : MonoBehaviour
                 StartCoroutine(Explode());
             return;
         }
+
+
+        // --- Player collisions
+        Transform player = PlayerStatic.TryGetPlayerTransformFromBodyPart(other.gameObject);
+        if (player == null) return;
+
+        PlayerMovement pm = player.GetComponent<PlayerMovement>();
+
+        // If the player can move freely, they don't die when "hitting" stuff
+        if (!pm.FreeMovement)
+        {
+            if (pm.GetComponent<PlayerStatus>().IsBuff)
+                StartCoroutine(Explode());
+            else
+                pm.HandleDeath();
+        }
     }
 
 

@@ -32,7 +32,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3315957918798202727}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0.5, y: 0.5, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -199,23 +199,9 @@ MonoBehaviour:
   syncDirection: 0
   syncMode: 0
   syncInterval: 0
-  _spriteApple: {fileID: 21300000, guid: 0e2a9133a1e406b49a184e3541e8c928, type: 3}
-  _spriteBalti: {fileID: 21300000, guid: 42969d740ee613646930a13d4bf0b299, type: 3}
-  _spriteBanana: {fileID: 0}
-  _spriteBone: {fileID: 0}
-  _spriteBooze: {fileID: 21300000, guid: 3e8950d30a6f0b746b3b4f4e69012a6c, type: 3}
-  _spriteCheese: {fileID: 0}
-  _spriteCoffee: {fileID: 0}
-  _spriteDoughnut: {fileID: 21300000, guid: 09a1a6268160fcb41a493197fc5dbcb4, type: 3}
-  _spriteDragonfruit: {fileID: 21300000, guid: cc0c599d216355c458a9c2502a74424c, type: 3}
-  _spriteDrumstick: {fileID: 21300000, guid: 46237619613771f449525ab3b0647479, type: 3}
-  _spriteIceCream: {fileID: 0}
-  _spriteOrange: {fileID: 21300000, guid: 60dde592f2246e54691df1ba74d0c9d3, type: 3}
-  _spritePineapple: {fileID: 0}
-  _spritePineapplePizza: {fileID: 0}
-  _spritePizza: {fileID: 21300000, guid: 2094db1395fb0a948b77b3c6d39c8dbb, type: 3}
   m_fireball: {fileID: 2942080626621601328, guid: 04777406194d8464aa1d686d6788ebe9, type: 3}
   m_staticShit: {fileID: 860416237506986402, guid: f045dd42fe85deb4abbaf393a5043e56, type: 3}
+  m_buffArms: {fileID: 202826521237215549, guid: 37b4da5895f5a034e80ab301a05e28b0, type: 3}
 --- !u!114 &8319943450019130825
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -293,6 +279,7 @@ MonoBehaviour:
   - {fileID: 8457383420197702784, guid: 56b349ba582b06f488f8aee4394c72fa, type: 3}
   - {fileID: 5883453940578565158, guid: 4992d10c21a5a1243b3b983015924347, type: 3}
   - {fileID: 3540720362809897522, guid: 53751b131fb05bb4cb78371e89654a70, type: 3}
+  - {fileID: 5883453940578565158, guid: 809a9950b02bfd4408d55d27a661077d, type: 3}
 --- !u!1 &6366460689727907375
 GameObject:
   m_ObjectHideFlags: 0

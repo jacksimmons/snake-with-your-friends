@@ -17,44 +17,14 @@ public class PlayerStatus : NetworkBehaviour
     // Recommended range: 0-90. Past 90 will give very shitty results.
     private const float SHIT_EXPLOSIVENESS = 45;
 
-    [SerializeField]
-    private Sprite _spriteApple;
-    [SerializeField]
-    private Sprite _spriteBalti;
-    [SerializeField]
-    private Sprite _spriteBanana;
-    [SerializeField]
-    private Sprite _spriteBone;
-    [SerializeField]
-    private Sprite _spriteBooze;
-    [SerializeField]
-    private Sprite _spriteCheese;
-    [SerializeField]
-    private Sprite _spriteCoffee;
-    [SerializeField]
-    private Sprite _spriteDoughnut;
-    [SerializeField]
-    private Sprite _spriteDragonfruit;
-    [SerializeField]
-    private Sprite _spriteDrumstick;
-    [SerializeField]
-    private Sprite _spriteIceCream;
-    [SerializeField]
-    private Sprite _spriteOrange;
-    [SerializeField]
-    private Sprite _spritePineapple;
-    [SerializeField]
-    private Sprite _spritePineapplePizza;
-    [SerializeField]
-    private Sprite _spritePizza;
-
-    private Dictionary<EFoodType, Sprite> _foodSprites;
 
     private PlayerMovement m_pm;
     [SerializeField]
     private GameObject m_fireball;
     [SerializeField]
     private GameObject m_staticShit;
+    [SerializeField]
+    private GameObject m_buffArms;
 
     /// <summary>
     /// Effects
@@ -74,7 +44,7 @@ public class PlayerStatus : NetworkBehaviour
         }
     }
 
-    // Counters
+    // Status variables
     private int _numPints = 0;
     public int NumPints
     {
@@ -90,6 +60,10 @@ public class PlayerStatus : NetworkBehaviour
             tmp.UpdatePints(value);
         }
     }
+
+    public bool IsBuff { get; private set; } = false;
+    private GameObject m_buffArmsInstance = null;
+
     public float SpeedIncrease { get; private set; } = 0f;
     public int PotassiumLevels { get; private set; } = 0;
 
@@ -101,24 +75,6 @@ public class PlayerStatus : NetworkBehaviour
         m_pm = GetComponent<PlayerMovement>();
         controls = new();
         controls.Gameplay.Powerup.performed += ctx => UsePowerup();
-
-        _foodSprites = new()
-        {
-            { EFoodType.Apple, _spriteApple },
-            { EFoodType.Balti, _spriteBalti },
-            { EFoodType.Booze, _spriteBooze },
-            { EFoodType.Cheese, _spriteCheese },
-            { EFoodType.Coffee, _spriteCoffee },
-            { EFoodType.Doughnut, _spriteDoughnut },
-            { EFoodType.Dragonfruit, _spriteDragonfruit },
-
-            { EFoodType.Drumstick, _spriteDrumstick },
-            { EFoodType.IceCream, _spriteIceCream },
-            { EFoodType.Orange, _spriteOrange },
-            { EFoodType.Pineapple, _spritePineapple },
-            { EFoodType.PineapplePizza, _spritePineapplePizza },
-            { EFoodType.Pizza, _spritePizza },
-        };
     }
 
 
@@ -126,60 +82,6 @@ public class PlayerStatus : NetworkBehaviour
 
 
     private void OnDisable() { controls.Gameplay.Disable(); }
-
-
-    /// <summary>
-    /// Handles spawning of projectiles, determined by the effect enum passed.
-    /// Some objects are synced with the server, some just have synced spawn times.
-    /// </summary>
-    /// <param name="effect">The projectile is based on the effect.</param>
-    [Command]
-    private void CmdSpawn(EEffect effect)
-    {
-        switch (effect)
-        {
-            case EEffect.RocketShitting:
-                ClientSpawnUnsynced(effect);
-                break;
-            case EEffect.BreathingFire:
-                BodyPart head = m_pm.BodyParts[0];
-
-                GameObject fireball = Instantiate(m_fireball, GameObject.Find("Projectiles").transform);
-                fireball.transform.position = head.Position + (Vector3)head.Direction;
-                fireball.GetComponent<ProjectileBehaviour>()
-                .Proj = Projectiles.ConstructFireball(
-                    head.Direction * PROJ_SPEED_FAST,
-                    head.RegularAngle);
-                
-                NetworkServer.Spawn(fireball);
-                break;
-        }
-    }
-
-    /// <summary>
-    /// Spawns an unsynced object, at a synced time (as every client does the same
-    /// thing).
-    /// </summary>
-    /// <param name="effect">The projectile is based on the effect.</param>
-    [ClientRpc]
-    private void ClientSpawnUnsynced(EEffect effect)
-    {
-        switch (effect)
-        {
-            case EEffect.RocketShitting:
-                float randomRotation = Random.Range(-SHIT_EXPLOSIVENESS, SHIT_EXPLOSIVENESS);
-
-                GameObject shit = Instantiate(m_staticShit, GameObject.Find("Projectiles").transform);
-                shit.transform.position = m_pm.BodyParts[^1].Position - (Vector3)m_pm.BodyParts[^1].Direction;
-                shit.transform.Rotate(Vector3.forward * randomRotation);
-
-                shit.GetComponent<ProjectileBehaviour>()
-                .Proj = Projectiles.ConstructShit(
-                    Extensions.Vectors.Rotate(-m_pm.BodyParts[^1].Direction, randomRotation) * PROJ_SPEED_SLOW,
-                    m_pm.BodyParts[^1].RegularAngle);
-                break;
-        }
-    }
 
 
     private void UsePowerup()
@@ -290,14 +192,39 @@ public class PlayerStatus : NetworkBehaviour
 
                 switch (effect.EffectName)
                 {
+                    case EEffect.Buff:
+                        if (IsBuff) break;
+                        m_buffArmsInstance = Instantiate(m_buffArms);
+                        m_buffArmsInstance.GetComponent<BuffArms>().Setup(m_pm);
+                        IsBuff = true;
+                        break;
+
                     case EEffect.CureAll:
                         ClearInputEffects();
                         ClearPassiveEffects();
+                        break;
 
-                        // Clear concealing objects
-                        GameObject foreground = GameObject.FindWithTag("Foreground");
-                        foreach (Transform fgObj in foreground.transform)
-                            Destroy(fgObj.gameObject);
+                    case EEffect.Drunk:
+                        NumPints++;
+                        break;
+
+                    case EEffect.LoseGains:
+                        Destroy(m_buffArmsInstance);
+                        IsBuff = false;
+                        break;
+
+                    case EEffect.RocketShitting:
+                        CmdSpawn(EEffect.RocketShitting);
+                        statusUI.ToggleShitIcon(true);
+                        break;
+
+                    case EEffect.Sleeping:
+                        m_pm.Frozen = true;
+                        statusUI.ToggleSleepingIcon(true);
+                        break;
+
+                    case EEffect.SoberUp:
+                        NumPints--;
                         break;
 
                     case EEffect.SpeedBoost:
@@ -313,24 +240,6 @@ public class PlayerStatus : NetworkBehaviour
                             statusUI.ChangeIconActive(false, "Slow", -effect.EffectLevel, true);
                         }
                         break;
-
-                    case EEffect.RocketShitting:
-                        CmdSpawn(EEffect.RocketShitting);
-                        statusUI.ToggleShitIcon(true);
-                        break;
-
-                    case EEffect.Drunk:
-                        NumPints++;
-                        break;
-
-                    case EEffect.SoberUp:
-                        NumPints--;
-                        break;
-
-                    case EEffect.Sleeping:
-                        m_pm.Frozen = true;
-                        statusUI.ToggleSleepingIcon(true);
-                        break;
                 }
 
                 // Execute a OneOff effect only once its cooldown (which it typically won't have) reaches 0.
@@ -339,6 +248,61 @@ public class PlayerStatus : NetworkBehaviour
             }
         }
     }
+
+
+    /// <summary>
+    /// Handles spawning of projectiles, determined by the effect enum passed.
+    /// Some objects are synced with the server, some just have synced spawn times.
+    /// </summary>
+    /// <param name="effect">The projectile is based on the effect.</param>
+    [Command]
+    private void CmdSpawn(EEffect effect)
+    {
+        switch (effect)
+        {
+            case EEffect.BreathingFire:
+                BodyPart head = m_pm.BodyParts[0];
+
+                GameObject fireball = Instantiate(m_fireball, GameObject.Find("Projectiles").transform);
+                fireball.transform.position = head.Position + (Vector3)head.Direction;
+                fireball.GetComponent<ProjectileBehaviour>()
+                .Proj = Projectiles.ConstructFireball(
+                    head.Direction * PROJ_SPEED_FAST,
+                    head.RegularAngle);
+
+                NetworkServer.Spawn(fireball);
+                break;
+            case EEffect.RocketShitting:
+                ClientSpawnUnsynced(effect);
+                break;
+        }
+    }
+
+    /// <summary>
+    /// Spawns an unsynced object, at a synced time (as every client does the same
+    /// thing).
+    /// </summary>
+    /// <param name="effect">The projectile is based on the effect.</param>
+    [ClientRpc]
+    private void ClientSpawnUnsynced(EEffect effect)
+    {
+        switch (effect)
+        {
+            case EEffect.RocketShitting:
+                float randomRotation = Random.Range(-SHIT_EXPLOSIVENESS, SHIT_EXPLOSIVENESS);
+
+                GameObject shit = Instantiate(m_staticShit, GameObject.Find("Projectiles").transform);
+                shit.transform.position = m_pm.BodyParts[^1].Position - (Vector3)m_pm.BodyParts[^1].Direction;
+                shit.transform.Rotate(Vector3.forward * randomRotation);
+
+                shit.GetComponent<ProjectileBehaviour>()
+                .Proj = Projectiles.ConstructShit(
+                    Extensions.Vectors.Rotate(-m_pm.BodyParts[^1].Direction, randomRotation) * PROJ_SPEED_SLOW,
+                    m_pm.BodyParts[^1].RegularAngle);
+                break;
+        }
+    }
+
 
     public void AddEffect(Effect effect)
     {
@@ -367,12 +331,6 @@ public class PlayerStatus : NetworkBehaviour
         }
     }
 
-    private void UndoEffect(Effect effect)
-    {
-        //switch (effect.EffectName)
-        //{
-        //}
-    }
 
     private void ClearPowerupIcon()
     {
@@ -381,9 +339,9 @@ public class PlayerStatus : NetworkBehaviour
         powerupImg.color = Color.clear;
     }
 
+
     private void RemoveInputEffect()
     {
-        UndoEffect(ActiveInputEffect);
         ItemSlotEffect = null;
         ActiveInputEffect = null;
     }
@@ -400,20 +358,21 @@ public class PlayerStatus : NetworkBehaviour
         StatusEffectUI statusUI = GameObject.FindWithTag("StatusUI").GetComponent<StatusEffectUI>();
         switch (effect.EffectName)
         {
-            case EEffect.SpeedBoost:
-                m_pm.ResetSpeedModifier();
-                statusUI.DisableAllSpeedIcons();
-                break;
             case EEffect.RocketShitting:
                 statusUI.ToggleShitIcon(false);
                 break;
+
             case EEffect.Sleeping:
                 m_pm.Frozen = false;
                 statusUI.ToggleSleepingIcon(false);
                 break;
+
+            case EEffect.SpeedBoost:
+                m_pm.ResetSpeedModifier();
+                statusUI.DisableAllSpeedIcons();
+                break;
         }
 
-        UndoEffect(effect);
         ActivePassiveEffects.Remove(effect);
     }
 
@@ -437,6 +396,7 @@ public class PlayerStatus : NetworkBehaviour
         ActiveInputEffect = null;
     }
 
+
     /// <summary>
     /// Disables all passive status effects, and resets all passive counters.
     /// </summary>
@@ -445,10 +405,18 @@ public class PlayerStatus : NetworkBehaviour
         StatusEffectUI statusUI = GameObject.FindWithTag("StatusUI").GetComponent<StatusEffectUI>();
         statusUI.DisableAllIcons();
 
-        ActivePassiveEffects.Clear();
+        foreach (Effect effect in ActivePassiveEffects)
+        {
+            RemovePassiveEffect(effect);
+        }
 
         NumPints = 0;
         PotassiumLevels = 0;
+
+        // Clear concealing objects
+        GameObject foreground = GameObject.FindWithTag("Foreground");
+        foreach (Transform fgObj in foreground.transform)
+            Destroy(fgObj.gameObject);
 
         m_pm.ResetSpeedModifier();
     }
@@ -478,7 +446,7 @@ public class PlayerStatus : NetworkBehaviour
     /// When the player eats a food, store its powerup properties in the item slot, etc.
     /// </summary>
     /// <param name="food"></param>
-    public void Eat(EFoodType food)
+    public void Eat(EFoodType food, Sprite powerupSprite)
     {
         // If there already is a powerup in the slot, do not overwrite it.
         if (ItemSlotEffect != null) return;
@@ -486,7 +454,7 @@ public class PlayerStatus : NetworkBehaviour
         Image powerupImg = GameObject.FindWithTag("PowerupUI").GetComponent<Image>();
 
         // Make the sprite visible (Color.clear is assigned on removal of icon)
-        powerupImg.sprite = _foodSprites[food];
+        powerupImg.sprite = powerupSprite;
         powerupImg.color = Color.white;
 
         // Set the item slot effect property (store in a variable until the powerup is used)
@@ -538,6 +506,14 @@ public class PlayerStatus : NetworkBehaviour
             case EFoodType.Dragonfruit:
                 ItemSlotEffect =
                     new(EEffect.BreathingFire, isInputEffect: true, isOneOff: true);
+                break;
+
+            case EFoodType.Drumstick:
+
+                Effect weak = new Effect(EEffect.LoseGains, isOneOff: true);
+                Effect duration = new Effect(EEffect.None, lifetime: 7.5f, causes: new Effect[] { weak });
+                Effect buff = new Effect(EEffect.Buff, isOneOff: true);
+                ItemSlotEffect = new Effect(EEffect.None, causes: new Effect[] { buff, duration });
                 break;
         }
     }

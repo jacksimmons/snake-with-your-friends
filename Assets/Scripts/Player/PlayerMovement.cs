@@ -253,7 +253,6 @@ public class PlayerMovement : NetworkBehaviour
             m_direction = Vector2.zero;
             return;
         }
-        HandleMovementLoop();
     }
 
 
@@ -263,12 +262,12 @@ public class PlayerMovement : NetworkBehaviour
     /// </summary>
     public void HandleMovementLoop()
     {
-        // Counter logic
-        m_timeTillMove -= Time.fixedDeltaTime;
-        if (m_timeTillMove > 0)
-            return;
+        //m_timeTillMove -= Time.fixedDeltaTime;
 
-        m_timeTillMove = TimeBetweenMoves;
+        //if (m_timeTillMove > 0)
+        //    return;
+
+        //m_timeTillMove = TimeBetweenMoves;
 
         // Queued actions wait until the next move frame before being called.
         for (int i = 0; i < m_queuedActions.Count; i++)

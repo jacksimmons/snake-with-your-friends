@@ -18,6 +18,8 @@ public enum EFoodType
     PineapplePizza,
     Pizza, // 15 (2 bytes)
 }
+
+
 public enum EEffect
 {
     None,
@@ -25,12 +27,10 @@ public enum EEffect
     // Apple
     CureAll,
 
-    // Dragonfruit
-    BreathingFire,
-
     // Booze
     Drunk,
     Pissing,
+    SoberUp,
 
     // Balti
     SpeedBoost,
@@ -39,9 +39,15 @@ public enum EEffect
     // Doughnut
     Sleeping,
 
-    SoberUp,
+    // Dragonfruit
+    BreathingFire,
+
+    // Drumstick
+    Buff,
+    LoseGains,
+
+
     Hallucination,
     Unicorn,
     BrainFreeze,
-    Buff
 }
