@@ -14,18 +14,30 @@ public class SnakeButton : MonoBehaviour
 
     private Image m_image;
 
+
     private void Start()
     {
         m_image = GetComponent<Image>();
     }
 
+
     public void OnPointerEnter()
     {
-        m_image.sprite = m_buttonHover;
+        SetSprite(m_buttonHover);
     }
+
 
     public void OnPointerExit()
     {
-        m_image.sprite = m_buttonDefault;
+        SetSprite(m_buttonDefault);
+    }
+
+
+    private void SetSprite(Sprite sprite)
+    {
+        m_image.sprite = sprite;
+
+        // Resizes the sprite rect to fit the new sprite
+        m_image.SetNativeSize();
     }
 }
