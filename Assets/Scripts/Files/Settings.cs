@@ -1,6 +1,35 @@
 using System;
 using UnityEngine;
 
+
+[Serializable]
+public struct Res
+{
+    public int x;
+    public int y;
+    public int hz;
+
+
+    public Res(Resolution res)
+    {
+        x = res.width;
+        y = res.height;
+        hz = res.refreshRate;
+    }
+
+
+    public static Resolution ToResolution(Res res)
+    {
+        Resolution resolution = new();
+        resolution.width = res.x;
+        resolution.height = res.y;
+        resolution.refreshRate = res.hz;
+
+        return resolution;
+    }
+}
+
+
 [Serializable]
 public class Settings : ICached
 {
@@ -8,7 +37,7 @@ public class Settings : ICached
 
     public float menuVolume;
     public float sfxVolume;
-    public int resX, resY, resHz;
+    public Res resolution;
 
     private BitField bf = new(1);
     public bool Fullscreen
@@ -33,9 +62,7 @@ public class Settings : ICached
     {
         menuVolume = 1;
         sfxVolume = 1;
-        resX = 1920;
-        resY = 1080;
-        resHz = 60;
+        resolution = new();
 
         Fullscreen = false;
         Borderless = true;
@@ -46,9 +73,7 @@ public class Settings : ICached
     {
         menuVolume = other.menuVolume;
         sfxVolume = other.sfxVolume;
-        resX = other.resX;
-        resY = other.resY;
-        resHz = other.resHz;
+        resolution = other.resolution;
 
         bf = new(1);
         Fullscreen = other.Fullscreen;
@@ -56,14 +81,12 @@ public class Settings : ICached
         HelpMotionSickness = other.HelpMotionSickness;
     }
 
-    public Settings(float menuVolume, float sfxVolume, int resX, int resY, int resHz,
-    bool fullscreen, bool borderless, bool helpMotionSickness)
+    public Settings(float menuVolume, float sfxVolume, Res resolution, bool fullscreen,
+        bool borderless, bool helpMotionSickness)
     {
         this.menuVolume = menuVolume;
         this.sfxVolume = sfxVolume;
-        this.resX = resX;
-        this.resY = resY;
-        this.resHz = resHz;
+        this.resolution = resolution;
 
         bf = new(1);
         Fullscreen = fullscreen;

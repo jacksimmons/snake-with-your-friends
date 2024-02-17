@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
 using TMPro;
 using UnityEditor;
@@ -22,13 +23,13 @@ public class SettingsMenu : MonoBehaviour
 
     // Settings sliders
     [SerializeField]
-    private TextMeshProUGUI menuVolumeLabel;
+    private TMP_Text menuVolumeLabel;
     [SerializeField]
     private Slider menuVolumeSlider;
     private float menuVolumeValue;
 
     [SerializeField]
-    private TextMeshProUGUI sfxVolumeLabel;
+    private TMP_Text sfxVolumeLabel;
     [SerializeField]
     private Slider sfxVolumeSlider;
     private float sfxVolumeValue;
@@ -57,30 +58,27 @@ public class SettingsMenu : MonoBehaviour
     {
         audioHandler = GameObject.FindWithTag("AudioHandler");
 
-        menuVolumeSlider.value = Settings.Saved.menuVolume * 100;
-        menuVolumeValue = menuVolumeSlider.value;
+        SetMenuVolume(Settings.Saved.menuVolume);
         menuVolumeSlider.onValueChanged.AddListener(SetMenuVolume);
 
-        sfxVolumeSlider.value = Settings.Saved.sfxVolume * 100;
-        sfxVolumeValue = sfxVolumeSlider.value;
+        SetSFXVolume(Settings.Saved.sfxVolume);
         sfxVolumeSlider.onValueChanged.AddListener(SetSFXVolume);
 
         resolutions = Screen.resolutions;
+
+        // Put the resolutions into the dropdown
         for (int i = 0; i < resolutions.Length; i++)
         {
             var res = resolutions[i];
             resDropdown.options.Add(new TMP_Dropdown.OptionData(res.ToString()));
 
-            Resolution currentRes = new Resolution();
-            currentRes.width = Screen.width;
-            currentRes.height = Screen.height;
-            currentRes.refreshRate = Screen.currentResolution.refreshRate;
-            if (ResolutionEquals(res, currentRes))
+            if (ResolutionEquals(res, Res.ToResolution(Settings.Saved.resolution)))
             {
                 resDropdown.itemText.text = res.ToString();
                 resDropdown.value = i;
             }
         }
+
         // Dropdown value can be changed in the above for-if statement - add listener after so res doesn't get changed
         resDropdown.onValueChanged.AddListener(SetResolution);
 
@@ -112,8 +110,8 @@ public class SettingsMenu : MonoBehaviour
         // Testing sound
         AudioSource clickTest = audioHandler.transform.Find("ClickHandler").GetComponent<AudioSource>();
         AudioSource buttonTest = audioHandler.transform.Find("ButtonPressHandler").GetComponent<AudioSource>();
-        clickTest.volume = volume / 100;
-        buttonTest.volume = volume / 100;
+        clickTest.volume = volume / 100f;
+        buttonTest.volume = volume / 100f;
         buttonTest.Play();
 
         menuVolumeValue = volume;
@@ -156,9 +154,9 @@ public class SettingsMenu : MonoBehaviour
     public void SaveSettingsToFile()
     {
         Settings settings = new Settings(
-            menuVolumeValue / 100,
-            sfxVolumeValue / 100,
-            Screen.width, Screen.height, Screen.currentResolution.refreshRate,
+            menuVolumeValue,
+            sfxVolumeValue,
+            new(Screen.currentResolution),
             Screen.fullScreen,
             borderlessValue,
             motionSicknessValue

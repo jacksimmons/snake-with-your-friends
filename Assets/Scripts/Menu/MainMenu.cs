@@ -54,12 +54,12 @@ public class MainMenu : SceneTransitionHandler
     private void ApplySettings()
     {
         GameObject audioParent = GameObject.FindWithTag("AudioHandler");
-        audioParent.transform.Find("ClickHandler").GetComponent<AudioSource>().volume = Settings.Saved.menuVolume;
-        audioParent.transform.Find("ButtonPressHandler").GetComponent<AudioSource>().volume = Settings.Saved.menuVolume;
-        audioParent.transform.Find("EatHandler").GetComponent<AudioSource>().volume = Settings.Saved.sfxVolume;
+        audioParent.transform.Find("ClickHandler").GetComponent<AudioSource>().volume = Settings.Saved.menuVolume / 100f;
+        audioParent.transform.Find("ButtonPressHandler").GetComponent<AudioSource>().volume = Settings.Saved.menuVolume / 100f;
+        audioParent.transform.Find("EatHandler").GetComponent<AudioSource>().volume = Settings.Saved.sfxVolume / 100f;
 
         FullScreenMode fsm = Settings.GetWindowMode(Settings.Saved.Fullscreen, Settings.Saved.Borderless);
-        Screen.SetResolution(Settings.Saved.resX, Settings.Saved.resY, fsm, Settings.Saved.resHz);
+        Screen.SetResolution(Settings.Saved.resolution.x, Settings.Saved.resolution.y, fsm, Settings.Saved.resolution.hz);
 
         //print($"Resolution: {Settings.Saved.resX}x{Settings.Saved.resY}@{Settings.Saved.resHz}");
         //print($"Fullscreen: {Settings.Saved.Fullscreen} Borderless: {Settings.Saved.Borderless}");
