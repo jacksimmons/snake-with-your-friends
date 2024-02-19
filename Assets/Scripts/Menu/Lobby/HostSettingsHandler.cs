@@ -6,6 +6,9 @@ using UnityEngine.UI;
 public class HostSettingsHandler : MonoBehaviour
 {
     [SerializeField]
+    private LobbyMenu m_lobbyMenu;
+
+    [SerializeField]
     private Slider m_speedSlider;
     [SerializeField]
     private TextMeshProUGUI m_speedLabel;
@@ -71,6 +74,7 @@ public class HostSettingsHandler : MonoBehaviour
         m_speedLabel.text = $"Time Between Moves ({m_speedSlider.value}{speed})";
 
         GameSettings.Saved.Data.TimeToMove = m_speedSlider.value;
+        m_lobbyMenu.SaveGameSettings();
     }
 
 
@@ -78,11 +82,15 @@ public class HostSettingsHandler : MonoBehaviour
     {
         SetFriendlyFireLabel(pressed);
         GameSettings.Saved.Data.FriendlyFire = pressed;
+        m_lobbyMenu.SaveGameSettings();
     }
+
+
     private void SetFriendlyFireLabel(bool pressed)
     {
         string onOrOff = pressed ? "ON" : "OFF";
         m_friendlyFireLabel.text = $"Friendly Fire ({onOrOff})";
+        m_lobbyMenu.SaveGameSettings();
     }
 
 
@@ -90,11 +98,13 @@ public class HostSettingsHandler : MonoBehaviour
     {
         GameSettings.Saved.Data.GameMode = 
         (EGameMode)Enum.GetValues(typeof(EGameMode)).GetValue(index);
+        m_lobbyMenu.SaveGameSettings();
     }
 
 
     public void OnPowerupTogglePressed(bool pressed, EFoodType food)
     {
         GameSettings.Saved.FoodSettings.SetBit((int)food, pressed);
+        m_lobbyMenu.SaveGameSettings();
     }
 }

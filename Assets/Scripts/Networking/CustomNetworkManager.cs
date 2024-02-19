@@ -124,7 +124,7 @@ public class CustomNetworkManager : NetworkManager
 
         if (LOBBY_SCENES.Contains(sceneName))
         {
-            GameObject.Find("LobbyController").GetComponent<LobbyMenu>()
+            GameObject.Find("LobbyMenu").GetComponent<LobbyMenu>()
                 .UpdatePlayerList();
 
             // Reset every Player Object, so that the game can run again

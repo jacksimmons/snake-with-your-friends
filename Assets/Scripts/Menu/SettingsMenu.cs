@@ -153,6 +153,7 @@ public class SettingsMenu : MonoBehaviour
 
     public void SaveSettingsToFile()
     {
+        print(Screen.currentResolution);
         Settings settings = new Settings(
             menuVolumeValue,
             sfxVolumeValue,
