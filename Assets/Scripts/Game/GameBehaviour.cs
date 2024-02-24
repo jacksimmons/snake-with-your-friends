@@ -181,9 +181,14 @@ public class GameBehaviour : NetworkBehaviour
             ServerOnAllReady();
 
         if (s_serverNumPlayersReady != 0) return;
-        // ^ Following code executes directly after the last readier, every handshake
+
+        ServerLoadingStageUpdate();
+    }
 
 
+    [Server]
+    private void ServerLoadingStageUpdate()
+    {
         // Server-side loading stages (these will invoke client-side loading stages)
         switch (s_serverPlayersLoadingStage)
         {
@@ -210,6 +215,7 @@ public class GameBehaviour : NetworkBehaviour
         s_serverNumPlayersReady = 0;
 
         s_serverPlayersLoadingStage++;
+        ServerLoadingStageUpdate();
         RpcLoadingStageUpdate(s_serverPlayersLoadingStage);
     }
 
