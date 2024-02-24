@@ -181,8 +181,6 @@ public class GameBehaviour : NetworkBehaviour
             ServerOnAllReady();
 
         if (s_serverNumPlayersReady != 0) return;
-
-        ServerLoadingStageUpdate();
     }
 
 
