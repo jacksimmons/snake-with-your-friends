@@ -131,7 +131,8 @@ public class CustomNetworkManager : NetworkManager
             foreach (PlayerObjectController poc in Players)
             {
                 Transform bodyParts = poc.transform.Find("BodyParts");
-                while (bodyParts.childCount > 0)
+
+                for (int i = 0; i < bodyParts.childCount; i++)
                 {
                     DestroyImmediate(bodyParts.GetChild(0).gameObject);
                 }

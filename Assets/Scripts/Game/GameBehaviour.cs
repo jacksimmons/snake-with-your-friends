@@ -81,7 +81,7 @@ public class GameBehaviour : NetworkBehaviour
     // Global clock system so players move at the same time
     private static float s_timeSinceLastTick;
 
-    private static float s_playerSpeedMultiplier;
+    private static float s_playerSpeedMultiplier = 1;
     private static float s_defaultTicksBetweenMoves;
 
     public static float TicksBetweenMoves
@@ -116,6 +116,7 @@ public class GameBehaviour : NetworkBehaviour
             s_serverPlayersLoadingStage = EGameLoadStage.Unloaded;
             m_numOutfitSettingsReceived = 0;
             s_timeSinceLastTick = 0;
+            s_defaultTicksBetweenMoves = GameSettings.Saved.Data.TimeToMove;
         }
     }
 
@@ -689,27 +690,6 @@ public class GameBehaviour : NetworkBehaviour
             }
         }
     }
-
-
-    ///// <summary>
-    ///// Finds the first free slot in s_objects(null slot), populates it with obj, and returns the
-    ///// index. Linear Search = O(n)
-    //[Server]
-    //public int AddObjectToGrid(GameObject obj)
-    //{
-    //    // Linear search for the first empty slot
-    //    int objPos = 0;
-    //    while (objPos < s_objects.Length)
-    //    {
-    //        if (s_objects[objPos] == null)
-    //        {
-    //            s_objects[objPos] = obj;
-    //            return objPos;
-    //        }
-    //        objPos++;
-    //    }
-    //    return -1;
-    //}
 
 
     ///// <summary>

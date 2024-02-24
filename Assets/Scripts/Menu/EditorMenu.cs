@@ -330,7 +330,7 @@ public class EditorMenu : MonoBehaviour
 
         //// If {chosenName}.prefab exists, Increase numDuplicates until we find an unused filename of the format
         //// "{chosenName} [numDuplicates].prefab" that hasn't been taken in the maps folder.
-        //while (true)
+        //oldwhile (true)
         //{
         //    savePath = $"Maps/{m_savedName}";
         //    if (numDuplicates > 0)

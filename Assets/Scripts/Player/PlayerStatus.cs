@@ -148,6 +148,7 @@ public class PlayerStatus : NetworkBehaviour
             }
         }
 
+        List<Effect> toRemove = new();
         for (int i = 0; i < ActivePassiveEffects.Count; i++)
         {
             Effect effect = ActivePassiveEffects[i];
@@ -155,9 +156,17 @@ public class PlayerStatus : NetworkBehaviour
             {
                 AddCausedEffects(effect);
                 RemovePassiveEffect(i);
-                i--;
+
+                toRemove.Add(effect);
+                continue;
             }
             effect.SubtractCooldown(Time.deltaTime);
+        }
+
+        // Remove all expired passive effects
+        foreach (Effect e in toRemove)
+        {
+            ActivePassiveEffects.Remove(e);
         }
     }
 
@@ -372,8 +381,6 @@ public class PlayerStatus : NetworkBehaviour
                 statusUI.DisableAllSpeedIcons();
                 break;
         }
-
-        ActivePassiveEffects.Remove(effect);
     }
 
 
@@ -409,6 +416,8 @@ public class PlayerStatus : NetworkBehaviour
         {
             RemovePassiveEffect(effect);
         }
+        // Clear after so as to not modify the collection during iteration
+        ActivePassiveEffects.Clear();
 
         NumPints = 0;
         PotassiumLevels = 0;
@@ -417,8 +426,6 @@ public class PlayerStatus : NetworkBehaviour
         GameObject foreground = GameObject.FindWithTag("Foreground");
         foreach (Transform fgObj in foreground.transform)
             Destroy(fgObj.gameObject);
-
-        GameBehaviour.Instance.CmdResetSpeedMultiplier();
     }
 
     public Dictionary<string, string> GetStatusDebug()
