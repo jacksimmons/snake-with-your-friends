@@ -183,8 +183,19 @@ public class GameBehaviour : NetworkBehaviour
         if (s_serverNumPlayersReady != 0) return;
         // ^ Following code executes directly after the last readier, every handshake
 
+
+        // Server-side loading stages (these will invoke client-side loading stages)
         switch (s_serverPlayersLoadingStage)
         {
+            case EGameLoadStage.SceneLoaded:
+                Instance.ServerBroadcastGameSettings(Instance.transform.parent.gameObject);
+                break;
+            case EGameLoadStage.GameSettingsSynced:
+                Instance.ServerBroadcastMap(Instance.transform.parent.gameObject);
+                break;
+            case EGameLoadStage.OutfitSettingsSynced:
+                Instance.ServerAllBroadcastOutfit(Instance.transform.parent.gameObject);
+                break;
             case EGameLoadStage.PlayerScriptsEnabled:
                 ServerInitFood();
                 ServerPlacePlayers();
@@ -215,18 +226,11 @@ public class GameBehaviour : NetworkBehaviour
         // Call commands from Your GB locally for authority
         // Some commands need a target; this is the gameObject
         // of Your GB locally.
+
+        // Client-side loading stages
         switch (newValue)
         {
             case EGameLoadStage.Unloaded:
-                break;
-            case EGameLoadStage.SceneLoaded:
-                Instance.CmdRequestGameSettings(Instance.transform.parent.gameObject);
-                break;
-            case EGameLoadStage.GameSettingsSynced:
-                Instance.CmdRequestMap(Instance.transform.parent.gameObject);
-                break;
-            case EGameLoadStage.OutfitSettingsSynced:
-                Instance.CmdSendOutfitSettings(Instance.transform.parent.gameObject);
                 break;
             case EGameLoadStage.MapLoaded:
                 Instance.EnablePlayerScripts();
@@ -243,8 +247,8 @@ public class GameBehaviour : NetworkBehaviour
 
 
     // GAME SETTINGS HANDSHAKE ------------
-    [Command]
-    private void CmdRequestGameSettings(GameObject player)
+    [Server]
+    private void ServerBroadcastGameSettings(GameObject player)
     {
         NetworkIdentity netIdentity = player.GetComponent<NetworkIdentity>();
         RpcReceiveGameSettings(netIdentity.connectionToClient, GameSettings.Saved.Data);
@@ -265,32 +269,9 @@ public class GameBehaviour : NetworkBehaviour
     // ------------------------------------
 
 
-    // CUSTOMISATION HANDSHAKE ------------
-    [Command]
-    private void CmdSendOutfitSettings(GameObject player)
-    {
-        int playerNo = player.GetComponent<PlayerObjectController>().playerNo;
-        RpcReceiveOutfitSettings(OutfitSettings.Saved.Data, playerNo);
-    }
-
-
-    [ClientRpc]
-    private void RpcReceiveOutfitSettings(OutfitSettingsData data, int playerNo)
-    {
-        m_numOutfitSettingsReceived++;
-
-        // Assign the settings to the player
-        CustomNetworkManager.Instance.Players[playerNo-1].GetComponent<PlayerOutfit>().UpdateOutfit(data);
-
-        if (m_numOutfitSettingsReceived == CustomNetworkManager.Instance.Players.Count)
-            CmdOnReady();
-    }
-    // ------------------------------------
-
-
     // MAP HANDSHAKE ----------------------
-    [Command]
-    private void CmdRequestMap(GameObject player)
+    [Server]
+    private void ServerBroadcastMap(GameObject player)
     {
         NetworkIdentity netIdentity = player.GetComponent<NetworkIdentity>();
 
@@ -329,6 +310,43 @@ public class GameBehaviour : NetworkBehaviour
         s_groundTilemap = map.transform.Find("Ground").GetComponentInChildren<Tilemap>();
         s_wallTilemap = map.transform.Find("Wall").GetComponentInChildren<Tilemap>();
         CmdOnReady();
+    }
+    // ------------------------------------
+
+
+    // CUSTOMISATION HANDSHAKE ------------
+    [Server]
+    private void ServerAllBroadcastOutfit(GameObject player)
+    {
+        NetworkIdentity netIdentity = player.GetComponent<NetworkIdentity>();
+
+        foreach (PlayerObjectController poc in CustomNetworkManager.Instance.Players)
+        {
+        }
+
+        int playerNo = player.GetComponent<PlayerObjectController>().playerNo;
+        RpcReceiveOutfitSettings(OutfitSettings.Saved.Data, playerNo);
+
+        RpcBroadcastOutfit(netIdentity.connectionToClient); 
+    }
+
+
+    [TargetRpc]
+    private void RpcBroadcastOutfit(NetworkConnectionToClient _)
+    {
+    }
+
+
+    [ClientRpc]
+    private void RpcReceiveOutfitSettings(OutfitSettingsData data, int playerNo)
+    {
+        m_numOutfitSettingsReceived++;
+
+        // Assign the settings to the player
+        CustomNetworkManager.Instance.Players[playerNo - 1].GetComponent<PlayerOutfit>().UpdateOutfit(data);
+
+        if (m_numOutfitSettingsReceived == CustomNetworkManager.Instance.Players.Count)
+            CmdOnReady();
     }
     // ------------------------------------
 
