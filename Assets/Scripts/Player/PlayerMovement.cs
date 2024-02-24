@@ -68,15 +68,6 @@ public class PlayerMovement : NetworkBehaviour
     private Vector2 m_prevDirection;
     private Vector2 m_forcedDirection; // Where player cannot stop/change dir
 
-    private float _baseTimeBetweenMoves;
-    private float TimeBetweenMoves
-    {
-        get { return _baseTimeBetweenMoves / m_speedMultiplier; }
-    }
-
-    private float m_timeTillMove;
-    private float m_speedMultiplier;
-
 
     /// <summary>
     /// Queued actions
@@ -113,15 +104,10 @@ public class PlayerMovement : NetworkBehaviour
 
     private void Init()
     {
-        // Initialise game settings
-        if (GameSettings.Saved != null)
-            _baseTimeBetweenMoves = GameSettings.Saved.Data.TimeToMove;
-
-        // Initialise other variables
+        // Initialise movement variables
         m_direction = Vector2.zero;
         m_prevDirection = Vector2.zero;
-        ResetSpeedModifier();
-        m_timeTillMove = TimeBetweenMoves;
+        m_forcedDirection = Vector2.zero;
 
         SetupBodyParts();
 
@@ -141,27 +127,6 @@ public class PlayerMovement : NetworkBehaviour
         BodyParts = PlayerStatic.SetupBodyParts(BodyPartContainer.transform, 0, DefaultSprites);
         m_poc.UpdateBodyParts();
         BodyPartContainer.SetActive(true);
-    }
-
-
-    private void SetTimeToMove(float timeToMove)
-    {
-        // We need TimeBetweenMoves = timeToMove
-        // We have TimeBetweenMoves = baseTimeToMove/{multiplier}
-        // So multiplier = timeToMove/baseTimeToMove
-        ApplySpeedMultiplier(_baseTimeBetweenMoves / timeToMove);
-    }
-
-
-    public void ApplySpeedMultiplier(float multiplier)
-    {
-        m_speedMultiplier = multiplier;
-    }
-
-
-    public void ResetSpeedModifier()
-    {
-        m_speedMultiplier = 1;
     }
 
 
@@ -186,7 +151,6 @@ public class PlayerMovement : NetworkBehaviour
             if (dir != m_direction)
             {
                 m_direction = dir;
-                m_timeTillMove = 0;
             }
         }
         else if (dir != Vector2.zero)
@@ -194,44 +158,6 @@ public class PlayerMovement : NetworkBehaviour
             m_direction = dir;
         }
     }
-
-
-    //private void HandleInput()
-    //{
-    //    // Forced movement
-    //    if (Frozen)
-    //    {
-    //        movement = _forcedMovement;
-    //        return;
-    //    }
-
-    //    // Prevent snakes going back on themselves
-    //    // Snake can only go back on itself if FreeMovement is enabled and BodyParts.Count <= 2.
-    //    bool canGoBackOnItself = FreeMovement && BodyParts.Count <= 2;
-    //    if (!canGoBackOnItself)
-    //    {
-    //        if (direction == -PrevMovement)
-    //            direction = Vector2.zero;
-    //    }
-
-    //    // Free Movement update
-    //    // - Instant if changing direction
-    //    // - Time delay if not
-    //    if (FreeMovement)
-    //    {
-    //        print($"Direction {direction}, Movement {movement}");
-    //        if (direction != movement)
-    //        {
-    //            movement = direction;
-    //            m_timeSinceLastMove = TimeToMove;
-    //        }
-    //    }
-    //    // Movement update
-    //    else if (direction != Vector2.zero && direction != movement)
-    //    {
-    //        movement = direction;
-    //    }
-    //}
 
 
     public void RecreateStartingParts(int count)
@@ -262,13 +188,6 @@ public class PlayerMovement : NetworkBehaviour
     /// </summary>
     public void HandleMovementLoop()
     {
-        //m_timeTillMove -= Time.fixedDeltaTime;
-
-        //if (m_timeTillMove > 0)
-        //    return;
-
-        //m_timeTillMove = TimeBetweenMoves;
-
         // Queued actions wait until the next move frame before being called.
         for (int i = 0; i < m_queuedActions.Count; i++)
         {
@@ -483,7 +402,6 @@ public class PlayerMovement : NetworkBehaviour
         m_queuedActions.Add(new Action(() =>
         {
             Frozen = true;
-            SetTimeToMove(timeToMove);
             m_forcedDirection = direction;
             foreach (var part in BodyParts)
             {
@@ -507,7 +425,6 @@ public class PlayerMovement : NetworkBehaviour
             // this means if the snake starts on a scootile,
             // they start without input.
             // It also removes all speed modifiers
-            ResetSpeedModifier();
             m_forcedDirection = Vector2.zero;
             for (int i = 0; i < BodyParts.Count; i++)
             {
@@ -527,8 +444,7 @@ public class PlayerMovement : NetworkBehaviour
         Dictionary<string, string> playerValues = new Dictionary<string, string>
         {
             { "direction", m_direction.ToString() },
-            { "prevDirection", m_prevDirection.ToString() },
-            { "baseTimeBetweenMoves", _baseTimeBetweenMoves.ToString() }
+            { "prevDirection", m_prevDirection.ToString() }
         };
         for (int i = 0; i < m_queuedActions.Count; i++)
             playerValues.Add("queuedActions [" + i.ToString() + "]", m_queuedActions[i].Target.ToString());

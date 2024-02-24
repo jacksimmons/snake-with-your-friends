@@ -8,13 +8,13 @@ using UnityEngine.Tilemaps;
 using UnityEngine.UI;
 using Random = UnityEngine.Random;
 
+
 public class GameBehaviour : NetworkBehaviour
 {
     private struct PlayerSpawnInfo
     {
         // Used as a check; ensures the list of players has not changed.
         public ulong SteamID;
-
         public Vector3 Position;
         public float Rotation_z;
 
@@ -27,7 +27,7 @@ public class GameBehaviour : NetworkBehaviour
         }
     }
 
-    public enum EGameLoadStage
+    private enum EGameLoadStage
     {
         Unloaded,
         SceneLoaded,
@@ -60,54 +60,44 @@ public class GameBehaviour : NetworkBehaviour
         }
     }
 
-    public static readonly string[] GAME_SCENES =
-    { "Game" };
-
-    // --- Puzzle
-    public int availablePuzzles = 0;
-
-    // An array of food GameObjects (all foods in this go under the Objects game object parent)
-    private static GameObject[] s_foods;
-
-    protected static Tilemap s_groundTilemap;
-    protected static Tilemap s_wallTilemap;
-
-    // Templates
-    [SerializeField]
-    private GameObject _mapTemplate;
-
-    [SerializeField]
-    private Tile _lightTile;
-    [SerializeField]
-    private Tile _darkTile;
-    [SerializeField]
-    private Tile _wallTile;
-
-    [SerializeField]
-    private GameObject _gameOverTemplate;
-
-    [SerializeField]
-    private GameObject _menuSelectTemplate;
-
-    [SerializeField]
-    private List<GameObject> _foodTemplates = new();
-
-    // A list containing every food spawn point location (these are defined by the position of FoodSpawner objects)
-    private static List<Vector2> s_foodSpawnPoints;
-
 
     // SERVER VARIABLES --------------------
     // These are only accurate on the server; hence do NOT use them on a client.
     // They are static because they belong to no particular GameBehaviour.
+
     // How "loaded" the game currently is for the furthest behind player.
     private static EGameLoadStage s_serverPlayersLoadingStage;
     private static int s_serverNumPlayersReady;
+
+    // An array of food GameObjects (all foods in this go under the Objects game object parent)
+    private static GameObject[] s_foods;
+    // A list containing every food spawn point location (these are defined by the position of FoodSpawner objects)
+    private static List<Vector2> s_foodSpawnPoints;
+
+    // Tilemaps representing the tiles of the current map.
+    protected static Tilemap s_groundTilemap;
+    protected static Tilemap s_wallTilemap;
+
     // Global clock system so players move at the same time
     private static float s_timeSinceLastTick;
-    private const float TICK_SPACING = 0.5f; // 10 ticks per second
+
+    private static float s_playerSpeedMultiplier;
+    private static float s_defaultTicksBetweenMoves;
+
+    public static float TicksBetweenMoves
+    {
+        get
+        {
+            if (s_playerSpeedMultiplier == 0) return 0;
+            return s_defaultTicksBetweenMoves / s_playerSpeedMultiplier;
+        }
+    }
 
 
     // CLIENT VARIABLES --------------------
+    [SerializeField]
+    private List<GameObject> _foodTemplates = new();
+
     private int m_numOutfitSettingsReceived;
 
 
@@ -134,7 +124,6 @@ public class GameBehaviour : NetworkBehaviour
     {
         if (!isOwned) return;
 
-
         if (s_serverPlayersLoadingStage == EGameLoadStage.Loaded)
             ServerFixedUpdate();
     }
@@ -145,7 +134,7 @@ public class GameBehaviour : NetworkBehaviour
     {
         s_timeSinceLastTick += Time.fixedDeltaTime;
 
-        if (s_timeSinceLastTick < TICK_SPACING)
+        if (s_timeSinceLastTick < TicksBetweenMoves)
             return;
 
         // Perform tick
@@ -467,6 +456,31 @@ public class GameBehaviour : NetworkBehaviour
     // ------------------------------------
 
 
+    [Command]
+    public void CmdRemoveFood(GameObject food)
+    {
+        ServerRemoveFood(food);
+
+        if (GameSettings.Saved.Data.GameMode == EGameMode.SnakeRoyale)
+        {
+            ServerGenerateFood();
+        }
+    }
+
+
+    /// <summary>
+    /// Removes a given food GameObject from the food list, and despawns it from the server.
+    /// </summary>
+    /// <param name="food">The food GameObject to remove.</param>
+    [Server]
+    private void ServerRemoveFood(GameObject food)
+    {
+        s_foods[Array.IndexOf(s_foods, food)] = null;
+        NetworkServer.UnSpawn(food);
+        NetworkServer.Destroy(food);
+    }
+
+
     [Server]
     private void ServerGenerateFood()
     {
@@ -569,92 +583,28 @@ public class GameBehaviour : NetworkBehaviour
 
 
     [Command]
-    public void CmdRemoveFood(GameObject food)
+    public void CmdSetTimeToMove(float timeToMove)
     {
-        ServerRemoveFood(food);
-
-        if (GameSettings.Saved.Data.GameMode == EGameMode.SnakeRoyale)
-        {
-            ServerGenerateFood();
-        }
+        // We need TimeBetweenMoves = timeToMove
+        // We have TimeBetweenMoves = baseTimeToMove/{multiplier}
+        // So multiplier = timeToMove/baseTimeToMove
+        ServerSetSpeedMultiplier(timeToMove / s_defaultTicksBetweenMoves);
     }
 
 
-    /// <summary>
-    /// Removes a given food GameObject from the food list, and despawns it from the server.
-    /// </summary>
-    /// <param name="food">The food GameObject to remove.</param>
+    [Command]
+    public void CmdSetSpeedMultiplier(float multiplier) { ServerSetSpeedMultiplier(multiplier); }
+
+
+    [Command]
+    public void CmdResetSpeedMultiplier() { ServerSetSpeedMultiplier(1); }
+
+
     [Server]
-    private void ServerRemoveFood(GameObject food)
+    private void ServerSetSpeedMultiplier(float multiplier)
     {
-        s_foods[Array.IndexOf(s_foods, food)] = null;
-        NetworkServer.UnSpawn(food);
-        NetworkServer.Destroy(food);
+        s_playerSpeedMultiplier = multiplier;
     }
-
-
-    ///// <summary>
-    ///// Finds the first free slot in s_objects(null slot), populates it with obj, and returns the
-    ///// index. Linear Search = O(n)
-    //[Server]
-    //public int AddObjectToGrid(GameObject obj)
-    //{
-    //    // Linear search for the first empty slot
-    //    int objPos = 0;
-    //    while (objPos < s_objects.Length)
-    //    {
-    //        if (s_objects[objPos] == null)
-    //        {
-    //            s_objects[objPos] = obj;
-    //            return objPos;
-    //        }
-    //        objPos++;
-    //    }
-    //    return -1;
-    //}
-
-
-    ///// <summary>
-    ///// Checks the given position to see if it is free. If not, searches every slot until it finds a
-    ///// free slot. Then populates the slot with obj, returns the index of the slot. Recursive.
-    ///// </summary>
-    //[Server]
-    //public int AddObjectToGrid(int objectPos, GameObject obj)
-    //{
-    //    if (s_objects[objectPos] != null)
-    //    {
-    //        // If there already is an object at given pos, try to put
-    //        // the object on the first different free slot in the array.
-    //        for (int i = 0; (i < s_objects.Length) && (i != objectPos); i++)
-    //        {
-    //            if (s_objects[i] == null)
-    //            {
-    //                s_objects[i] = obj;
-    //                return i;
-    //            }
-    //        }
-
-    //        Debug.LogError("Grid filled with objects!");
-    //        return -1;
-    //    }
-    //    s_objects[objectPos] = obj;
-    //    return objectPos;
-    //}
-
-
-    //void CreateTeleportingMenuPair(
-    //    string text1, string text2,
-    //    Vector3 from, Vector3 to)
-    //{
-    //    GameObject menuSelect = Instantiate(_menuSelectTemplate);
-
-    //    Teleporter teleporter = menuSelect.GetComponentInChildren<Teleporter>();
-
-    //    teleporter.A.transform.position = from;
-    //    teleporter.A.GetComponentInChildren<TextMeshProUGUI>().text = text1;
-    //    teleporter.B.transform.position = to;
-    //    teleporter.B.GetComponentInChildren<TextMeshProUGUI>().text = text2;
-    //}
 
 
     public void OnGameOver(int score)
@@ -739,4 +689,68 @@ public class GameBehaviour : NetworkBehaviour
             }
         }
     }
+
+
+    ///// <summary>
+    ///// Finds the first free slot in s_objects(null slot), populates it with obj, and returns the
+    ///// index. Linear Search = O(n)
+    //[Server]
+    //public int AddObjectToGrid(GameObject obj)
+    //{
+    //    // Linear search for the first empty slot
+    //    int objPos = 0;
+    //    while (objPos < s_objects.Length)
+    //    {
+    //        if (s_objects[objPos] == null)
+    //        {
+    //            s_objects[objPos] = obj;
+    //            return objPos;
+    //        }
+    //        objPos++;
+    //    }
+    //    return -1;
+    //}
+
+
+    ///// <summary>
+    ///// Checks the given position to see if it is free. If not, searches every slot until it finds a
+    ///// free slot. Then populates the slot with obj, returns the index of the slot. Recursive.
+    ///// </summary>
+    //[Server]
+    //public int AddObjectToGrid(int objectPos, GameObject obj)
+    //{
+    //    if (s_objects[objectPos] != null)
+    //    {
+    //        // If there already is an object at given pos, try to put
+    //        // the object on the first different free slot in the array.
+    //        for (int i = 0; (i < s_objects.Length) && (i != objectPos); i++)
+    //        {
+    //            if (s_objects[i] == null)
+    //            {
+    //                s_objects[i] = obj;
+    //                return i;
+    //            }
+    //        }
+
+    //        Debug.LogError("Grid filled with objects!");
+    //        return -1;
+    //    }
+    //    s_objects[objectPos] = obj;
+    //    return objectPos;
+    //}
+
+
+    //void CreateTeleportingMenuPair(
+    //    string text1, string text2,
+    //    Vector3 from, Vector3 to)
+    //{
+    //    GameObject menuSelect = Instantiate(_menuSelectTemplate);
+
+    //    Teleporter teleporter = menuSelect.GetComponentInChildren<Teleporter>();
+
+    //    teleporter.A.transform.position = from;
+    //    teleporter.A.GetComponentInChildren<TextMeshProUGUI>().text = text1;
+    //    teleporter.B.transform.position = to;
+    //    teleporter.B.GetComponentInChildren<TextMeshProUGUI>().text = text2;
+    //}
 }

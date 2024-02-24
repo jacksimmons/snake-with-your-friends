@@ -228,7 +228,7 @@ public class PlayerStatus : NetworkBehaviour
                         break;
 
                     case EEffect.SpeedBoost:
-                        m_pm.ApplySpeedMultiplier(Effect.GetSpeedMultFromSignedLevel(effect.EffectLevel));
+                        GameBehaviour.Instance.CmdSetSpeedMultiplier(Effect.GetSpeedMultFromSignedLevel(effect.EffectLevel));
 
                         statusUI.DisableAllSpeedIcons();
                         if (effect.EffectLevel >= 0)
@@ -309,7 +309,7 @@ public class PlayerStatus : NetworkBehaviour
         if (effect.IsInputEffect)
         {
             // Clear the old effect for the new one
-            m_pm.ResetSpeedModifier();
+            GameBehaviour.Instance.CmdResetSpeedMultiplier();
             if (ActiveInputEffect != null)
                 ClearInputEffects();
             ActiveInputEffect = effect;
@@ -368,7 +368,7 @@ public class PlayerStatus : NetworkBehaviour
                 break;
 
             case EEffect.SpeedBoost:
-                m_pm.ResetSpeedModifier();
+                GameBehaviour.Instance.CmdResetSpeedMultiplier();
                 statusUI.DisableAllSpeedIcons();
                 break;
         }
@@ -418,7 +418,7 @@ public class PlayerStatus : NetworkBehaviour
         foreach (Transform fgObj in foreground.transform)
             Destroy(fgObj.gameObject);
 
-        m_pm.ResetSpeedModifier();
+        GameBehaviour.Instance.CmdResetSpeedMultiplier();
     }
 
     public Dictionary<string, string> GetStatusDebug()
