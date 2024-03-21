@@ -23,10 +23,11 @@ public class PlayerHUDElement : MonoBehaviour
 
     public void AppearDead()
     {
-        transform.Find("NumPartsLabel").GetComponent<TextMeshProUGUI>().text = "RIP";
+        transform.Find("NumPartsLabel").GetComponent<TextMeshProUGUI>().text = "";
         transform.Find("DeathIcon").gameObject.SetActive(true);
-        transform.Find("Head").gameObject.SetActive(false);
-        transform.Find("Torso").gameObject.SetActive(false);
-        transform.Find("Tail").gameObject.SetActive(false);
+        Transform box = transform.Find("SnakeBox");
+        box.Find("Head").gameObject.SetActive(false);
+        box.Find("Torso").gameObject.SetActive(false);
+        box.Find("Tail").gameObject.SetActive(false);
     }
 }

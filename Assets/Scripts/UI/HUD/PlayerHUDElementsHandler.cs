@@ -26,9 +26,10 @@ public class PlayerHUDElementsHandler : MonoBehaviour
                     () =>
                     {
                         item.SetNumParts(poc.PM.BodyParts.Count);
-                        item.transform.Find("Head").GetComponent<Image>().sprite = poc.PM.DefaultSprites[0];
-                        item.transform.Find("Torso").GetComponent<Image>().sprite = poc.PM.DefaultSprites[1];
-                        item.transform.Find("Tail").GetComponent<Image>().sprite = poc.PM.DefaultSprites[2];
+                        Transform box = item.transform.Find("SnakeBox");
+                        box.Find("Head").GetComponent<Image>().sprite = poc.PM.DefaultSprites[0];
+                        box.Find("Torso").GetComponent<Image>().sprite = poc.PM.DefaultSprites[1];
+                        box.Find("Tail").GetComponent<Image>().sprite = poc.PM.DefaultSprites[2];
 
                         m_mapSteamIDToHUDElement[poc.playerSteamID] = item;
                     }
