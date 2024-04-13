@@ -219,7 +219,6 @@ public class LobbyMenu : MonoBehaviour
                 GameObject objToRemove = playerListItemToRemove.gameObject;
                 _playerListItems.Remove(playerListItemToRemove);
                 Destroy(objToRemove);
-                objToRemove = null;
             }
         }
     }

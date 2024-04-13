@@ -8,7 +8,7 @@ public class PlayerHUDElement : MonoBehaviour
     [SerializeField]
     private TextMeshProUGUI m_nameLabel;
     [SerializeField]
-    private TextMeshProUGUI m_numPartsLabel;
+    private TMP_Text m_numPartsLabel;
 
 
     public void SetName(string name)
@@ -23,7 +23,7 @@ public class PlayerHUDElement : MonoBehaviour
 
     public void AppearDead()
     {
-        transform.Find("NumPartsLabel").GetComponent<TextMeshProUGUI>().text = "";
+        m_numPartsLabel.text = "";
         transform.Find("DeathIcon").gameObject.SetActive(true);
         Transform box = transform.Find("SnakeBox");
         box.Find("Head").gameObject.SetActive(false);

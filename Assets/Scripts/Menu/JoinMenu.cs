@@ -89,11 +89,7 @@ public class JoinMenu : MonoBehaviour
 
     private void OnLobbyMatchList(LobbyMatchList_t result, bool bIOFailure)
     {
-        // Remove pre-existing lobbies
-        foreach (Transform child in _contentOutput.transform)
-        {
-            Destroy(child.gameObject);
-        }
+        _contentOutput.transform.DestroyAllChildren();
 
         uint count = result.m_nLobbiesMatching;
         for (int i = 0; i < count; i++)

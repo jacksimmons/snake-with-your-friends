@@ -27,10 +27,7 @@ public class MapEditorLoadBehaviour : MonoBehaviour
     {
         m_loadPanel.SetActive(true);
 
-        foreach (Transform child in m_mapPreviewContainer.transform)
-        {
-            Destroy(child.gameObject);
-        }
+        m_mapPreviewContainer.transform.DestroyAllChildren();
 
         string folder = Application.persistentDataPath + "/Maps";
         if (!Directory.Exists(folder))

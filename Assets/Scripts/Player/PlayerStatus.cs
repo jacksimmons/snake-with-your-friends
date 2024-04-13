@@ -287,6 +287,7 @@ public class PlayerStatus : NetworkBehaviour
         }
     }
 
+
     /// <summary>
     /// Spawns an unsynced object, at a synced time (as every client does the same
     /// thing).
@@ -328,6 +329,7 @@ public class PlayerStatus : NetworkBehaviour
             ActivePassiveEffects.Add(effect);
         }
     }
+
 
     private void AddCausedEffects(Effect effect)
     {
