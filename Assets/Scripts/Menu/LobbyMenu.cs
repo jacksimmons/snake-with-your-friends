@@ -1,11 +1,10 @@
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using UnityEngine;
 using Mirror;
 using Steamworks;
-using UnityEngine.UI;
+using System.Collections.Generic;
+using System.Linq;
 using TMPro;
+using UnityEngine;
+using UnityEngine.UI;
 
 public class LobbyMenu : MonoBehaviour
 {

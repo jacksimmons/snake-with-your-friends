@@ -117,7 +117,8 @@ namespace Mirror
                 // => PlayerLoopSystem has native IntPtr loop members
                 // => forgetting to clear those would cause undefined behaviour!
                 // see also: https://github.com/vis2k/Mirror/pull/2652
-                PlayerLoopSystem system = new PlayerLoopSystem {
+                PlayerLoopSystem system = new PlayerLoopSystem
+                {
                     type = ownerType,
                     updateDelegate = function
                 };

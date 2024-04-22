@@ -1,9 +1,6 @@
 // Simple Bitfield.
 // Any bool value used with this defaults to false.
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 

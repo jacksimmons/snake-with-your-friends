@@ -31,11 +31,11 @@ namespace Mirror
         // average over N begin/end captures
         public TimeSample(int n)
         {
-            watch     = new Stopwatch();
+            watch = new Stopwatch();
             watch.Start();
-            ema       = new ExponentialMovingAverage(n);
+            ema = new ExponentialMovingAverage(n);
             beginTime = 0;
-            average   = 0;
+            average = 0;
         }
 
         // begin is called before the code to be sampled

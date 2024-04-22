@@ -38,7 +38,7 @@ public class SceneTransitionHandler : MonoBehaviour
         StartCoroutine(
             Wait.LoadSceneThenWait(
                 name,
-                () => 
+                () =>
                 {
                     bool ready = GetReady();
                     SetReady(false); // E.g. if retry is used, ready will be used again later.
@@ -55,7 +55,7 @@ public class SceneTransitionHandler : MonoBehaviour
         LoadingIcon.Instance.Toggle(true);
 
         LoadSceneInBackground(name);
-        
+
         foreach (var spawner in snakeSpawners)
             spawner.SpawnChungusnake();
     }

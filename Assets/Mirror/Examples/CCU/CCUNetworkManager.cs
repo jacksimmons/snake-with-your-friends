@@ -7,7 +7,7 @@ namespace Mirror.Examples.CCU
     {
         [Header("Spawns")]
         public int spawnAmount = 10_000;
-        public float      interleave = 1;
+        public float interleave = 1;
         public GameObject spawnPrefab;
 
         // player spawn positions should be spread across the world.

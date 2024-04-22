@@ -258,7 +258,7 @@ namespace Mirror.Examples.TanksCoop
         [Command]
         public void CmdAssignAuthority(NetworkIdentity _networkIdentity)
         {
-           // Debug.Log("Mirror Object owner set to: " + this.netIdentity);
+            // Debug.Log("Mirror Object owner set to: " + this.netIdentity);
 
             tankController = _networkIdentity.GetComponent<TankController>();
 

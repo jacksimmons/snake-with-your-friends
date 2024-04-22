@@ -28,9 +28,9 @@ namespace Mirror
             GUIStyle style = GUI.skin.GetStyle("Label");
             style.alignment = TextAnchor.MiddleRight;
             GUILayout.BeginHorizontal(style);
-                GUILayout.Label($"RTT: {Math.Round(NetworkTime.rtt * 1000)}ms");
-                GUI.color = NetworkClient.connectionQuality.ColorCode();
-                GUILayout.Label($"Q: {NetworkClient.connectionQuality}");
+            GUILayout.Label($"RTT: {Math.Round(NetworkTime.rtt * 1000)}ms");
+            GUI.color = NetworkClient.connectionQuality.ColorCode();
+            GUILayout.Label($"Q: {NetworkClient.connectionQuality}");
             GUILayout.EndHorizontal();
             GUILayout.EndArea();
             GUI.color = Color.white;

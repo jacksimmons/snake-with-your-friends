@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
@@ -45,7 +43,7 @@ public class DebugLabels : MonoBehaviour
     {
         GameObject localPlayerObj = GameObject.Find("LocalPlayerObject");
         if (localPlayerObj == null) return;
-        
+
         //! PlayerStatus playerStatus = localPlayerObj.GetComponentInChildren<PlayerStatus>();
         //! playerStatus.Eat(foodType);
     }

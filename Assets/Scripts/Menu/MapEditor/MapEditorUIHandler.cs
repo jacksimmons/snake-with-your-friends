@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Tilemaps;
@@ -40,7 +38,7 @@ public class MapEditorUIHandler : MonoBehaviour
     private Image m_tileIcon;
     [SerializeField]
     private GameObject m_tileSelectPanel;
-    
+
     [SerializeField]
     private Image m_objectIcon;
     [SerializeField]

@@ -187,7 +187,7 @@ namespace Mirror.Discovery
                     // socket has been closed
                     break;
                 }
-                catch (Exception) {}
+                catch (Exception) { }
             }
         }
 
@@ -268,7 +268,7 @@ namespace Mirror.Discovery
 #endif
 
         void BeginMulticastLock()
-		{
+        {
 #if UNITY_ANDROID
             if (hasMulticastLock) return;
 
@@ -297,7 +297,7 @@ namespace Mirror.Discovery
 #endif
         }
 
-#endregion
+        #endregion
 
         #region Client
 

@@ -16,7 +16,7 @@ namespace Mirror
         public const string Scheme = "tcp4";
 
         public ushort port = 7777;
-        public ushort Port { get => port; set => port=value; }
+        public ushort Port { get => port; set => port = value; }
 
         [Header("Common")]
         [Tooltip("Nagle Algorithm can be disabled by enabling NoDelay")]

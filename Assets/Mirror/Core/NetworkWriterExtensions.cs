@@ -34,7 +34,7 @@ namespace Mirror
         public static void WriteUInt(this NetworkWriter writer, uint value) => writer.WriteBlittable(value);
         public static void WriteUIntNullable(this NetworkWriter writer, uint? value) => writer.WriteBlittableNullable(value);
 
-        public static void WriteLong(this NetworkWriter writer, long value)  => writer.WriteBlittable(value);
+        public static void WriteLong(this NetworkWriter writer, long value) => writer.WriteBlittable(value);
         public static void WriteLongNullable(this NetworkWriter writer, long? value) => writer.WriteBlittableNullable(value);
 
         public static void WriteULong(this NetworkWriter writer, ulong value) => writer.WriteBlittable(value);

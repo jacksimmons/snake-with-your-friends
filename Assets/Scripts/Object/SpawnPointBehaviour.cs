@@ -24,7 +24,7 @@ public class SpawnPointBehaviour : MonoBehaviour
     //    {
     //        float rot = transform.rotation.eulerAngles.z;
     //        Vector3 startDir = Extensions.Vectors.Rotate(Vector3.up, rot);
-                
+
     //        for (int i = 0; i < pm.BodyParts.Count; i++)
     //        {
     //            pm.BodyParts[i].Position = transform.position - (startDir * i);

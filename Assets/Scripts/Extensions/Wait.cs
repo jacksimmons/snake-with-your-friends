@@ -5,7 +5,7 @@ using UnityEngine.SceneManagement;
 
 public class Wait
 {
-    public static IEnumerator WaitThen(float seconds, Action then=null)
+    public static IEnumerator WaitThen(float seconds, Action then = null)
     {
         yield return new WaitForSeconds(seconds);
         then?.Invoke();
@@ -13,7 +13,7 @@ public class Wait
     }
 
     public static IEnumerator WaitForConditionThen(Func<bool> getCondition, float secondsToWait,
-        Action then=null)
+        Action then = null)
     {
         while (!getCondition())
         {
@@ -27,7 +27,7 @@ public class Wait
     /// Uses a findObj function to attempt to locate the object every waitTime, and then calls the "then" action
     /// with the found object as a parameter.
     public static IEnumerator WaitForObjectThen<T>(Func<T> findObj, float secondsToWait,
-        Action<T> then=null) where T : class
+        Action<T> then = null) where T : class
     {
         T obj = null;
         while (obj == null)
@@ -40,7 +40,7 @@ public class Wait
     }
 
 
-    public static IEnumerator LoadSceneThenWait(string sceneName, 
+    public static IEnumerator LoadSceneThenWait(string sceneName,
         Func<bool> conditionToActivate, float secondsToWait)
     {
         AsyncOperation load = SceneManager.LoadSceneAsync(sceneName);

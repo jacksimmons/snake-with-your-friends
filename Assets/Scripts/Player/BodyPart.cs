@@ -1,9 +1,4 @@
-using System;
-using System.Collections.Specialized;
-using System.Runtime.InteropServices;
-using TMPro;
 using UnityEngine;
-using UnityEngine.UIElements;
 
 /// <summary>
 /// Struct to represent data of a BodyPart needed for networking.

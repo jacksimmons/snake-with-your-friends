@@ -1,6 +1,5 @@
 using System;
 using UnityEngine;
-using Conditional = System.Diagnostics.ConditionalAttribute;
 
 namespace Mirror.SimpleWeb
 {

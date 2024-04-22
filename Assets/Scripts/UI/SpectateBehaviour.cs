@@ -1,8 +1,5 @@
-using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
-using static UnityEngine.GraphicsBuffer;
 
 public class SpectateBehaviour : MonoBehaviour
 {
@@ -60,7 +57,7 @@ public class SpectateBehaviour : MonoBehaviour
         int nextIndex = spectateIndex + diff;
         spectateIndex =
             nextIndex >= Manager.AlivePlayers.Count ? 0
-            : 
+            :
             nextIndex < 0 ? Manager.AlivePlayers.Count - 1
             :
             nextIndex;

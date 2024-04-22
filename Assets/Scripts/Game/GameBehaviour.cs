@@ -3,7 +3,6 @@ using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
-using UnityEngine.Pool;
 using UnityEngine.Tilemaps;
 using UnityEngine.UI;
 using Random = UnityEngine.Random;
@@ -39,11 +38,9 @@ public class GameBehaviour : NetworkBehaviour
         Loaded,
     }
 
-    /// <summary>
     /// ====================================
     /// Attribs ----------------------------
     /// ====================================
-    /// </summary>
     private static GameBehaviour _instance;
     public static GameBehaviour Instance
     {
@@ -82,14 +79,14 @@ public class GameBehaviour : NetworkBehaviour
     private static float s_timeSinceLastTick;
 
     private static float s_playerSpeedMultiplier = 1;
-    private static float s_defaultTicksBetweenMoves;
+
 
     public static float TicksBetweenMoves
     {
         get
         {
             if (s_playerSpeedMultiplier == 0) return 0;
-            return s_defaultTicksBetweenMoves / s_playerSpeedMultiplier;
+            return GameSettings.Saved.Data.TimeToMove / s_playerSpeedMultiplier;
         }
     }
 
@@ -101,11 +98,9 @@ public class GameBehaviour : NetworkBehaviour
     private int m_numOutfitSettingsReceived;
 
 
-    /// <summary>
     /// ====================================
     /// Methods ----------------------------
     /// ====================================
-    /// </summary>
     private void OnEnable()
     {
         if (!isOwned) return;
@@ -116,7 +111,6 @@ public class GameBehaviour : NetworkBehaviour
             s_serverPlayersLoadingStage = EGameLoadStage.Unloaded;
             m_numOutfitSettingsReceived = 0;
             s_timeSinceLastTick = 0;
-            s_defaultTicksBetweenMoves = GameSettings.Saved.Data.TimeToMove;
         }
     }
 
@@ -331,7 +325,7 @@ public class GameBehaviour : NetworkBehaviour
         int playerNo = player.GetComponent<PlayerObjectController>().playerNo;
         RpcReceiveOutfitSettings(OutfitSettings.Saved.Data, playerNo);
 
-        RpcBroadcastOutfit(netIdentity.connectionToClient); 
+        RpcBroadcastOutfit(netIdentity.connectionToClient);
     }
 
 
@@ -606,16 +600,6 @@ public class GameBehaviour : NetworkBehaviour
 
 
     [Command]
-    public void CmdSetTimeToMove(float timeToMove)
-    {
-        // We need TimeBetweenMoves = timeToMove
-        // We have TimeBetweenMoves = baseTimeToMove/{multiplier}
-        // So multiplier = timeToMove/baseTimeToMove
-        ServerSetSpeedMultiplier(timeToMove / s_defaultTicksBetweenMoves);
-    }
-
-
-    [Command]
     public void CmdSetSpeedMultiplier(float multiplier) { ServerSetSpeedMultiplier(multiplier); }
 
 
@@ -691,7 +675,7 @@ public class GameBehaviour : NetworkBehaviour
 
         if (active)
         {
-            puzzleComplete.Find("Level").GetComponent<TMP_Text>().text = $"Level: {SaveData.Saved.PuzzleLevel+1}/{SaveData.MaxPuzzleLevel}";
+            puzzleComplete.Find("Level").GetComponent<TMP_Text>().text = $"Level: {SaveData.Saved.PuzzleLevel + 1}/{SaveData.MaxPuzzleLevel}";
             Button btn = puzzleComplete.Find("NextButton").GetComponent<Button>();
             btn.onClick.RemoveAllListeners();
 

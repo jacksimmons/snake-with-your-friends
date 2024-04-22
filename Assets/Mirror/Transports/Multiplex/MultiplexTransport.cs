@@ -69,7 +69,7 @@ namespace Mirror
         {
             KeyValuePair<int, int> pair = multiplexedToOriginalId[multiplexId];
             originalConnectionId = pair.Key;
-            transportIndex       = pair.Value;
+            transportIndex = pair.Value;
         }
 
         public int MultiplexId(int originalConnectionId, int transportIndex)

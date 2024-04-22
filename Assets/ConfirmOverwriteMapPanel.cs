@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -22,7 +20,8 @@ public class ConfirmOverwriteMapPanel : MonoBehaviour
         titleLabel.text = $"Are you sure? ({mapName})";
         confirmButton.interactable = false;
 
-        confirmButton.onClick.AddListener(() => { 
+        confirmButton.onClick.AddListener(() =>
+        {
             menu.SaveMapToFile(mapName);
             gameObject.SetActive(false);
 

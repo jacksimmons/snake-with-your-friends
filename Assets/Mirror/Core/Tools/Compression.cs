@@ -173,7 +173,7 @@ namespace Mirror
         }
 
         const float QuaternionMinRange = -0.707107f;
-        const float QuaternionMaxRange =  0.707107f;
+        const float QuaternionMaxRange = 0.707107f;
         const ushort TenBitsMax = 0b11_1111_1111;
 
         // note: assumes normalized quaternions
@@ -258,15 +258,15 @@ namespace Mirror
             float c = ScaleUShortToFloat(cScaled, 0, TenBitsMax, QuaternionMinRange, QuaternionMaxRange);
 
             // calculate the omitted component based on a²+b²+c²+d²=1
-            float d = Mathf.Sqrt(1 - a*a - b*b - c*c);
+            float d = Mathf.Sqrt(1 - a * a - b * b - c * c);
 
             // reconstruct based on largest index
             Vector4 value;
             switch (largestIndex)
             {
-                case 0:  value = new Vector4(d, a, b, c); break;
-                case 1:  value = new Vector4(a, d, b, c); break;
-                case 2:  value = new Vector4(a, b, d, c); break;
+                case 0: value = new Vector4(d, a, b, c); break;
+                case 1: value = new Vector4(a, d, b, c); break;
+                case 2: value = new Vector4(a, b, d, c); break;
                 default: value = new Vector4(a, b, c, d); break;
             }
 
@@ -539,7 +539,7 @@ namespace Mirror
             byte a8 = reader.ReadByte();
             if (a0 == 255)
             {
-                return a1 + (((ulong)a2) << 8) + (((ulong)a3) << 16) + (((ulong)a4) << 24) + (((ulong)a5) << 32) + (((ulong)a6) << 40) + (((ulong)a7) << 48)  + (((ulong)a8) << 56);
+                return a1 + (((ulong)a2) << 8) + (((ulong)a3) << 16) + (((ulong)a4) << 24) + (((ulong)a5) << 32) + (((ulong)a6) << 40) + (((ulong)a7) << 48) + (((ulong)a8) << 56);
             }
 
             throw new IndexOutOfRangeException($"DecompressVarInt failure: {a0}");

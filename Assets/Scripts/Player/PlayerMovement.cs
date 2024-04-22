@@ -1,7 +1,7 @@
-using System.Collections.Generic;
-using UnityEngine;
 using Mirror;
 using System;
+using System.Collections.Generic;
+using UnityEngine;
 
 // Class which controls the Body Parts of a Player object.
 // Is Destroyed when the player dies, but other components are kept.

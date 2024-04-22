@@ -93,9 +93,9 @@ namespace Mirror
             switch (channeldId)
             {
                 case Channels.Reliable:
-                    return reliableLatency/1000 + spike;
+                    return reliableLatency / 1000 + spike;
                 case Channels.Unreliable:
-                    return unreliableLatency/1000 + spike;
+                    return unreliableLatency / 1000 + spike;
                 default:
                     return 0;
             }
@@ -135,11 +135,11 @@ namespace Mirror
                     break;
                 case Channels.Unreliable:
                     // simulate packet loss
-                    bool drop = random.NextDouble() < unreliableLoss/100;
+                    bool drop = random.NextDouble() < unreliableLoss / 100;
                     if (!drop)
                     {
                         // simulate scramble (Random.Next is < max, so +1)
-                        bool scramble = random.NextDouble() < unreliableScramble/100;
+                        bool scramble = random.NextDouble() < unreliableScramble / 100;
                         int last = unreliableQueue.Count;
                         int index = scramble ? random.Next(0, last + 1) : last;
 
@@ -157,18 +157,18 @@ namespace Mirror
 
         public override void ClientConnect(string address)
         {
-            wrap.OnClientConnected    = OnClientConnected;
+            wrap.OnClientConnected = OnClientConnected;
             wrap.OnClientDataReceived = OnClientDataReceived;
-            wrap.OnClientError        = OnClientError;
+            wrap.OnClientError = OnClientError;
             wrap.OnClientDisconnected = OnClientDisconnected;
             wrap.ClientConnect(address);
         }
 
         public override void ClientConnect(Uri uri)
         {
-            wrap.OnClientConnected    = OnClientConnected;
+            wrap.OnClientConnected = OnClientConnected;
             wrap.OnClientDataReceived = OnClientDataReceived;
-            wrap.OnClientError        = OnClientError;
+            wrap.OnClientError = OnClientError;
             wrap.OnClientDisconnected = OnClientDisconnected;
             wrap.ClientConnect(uri);
         }

@@ -10,12 +10,12 @@ namespace Mirror.Examples.CCU
         // player may switch to manual movement any time
         [Header("Automated Movement")]
         public bool autoMove = true;
-        public float autoSpeed           = 2;
+        public float autoSpeed = 2;
         public float movementProbability = 0.5f;
-        public float movementDistance    = 20;
-        bool         moving;
-        Vector3      start;
-        Vector3      destination;
+        public float movementDistance = 20;
+        bool moving;
+        Vector3 start;
+        Vector3 destination;
 
         [Header("Manual Movement")]
         public float manualSpeed = 10;

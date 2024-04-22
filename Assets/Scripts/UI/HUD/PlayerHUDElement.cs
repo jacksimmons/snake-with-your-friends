@@ -1,7 +1,5 @@
-using Steamworks;
 using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class PlayerHUDElement : MonoBehaviour
 {

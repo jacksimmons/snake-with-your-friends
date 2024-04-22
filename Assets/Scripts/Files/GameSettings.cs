@@ -1,8 +1,4 @@
-using Mirror;
 using System;
-using System.Collections.Generic;
-using System.Data.SqlTypes;
-using UnityEngine;
 
 
 [Serializable]
@@ -36,7 +32,7 @@ public struct GameSettingsData
 
         FoodSettingsData = foodSettingsData.Data;
     }
-} 
+}
 
 
 [Serializable]

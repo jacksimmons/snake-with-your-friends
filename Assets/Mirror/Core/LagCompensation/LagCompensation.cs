@@ -45,19 +45,21 @@ namespace Mirror
             where T : Capture
         {
             before = default;
-            after  = default;
+            after = default;
             t = 0;
 
             // can't sample an empty history
             // interpolation needs at least one entry.
             // extrapolation needs at least two entries.
             //   can't Lerp(A, A, 1.5). dist(A, A) * 1.5 is always 0.
-            if(history.Count < 2) {
+            if (history.Count < 2)
+            {
                 return false;
             }
 
             // older than oldest
-            if (timestamp < history.Peek().Key) {
+            if (timestamp < history.Peek().Key)
+            {
                 return false;
             }
 
@@ -67,9 +69,11 @@ namespace Mirror
             //      should be O(1) most of the time, unless sampling was off.
             KeyValuePair<double, T> prev = new KeyValuePair<double, T>();
             KeyValuePair<double, T> prevPrev = new KeyValuePair<double, T>();
-            foreach(KeyValuePair<double, T> entry in history) {
+            foreach (KeyValuePair<double, T> entry in history)
+            {
                 // exact match?
-                if (timestamp == entry.Key) {
+                if (timestamp == entry.Key)
+                {
                     before = entry.Value;
                     after = entry.Value;
                     t = Mathd.InverseLerp(before.timestamp, after.timestamp, timestamp);
@@ -77,7 +81,8 @@ namespace Mirror
                 }
 
                 // did we check beyond timestamp? then return the previous two.
-                if (entry.Key > timestamp) {
+                if (entry.Key > timestamp)
+                {
                     before = prev.Value;
                     after = entry.Value;
                     t = Mathd.InverseLerp(before.timestamp, after.timestamp, timestamp);
@@ -101,7 +106,8 @@ namespace Mirror
             //    punished by missing their targets since no entry at 'time' was found.
             // => extrapolation is the best solution. make sure this works as
             //    expected and within limits.
-            if (prev.Key < timestamp && timestamp <= prev.Key + interval) {
+            if (prev.Key < timestamp && timestamp <= prev.Key + interval)
+            {
                 // return the last two valid snapshots.
                 // can't just return (after, after) because we can't extrapolate
                 // if their distance is 0.

@@ -1,7 +1,6 @@
 using Steamworks;
 using TMPro;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 /// <summary>
 /// Client-side lobby joining.

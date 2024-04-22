@@ -96,7 +96,7 @@ public class HostSettingsHandler : MonoBehaviour
 
     public void OnGameModeUpdate(int index)
     {
-        GameSettings.Saved.Data.GameMode = 
+        GameSettings.Saved.Data.GameMode =
         (EGameMode)Enum.GetValues(typeof(EGameMode)).GetValue(index);
         m_lobbyMenu.SaveGameSettings();
     }

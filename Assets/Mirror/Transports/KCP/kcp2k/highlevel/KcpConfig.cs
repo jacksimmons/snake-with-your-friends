@@ -67,18 +67,18 @@ namespace kcp2k
         // constructor with defaults for convenience.
         // makes it easy to define "new KcpConfig(DualMode=false)" etc.
         public KcpConfig(
-            bool DualMode          = true,
-            int RecvBufferSize     = 1024 * 1024 * 7,
-            int SendBufferSize     = 1024 * 1024 * 7,
-            int Mtu                = Kcp.MTU_DEF,
-            bool NoDelay           = true,
-            uint Interval          = 10,
-            int FastResend         = 0,
-            bool CongestionWindow  = false,
-            uint SendWindowSize    = Kcp.WND_SND,
+            bool DualMode = true,
+            int RecvBufferSize = 1024 * 1024 * 7,
+            int SendBufferSize = 1024 * 1024 * 7,
+            int Mtu = Kcp.MTU_DEF,
+            bool NoDelay = true,
+            uint Interval = 10,
+            int FastResend = 0,
+            bool CongestionWindow = false,
+            uint SendWindowSize = Kcp.WND_SND,
             uint ReceiveWindowSize = Kcp.WND_RCV,
-            int Timeout            = KcpPeer.DEFAULT_TIMEOUT,
-            uint MaxRetransmits    = Kcp.DEADLINK)
+            int Timeout = KcpPeer.DEFAULT_TIMEOUT,
+            uint MaxRetransmits = Kcp.DEADLINK)
         {
             this.DualMode = DualMode;
             this.RecvBufferSize = RecvBufferSize;

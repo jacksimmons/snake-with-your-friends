@@ -1,6 +1,6 @@
+using AOT;
 using System;
 using System.Collections.Generic;
-using AOT;
 
 namespace Mirror.SimpleWeb
 {

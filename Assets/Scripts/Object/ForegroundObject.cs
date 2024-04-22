@@ -4,7 +4,7 @@ using UnityEngine.UI;
 
 public class ForegroundObject : MonoBehaviour
 {
-    private float _opacityDecrement = 1f/255f / 10f;
+    private float _opacityDecrement = 1f / 255f / 10f;
     private Image _img;
 
     private void Start()

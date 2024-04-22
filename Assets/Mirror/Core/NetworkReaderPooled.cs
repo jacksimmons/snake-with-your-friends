@@ -8,8 +8,8 @@ namespace Mirror
     // TODO make sealed again after removing obsolete NetworkReaderPooled!
     public class NetworkReaderPooled : NetworkReader, IDisposable
     {
-        internal NetworkReaderPooled(byte[] bytes) : base(bytes) {}
-        internal NetworkReaderPooled(ArraySegment<byte> segment) : base(segment) {}
+        internal NetworkReaderPooled(byte[] bytes) : base(bytes) { }
+        internal NetworkReaderPooled(ArraySegment<byte> segment) : base(segment) { }
         public void Dispose() => NetworkReaderPool.Return(this);
     }
 }

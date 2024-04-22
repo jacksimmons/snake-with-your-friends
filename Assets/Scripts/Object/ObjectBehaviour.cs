@@ -1,7 +1,4 @@
-using System;
 using System.Collections;
-using System.Collections.Generic;
-using TMPro;
 using UnityEngine;
 
 
@@ -13,7 +10,7 @@ public class ObjectBehaviour : MonoBehaviour
     public byte ObjId
     {
         get { return m_objId; }
-        set 
+        set
         {
             if (m_objId == 0)
                 m_objId = value;
@@ -81,20 +78,15 @@ public class ObjectBehaviour : MonoBehaviour
         }
 
 
-        // --- Player collisions
+        // --- Player collisions (Do not kill the player here - Shit for example shouldn't!)
         Transform player = PlayerStatic.TryGetPlayerTransformFromBodyPart(other.gameObject);
         if (player == null) return;
 
         PlayerMovement pm = player.GetComponent<PlayerMovement>();
 
-        // If the player can move freely, they don't die when "hitting" stuff
-        if (!pm.FreeMovement)
-        {
-            if (pm.GetComponent<PlayerStatus>().IsBuff)
-                StartCoroutine(Explode());
-            else
-                pm.HandleDeath();
-        }
+        // If the player is buff, handle explosion
+        if (pm.GetComponent<PlayerStatus>().IsBuff)
+            StartCoroutine(Explode());
     }
 
 

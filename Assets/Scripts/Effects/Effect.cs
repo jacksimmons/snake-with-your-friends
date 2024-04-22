@@ -27,8 +27,8 @@ public class Effect
     }
 
     // An effect which may cause another effect.
-    public Effect(EEffect effectName, float lifetime=0f, float cooldown=0f, bool isInputEffect=false,
-        int level=0, Effect[] causes = null, bool isOneOff=false)
+    public Effect(EEffect effectName, float lifetime = 0f, float cooldown = 0f, bool isInputEffect = false,
+        int level = 0, Effect[] causes = null, bool isOneOff = false)
     {
         EffectName = effectName;
         LifetimeMax = lifetime;

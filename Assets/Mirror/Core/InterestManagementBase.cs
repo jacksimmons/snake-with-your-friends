@@ -30,7 +30,7 @@ namespace Mirror
         }
 
         [ServerCallback]
-        public virtual void Reset() {}
+        public virtual void Reset() { }
 
         // Callback used by the visibility system to determine if an observer
         // (player) can see the NetworkIdentity. If this function returns true,
@@ -58,12 +58,12 @@ namespace Mirror
         /// <summary>Called on the server when a new networked object is spawned.</summary>
         // (useful for 'only rebuild if changed' interest management algorithms)
         [ServerCallback]
-        public virtual void OnSpawned(NetworkIdentity identity) {}
+        public virtual void OnSpawned(NetworkIdentity identity) { }
 
         /// <summary>Called on the server when a networked object is destroyed.</summary>
         // (useful for 'only rebuild if changed' interest management algorithms)
         [ServerCallback]
-        public virtual void OnDestroyed(NetworkIdentity identity) {}
+        public virtual void OnDestroyed(NetworkIdentity identity) { }
 
         public abstract void Rebuild(NetworkIdentity identity, bool initialize);
 

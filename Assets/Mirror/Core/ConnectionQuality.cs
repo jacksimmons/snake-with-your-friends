@@ -23,11 +23,11 @@ namespace Mirror
         {
             switch (quality)
             {
-                case ConnectionQuality.EXCELLENT:  return Color.green;
-                case ConnectionQuality.GOOD:       return Color.yellow;
-                case ConnectionQuality.FAIR:       return new Color(1.0f, 0.647f, 0.0f);
-                case ConnectionQuality.POOR:       return Color.red;
-                default:                           return Color.gray;
+                case ConnectionQuality.EXCELLENT: return Color.green;
+                case ConnectionQuality.GOOD: return Color.yellow;
+                case ConnectionQuality.FAIR: return new Color(1.0f, 0.647f, 0.0f);
+                case ConnectionQuality.POOR: return Color.red;
+                default: return Color.gray;
             }
         }
 

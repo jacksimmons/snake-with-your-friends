@@ -1,11 +1,8 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using TMPro;
 using UnityEngine;
 using UnityEngine.Tilemaps;
-using UnityEngine.UI;
 
 public class MapEditorPaintBehaviour : MonoBehaviour
 {
@@ -111,7 +108,7 @@ public class MapEditorPaintBehaviour : MonoBehaviour
 
     public void Fill(Vector3Int start, bool draw)
     {
-        StartCoroutine(FillCoro(start, 
+        StartCoroutine(FillCoro(start,
             (Vector3Int pos) => CheckIfTilePosCanBeFilled(pos, draw),
             draw ? Draw : Erase));
     }
@@ -231,7 +228,7 @@ public class MapEditorPaintBehaviour : MonoBehaviour
 
     public void FillObject(Vector3Int start, bool draw)
     {
-        StartCoroutine(FillCoro(start, 
+        StartCoroutine(FillCoro(start,
            (Vector3Int pos) => CheckIfObjPosCanBeFilled(pos, draw),
            draw ? DrawObject : EraseObject));
     }

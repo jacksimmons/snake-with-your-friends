@@ -43,8 +43,8 @@ namespace Mirror.Examples.LagCompensationDemo
 
         // debugging ///////////////////////////////////////////////////////////
         [Header("Debug")]
-        public Color hitColor      = Color.blue;
-        public Color missedColor   = Color.magenta;
+        public Color hitColor = Color.blue;
+        public Color missedColor = Color.magenta;
         public Color originalColor = Color.black;
 
         [Header("Simulation")]

@@ -76,7 +76,7 @@ namespace Mirror.Examples.TanksCoop
 
         public PlayerController playerController;
         public Transform seatPosition;
-        
+
         [SyncVar(hook = nameof(OnOwnerChangedHook))]
         public NetworkIdentity objectOwner;
 
@@ -90,7 +90,7 @@ namespace Mirror.Examples.TanksCoop
                 playerController = _new.GetComponent<PlayerController>();
                 if (playerController) { playerController.canControlPlayer = false; }
             }
-            else if(_old)
+            else if (_old)
             {
                 playerController = _old.GetComponent<PlayerController>();
                 if (playerController) { playerController.canControlPlayer = true; }

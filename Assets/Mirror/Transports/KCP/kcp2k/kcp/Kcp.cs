@@ -15,7 +15,7 @@ namespace kcp2k
         public const int RTO_DEF = 200;            // default RTO
         public const int RTO_MAX = 60000;          // maximum RTO
         public const int CMD_PUSH = 81;            // cmd: push data
-        public const int CMD_ACK  = 82;            // cmd: ack
+        public const int CMD_ACK = 82;            // cmd: ack
         public const int CMD_WASK = 83;            // cmd: window probe (ask)
         public const int CMD_WINS = 84;            // cmd: window size (tell/insert)
         public const int ASK_SEND = 1;             // need to send CMD_WASK
@@ -100,18 +100,18 @@ namespace kcp2k
         // from the same connection.
         public Kcp(uint conv, Action<byte[], int> output)
         {
-            this.conv   = conv;
+            this.conv = conv;
             this.output = output;
             snd_wnd = WND_SND;
             rcv_wnd = WND_RCV;
             rmt_wnd = WND_RCV;
             mtu = MTU_DEF;
             mss = mtu - OVERHEAD;
-            rx_rto    = RTO_DEF;
+            rx_rto = RTO_DEF;
             rx_minrto = RTO_MIN;
-            interval  = INTERVAL;
-            ts_flush  = INTERVAL;
-            ssthresh  = THRESH_INIT;
+            interval = INTERVAL;
+            ts_flush = INTERVAL;
+            ssthresh = THRESH_INIT;
             fastlimit = FASTACK_LIMIT;
             dead_link = DEADLINK;
             buffer = new byte[(mtu + OVERHEAD) * 3];
@@ -342,7 +342,7 @@ namespace kcp2k
                 int delta = rtt - rx_srtt;
                 if (delta < 0) delta = -delta;
                 rx_rttval = (3 * rx_rttval + delta) / 4;
-                rx_srtt   = (7 * rx_srtt + rtt) / 8;
+                rx_srtt = (7 * rx_srtt + rtt) / 8;
                 if (rx_srtt < 1) rx_srtt = 1;
             }
             int rto = rx_srtt + Math.Max((int)interval, 4 * rx_rttval);
@@ -449,7 +449,7 @@ namespace kcp2k
         // appends an ack.
         void AckPush(uint sn, uint ts) // serial number, timestamp
         {
-            acklist.Add(new AckItem{ serialNumber = sn, timestamp = ts });
+            acklist.Add(new AckItem { serialNumber = sn, timestamp = ts });
         }
 
         // ikcp_parse_data
@@ -630,8 +630,8 @@ namespace kcp2k
                             seg.cmd = cmd;
                             seg.frg = frg;
                             seg.wnd = wnd;
-                            seg.ts  = ts;
-                            seg.sn  = sn;
+                            seg.ts = ts;
+                            seg.sn = sn;
                             seg.una = una;
                             if (len > 0)
                             {
@@ -723,7 +723,7 @@ namespace kcp2k
         // with congestion control, the window will be extremely small(!).
         public void Flush()
         {
-            int size  = 0;     // amount of bytes to flush. 'buffer ptr' in C.
+            int size = 0;     // amount of bytes to flush. 'buffer ptr' in C.
             bool lost = false; // lost segments
 
             // update needs to be called before flushing
@@ -1059,8 +1059,8 @@ namespace kcp2k
         public void SetInterval(uint interval)
         {
             // clamp interval between 10 and 5000
-            if      (interval > 5000) interval = 5000;
-            else if (interval < 10)   interval = 10;
+            if (interval > 5000) interval = 5000;
+            else if (interval < 10) interval = 10;
             this.interval = interval;
         }
 

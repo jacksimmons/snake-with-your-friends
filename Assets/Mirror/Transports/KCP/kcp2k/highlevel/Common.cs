@@ -31,13 +31,13 @@ namespace kcp2k
             // log initial size for comparison.
             // remember initial size for log comparison
             int initialReceive = socket.ReceiveBufferSize;
-            int initialSend    = socket.SendBufferSize;
+            int initialSend = socket.SendBufferSize;
 
             // set to configured size
             try
             {
                 socket.ReceiveBufferSize = recvBufferSize;
-                socket.SendBufferSize    = sendBufferSize;
+                socket.SendBufferSize = sendBufferSize;
             }
             catch (SocketException)
             {
@@ -45,7 +45,7 @@ namespace kcp2k
             }
 
 
-            Log.Info($"Kcp: RecvBuf = {initialReceive}=>{socket.ReceiveBufferSize} ({socket.ReceiveBufferSize/initialReceive}x) SendBuf = {initialSend}=>{socket.SendBufferSize} ({socket.SendBufferSize/initialSend}x)");
+            Log.Info($"Kcp: RecvBuf = {initialReceive}=>{socket.ReceiveBufferSize} ({socket.ReceiveBufferSize / initialReceive}x) SendBuf = {initialSend}=>{socket.SendBufferSize} ({socket.SendBufferSize / initialSend}x)");
         }
 
         // generate a connection hash from IP+Port.

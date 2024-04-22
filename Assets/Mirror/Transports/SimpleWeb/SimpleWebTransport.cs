@@ -14,7 +14,7 @@ namespace Mirror.SimpleWeb
 
         [Tooltip("Port to use for server and client")]
         public ushort port = 7778;
-        public ushort Port { get => port; set => port=value; }
+        public ushort Port { get => port; set => port = value; }
 
         [Tooltip("Tells the client to use the default port. This is useful when connecting to reverse proxy rather than directly to websocket server")]
         public bool ClientUseDefaultPort;

@@ -1,5 +1,4 @@
 using System.Collections;
-using TMPro;
 using UnityEngine;
 
 
@@ -73,12 +72,12 @@ public class ProjectileBehaviour : ObjectBehaviour
 
 
         // --- Player Collisions
-        bool isPlayer = true;
         Transform player = PlayerStatic.TryGetOwnedPlayerTransformFromBodyPart(other.gameObject);
         if (player == null) return;
         if (PlayerImmune) return;
 
 
+        // Core effects
         switch (type)
         {
             case EProjectileType.Shit:
@@ -91,25 +90,9 @@ public class ProjectileBehaviour : ObjectBehaviour
                 int index = other.transform.GetSiblingIndex();
                 PlayerMovement pm = player.GetComponent<PlayerMovement>();
                 pm.QRemoveBodyPart(index);
-                break;
-            default:
-                break;
-        }
-
-        // Player collision VFX, enabled only on owning client (for now)
-        switch (type)
-        {
-            case EProjectileType.Fireball:
-                if (isPlayer)
-                    StartCoroutine(Explode());
-                else
-                {
-                    m_speedMod *= m_restitution * -1;
-                    transform.Rotate(Vector3.forward * 180);
-                }
-                break;
-            default:
                 StartCoroutine(Explode());
+                break;
+            default:
                 break;
         }
     }

@@ -9,7 +9,7 @@ using UnityEngine;
 
 namespace Mirror
 {
-    public struct MinMaxBounds: IEquatable<Bounds>
+    public struct MinMaxBounds : IEquatable<Bounds>
     {
         public Vector3 min;
         public Vector3 max;

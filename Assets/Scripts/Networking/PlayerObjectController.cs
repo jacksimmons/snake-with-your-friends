@@ -1,10 +1,7 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
 using Mirror;
 using Steamworks;
-using UnityEditor;
-using System;
+using System.Collections.Generic;
+using UnityEngine;
 
 public class PlayerObjectController : NetworkBehaviour
 {
@@ -129,7 +126,7 @@ public class PlayerObjectController : NetworkBehaviour
 
     public void OnPlayerHostUpdate(bool oldValue, bool newValue)
     {
-        
+
     }
 
     [Command]
@@ -138,7 +135,7 @@ public class PlayerObjectController : NetworkBehaviour
         Manager.StartGame("Game");
     }
 
-    
+
     /// <summary>
     /// Converts all Body Parts into BodyPartDatas, ready to be sent across the network.
     /// </summary>
@@ -213,7 +210,7 @@ public class PlayerObjectController : NetworkBehaviour
     }
 
     public void LogDeath()
-    { 
+    {
         CmdLogDeath(playerNo);
         if (PlayerOnHUD)
             PlayerOnHUD.AppearDead();
@@ -230,7 +227,7 @@ public class PlayerObjectController : NetworkBehaviour
         {
             player.PlayerOnHUD.AppearDead();
         }));
-        Manager.KillPlayer(playerNo-1);
+        Manager.KillPlayer(playerNo - 1);
     }
 
     [ClientRpc]

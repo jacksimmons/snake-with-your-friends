@@ -1,8 +1,6 @@
-using UnityEngine.Tilemaps;
-using UnityEngine;
-using System.Runtime.Serialization.Formatters.Binary;
-using System;
 using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.Tilemaps;
 
 public class MapLoader : MonoBehaviour
 {

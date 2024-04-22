@@ -1,10 +1,10 @@
 //#if MIRROR <- commented out because MIRROR isn't defined on first import yet
+using Mirror;
 using System;
 using System.Linq;
 using System.Net;
-using UnityEngine;
-using Mirror;
 using Unity.Collections;
+using UnityEngine;
 using UnityEngine.Serialization;
 
 namespace kcp2k
@@ -20,7 +20,7 @@ namespace kcp2k
         [Header("Transport Configuration")]
         [FormerlySerializedAs("Port")]
         public ushort port = 7777;
-        public ushort Port { get => port; set => port=value; }
+        public ushort Port { get => port; set => port = value; }
         [Tooltip("DualMode listens to IPv6 and IPv4 simultaneously. Disable if the platform only supports IPv4.")]
         public bool DualMode = true;
         [Tooltip("NoDelay is recommended to reduce latency. This also scales better without buffers getting full.")]
@@ -38,7 +38,8 @@ namespace kcp2k
         [Tooltip("KCP fastresend parameter. Faster resend for the cost of higher bandwidth. 0 in normal mode, 2 in turbo mode.")]
         public int FastResend = 2;
         [Tooltip("KCP congestion window. Restricts window size to reduce congestion. Results in only 2-3 MTU messages per Flush even on loopback. Best to keept his disabled.")]
-        /*public*/ bool CongestionWindow = false; // KCP 'NoCongestionWindow' is false by default. here we negate it for ease of use.
+        /*public*/
+        bool CongestionWindow = false; // KCP 'NoCongestionWindow' is false by default. here we negate it for ease of use.
         [Tooltip("KCP window size can be modified to support higher loads. This also increases max message size.")]
         public uint ReceiveWindowSize = 4096; //Kcp.WND_RCV; 128 by default. Mirror sends a lot, so we need a lot more.
         [Tooltip("KCP window size can be modified to support higher loads.")]
@@ -84,7 +85,7 @@ namespace kcp2k
 
         public static TransportError ToTransportError(ErrorCode error)
         {
-            switch(error)
+            switch (error)
             {
                 case ErrorCode.DnsResolve: return TransportError.DnsResolve;
                 case ErrorCode.Timeout: return TransportError.Timeout;
@@ -105,7 +106,7 @@ namespace kcp2k
             if (debugLog)
                 Log.Info = Debug.Log;
             else
-                Log.Info = _ => {};
+                Log.Info = _ => { };
             Log.Warning = Debug.LogWarning;
             Log.Error = Debug.LogError;
 
@@ -199,7 +200,7 @@ namespace kcp2k
             // call event. might be null if no statistics are listening etc.
             OnServerDataSent?.Invoke(connectionId, segment, channelId);
         }
-        public override void ServerDisconnect(int connectionId) =>  server.Disconnect(connectionId);
+        public override void ServerDisconnect(int connectionId) => server.Disconnect(connectionId);
         public override string ServerGetClientAddress(int connectionId)
         {
             IPEndPoint endPoint = server.GetClientEndPoint(connectionId);
@@ -223,7 +224,7 @@ namespace kcp2k
         public override void ServerLateUpdate() => server.TickOutgoing();
 
         // common
-        public override void Shutdown() {}
+        public override void Shutdown() { }
 
         // max message size
         public override int GetMaxPacketSize(int channelId = Channels.Reliable)
@@ -324,7 +325,7 @@ namespace kcp2k
             GUILayout.EndArea();
         }
 
-// OnGUI allocates even if it does nothing. avoid in release.
+        // OnGUI allocates even if it does nothing. avoid in release.
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
         protected virtual void OnGUI()
         {

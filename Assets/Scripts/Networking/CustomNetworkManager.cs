@@ -1,9 +1,9 @@
+using Mirror;
 using Steamworks;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using Mirror;
-using System.Linq;
 
 public class CustomNetworkManager : NetworkManager
 {
@@ -96,7 +96,7 @@ public class CustomNetworkManager : NetworkManager
             playerInstance.playerNo = Players.Count + 1;
 
             CSteamID lobbyID = new(Steam.Instance.LobbyID);
-            playerInstance.playerSteamID = 
+            playerInstance.playerSteamID =
                 (ulong)SteamMatchmaking.GetLobbyMemberByIndex(lobbyID, Players.Count);
 
             NetworkServer.AddPlayerForConnection(conn, playerInstance.gameObject);

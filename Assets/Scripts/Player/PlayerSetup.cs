@@ -1,6 +1,4 @@
 using System.Collections.Generic;
-using System;
-using UnityEditor;
 using UnityEngine;
 
 public static class PlayerStatic
