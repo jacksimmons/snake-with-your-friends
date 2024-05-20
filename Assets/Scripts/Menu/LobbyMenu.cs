@@ -281,15 +281,6 @@ public class LobbyMenu : MonoBehaviour
     }
 
 
-    /// <summary>
-    /// GameSettings is save-clamped in this menu, meaning any form of exit from it must result in a save.
-    /// 
-    /// Current exits:
-    /// - Main Menu button (In OnDestroy)
-    /// - Start Game (In OnDestroy)
-    /// - Playtest Start Game (In OnDestroy)
-    /// - Close Game [Alt-F4] (In OnDestroy)
-    /// </summary>
     public void SaveGameSettings()
     {
         Saving.SaveToFile(GameSettings.Saved, "GameSettings.json");

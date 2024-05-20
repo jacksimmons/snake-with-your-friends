@@ -1,7 +1,10 @@
 using Mirror;
+using Steamworks;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
+using UnityEngine.InputSystem.HID;
 using UnityEngine.UI;
 
 using Random = UnityEngine.Random;
@@ -16,7 +19,6 @@ public class PlayerStatus : NetworkBehaviour
     // An angle either side of the player defining the random range of RocketShitting.
     // Recommended range: 0-90. Past 90 will give very shitty results.
     private const float SHIT_EXPLOSIVENESS = 45;
-
 
     private PlayerMovement m_pm;
     [SerializeField]
@@ -105,7 +107,9 @@ public class PlayerStatus : NetworkBehaviour
         if (ItemSlotEffect == null) return;
 
         if (!ItemSlotEffect.IsInputEffect)
+        {
             TryUseItem();
+        }
         else
         {
             ActiveInputEffect ??= ItemSlotEffect;
@@ -194,11 +198,10 @@ public class PlayerStatus : NetworkBehaviour
         for (int i = 0; i < ActivePassiveEffects.Count; i++)
         {
             Effect effect = ActivePassiveEffects[i];
+
             if (effect.Cooldown <= 0)
             {
                 effect.ResetCooldown();
-                StatusEffectUI statusUI = GameObject.FindWithTag("StatusUI").GetComponent<StatusEffectUI>();
-
                 switch (effect.EffectName)
                 {
                     case EEffect.Buff:
@@ -224,12 +227,10 @@ public class PlayerStatus : NetworkBehaviour
 
                     case EEffect.RocketShitting:
                         CmdSpawn(EEffect.RocketShitting);
-                        statusUI.ToggleShitIcon(true);
                         break;
 
                     case EEffect.Sleeping:
                         m_pm.Frozen = true;
-                        statusUI.ToggleSleepingIcon(true);
                         break;
 
                     case EEffect.SoberUp:
@@ -238,16 +239,6 @@ public class PlayerStatus : NetworkBehaviour
 
                     case EEffect.SpeedBoost:
                         GameBehaviour.Instance.CmdSetSpeedMultiplier(Effect.GetSpeedMultFromSignedLevel(effect.EffectLevel));
-
-                        statusUI.DisableAllSpeedIcons();
-                        if (effect.EffectLevel >= 0)
-                        {
-                            statusUI.ChangeIconActive(true, "Fast", effect.EffectLevel, true);
-                        }
-                        else
-                        {
-                            statusUI.ChangeIconActive(false, "Slow", -effect.EffectLevel, true);
-                        }
                         break;
                 }
 
@@ -327,6 +318,9 @@ public class PlayerStatus : NetworkBehaviour
         else
         {
             ActivePassiveEffects.Add(effect);
+
+            PlayerHUDElement hud = GameObject.FindWithTag("HUD").GetComponent<PlayerHUDElementsHandler>().GetHUDElementOrNull((ulong)SteamUser.GetSteamID());
+            hud.AddStatusEffect(effect);
         }
     }
 

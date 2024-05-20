@@ -202,6 +202,16 @@ MonoBehaviour:
   m_fireball: {fileID: 2942080626621601328, guid: 04777406194d8464aa1d686d6788ebe9, type: 3}
   m_staticShit: {fileID: 860416237506986402, guid: f045dd42fe85deb4abbaf393a5043e56, type: 3}
   m_buffArms: {fileID: 202826521237215549, guid: 37b4da5895f5a034e80ab301a05e28b0, type: 3}
+  m_customEffects: 02000000030000000500000005000000050000000500000005000000
+  m_customEffectSprites:
+  - {fileID: 21300000, guid: 28099c135b360f34fa23f8e6707c6869, type: 3}
+  - {fileID: 21300000, guid: 49144bff85821894dbbb500cc1f4b0a0, type: 3}
+  - {fileID: 21300000, guid: 66ccf70fdb5b2e0429e4d1f468b3aef6, type: 3}
+  - {fileID: 21300000, guid: 1eb77828da230b148ba1254dc7a92c63, type: 3}
+  - {fileID: 21300000, guid: 473e14b41b81de94ab374572d3638fd7, type: 3}
+  - {fileID: 21300000, guid: db6e88119b4b28f43af9a955c6cf9a14, type: 3}
+  - {fileID: 21300000, guid: 516d888cfd8504740b433904f534ac0e, type: 3}
+  m_customEffectLevels: 00000000000000000100000002000000030000000400000005000000
 --- !u!114 &8319943450019130825
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -266,13 +276,6 @@ MonoBehaviour:
   syncDirection: 0
   syncMode: 0
   syncInterval: 0
-  availablePuzzles: 0
-  _mapTemplate: {fileID: 2967618649542669978, guid: df8d9b3069467cb47bc7fd27a2c372f7, type: 3}
-  _lightTile: {fileID: 11400000, guid: 044c243fd2a30a348a78044e5f4906a5, type: 2}
-  _darkTile: {fileID: 11400000, guid: 07b747c9dcfc66f4db45e88c86928a9c, type: 2}
-  _wallTile: {fileID: 11400000, guid: 2a1c06836de000d4bb5cdb4ca8f49847, type: 2}
-  _gameOverTemplate: {fileID: 5693628947570318495, guid: 7f037517319c66e41b1000faa200740e, type: 3}
-  _menuSelectTemplate: {fileID: 0}
   _foodTemplates:
   - {fileID: 5883453940578565158, guid: cd3a9a6b98ddefa49920c11ef7761050, type: 3}
   - {fileID: 282451142020418660, guid: 0275836c03688364b84c9c8124927bf3, type: 3}

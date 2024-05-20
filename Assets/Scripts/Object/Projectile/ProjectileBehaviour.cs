@@ -17,7 +17,6 @@ public class ProjectileBehaviour : ObjectBehaviour
         set
         {
             // A mini ready-function.
-
             _rb = GetComponent<Rigidbody2D>();
             _proj = value;
             Ready = true;
@@ -95,6 +94,11 @@ public class ProjectileBehaviour : ObjectBehaviour
             default:
                 break;
         }
+
+
+        // Bounce effects
+        //m_speedMod *= m_restitution * -1;
+        //transform.Rotate(Vector3.forward * 180);
     }
 
     private IEnumerator HandleImmunity(float seconds)
