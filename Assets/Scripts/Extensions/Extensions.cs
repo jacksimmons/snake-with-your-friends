@@ -33,7 +33,7 @@ public static class Extensions
 
     public static class Vectors
     {
-        public static Vector2 mod(Vector2 vec, int mod)
+        public static Vector2 Mod(Vector2 vec, int mod)
         {
             return new Vector2(vec.x % mod, vec.y % mod);
         }
